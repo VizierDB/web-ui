@@ -1,0 +1,33 @@
+div.spreadsheet {
+    padding: 10px;
+}
+
+.spreadsheet-control {
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+
+th.spreadsheet-topcorner {
+    background: #f2f2f2 !important;
+    text-align: center;
+    width: 100px;
+}
+
+th.spreadsheet-header {
+    background: #f2f2f2 !important;
+}
+
+td.row-number {
+    background: #f2f2f2;
+    width: 100px;
+}
+
+.centered-button {
+    width: 100%;
+    text-align: center;
+}
+
+span.anno-right {
+    float: right;
+}

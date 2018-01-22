@@ -1,0 +1,86 @@
+.app-header {
+  background-color: #96714b;
+  height: 40px;
+  line-height: 40px;
+  padding: 10px 30px;
+  color: white;
+  display: flex;
+  align-items: center;
+}
+
+/*font-size: 1.5em;
+font-weight: 700;
+font-family: Titillium Web,sans-serif;
+color: #fff;
+*/
+.app-name {
+    margin-left: 15px;
+    font-size: 1.25em;
+    font-weight: 700;
+    font-family: Titillium Web,sans-serif;
+    color: #fff;
+}
+
+.app-title {
+    color: #e0cba8;
+    font-size: 0.7em;
+    margin-left: 15px;
+    font-weight: 300;
+    font-family: Titillium Web,sans-serif;
+    letter-spacing: 2px;
+}
+
+.inactive-value {
+    color: #a0a0a0;
+    font-style: italic;
+    font-weight: normal;
+}
+
+.main-content {
+    margin: 25px;
+}
+
+a.home-link {
+    color: #fff;
+    text-decoration: none;
+    outline: 0;
+}
+
+a.home-link:hover {
+    color: #fff;
+    text-decoration: none;
+    outline: 0;
+}
+
+p.info-text {
+    color: #3b4151;
+    font-size: 0.8em;
+    margin-top: 5px;
+}
+
+span.info-bold {
+    color: #000;
+    padding-left: 0.25em;
+    font-weight: bold;
+}
+
+span.info-highlight {
+    padding-left: 0.25em;
+    color: #000;
+}
+
+span.left-padding-sm {
+    padding-left: 5px;
+}
+
+span.left-padding-md {
+    padding-left: 10px;
+}
+
+span.left-padding-lg {
+    padding-left: 20px;
+}
+
+div.spinner-padding {
+    margin: 50px;
+}

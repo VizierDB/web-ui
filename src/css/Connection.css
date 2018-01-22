@@ -1,0 +1,26 @@
+.connection-info {
+    color: #3b4151;
+    font-size: 12px;
+    font-weight: 300 !important;
+    font-family: Source Code Pro,monospace;
+    margin-top: 20px;
+}
+
+a.connection-link {
+    color: #3b4151;
+    text-decoration: none;
+}
+
+span.docu-icon {
+    margin-left: 10px;
+}
+
+a.docu-icon {
+    color: #3b4151;
+    text-decoration: none;
+}
+
+a.docu-icon:hover {
+    color: #4286f4;
+    text-decoration: none;
+}

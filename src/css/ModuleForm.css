@@ -1,0 +1,34 @@
+div.module-form {
+    border-radius: 4px;
+    background: #f6f6f6;
+    border: solid 1px #e0e0e0;
+    /*background: rgba(97,175,254,.075);
+    border: 1px solid rgba(97,175,254, .25);*/
+    padding: 10px 10px 10px 20px;
+    margin: 10px 0px;
+}
+
+div.module-form-error {
+    border-radius: 4px;
+    background: #f2dede;
+    border: solid 1px #ebccd1;
+    /*background: rgba(97,175,254,.075);
+    border: 1px solid rgba(97,175,254, .25);*/
+    padding: 20px 20px;
+    margin: 10px 0px;
+}
+
+/* Code Editor Form */
+
+div.code-form {
+    margin: 10px 0px;
+}
+
+
+div.editor-container {
+    border: solid 1px #dedede;
+}
+
+div.menu-padding {
+    padding-top: 10px;
+}

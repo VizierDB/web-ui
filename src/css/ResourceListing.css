@@ -1,0 +1,44 @@
+th.resource {
+    /*background: #f2f2f2;
+    border-bottom: 1px solid #f2f2f2;*/
+    color: #3b4151;
+    font-weight: normal;
+    padding: 10px 5px;
+    font-size: 0.8em;
+}
+
+td.resources {
+    padding: 10px 5px;;
+}
+
+td.resource-text {
+    text-align: center;
+    font-family: "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;
+    width: 20%;
+    font-weight: 300;
+    font-size: 0.8em;
+}
+
+td.resource-buttons {
+    width: 100px;
+}
+
+a.resource-link {
+    color: #3b4151;
+    text-decoration: none;
+    font-weight: 600;
+    outline: 0;
+}
+
+a.resource-link:hover {
+    color: #4286f4;
+}
+
+span.button-wrapper {
+    padding: 0px 5px;
+}
+
+
+.resource-name-input {
+    width: 100%;
+}

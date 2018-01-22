@@ -1,0 +1,88 @@
+div.notebook {
+    margin-bottom: 10px;
+}
+
+div.notebook-header {
+    text-align: right;
+}
+
+div.notebook-cell {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+/* CELL INDEX */
+
+div.notebook-cell-index {
+    color: #303f9f;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    line-height: 20px;
+    min-width: 7ex;
+    text-align: center;
+    padding-top: 10px;
+}
+
+a.notebook-cell-index {
+    color: #303f9f;
+    outline: 0;
+}
+
+a.notebook-cell-index:hover {
+    color: #4183c4;
+    outline: 0;
+    cursor: pointer;
+}
+
+/* CELL MODULE */
+
+div.notebook-cell-module {
+    margin-bottom: 5px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    align-items: stretch;
+}
+
+/* COMMAND SELECTOR */
+
+div.command-dropdown {
+    margin-top: 10px;
+}
+
+/* OUTPUT */
+
+div.notebook-cell-output {
+    margin-top: 20px;
+}
+
+pre.collapsed-command {
+    background: #fcfaf8;
+    border-radius: 2px;
+    border: solid 1px #f2f0ed;
+    color: #000;
+    padding: 5px 10px;
+    margin: 10px 0px;
+}
+
+pre.collapsed-command-error {
+    background: #f2dede;
+    border-radius: 2px;
+    border: solid 1px #ebccd1;
+    color: #843534;
+    padding: 5px 10px;
+    margin: 10px 0px;
+}
+
+pre.collapsed-output {
+    color: #3b4151;
+    padding: 0px 11px;
+}
+
+pre.collapsed-output-error {
+    color: #843534;
+    padding: 0px 11px;
+}
