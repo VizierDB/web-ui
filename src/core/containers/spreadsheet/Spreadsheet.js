@@ -63,7 +63,7 @@ class Spreadsheet extends React.Component {
         this.state = {action: null, inputValue: ''};
     }
     /**
-     * Cancek a requested user action by setting the action object to null.
+     * Cancel a requested user action by setting the action object to null.
      */
     cancelAction = () => {
         this.setState({action: null, inputValue: ''})
@@ -91,6 +91,9 @@ class Spreadsheet extends React.Component {
     deleteRow(rowIndex) {
         this.setState({action: {type: DELETE_ROW, rowIndex}})
     }
+    /**
+     * Handle change in cell input control.
+     */
     handleChange = (event) => {
         this.setState({inputValue: event.target.value})
     }
@@ -111,7 +114,7 @@ class Spreadsheet extends React.Component {
         }
     }
     /**
-     * Request insertion of a new column. Will display a modal dialog that let's
+     * Request insertion of a new column. Will display a modal dialog that lets
      * the user enter a name for the new column. After entering the new name
      * call submitInsertColumn to dispatch the operation.
      */

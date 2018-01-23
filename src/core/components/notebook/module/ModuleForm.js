@@ -9,6 +9,7 @@ import { Button, Form, Grid } from 'semantic-ui-react'
 import { ErrorMessage } from '../../util/Message'
 import BoolInput from './BoolInput'
 import CodeEditor from './CodeEditor'
+import ControlGroup from './ControlGroup'
 import DatasetSelector from './DatasetSelector'
 import FileSelector from './FileSelector'
 import TextControl from './TextControl'
@@ -70,6 +71,9 @@ class ModuleForm extends React.Component {
         const data = {type: module.type, id: module.id, arguments: {}}
         for (let i = 0; i < module.arguments.length; i++) {
             const arg = module.arguments[i]
+            if (arg.parent) {
+                continue
+            }
             const value = this.state[arg.id]
             data.arguments[arg.id] = value
             if ((!value) && (arg.required)) {
@@ -109,6 +113,10 @@ class ModuleForm extends React.Component {
         let components = []
         for (let i = 0; i < args.length; i++) {
             const arg = args[i]
+            // Skip elements that are part of a group
+            if (arg.parent) {
+                continue
+            }
             if (arg.datatype === 'dataset') {
                 components.push(
                     <DatasetSelector
@@ -175,7 +183,24 @@ class ModuleForm extends React.Component {
                         handler={this}
                         id={arg.id}
                         value={this.state[arg.id]}
-                />
+                    />
+                )
+            } else if (arg.datatype === 'group') {
+                const children = []
+                for (let j = 0; j < args.length; j++) {
+                    const child = args[j]
+                    if (child.parent === arg.id) {
+                        children.push(child)
+                    }
+                }
+                components.push(
+                    <ControlGroup
+                        key={arg.id}
+                        handler={this}
+                        id={arg.id}
+                        values={this.state[arg.id]}
+                        children={children}
+                    />
                 )
             }
         }

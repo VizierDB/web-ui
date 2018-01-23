@@ -64,9 +64,24 @@ const commandText = (command) => {
     } else if ((type === 'python') && (id === 'CODE')) {
         return args.source
     } else if ((type === 'mimir') && (id === 'KEY_REPAIR')) {
-        return 'CREATE KEY REPAIR LENS FOR COLUMN ' + args.column
+        return 'CREATE KEY REPAIR LENS FOR COLUMN ' + args.column + ' IN ' + args.dataset
     } else if ((type === 'mimir') && (id === 'MISSING_VALUE')) {
-        return 'CREATE MISSING VALUE LENS FOR COLUMN ' + args.column
+        return 'CREATE MISSING VALUE LENS FOR COLUMN ' + args.column + ' IN ' + args.dataset
+    } else if ((type === 'mimir') && (id === 'SCHEMA_MATCHING')) {
+        let columns = ''
+        for (let i = 0; i < args.schema.length; i++) {
+            const tuple = args.schema[i]
+            if (tuple.column) {
+                if (i === 0) {
+                    columns = tuple.column
+                } else {
+                    columns += ',' + tuple.column
+                }
+            }
+        }
+        return 'SCHEMA MATCHING ' + args.dataset + '(' + columns + ') AS ' + args.resultName
+    } else if ((type === 'mimir') && (id === 'TYPE_INFERENCE')) {
+        return 'TYPE INFERENCE FOR COLUMNS IN ' + args.dataset + ' WITH percent_conform = '+ args.percentConform
     }
 }
 
@@ -82,7 +97,9 @@ const defaultArguments = (moduleSpec, datasets) => {
             } else {
                 args[arg.id] = ''
             }
-        } else {
+        } else if (arg.datatype === 'group') {
+            args[arg.id] = []
+        } else if (!arg.parent) {
             args[arg.id] = ''
         }
     }
