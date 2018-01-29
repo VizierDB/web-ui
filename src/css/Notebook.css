@@ -86,3 +86,7 @@ pre.collapsed-output-error {
     color: #843534;
     padding: 0px 11px;
 }
+
+span.form-constant {
+    padding: 0px 10px;
+}

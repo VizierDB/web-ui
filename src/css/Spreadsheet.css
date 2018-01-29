@@ -31,3 +31,7 @@ td.row-number {
 span.anno-right {
     float: right;
 }
+
+td.uncertain-cell {
+    background: #f2dede;
+}

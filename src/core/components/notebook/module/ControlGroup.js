@@ -8,7 +8,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Button, Form } from 'semantic-ui-react'
-
+import '../../../../css/Notebook.css'
 
 class ControlGroup extends React.Component {
     static propTypes = {
@@ -106,7 +106,9 @@ class ControlGroup extends React.Component {
             for (let j = 0; j < children.length; j++) {
                 row.push(
                     <Form.Field key={i + '#' + j} width={3}>
-                        {tuple[children[j].id]}
+                        <span className='form-constant'>
+                            {tuple[children[j].id]}
+                        </span>
                     </Form.Field>
                 )
             }

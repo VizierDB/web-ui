@@ -9,12 +9,14 @@ export const VIZUAL_OP = 'vizual'
 
 export const DELETE_COLUMN = 'DELETE_COLUMN'
 export const DELETE_ROW = 'DELETE_ROW'
+export const DROP_DATASET = 'DROP_DATASET'
 export const INSERT_COLUMN = 'INSERT_COLUMN'
 export const INSERT_ROW = 'INSERT_ROW'
 export const LOAD = 'LOAD'
 export const MOVE_COLUMN = 'MOVE_COLUMN'
 export const MOVE_ROW = 'MOVE_ROW'
 export const RENAME_COLUMN = 'RENAME_COLUMN'
+export const RENAME_DATASET = 'RENAME_DATASET'
 export const UPDATE_CELL = 'UPDATE_CELL'
 
 

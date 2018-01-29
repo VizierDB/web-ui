@@ -106,7 +106,6 @@ class Notebook extends React.Component {
                 // The cell label is an empty string for cells without modules
                 if (cell.module) {
                     label++
-                    datasets = cell.module.datasets
                     links['branch'] = workflow.links.branches
                     links['delete'] = cell.module.links.delete
                     links['replace'] = cell.module.links.replace
@@ -133,6 +132,11 @@ class Notebook extends React.Component {
                         notebook={this}
                     />
                 );
+                // Update list of datasets to ensure that it always point to the
+                // datasets in the previouds module
+                if (cell.module) {
+                    datasets = cell.module.datasets
+                }
             }
         }
         // Reverse cell order if reversed flag is true

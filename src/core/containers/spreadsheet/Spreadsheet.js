@@ -266,27 +266,36 @@ class Spreadsheet extends React.Component {
                             </Table.Cell>
                         )
                     } else {
+                        let uncertain = false
                         let annotation = null
-                        if (dataset.hasCellAnnotation(col.id, row.id)) {
-                            let anno = dataset.getCellAnnotation(col.id, row.id)
-                            annotation = (
-                                <span className='anno-right'>
-                                    <Popup
-                                        key={cellKey}
-                                        trigger={
-                                            <Icon
-                                                name='info circle'
-                                                color='blue'
-                                            />
-                                        }
-                                        header={anno.title}
-                                        content={anno.text}
-                                    />
-                                </span>
-                            )
+                        const cellAnnotations = dataset.getCellAnnotations(
+                            col.id,
+                            row.id
+                        )
+                        if (cellAnnotations) {
+                            if (cellAnnotations['mimir:reason']) {
+                                annotation = (
+                                    <span className='anno-right'>
+                                        <Popup
+                                            key={cellKey}
+                                            trigger={
+                                                <Icon
+                                                    name='info circle'
+                                                    color='blue'
+                                                />
+                                            }
+                                            header='Mimir Reason'
+                                            content={cellAnnotations['mimir:reason']}
+                                        />
+                                    </span>
+                                )
+                            }
+                            if (cellAnnotations['mimir:uncertain']) {
+                                uncertain = true
+                            }
                         }
                         cell = (
-                            <Table.Cell key={cellKey} onClick={() => (this.updateCell(j, i))}>
+                            <Table.Cell key={cellKey} error={uncertain} onClick={() => (this.updateCell(j, i))}>
                                 {row.values[j]}
                                 {annotation}
                             </Table.Cell>

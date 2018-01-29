@@ -20,8 +20,8 @@ import ModuleOutput from './ModuleOutput'
 import NotebookCellOutput from './NotebookCellOutput'
 import { moduleIdentifier } from '../../util/Api'
 import {
-    DELETE_COLUMN, DELETE_ROW, INSERT_COLUMN, INSERT_ROW, LOAD, MOVE_COLUMN,
-    MOVE_ROW, RENAME_COLUMN, UPDATE_CELL, VIZUAL_OP
+    DELETE_COLUMN, DELETE_ROW, DROP_DATASET, INSERT_COLUMN, INSERT_ROW, LOAD,
+    MOVE_COLUMN, MOVE_ROW, RENAME_COLUMN, RENAME_DATASET, UPDATE_CELL, VIZUAL_OP
 } from '../../util/Vizual'
 import '../../../css/Notebook.css'
 import '../../../css/ResourceListing.css'
@@ -47,6 +47,8 @@ const commandText = (command) => {
         return 'DELETE COLUMN ' + args.column + ' FROM ' + args.dataset
     } else if ((type === VIZUAL_OP) && (id === DELETE_ROW)) {
         return 'DELETE ROW ' + args.row + ' FROM ' + args.dataset
+    } else if ((type === VIZUAL_OP) && (id === DROP_DATASET)) {
+        return 'DROP DATASET ' + args.dataset
     } else if ((type === VIZUAL_OP) && (id === INSERT_COLUMN)) {
         return 'INSERT COLUMN \'' + args.name + '\' INTO ' + args.dataset + ' AT POSITION ' + args.position
     } else if ((type === VIZUAL_OP) && (id === INSERT_ROW)) {
@@ -58,15 +60,35 @@ const commandText = (command) => {
     } else if ((type === VIZUAL_OP) && (id === MOVE_ROW)) {
         return 'MOVE ROW ' + args.row + ' IN ' + args.dataset + ' TO POSITION ' + args.position
     } else if ((type === VIZUAL_OP) && (id === RENAME_COLUMN)) {
-        return 'RENAME COLUMN ' + args.column + '\' IN ' + args.dataset + ' TO \'' + args.name
+        return 'RENAME COLUMN ' + args.column + ' IN ' + args.dataset + ' TO ' + args.name
+    } else if ((type === VIZUAL_OP) && (id === RENAME_DATASET)) {
+        return 'RENAME DATASET ' + args.dataset + ' TO ' + args.name
     } else if ((type === VIZUAL_OP) && (id === UPDATE_CELL)) {
         return 'UPDATE ' + args.dataset + ' SET [' + args.column + ',' + args.row + '] = \'' + args.value + '\''
     } else if ((type === 'python') && (id === 'CODE')) {
         return args.source
     } else if ((type === 'mimir') && (id === 'KEY_REPAIR')) {
         return 'CREATE KEY REPAIR LENS FOR COLUMN ' + args.column + ' IN ' + args.dataset
+    } else if ((type === 'mimir') && (id === 'MISSING_KEY')) {
+        return 'CREATE MISSING KEY LENS FOR COLUMN ' + args.column + ' IN ' + args.dataset
     } else if ((type === 'mimir') && (id === 'MISSING_VALUE')) {
         return 'CREATE MISSING VALUE LENS FOR COLUMN ' + args.column + ' IN ' + args.dataset
+    } else if ((type === 'mimir') && (id === 'PICKER')) {
+        console.log(args)
+        let columns = ''
+        for (let i = 0; i < args.schema.length; i++) {
+            const column = args.schema[i].pickFrom
+            if (i === 0) {
+                columns = column
+            } else {
+                columns += ',' + column
+            }
+        }
+        let pickAs = ''
+        if (args.pickAs) {
+            pickAs = ' AS ' + args.pickAs
+        }
+        return 'PICK FROM ' + columns + pickAs + ' IN ' + args.dataset
     } else if ((type === 'mimir') && (id === 'SCHEMA_MATCHING')) {
         let columns = ''
         for (let i = 0; i < args.schema.length; i++) {

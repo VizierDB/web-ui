@@ -61,26 +61,24 @@ export class DatasetHandle {
         this.links = new HATEOASReferences(json.links)
     }
     /**
-     * Returns true if there exists an annotation for the cell with the given
-     * column and row identifier.
+     * Returns an object with annotations for the cell with the given column and
+     * row identifier. If there are no annotations for the given cell the result
+     * is null.
      */
-    hasCellAnnotation(columnId, rowId) {
-        const anno = this.annotations.find(anno => ((anno.column === columnId) && (anno.row === rowId)))
-        if (anno) {
-            return true
+    getCellAnnotations(columnId, rowId) {
+        const annoList = this.annotations.find(
+            anno => ((anno.column === columnId) && (anno.row === rowId))
+        )
+        if (annoList) {
+            const anno = {}
+            for (let i = 0; i < annoList.annotations.length; i++) {
+                const kvp = annoList.annotations[i]
+                anno[kvp.key] = kvp.value
+            }
+            return anno
+        } else {
+            return null
         }
-        return false
-    }
-    /**
-     * Returns the first annotation for the cell with the given column and row
-     * identifier. Assumes that hasCellAnnotation is true for the given cell.
-     * TODO: (1) Check that annotations for the cell exist; (2) return the full
-     * list of cell annotations; (3) set annotation title based on value of
-     * anno.key.
-     */
-    getCellAnnotation(columnId, rowId) {
-        const anno = this.annotations.find(anno => ((anno.column === columnId) && (anno.row === rowId))).annotations[0]
-        return {title: 'Mimir Reason', text: anno.value}
     }
 }
 
