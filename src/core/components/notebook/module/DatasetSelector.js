@@ -4,7 +4,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Form } from 'semantic-ui-react'
+import { Dropdown } from 'semantic-ui-react'
 
 
 class DatasetSelector extends React.Component {
@@ -21,24 +21,29 @@ class DatasetSelector extends React.Component {
     }
     render() {
         const { datasets, label, value } = this.props
-        let datasetOptions = []
+        let options = []
         for (let i = 0; i < datasets.length; i++) {
             const dataset = datasets[i];
-            datasetOptions.push(
-                <Form.Radio
-                    name={'dataset'}
-                    key={dataset.name}
-                    label={dataset.name}
-                    value={dataset.name}
-                    checked={value === dataset.name}
-                    onChange={this.handleChange}
-                />);
+            options.push({
+                key: dataset.name,
+                text: dataset.name,
+                value: dataset.name
+            })
         }
         return (
-            <Form.Group inline>
-                <Form.Field width={1}><label>{label}</label></Form.Field>
-                { datasetOptions }
-            </Form.Group>
+            <tr>
+                <td className='form-label'>{label}</td>
+                <td className='form-control'>
+                    <Dropdown
+                        text={value}
+                        selection
+                        fluid
+                        scrolling
+                        options={options}
+                        onChange={this.handleChange}
+                    />
+                </td>
+            </tr>
         )
     }
 }

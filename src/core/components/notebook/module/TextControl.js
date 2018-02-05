@@ -24,15 +24,17 @@ class TextControl extends React.Component {
     render() {
         const { label, value } = this.props
         return (
-            <Form.Group inline >
-                <Form.Field width={1}><label>{label}</label></Form.Field>
-                <Form.Input
-                    placeholder={label}
-                    value={value}
-                    onChange={this.handleChange}
-                    width={4}
-                />
-            </Form.Group>
+            <tr>
+                <td className='form-label'>{label}</td>
+                <td className='form-control'>
+                    <Form.Input
+                        placeholder={label}
+                        value={value}
+                        onChange={this.handleChange}
+                        fluid
+                    />
+                </td>
+            </tr>
         )
     }
 }

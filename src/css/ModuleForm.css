@@ -1,10 +1,10 @@
 div.module-form {
     border-radius: 4px;
-    background: #f6f6f6;
-    border: solid 1px #e0e0e0;
+    background: #fcfaf8;
+    border: solid 1px #f2f0ed;
     /*background: rgba(97,175,254,.075);
     border: 1px solid rgba(97,175,254, .25);*/
-    padding: 10px 10px 10px 20px;
+    padding: 10px 10px 10px 10px;
     margin: 10px 0px;
 }
 
@@ -18,6 +18,41 @@ div.module-form-error {
     margin: 10px 0px;
 }
 
+/* Form table layout */
+
+table.form-table {
+}
+
+td.form-label {
+    font-weight: bold;
+    width: 100px;
+}
+
+td.form-group-label {
+    font-weight: bold;
+    vertical-align: top;
+    width: 100px;
+}
+
+td.form-constant {
+    padding-left: 10px;
+}
+
+td.form-control {
+    min-width: 200px;
+}
+
+td.inner-form-header {
+    color: #888;
+    font-size: 0.95em;
+    font-weight: bold;
+}
+
+table.inner-form {
+    border-spacing: 0px;
+    border-collapse: collapse;
+}
+
 /* Code Editor Form */
 
 div.code-form {
@@ -27,8 +62,4 @@ div.code-form {
 
 div.editor-container {
     border: solid 1px #dedede;
-}
-
-div.menu-padding {
-    padding-top: 10px;
 }

@@ -4,7 +4,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Form } from 'semantic-ui-react'
+import { Dropdown } from 'semantic-ui-react'
 
 
 class TextSelector extends React.Component {
@@ -31,15 +31,19 @@ class TextSelector extends React.Component {
             })
         }
         return (
-            <Form.Group inline >
-                <Form.Field width={1}><label>{label}</label></Form.Field>
-                <Form.Select
-                    value={value}
-                    options={listing}
-                    onChange={this.handleChange}
-                    width={4}
-                />
-            </Form.Group>
+            <tr>
+                <td className='form-label'>{label}</td>
+                <td className='form-control'>
+                    <Dropdown
+                        text={value}
+                        selection
+                        fluid
+                        scrolling
+                        options={options}
+                        onChange={this.handleChange}
+                    />
+                </td>
+            </tr>
         );
     }
 }

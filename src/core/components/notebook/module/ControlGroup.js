@@ -12,9 +12,10 @@ import '../../../../css/Notebook.css'
 
 class ControlGroup extends React.Component {
     static propTypes = {
+        children: PropTypes.array.isRequired,
         handler: PropTypes.object.isRequired,
         id: PropTypes.string.isRequired,
-        children: PropTypes.array.isRequired,
+        label: PropTypes.string.isRequired,
         values: PropTypes.array.isRequired
     }
     constructor(props) {
@@ -46,18 +47,16 @@ class ControlGroup extends React.Component {
         handler.setFormValue(id, modifiedTuples)
     }
     render() {
-        const { children } = this.props
+        const { children, label } = this.props
         const { tuples } = this.state
         const formLabels = []
         const formControls = []
         for (let i = 0; i < children.length; i++) {
             const child = children[i]
             formLabels.push(
-                <Form.Field key={i} width={3}>
-                    <label>
-                        {child.name}
-                    </label>
-                </Form.Field>
+                <td key={formLabels.length} className='inner-form-header'>
+                    {child.name}
+                </td>
             )
             if (child.values) {
                 const listing = [];
@@ -70,34 +69,39 @@ class ControlGroup extends React.Component {
                     })
                 }
                 formControls.push(
-                    <Form.Select
-                        key={i}
-                        name={child.id}
-                        options={listing}
-                        onChange={this.handleChange}
-                        width={3}
-                    />
+                    <td key={formControls.length} className='inner-form-control'>
+                        <Form.Select
+                            key={i}
+                            name={child.id}
+                            options={listing}
+                            onChange={this.handleChange}
+                            width={3}
+                        />
+                    </td>
                 )
             } else {
                 formControls.push(
-                    <Form.Input
-                        key={i}
-                        name={child.id}
-                        placeholder={child.name}
-                        onChange={this.handleChange}
-                        width={3}
-                    />
+                    <td key={formControls.length} className='inner-form-control'>
+                        <Form.Input
+                            key={i}
+                            name={child.id}
+                            placeholder={child.name}
+                            onChange={this.handleChange}
+                            width={3}
+                        />
+                    </td>
                 )
             }
         }
         formLabels.push(
-            <Form.Field key={children.length} width={1}>
-            </Form.Field>
+            <td key={formLabels.length}  className='inner-form-header' />
         )
         formControls.push(
-            <Form.Field key={children.length} width={1}>
-                <Button icon='plus' positive onClick={this.handleAdd}/>
-            </Form.Field>
+            <td key={formControls.length} className='inner-form-control'>
+                <Form.Field key={children.length} width={1}>
+                    <Button icon='plus' positive onClick={this.handleAdd}/>
+                </Form.Field>
+            </td>
         )
         const formTuples = []
         for (let i = 0; i < tuples.length; i++) {
@@ -105,20 +109,19 @@ class ControlGroup extends React.Component {
             const row = []
             for (let j = 0; j < children.length; j++) {
                 row.push(
-                    <Form.Field key={i + '#' + j} width={3}>
-                        <span className='form-constant'>
-                            {tuple[children[j].id]}
-                        </span>
-                    </Form.Field>
+                    <td key={i + '#' + j} className='form-constant'>
+                        {tuple[children[j].id]}
+                    </td>
                 )
             }
             row.push(
-                <Form.Field key={i + '#' + children.length} width={1}>
+                <td key={i + '#' + children.length} width={1}>
                     <Button icon='trash' value={i} negative onClick={this.handleRemove}/>
-                </Form.Field>
+                </td>
             )
-            formTuples.push(<Form.Group key={i} inline >{row}</Form.Group>)
+            formTuples.push(<tr key={formTuples.length}>{row}</tr>)
         }
+        formTuples.push(<tr key={formTuples.length}>{formControls}</tr>)
         /*<Form.Group inline >
             <Form.Field width={2}><label>{'COL1'}</label></Form.Field>
             <Form.Field width={2}><label>{'COL2'}</label></Form.Field>
@@ -128,11 +131,17 @@ class ControlGroup extends React.Component {
             <Form.Field width={2}>{'COL2'}</Form.Field>
         </Form.Group>*/
         return (
-            <div className='form-groups'>
-                <Form.Group inline >{formLabels}</Form.Group>
-                { formTuples }
-                <Form.Group inline >{formControls}</Form.Group>
-            </div>
+            <tr>
+                <td className='form-group-label'>{label}</td>
+                <td className='module-form-control'>
+                    <table className='inner-form'>
+                        <tbody>
+                            <tr>{ formLabels }</tr>
+                            { formTuples }
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
         )
     }
 }

@@ -4,7 +4,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Form } from 'semantic-ui-react'
+import { Checkbox } from 'semantic-ui-react'
 
 
 class BoolInput extends React.Component {
@@ -14,22 +14,25 @@ class BoolInput extends React.Component {
         label: PropTypes.string.isRequired,
         value: PropTypes.bool.isRequired
     }
-    handleChange = () => {
-        const { id, handler, value } = this.props
-        handler.setFormValue(id, !value)
+    handleChange = (e, { checked }) => {
+        const { id, handler } = this.props
+        handler.setFormValue(id, checked)
     }
     render() {
         const { label, value } = this.props
         return (
-            <Form.Group inline >
-                <Form.Field width={1}><label>{label}</label></Form.Field>
-                <Form.Checkbox
-                    checked={value}
-                    onChange={this.handleChange}
-                />
-            </Form.Group>
+            <tr>
+                <td className='form-label'>{label}</td>
+                <td className='form-control'>
+                    <Checkbox slider checked={value} onChange={this.handleChange}/>
+                </td>
+            </tr>
         )
     }
 }
+/*<Form.Checkbox
+    checked={value}
+    onChange={this.handleChange}
+/>*/
 
 export default BoolInput

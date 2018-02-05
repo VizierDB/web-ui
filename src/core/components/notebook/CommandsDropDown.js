@@ -7,13 +7,13 @@ import '../../../css/Notebook.css'
 
 class CommandsDropDown extends React.Component {
     static propTypes = {
-        cell: PropTypes.object.isRequired,
+        notebookCellComponent: PropTypes.object.isRequired,
         engine: PropTypes.object.isRequired,
         selectedModule: PropTypes.object
     }
     handleSelect = (e, data) => {
-        const { cell, engine } = this.props
-        cell.selectModule(engine.module[data.value])
+        const { notebookCellComponent, engine } = this.props
+        notebookCellComponent.selectModule(engine.module[data.value])
     }
     render() {
         const { engine, selectedModule } = this.props
@@ -39,24 +39,20 @@ class CommandsDropDown extends React.Component {
         }
         // Depending on whether a command is selected or not a different icon
         // and label are being shown
-        let icon = null
         let label = null
         if (selectedModule) {
-            icon = 'lightning'
             label = selectedModule.name
         } else {
-            icon = 'question'
             label = 'Select Module Type'
         }
         return (
-            <div className='command-dropdown'>
-                <Dropdown floating icon={icon}>
+            <span className='command-dropdown'>
+                <Dropdown text={label} floating scrolling>
                     <Dropdown.Menu>
                         { menuItems }
                     </Dropdown.Menu>
                 </Dropdown>
-            <span className='command-type'>{label}</span>
-        </div>
+        </span>
         )
     }
 }

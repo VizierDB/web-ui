@@ -10,12 +10,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types'
-import { Button, Header, Icon, Input, Modal } from 'semantic-ui-react'
+import { Button, Divider, Header, Icon, Input, Modal } from 'semantic-ui-react'
 import { ContentSpinner } from '../../components/util/Spinner'
 import { ErrorMessage } from '../../components/util/Message';
 import { IconButton } from '../../components/util/Button'
-import CommandsDropDown from './CommandsDropDown'
-import ModuleForm from './module/ModuleForm'
+import CellModule from './CellModule'
 import ModuleOutput from './ModuleOutput'
 import NotebookCellOutput from './NotebookCellOutput'
 import { moduleIdentifier } from '../../util/Api'
@@ -74,7 +73,6 @@ const commandText = (command) => {
     } else if ((type === 'mimir') && (id === 'MISSING_VALUE')) {
         return 'CREATE MISSING VALUE LENS FOR COLUMN ' + args.column + ' IN ' + args.dataset
     } else if ((type === 'mimir') && (id === 'PICKER')) {
-        console.log(args)
         let columns = ''
         for (let i = 0; i < args.schema.length; i++) {
             const column = args.schema[i].pickFrom
@@ -143,6 +141,7 @@ const ACTION_DELETE = 'DELETE'
 class NotebookCell extends React.Component {
     static propTypes = {
         cell: PropTypes.object.isRequired,
+        cellCount: PropTypes.number.isRequired,
         datasets: PropTypes.array.isRequired,
         engine: PropTypes.object.isRequired,
         files: PropTypes.array.isRequired,
@@ -301,7 +300,7 @@ class NotebookCell extends React.Component {
      * column the cell module.
      */
     render() {
-        const { cell, datasets, engine, files, label } = this.props
+        const { cell, cellCount, datasets, engine, files, label } = this.props
         const { expanded, formDefaults, formError, selectedModule } = this.state
         // If the cell isBusy flag is true or if an error message occured no
         // other information but a spinner or error message, respectively, is
@@ -324,17 +323,37 @@ class NotebookCell extends React.Component {
             // Two column layout
             let cellIndexColumn = null
             let cellModuleColumn = null
+            // Allow different layouts for expanded cells
+            let cellCssSuffix = ''
+            if (expanded) {
+                cellCssSuffix = '-expanded'
+            }
             // Depending on the isExpanded and hasModule flags there are a total of
             // four different views on the notebook cell.
             if ((!cell.module) && (!expanded)) {
-                // Compact, non-module cell. Simply shows a button to expand the
-                // cell in the cell index column. The cell module column is empty.
-                cellIndexColumn = (
-                    <IconButton
-                        name='plus-square-o'
-                        onClick={this.handleExpandClick}
-                    />
-                );
+                // Compact, non-module cell. Only show an 'Add Cell' button if
+                // the notebook is empty (i.e., cellCount == 1)
+                if (cellCount === 1) {
+                    cellModuleColumn = (
+                        <div>
+                            <p className='empty-notebook-message'>
+                                Your notebook is empty. Start by adding a new cell.
+                            </p>
+                            <p className='empty-notebook-button'>
+                                <IconButton name='plus fa-4x' onClick={this.handleExpandClick}/>
+                            </p>
+                        </div>
+                    );
+                } else {
+                    cellModuleColumn = (
+                        <Divider horizontal>
+                            <IconButton
+                                name='plus-square-o'
+                                onClick={this.handleExpandClick}
+                            />
+                        </Divider>
+                    );
+                }
             } else if ((!cell.module) && (expanded)) {
                 // Expanded, non-module cell. Allows the user to select a command
                 // from the dropdown list and enter command specific arguments. The
@@ -349,32 +368,22 @@ class NotebookCell extends React.Component {
                 );
                 // If a module specification has been selected display the module
                 // input form
-                let moduleForm = null
-                if (selectedModule) {
-                    moduleForm = <ModuleForm
-                        cell={this}
+                cellModuleColumn = (
+                    <CellModule
                         datasets={datasets}
+                        engine={engine}
                         files={files}
                         module={selectedModule}
+                        notebookCellComponent={this}
                         values={formDefaults}
                         hasError={false}
                         hasModule={false}
                     />
-                }
-                cellModuleColumn = (
-                    <div>
-                        <CommandsDropDown
-                            cell={this}
-                            engine={engine}
-                            selectedModule={selectedModule}
-                        />
-                        { moduleForm }
-                    </div>
                 )
             } else if (cell.module) {
                 // Module cell. Independent of whether the cell is in compact or
-                // expanded mode the cell index contains a clickable display of the
-                // cell index number.
+                // expanded mode the cell index contains a clickable display of
+                // the cell index number.
                 cellIndexColumn = (
                     <span className='notebook-cell-index'>
                         [
@@ -394,7 +403,9 @@ class NotebookCell extends React.Component {
                         cssSuffix = '-error'
                     }
                     cellModuleColumn = (
-                            <div className='notebook-cell-module'>
+                            <div
+                                className='notebook-cell-module'
+                                onDoubleClick={this.handleExpandClick}>
                                 <pre className={'collapsed-command' + cssSuffix}>
                                     {commandText(cell.module.command)}
                                 </pre>
@@ -457,16 +468,12 @@ class NotebookCell extends React.Component {
                     }
                     cellModuleColumn = (
                         <div>
-                            <CommandsDropDown
-                                cell={this}
-                                engine={engine}
-                                selectedModule={selectedModule}
-                            />
-                            <ModuleForm
-                                cell={this}
+                            <CellModule
                                 datasets={datasets}
+                                engine={engine}
                                 files={files}
                                 module={selectedModule}
+                                notebookCellComponent={this}
                                 values={formDefaults}
                                 hasError={formError}
                                 hasModule={true}
@@ -484,10 +491,10 @@ class NotebookCell extends React.Component {
             }
             content = (
                 <div className='notebook-cell'>
-                    <div className='notebook-cell-index'>
+                    <div className={'notebook-cell-index' + cellCssSuffix}>
                         {cellIndexColumn}
                     </div>
-                    <div className='notebook-cell-module'>
+                    <div className={'notebook-cell-module' + cellCssSuffix}>
                         {cellModuleColumn}
                     </div>
                 </div>

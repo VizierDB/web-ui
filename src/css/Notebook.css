@@ -15,6 +15,7 @@ div.notebook-cell {
 /* CELL INDEX */
 
 div.notebook-cell-index {
+    border-left: 3px solid #fff;
     color: #303f9f;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 14px;
@@ -22,7 +23,19 @@ div.notebook-cell-index {
     line-height: 20px;
     min-width: 7ex;
     text-align: center;
-    padding-top: 10px;
+    margin-bottom: 2px;
+}
+
+div.notebook-cell-index-expanded {
+    border-left: 3px solid #3b4151;
+    color: #303f9f;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    line-height: 20px;
+    min-width: 7ex;
+    text-align: center;
+    margin-bottom: 10px;
 }
 
 a.notebook-cell-index {
@@ -39,18 +52,51 @@ a.notebook-cell-index:hover {
 /* CELL MODULE */
 
 div.notebook-cell-module {
-    margin-bottom: 5px;
     min-width: 0;
     display: flex;
     flex-direction: column;
     flex: 1;
     align-items: stretch;
+    margin-bottom: 2px;
 }
 
-/* COMMAND SELECTOR */
+div.notebook-cell-module-expanded {
+    padding-right: 10px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    align-items: stretch;
+    margin-bottom: 10px;
+}
 
-div.command-dropdown {
-    margin-top: 10px;
+/* CELL MENU */
+
+div.cell-menu {
+    padding: 1px 5px;
+    margin: 0px;
+}
+
+span.command-dropdown {
+    font-size: 0.9em;
+    font-weight: 500;
+    margin-left: 0px;
+}
+
+span.menu-separator {
+    border-left: 1px solid #e8e8e9;
+    margin: 0px 10px;
+}
+
+span.menu-text {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: #888;
+    margin-right: 5px;
+}
+
+span.play-button {
+    margin-right: 10px;
 }
 
 /* OUTPUT */
@@ -65,7 +111,7 @@ pre.collapsed-command {
     border: solid 1px #f2f0ed;
     color: #000;
     padding: 5px 10px;
-    margin: 10px 0px;
+    margin: 0px;
 }
 
 pre.collapsed-command-error {
@@ -89,4 +135,19 @@ pre.collapsed-output-error {
 
 span.form-constant {
     padding: 0px 10px;
+}
+
+/*
+ * MISC
+ */
+
+p.empty-notebook-button {
+    color: #888;
+    text-align: center;
+}
+
+p.empty-notebook-message {
+    color: #888;
+    font-size: 1.5em;
+    text-align: center;
 }

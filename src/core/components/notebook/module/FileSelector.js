@@ -4,7 +4,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Form } from 'semantic-ui-react'
+import { Dropdown } from 'semantic-ui-react'
 
 
 class FileSelector extends React.Component {
@@ -21,6 +21,7 @@ class FileSelector extends React.Component {
     }
     render() {
         const { files, label, value } = this.props
+        let selectedFileName = ''
         const options = [];
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
@@ -29,17 +30,24 @@ class FileSelector extends React.Component {
                 text: file.name,
                 value: file.id
             })
+            if (file.id === value) {
+                selectedFileName = file.name
+            }
         }
         return (
-            <Form.Group inline >
-                <Form.Field width={1}><label>{label}</label></Form.Field>
-                <Form.Select
-                    value={value}
-                    options={options}
-                    onChange={this.handleChange}
-                    width={4}
-                />
-            </Form.Group>
+            <tr>
+                <td className='form-label'>{label}</td>
+                <td className='form-control'>
+                    <Dropdown
+                        text={selectedFileName}
+                        selection
+                        fluid
+                        scrolling
+                        options={options}
+                        onChange={this.handleChange}
+                    />
+                </td>
+            </tr>
         );
     }
 }

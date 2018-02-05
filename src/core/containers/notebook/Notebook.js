@@ -76,7 +76,6 @@ class Notebook extends React.Component {
      */
     loadOutputDataset = (cellId, dataset) => {
         const { dispatch } = this.props
-        console.log('REQUEST FROM ' + cellId)
         dispatch(loadNotebookCellDataset(cellId, dataset.links.self))
     }
     /**
@@ -122,8 +121,9 @@ class Notebook extends React.Component {
                 }
                 notebookCells.push(
                     <NotebookCell
-                        key={i}
+                        key={workflow.version + '#' + i}
                         cell={cell}
+                        cellCount={cells.length}
                         datasets={datasets}
                         engine={engineRepository}
                         files={files}
