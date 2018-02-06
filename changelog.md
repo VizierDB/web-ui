@@ -16,3 +16,8 @@
 * Mimir lenses and data store
 * Deletion of workflow modules
 * Allow different workflow engines for different projects
+
+### 0.3.1 - 2018-02-06
+
+* Redesign notebook cells to contain options menu
+* Add simple welcome message

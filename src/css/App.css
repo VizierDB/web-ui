@@ -40,6 +40,13 @@ color: #fff;
     margin: 25px;
 }
 
+.home-content {
+    background: #fff;
+    border-radius: 4px;
+    border: solid 1px #cecece;
+    padding: 20px;
+}
+
 a.home-link {
     color: #fff;
     text-decoration: none;
@@ -50,6 +57,40 @@ a.home-link:hover {
     color: #fff;
     text-decoration: none;
     outline: 0;
+}
+
+a.external-link {
+    color: #3b4151;
+    font-weight: bold;
+    text-decoration: none;
+    outline: 0;
+}
+
+a.external-link:hover {
+    color: #4286f4;
+    font-weight: bold;
+    text-decoration: none;
+    outline: 0;
+}
+
+h1.home-headline {
+    color: #3b4151;
+    margin-bottom: 40px;
+    font-size: 3em;
+    font-weight: bold;
+}
+
+h3.home-headline {
+    color: #3b4151;
+    font-weight: bold;
+    font-size: 1.75em;
+}
+
+p.home-text {
+    color: #3b4151;
+    font-size: 1.2em;
+    margin-top: 5px;
+    text-align: justify;
 }
 
 p.info-text {
@@ -79,6 +120,10 @@ span.left-padding-md {
 
 span.left-padding-lg {
     padding-left: 20px;
+}
+
+span.sys-name {
+    font-weight: bold;
 }
 
 div.spinner-padding {

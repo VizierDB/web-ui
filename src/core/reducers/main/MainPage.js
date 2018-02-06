@@ -3,7 +3,8 @@
  */
 
 import { SET_ACTIVE_ITEM } from '../../actions/main/MainPage'
-import { MENU_ITEM_PROJECTS } from '../../containers/main/MainPage'
+import { RECEIVE_SERVICE } from '../../actions/main/Service'
+import { MENU_ITEM_HOME } from '../../containers/main/MainPage'
 
 /**
  * STATE:
@@ -12,7 +13,8 @@ import { MENU_ITEM_PROJECTS } from '../../containers/main/MainPage'
  */
 
 const INITIAL_STATE = {
-    activeItem: MENU_ITEM_PROJECTS
+    activeItem: MENU_ITEM_HOME,
+    homePageContent: null
 }
 
 export const mainPage = (state = INITIAL_STATE, action) => {
@@ -21,6 +23,11 @@ export const mainPage = (state = INITIAL_STATE, action) => {
         return {
           ...state,
           activeItem: action.item
+        }
+    case RECEIVE_SERVICE:
+        return {
+          ...state,
+          homePageContent: action.welcome
         }
     default:
       return state

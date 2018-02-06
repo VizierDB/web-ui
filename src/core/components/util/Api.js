@@ -14,22 +14,24 @@ import '../../../css/Connection.css'
 export const ConnectionInfo = ({api}) => {
     const url = api.links.self;
     return (
-        <pre className="connection-info">
-            {'[ Connected to '}{api.name}{' : '}
-            <a className="connection-link" href={url}>
-                {url}
-            </a>
-            <span className="docu-icon">
-                <a
-                    href={api.links.doc}
-                    className="docu-icon"
-                    target="_blank"
-                >
-                    <i className="fa fa-book"/>
+        <div className='connection-info'>
+            <pre className='connection-info'>
+                {'[ Connected to '}{api.name}{' : '}
+                <a className="connection-link" href={url}>
+                    {url}
                 </a>
-            </span>
-            {' ]'}
-        </pre>
+                <span className="docu-icon">
+                    <a
+                        href={api.links.doc}
+                        className='docu-icon'
+                        target='_blank'
+                    >
+                        <i className='fa fa-book'/>
+                    </a>
+                </span>
+                {' ]'}
+            </pre>
+        </div>
     );
 }
 

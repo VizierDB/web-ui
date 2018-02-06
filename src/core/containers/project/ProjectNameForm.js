@@ -14,6 +14,7 @@ import {
 } from '../../actions/project/ProjectNameForm'
 
 import '../../../css/App.css'
+import '../../../css/ProjectPage.css'
 
 
 /**

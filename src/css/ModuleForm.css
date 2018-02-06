@@ -1,9 +1,9 @@
 div.module-form {
     border-radius: 4px;
-    background: #fcfaf8;
-    border: solid 1px #f2f0ed;
-    /*background: rgba(97,175,254,.075);
-    border: 1px solid rgba(97,175,254, .25);*/
+    /*background: #fcfaf8;
+    border: solid 1px #f2f0ed;*/
+    background: rgba(97,175,254,.075);
+    border: 1px solid rgba(97,175,254, .25);
     padding: 10px 10px 10px 10px;
     margin: 10px 0px;
 }

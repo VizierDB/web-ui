@@ -1,9 +1,13 @@
-.connection-info {
+div.connection-info {
+    margin-top: 30px;
+    text-align: right;
+}
+
+pre.connection-info {
     color: #3b4151;
     font-size: 12px;
     font-weight: 300 !important;
     font-family: Source Code Pro,monospace;
-    margin-top: 20px;
 }
 
 a.connection-link {
