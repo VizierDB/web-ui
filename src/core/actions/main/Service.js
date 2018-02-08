@@ -1,7 +1,8 @@
 /**
  * Actions for retrieving the Vizier DB Web Service Descriptor. The service
- * descriptor contains the service name, the list of available workflow engines,
- * and a list of HATEOAS references to Web service resources.
+ * descriptor contains the service name, the list of available workflow
+ * execution environments, and a list of HATEOAS references to Web service
+ * resources.
  *
  * The service descriptor will be retrieved as the first operation by the Web
  * Application.
@@ -30,7 +31,7 @@ const requestService = () => ({
 const receiveService = (json) => ({
   type: RECEIVE_SERVICE,
   name: json.name,
-  engines: json.engines,
+  envs: json.envs,
   links: json.links
 })
 

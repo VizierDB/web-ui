@@ -21,3 +21,7 @@
 
 * Redesign notebook cells to contain options menu
 * Add simple welcome message
+
+### 0.3.2 - 2018-02-08
+
+* Adjust to changes in API backend

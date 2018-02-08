@@ -2,7 +2,7 @@ import { receiveBranches } from './ProjectMenu'
 import { fetchResource, HATEOASReferences, ModuleRegistry } from '../../util/Api'
 import { receiveFiles } from '../fileserver/Fileserver'
 
-export const RECEIVE_ENGINE_REPOSITORY = 'RECEIVE_ENGINE_REPOSITORY'
+export const RECEIVE_MODULE_REGISTRY = 'RECEIVE_MODULE_REGISTRY'
 export const RECEIVE_PROJECT = 'RECEIVE_PROJECT'
 export const REQUEST_PROJECT = 'REQUEST_PROJECT'
 export const SET_PROJECT_FETCH_ERROR = 'SET_PROJECT_FETCH_ERROR'
@@ -78,11 +78,12 @@ const projectFetchError = (error) => ({
 })
 
 /**
- * Set the command repository of the engine that is associated with a project.
+ * Set the module registry of the execution environment that is associated with
+ * the project.
  */
-const receiveEngineRepository = (modules) => ({
-    type: RECEIVE_ENGINE_REPOSITORY,
-    engineRepository: new ModuleRegistry(modules)
+const receiveModuleRegistry = (modules) => ({
+    type: RECEIVE_MODULE_REGISTRY,
+    moduleRegistry: new ModuleRegistry(modules)
 })
 
 /**
@@ -94,8 +95,8 @@ export const receiveProject = (json) => (dispatch) => {
         project: json
     })
     const branches = json.branches
-    // Fetch the project's engine command repository
-    return fetch(new HATEOASReferences(json.links).engine)
+    // Fetch the project's module registry
+    return fetch(new HATEOASReferences(json.links).environment)
     // Check the response. Assume that eveything is all right if status
     // code below 400
     .then(function(response) {
@@ -104,7 +105,7 @@ export const receiveProject = (json) => (dispatch) => {
             // handler
             response.json().then(json => {
                 dispatch(receiveBranches(branches))
-                dispatch(receiveEngineRepository(json.modules))
+                dispatch(receiveModuleRegistry(json.modules))
             });
         } else {
             // ERROR: The API is expected to return a JSON object in case

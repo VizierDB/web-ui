@@ -8,22 +8,22 @@ import '../../../css/Notebook.css'
 class CommandsDropDown extends React.Component {
     static propTypes = {
         notebookCellComponent: PropTypes.object.isRequired,
-        engine: PropTypes.object.isRequired,
+        env: PropTypes.object.isRequired,
         selectedModule: PropTypes.object
     }
     handleSelect = (e, data) => {
-        const { notebookCellComponent, engine } = this.props
-        notebookCellComponent.selectModule(engine.module[data.value])
+        const { notebookCellComponent, env } = this.props
+        notebookCellComponent.selectModule(env.module[data.value])
     }
     render() {
-        const { engine, selectedModule } = this.props
+        const { env, selectedModule } = this.props
         // Get a list of command types
         const menuItems = []
-        for (let value of engine.types) {
+        for (let value of env.types) {
             menuItems.push(
                 <Dropdown.Header key={menuItems.length} content={value} />
             )
-            const typeCommands = engine.modules[value]
+            const typeCommands = env.modules[value]
             typeCommands.sort((c1, c2) => (c1.name.localeCompare(c2.name)))
             for (let i = 0; i < typeCommands.length; i++) {
                 const cmd = typeCommands[i]

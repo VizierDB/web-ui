@@ -7,6 +7,7 @@ import {
   SET_PROJECT_DELETE_ERROR, SET_PROJECT_EDIT_ERROR_LISTING,
   SET_PROJECTS_FETCH_ERROR
 } from '../../actions/project/ProjectListing'
+import { RECEIVE_SERVICE } from '../../actions/main/Service'
 import {
     HATEOASReferences, getProperty
 } from '../../util/Api'
@@ -26,7 +27,7 @@ import { UTC2LocalTime } from '../../util/Timestamp';
 const INITIAL_STATE = {
     deleteError: null,
     editError: null,
-    engines: null,
+    envs: null,
     fetchError: null,
     isFetching: false,
     projects: [],
@@ -44,7 +45,7 @@ const listProjects = (projects) => {
         result.push({
             id: prj.id,
             name: getProperty(prj, 'name', 'undefined'),
-            engineId: prj.engine,
+            envId: prj.environment,
             createdAt: UTC2LocalTime(prj.createdAt),
             lastModifiedAt: UTC2LocalTime(prj.lastModifiedAt),
             links: new HATEOASReferences(prj.links)
@@ -70,6 +71,8 @@ export const projectListing = (state = INITIAL_STATE, action) => {
                 projects: listProjects(action.projects),
                 links: new HATEOASReferences(action.links)
             }
+        case RECEIVE_SERVICE:
+            return {...state, envs: action.envs}
         case SET_PROJECT_DELETE_ERROR:
             return {
                 ...state,

@@ -4,7 +4,7 @@
 
 import { RECEIVE_FILES } from '../../actions/fileserver/Fileserver'
 import {
-  REQUEST_PROJECT, RECEIVE_ENGINE_REPOSITORY, RECEIVE_PROJECT,
+  REQUEST_PROJECT, RECEIVE_MODULE_REGISTRY, RECEIVE_PROJECT,
   SET_PROJECT_FETCH_ERROR
 } from '../../actions/project/ProjectPage'
 import {
@@ -22,7 +22,7 @@ import { UTC2LocalTime } from '../../util/Timestamp';
  */
 
 const INITIAL_STATE = {
-    engineRepository: null,
+    moduleRegistry: null,
     error: null,
     files: [],
     isFetching: false,
@@ -36,10 +36,10 @@ export const projectPage = (state = INITIAL_STATE, action) => {
                 ...state,
                 isFetching: true
             }
-        case RECEIVE_ENGINE_REPOSITORY:
+        case RECEIVE_MODULE_REGISTRY:
             return {
                 ...state,
-                engineRepository: action.engineRepository
+                moduleRegistry: action.moduleRegistry
             }
         case RECEIVE_FILES:
             return {...state, files: action.files}

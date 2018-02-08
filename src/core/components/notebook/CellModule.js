@@ -21,7 +21,7 @@ import '../../../css/ModuleForm.css'
 class CellModule extends React.Component {
     static propTypes = {
         datasets: PropTypes.array.isRequired,
-        engine: PropTypes.object.isRequired,
+        env: PropTypes.object.isRequired,
         files: PropTypes.array.isRequired,
         hasError: PropTypes.bool.isRequired,
         hasModule: PropTypes.bool.isRequired,
@@ -40,6 +40,7 @@ class CellModule extends React.Component {
         } else if (module !== null) {
             if ((module.type !== nextProps.module.type) || (module.id !== nextProps.module.id)) {
                 this.setState({...nextProps.values, hasError: false})
+            } else {
             }
         } else {
             this.setState({...nextProps.values, hasError: false})
@@ -90,7 +91,7 @@ class CellModule extends React.Component {
     }
     render() {
         const {
-            notebookCellComponent, datasets, engine, files, module, hasModule
+            notebookCellComponent, datasets, env, files, module, hasModule
         } = this.props
         const { hasError, errorMessage } = this.state
         // Note that values may be null in which case nothing is being rendered
@@ -232,7 +233,7 @@ class CellModule extends React.Component {
             <div>
                 <CellMenu
                     cellModuleComponent={this}
-                    engine={engine}
+                    env={env}
                     hasModule={hasModule}
                     module={module}
                     notebookCellComponent={notebookCellComponent}

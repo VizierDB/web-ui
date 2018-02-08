@@ -14,7 +14,7 @@ import '../../../css/Notebook.css'
 class CellMenu extends React.Component {
     static propTypes = {
         cellModuleComponent: PropTypes.object.isRequired,
-        engine: PropTypes.object.isRequired,
+        env: PropTypes.object.isRequired,
         hasModule: PropTypes.bool.isRequired,
         module: PropTypes.object,
         notebookCellComponent: PropTypes.object.isRequired,
@@ -41,7 +41,7 @@ class CellMenu extends React.Component {
         cellModuleComponent.handleSubmit()
     }
     render() {
-        const { notebookCellComponent, engine, hasModule, module } = this.props
+        const { notebookCellComponent, env, hasModule, module } = this.props
         // The list of action buttons depends on (a) if a module is selected and
         // (b) if the cell represents an existing workflow module.
         let runButton = null
@@ -103,7 +103,7 @@ class CellMenu extends React.Component {
                 { runButton }
                 <CommandsDropDown
                     notebookCellComponent={notebookCellComponent}
-                    engine={engine}
+                    env={env}
                     selectedModule={module}
                 />
                 { options }

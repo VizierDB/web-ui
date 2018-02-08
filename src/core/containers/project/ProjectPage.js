@@ -14,7 +14,6 @@ import '../../../css/ProjectPage.css'
 
 class ProjectPage extends Component {
     static propTypes = {
-        engineRepository: PropTypes.object,
         error: PropTypes.string,
         isFetching: PropTypes.bool.isRequired,
         serviceUrl: PropTypes.object
@@ -54,7 +53,6 @@ class ProjectPage extends Component {
 const mapStateToProps = state => {
 
     return {
-        engineRepository: state.projectPage.engineRepository,
         error: state.projectPage.error,
         files: state.projectPage.files,
         isFetching: state.projectPage.isFetching,

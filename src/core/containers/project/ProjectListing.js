@@ -17,7 +17,7 @@ import '../../../css/ResourceListing.css'
 
 class ProjectListing extends Component {
     static propTypes = {
-        engines: PropTypes.array,
+        envs: PropTypes.array,
         deleteError: PropTypes.string,
         editError: PropTypes.string,
         fetchError: PropTypes.string,
@@ -92,7 +92,7 @@ class ProjectListing extends Component {
      * 'Delete Project' dialog is being displayed.
      */
     render() {
-        const { isFetching, deleteError, editError, engines, fetchError, projects } = this.props;
+        const { isFetching, deleteError, editError, envs, fetchError, projects } = this.props;
         let content = null;
         if (isFetching) {
             content = (<ContentSpinner />)
@@ -105,7 +105,7 @@ class ProjectListing extends Component {
             const tabHead = (
                     <Table.Row>
                         <Table.HeaderCell className="resource">Name</Table.HeaderCell>
-                        <Table.HeaderCell className="resource">Project engine</Table.HeaderCell>
+                        <Table.HeaderCell className="resource">Project type</Table.HeaderCell>
                         <Table.HeaderCell className="resource">Created at</Table.HeaderCell>
                         <Table.HeaderCell className="resource">Last modified</Table.HeaderCell>
                         <Table.HeaderCell className="resource"></Table.HeaderCell>
@@ -121,7 +121,7 @@ class ProjectListing extends Component {
                         <a className={'resource-link'} href={link}>{pj.name}</a>
                     </Table.Cell>
                     <Table.Cell className={'resource-text'}>
-                        {engines.find(e => (e.id === pj.engineId)).name}
+                        {envs.find(e => (e.id === pj.envId)).name}
                     </Table.Cell>
                     <Table.Cell className={'resource-text'}>{pj.createdAt}</Table.Cell>
                     <Table.Cell className={'resource-text'}>{pj.lastModifiedAt}</Table.Cell>
@@ -273,7 +273,7 @@ class ProjectListing extends Component {
 const mapStateToProps = state => {
 
     return {
-        engines: state.serviceApi.engines,
+        envs: state.projectListing.envs,
         fetchError: state.projectListing.fetchError,
         deleteError: state.projectListing.deleteError,
         editError: state.projectListing.editError,

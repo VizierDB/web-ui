@@ -13,26 +13,26 @@ import { UpdateFormSpinner } from '../../components/util/Spinner'
  */
 class CreateProjectForm extends React.Component {
     static propTypes = {
-        engines: PropTypes.array,
+        envs: PropTypes.array,
         error: PropTypes.string,
         isSubmitting: PropTypes.bool.isRequired
     }
     constructor(props) {
         super(props);
-        let defaultEngine = null;
-        const { engines } = this.props;
-        if (engines) {
-            engines.sort(function(e1, e2) {return e1.name.localeCompare(e2.name)});
-            for (let i = 0; i < engines.length; i++) {
-                const engine = engines[i];
-                if (defaultEngine === null) {
-                    defaultEngine = engine;
-                } else if (engine.default) {
-                    defaultEngine = engine;
+        let defaultEnv = null;
+        const { envs } = this.props;
+        if (envs) {
+            envs.sort(function(e1, e2) {return e1.name.localeCompare(e2.name)});
+            for (let i = 0; i < envs.length; i++) {
+                const env = envs[i];
+                if (defaultEnv === null) {
+                    defaultEnv = env;
+                } else if (env.default) {
+                    defaultEnv = env;
                 }
             }
         }
-        this.state = {value: '', defaultEngine: defaultEngine};
+        this.state = {value: '', defaultEnv: defaultEnv};
     }
     clearCreateError = () => {
         const { dispatch } = this.props
@@ -43,9 +43,9 @@ class CreateProjectForm extends React.Component {
      */
     handleSubmit() {
         const { dispatch, links } = this.props
-        const { defaultEngine, value } = this.state
-        if (defaultEngine) {
-            dispatch(createProject(links.create, defaultEngine, value))
+        const { defaultEnv, value } = this.state
+        if (defaultEnv) {
+            dispatch(createProject(links.create, defaultEnv, value))
             this.setState({value: ''});
         }
     }
@@ -64,16 +64,16 @@ class CreateProjectForm extends React.Component {
         }
     }
     /**
-     * Set the default workflow engine to the engine whose identifier matches
-     * the given value.
+     * Set the default workflow execution environment to the entry whose
+     * identifier matches the given value.
      */
-    handleSelectEngine(e, { value }) {
-        const { engines } = this.props;
-        if (engines) {
-            for (let i = 0; i < engines.length; i++) {
-                const engine = engines[i];
-                if (engine.id === value) {
-                    this.setState({defaultEngine: engine})
+    handleSelectEnv(e, { value }) {
+        const { envs } = this.props;
+        if (envs) {
+            for (let i = 0; i < envs.length; i++) {
+                const env = envs[i];
+                if (env.id === value) {
+                    this.setState({defaultEnv: env})
                     return;
                 }
             }
@@ -81,30 +81,30 @@ class CreateProjectForm extends React.Component {
     }
     /**
      * Show the create project form. The form contains three main parts: a
-     * dropdown to select the workflow engine, a text field to enter the project
-     * name, and a submit button. In addition there is a text line to display
-     * the description about the selected workflow engine and an optional error
-     * message.
+     * dropdown to select the execution environment, a text field to enter the
+     * project name, and a submit button. In addition there is a text line to
+     * display the description about the selected execution environment and an
+     * optional error message.
      */
     render() {
-        const { engines, error, isSubmitting } = this.props;
-        const { defaultEngine } = this.state;
+        const { envs, error, isSubmitting } = this.props;
+        const { defaultEnv } = this.state;
         // Check the isSubmitting flag to determine whether to display a spinner
-        // or the form. Not that if engines are not set null is returned.
+        // or the form. Note that if environments are not set, null is returned.
         if (isSubmitting) {
             return (<UpdateFormSpinner />);
-        } else if (engines) {
-            // Sort engines by their name
-            engines.sort(function(e1, e2) {return e1.name.localeCompare(e2.name)});
-            // Create list of drop-down options from list of engines
+        } else if (envs) {
+            // Sort environments by their name
+            envs.sort(function(e1, e2) {return e1.name.localeCompare(e2.name)});
+            // Create list of drop-down options from list of environments
             // { key: '.com', text: '.com', value: '.com' },
             const options = []
-            for (let i = 0; i < engines.length; i++) {
-                const engine = engines[i];
+            for (let i = 0; i < envs.length; i++) {
+                const env = envs[i];
                 options.push({
-                    key: engine.id,
-                    text: engine.name,
-                    value: engine.id
+                    key: env.id,
+                    text: env.name,
+                    value: env.id
                 })
             }
             // Show an error message if error is set
@@ -127,9 +127,9 @@ class CreateProjectForm extends React.Component {
                             onClick={this.handleSubmit.bind(this)}
                         />}
                         label={<Dropdown
-                            defaultValue={defaultEngine.id}
+                            defaultValue={defaultEnv.id}
                             options={options}
-                            onChange={this.handleSelectEngine.bind(this)}
+                            onChange={this.handleSelectEnv.bind(this)}
                         />}
                         placeholder='New Project Name ...'
                         value={this.state.value}
@@ -138,8 +138,8 @@ class CreateProjectForm extends React.Component {
                     />
                     <p className='info-text'>
                         Create new data curation project using
-                        <span className='info-bold'>{defaultEngine.name}</span>:
-                        <span className='info-highlight'>{defaultEngine.description}</span>
+                        <span className='info-bold'>{defaultEnv.name}</span>:
+                        <span className='info-highlight'>{defaultEnv.description}</span>
                     </p>
                     { errorMessage }
                 </div>
@@ -153,7 +153,7 @@ class CreateProjectForm extends React.Component {
 const mapStateToProps = state => {
 
     return {
-        engines: state.serviceApi.engines,
+        envs: state.serviceApi.envs,
         error: state.projectCreate.error,
         isSubmitting: state.projectCreate.isSubmitting,
         links: state.projectListing.links

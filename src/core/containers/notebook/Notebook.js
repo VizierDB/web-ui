@@ -28,7 +28,7 @@ import {
 class Notebook extends React.Component {
     static propTypes = {
         cells: PropTypes.array.isRequired,
-        engineRepository: PropTypes.object.isRequired,
+        moduleRegistry: PropTypes.object.isRequired,
         reversed: PropTypes.bool.isRequired,
         workflow: PropTypes.object
     }
@@ -83,7 +83,7 @@ class Notebook extends React.Component {
      * to reverse notebook cell ordering.
      */
     render() {
-        const { cells, engineRepository, files, reversed, workflow } = this.props
+        const { cells, moduleRegistry, files, reversed, workflow } = this.props
         // List of notebook cells
         let notebookCells = null;
         if (workflow) {
@@ -125,7 +125,7 @@ class Notebook extends React.Component {
                         cell={cell}
                         cellCount={cells.length}
                         datasets={datasets}
-                        engine={engineRepository}
+                        env={moduleRegistry}
                         files={files}
                         label={label}
                         links={links}
@@ -173,7 +173,7 @@ const mapStateToProps = state => {
 
     return {
         cells: state.notebook.cells,
-        engineRepository: state.projectPage.engineRepository,
+        moduleRegistry: state.projectPage.moduleRegistry,
         files: state.projectPage.files,
         reversed: state.notebook.reversed,
         workflow: state.workflow.workflow

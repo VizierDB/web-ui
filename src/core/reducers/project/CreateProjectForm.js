@@ -15,7 +15,6 @@ import {
  */
 
 const INITIAL_STATE = {
-    engines: null,
     error: null,
     isSubmitting: false
 }

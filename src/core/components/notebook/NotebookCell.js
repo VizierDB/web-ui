@@ -143,7 +143,7 @@ class NotebookCell extends React.Component {
         cell: PropTypes.object.isRequired,
         cellCount: PropTypes.number.isRequired,
         datasets: PropTypes.array.isRequired,
-        engine: PropTypes.object.isRequired,
+        env: PropTypes.object.isRequired,
         files: PropTypes.array.isRequired,
         label: PropTypes.number.isRequired,
         links: PropTypes.object.isRequired,
@@ -151,13 +151,13 @@ class NotebookCell extends React.Component {
     }
     constructor(props) {
         super(props)
-        const { cell, engine } = props
+        const { cell, env } = props
         let selectedModule = null
         let formDefaults = null
         let formError = false
         if (cell.module) {
             const cmd = cell.module.command
-            selectedModule = engine.module[moduleIdentifier(cmd)]
+            selectedModule = env.module[moduleIdentifier(cmd)]
             formDefaults = commandArguments(selectedModule, cmd)
             formError = cell.module.stderr.length > 0
         }
@@ -190,14 +190,14 @@ class NotebookCell extends React.Component {
      * busy but the new properties indicate that it is not busy anymore).
      */
     componentWillReceiveProps(nextProps) {
-        const { cell, engine } = this.props
+        const { cell, env } = this.props
         if ((cell.isBusy) && (!nextProps.cell.isBusy)) {
             let selectedModule = null
             let formDefaults = null
             let formError = false
             if (nextProps.cell.module) {
                 const cmd = nextProps.cell.module.command
-                selectedModule = engine.module[moduleIdentifier(cmd)]
+                selectedModule = env.module[moduleIdentifier(cmd)]
                 formDefaults = commandArguments(selectedModule, cmd)
                 formError = nextProps.cell.module.stderr.length > 0
             }
@@ -245,14 +245,14 @@ class NotebookCell extends React.Component {
     handleExpandClick = () => {
         const { expanded } = this.state
         if (expanded) {
-            const { cell, engine } = this.props
+            const { cell, env } = this.props
             // Reset selected module if the cell is being collapsed
             let selectedModule = null
             let formDefaults = null
             let formError = false
             if (cell.module) {
                 const cmd = cell.module.command
-                selectedModule = engine.module[moduleIdentifier(cmd)]
+                selectedModule = env.module[moduleIdentifier(cmd)]
                 formDefaults = commandArguments(selectedModule, cmd)
                 formError = cell.module.stderr.length > 0
             }
@@ -300,7 +300,7 @@ class NotebookCell extends React.Component {
      * column the cell module.
      */
     render() {
-        const { cell, cellCount, datasets, engine, files, label } = this.props
+        const { cell, cellCount, datasets, env, files, label } = this.props
         const { expanded, formDefaults, formError, selectedModule } = this.state
         // If the cell isBusy flag is true or if an error message occured no
         // other information but a spinner or error message, respectively, is
@@ -371,7 +371,7 @@ class NotebookCell extends React.Component {
                 cellModuleColumn = (
                     <CellModule
                         datasets={datasets}
-                        engine={engine}
+                        env={env}
                         files={files}
                         module={selectedModule}
                         notebookCellComponent={this}
@@ -470,7 +470,7 @@ class NotebookCell extends React.Component {
                         <div>
                             <CellModule
                                 datasets={datasets}
-                                engine={engine}
+                                env={env}
                                 files={files}
                                 module={selectedModule}
                                 notebookCellComponent={this}

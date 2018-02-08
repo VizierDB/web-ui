@@ -151,7 +151,7 @@ const listNotebookCells = (modules) => {
  *
  * cells: Array of NotebookCellHandles that represent the individual cells of
  *     the notebook
- * engineRepository: ModuleRegistry object that contains the list of available
+ * moduleRegistry: ModuleRegistry object that contains the list of available
  *     modules for notebook cells.
  * files: List of file handles for uploaded files
  * reversed: Flag indicating whethers cells are displayed in reverse order.
@@ -159,7 +159,6 @@ const listNotebookCells = (modules) => {
  */
 const INITIAL_STATE = {
     cells: [],
-    engineRepository: null,
     files: [],
     reversed: false,
     workflow: null

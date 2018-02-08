@@ -13,7 +13,7 @@ import { HATEOASReferences } from '../../util/Api'
  * error: Error while fetching service descriptor
  * isFetchig: Flag indicating whether fetching is in progress
  * name: Service name
- * engines: List of service engines [{id, name, description}]
+ * envs: List of execution environments [{id, name, description}]
  * links: List of HATEOAS references [{rel, href}]
  */
 
@@ -29,7 +29,7 @@ export const serviceApi = (state = {}, action) => {
               ...state,
               isFetching: false,
               name: action.name,
-              engines: action.engines,
+              envs: action.envs,
               links: new HATEOASReferences(action.links)
             }
         case SERVICE_ERROR:

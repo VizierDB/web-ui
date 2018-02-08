@@ -19,11 +19,11 @@ export const SET_PROJECTS_FETCH_ERROR = 'SET_PROJECTS_FETCH_ERROR'
 /**
  * Create a new project.
  */
-export const createProject = (url, engine, name) => (dispatch) =>  {
+export const createProject = (url, env, name) => (dispatch) =>  {
     // Signal start of create project action
     dispatch(projectSubmitting(true))
     // Set request body
-    const data = {engine: engine.id, properties: []}
+    const data = {environment: env.id, properties: []}
     if (name.trim() !== '') {
         data.properties.push({key: 'name', value: name.trim()})
     }

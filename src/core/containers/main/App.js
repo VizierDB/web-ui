@@ -26,7 +26,7 @@ export const projectHref = baseHref + 'projects/:project_id';
 
 class App extends Component {
     static propTypes = {
-        engines: PropTypes.array,
+        envs: PropTypes.array,
         error: PropTypes.string,
         isFetching: PropTypes.bool.isRequired,
         links: PropTypes.object,
@@ -100,7 +100,7 @@ const mapStateToProps = state => {
         error: state.serviceApi.error,
         isFetching: state.serviceApi.isFetching,
         name: state.serviceApi.name,
-        engines: state.serviceApi.engines,
+        envs: state.serviceApi.envs,
         links: state.serviceApi.links,
         serviceUrl: state.serviceApi.serviceUrl
     }

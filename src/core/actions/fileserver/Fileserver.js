@@ -119,6 +119,7 @@ export const uploadFile = (url, file) => (dispatch) => {
     dispatch(startUpload())
     let data = new FormData();
     data.append('file', file);
+    console.log('READY TO GO')
     return fetch(
             url,
             {
@@ -129,13 +130,22 @@ export const uploadFile = (url, file) => (dispatch) => {
         // Check the response. Assume that eveything is all right if status
         // code below 400
         .then(function(response) {
+            console.log('GOT DATA')
             if (response.status >= 200 && response.status < 400) {
+                console.log('UPLOAD SUCCESS')
                 // SUCCESS: Fetch updated file listing
                 response.json().then(json => dispatch(fetchFiles()));
             } else {
                 // ERROR: The API is expected to return a JSON object in case
-                // of an error that contains an error message
-                response.json().then(json => dispatch(uploadError(json.message)));
+                // of an error that contains an error message. For some response
+                // codes, however, this is not true (e.g. 413).
+                // TODO: Catch the cases where there is no Json response
+                if (response.status === 413) {
+                    dispatch(uploadError('HTTP 413 Payload Too Large'))
+                } else {
+                    console.log('UPLOAD ERROR')
+                    response.json().then(json => dispatch(uploadError(json.message)));
+                }
             }
         })
         .catch(err => dispatch(uploadError(err.message)))

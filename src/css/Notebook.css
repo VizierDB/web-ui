@@ -126,7 +126,7 @@ pre.collapsed-command-error {
     border: solid 1px #ebccd1;
     color: #843534;
     padding: 5px 10px;
-    margin: 10px 0px;
+    margin: 0px;
 }
 
 pre.collapsed-output {

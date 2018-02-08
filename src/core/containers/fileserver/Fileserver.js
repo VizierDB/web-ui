@@ -264,12 +264,12 @@ class Fileserver extends Component {
                 if (uploadError) {
                     fileUploadForm = (
                         <div>
-                            {fileUploadForm}
                             <ErrorMessage
                                 title="Error while uploading file"
                                 message={uploadError}
                                 handleDismiss={this.clearUploadError}
                             />
+                            {fileUploadForm}
                         </div>
                     )
                 }
