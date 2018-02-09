@@ -6,7 +6,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Dropdown, Icon } from 'semantic-ui-react'
+import { Button } from 'semantic-ui-react'
 import CommandsDropDown from './CommandsDropDown'
 import '../../../css/Notebook.css'
 
@@ -44,69 +44,54 @@ class CellMenu extends React.Component {
         const { notebookCellComponent, env, hasModule, module } = this.props
         // The list of action buttons depends on (a) if a module is selected and
         // (b) if the cell represents an existing workflow module.
-        let runButton = null
-        if (module) {
-            runButton = (
-                <span key='play' className='play-button'>
-                    <Icon
-                        name='play'
-                        color='blue'
-                        link
-                        onClick={this.handleSubmit}
+        const runButton = (
+            <span className='run-button'>
+                <Button
+                    key='run'
+                    icon='play'
+                    circular
+                    size='small'
+                    primary
+                    onClick={this.handleSubmit}
+                    disabled={module === null}
+                />
+            </span>
+        )
+        const optionButtons = (
+            <span className='option-buttons'>
+                <span className='branch-button'>
+                    <Button
+                        key='branch'
+                        icon='fork'
+                        circular
+                        size='small'
+                        color='green'
+                        onClick={this.handleBranch}
+                        disabled={!hasModule}
                     />
                 </span>
-            )
-        } else {
-            runButton = (
-                <span key='play' className='play-button'>
-                    <Icon
-                        name='play'
-                        color='grey'
+                <span className='delete-button'>
+                    <Button
+                        key='delete'
+                        icon='trash'
+                        circular
+                        size='small'
+                        negative
+                        onClick={this.handleDelete}
+                        disabled={!hasModule}
                     />
                 </span>
-            )
-        }
-        let options = [];
-        if (hasModule) {
-            let actionButtons = []
-            actionButtons.push(
-                <Dropdown.Item
-                    key='branch'
-                    content='Create branch'
-                    icon='fork'
-                    onClick={this.handleBranch}
-                />
-            )
-            actionButtons.push(
-                <Dropdown.Item
-                    key='delete'
-                    content='Delete Module'
-                    icon='trash'
-                    onClick={this.handleDelete}
-                />
-            )
-            options.push(<span key='seperator' className='menu-separator' />)
-            options.push(
-                <span key='dropdown' className='command-dropdown'>
-                    <Dropdown text='Options' floating>
-                        <Dropdown.Menu>
-                            { actionButtons }
-                        </Dropdown.Menu>
-                    </Dropdown>
-                </span>
-            )
-        }
-        /*<Icon name='trash' link color='red' onClick={() => (alert('Delete'))}/>
-        <Icon name='fork' link color='green' onClick={() => (alert('Branch'))}/>*/
+            </span>
+        );
         return (
             <div className='cell-menu'>
-                { runButton }
                 <CommandsDropDown
                     notebookCellComponent={notebookCellComponent}
                     env={env}
                     selectedModule={module}
                 />
-                { options }
+                { runButton }
+                { optionButtons }
             </div>
         )
     }

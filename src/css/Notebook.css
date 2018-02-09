@@ -76,6 +76,10 @@ div.notebook-cell-module-expanded {
     margin-bottom: 10px;
 }
 
+div.commands-listing {
+    margin: 0px 20px 20px 20px;
+}
+
 /* CELL MENU */
 
 div.cell-menu {
@@ -89,20 +93,15 @@ span.command-dropdown {
     margin-left: 0px;
 }
 
-span.menu-separator {
+span.run-button {
     border-left: 1px solid #e8e8e9;
-    margin: 0px 10px;
+    border-right: 1px solid #e8e8e9;
+    padding: 0px 20px;
+    margin: 0px 20px;
 }
 
-span.menu-text {
-    font-size: 1em;
-    font-weight: 500;
-    color: #888;
-    margin-right: 5px;
-}
-
-span.play-button {
-    margin-right: 10px;
+span.delete-button {
+    margin-left: 10px;
 }
 
 /* OUTPUT */
@@ -146,6 +145,13 @@ span.form-constant {
 /*
  * MISC
  */
+
+ p.empty-cell-message {
+     color: #888;
+     font-size: 1.5em;
+     text-align: center;
+     margin-bottom: 30px;
+ }
 
 p.empty-notebook-button {
     color: #888;

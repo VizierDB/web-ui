@@ -15,6 +15,7 @@ import FileSelector from './module/FileSelector'
 import TextControl from './module/TextControl'
 import TextSelector from './module/TextSelector'
 import CellMenu from './CellMenu'
+import CommandsListing from './CommandsListing'
 import '../../../css/ModuleForm.css'
 
 
@@ -31,7 +32,8 @@ class CellModule extends React.Component {
     }
     constructor(props) {
         super(props)
-        this.state = {...props.values, hasError: props.hasError}
+        const { hasError, values } = props
+        this.state = {...values, hasError: hasError}
     }
     componentWillReceiveProps(nextProps) {
         const { module } = this.props
@@ -63,12 +65,15 @@ class CellModule extends React.Component {
             if (arg.parent) {
                 continue
             }
-            const value = this.state[arg.id]
+            let value = this.state[arg.id]
             data.arguments[arg.id] = value
-            if ((!value) && (arg.required)) {
+            if ((value === null) && (arg.required)) {
                 this.setState({hasError: true, errorMessage: 'Missing value for ' + arg.name})
                 return
-            } else if (value) {
+            } else if (value !== null) {
+                if (value.trim) {
+                    value = value.trim()
+                }
                 if ((arg.datatype === 'int') || (arg.datatype === 'rowindex')) {
                     if (isNaN(value)) {
                         this.setState({hasError: true, errorMessage: 'Expected integer value for ' + arg.name})
@@ -80,7 +85,7 @@ class CellModule extends React.Component {
                         return
                     }
                 } else if ((arg.datatype === 'string') || (arg.datatype === 'colindex')) {
-                    if ((value.trim() === '') && (arg.required)) {
+                    if ((value === '') && (arg.required)) {
                         this.setState({hasError: true, errorMessage: 'Missing value for ' + arg.name})
                         return
                     }
@@ -98,8 +103,9 @@ class CellModule extends React.Component {
         if ((this.state === null)) {
             return null
         }
-        let moduleForm = null;
+        let content = null;
         if (module) {
+            let moduleForm = null;
             // Add a form component for each module module argument
             const args = module.arguments
             args.sort((a1, a2) => (a1.index > a2.index))
@@ -228,19 +234,26 @@ class CellModule extends React.Component {
                     </div>
                 )
             }
-        }
-        return (
-            <div>
-                <CellMenu
-                    cellModuleComponent={this}
-                    env={env}
-                    hasModule={hasModule}
-                    module={module}
+            content = (
+                <div>
+                    <CellMenu
+                        cellModuleComponent={this}
+                        env={env}
+                        hasModule={hasModule}
+                        module={module}
+                        notebookCellComponent={notebookCellComponent}
+                    />
+                    { moduleForm }
+                </div>
+            )
+        } else {
+            content = (
+                <CommandsListing
                     notebookCellComponent={notebookCellComponent}
-                />
-                { moduleForm }
-            </div>
-        )
+                    env={env}
+                />);
+        }
+        return content
     }
     /**
      * Set the value of a form control in the local state.

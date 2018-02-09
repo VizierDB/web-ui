@@ -119,7 +119,6 @@ export const uploadFile = (url, file) => (dispatch) => {
     dispatch(startUpload())
     let data = new FormData();
     data.append('file', file);
-    console.log('READY TO GO')
     return fetch(
             url,
             {
@@ -130,9 +129,7 @@ export const uploadFile = (url, file) => (dispatch) => {
         // Check the response. Assume that eveything is all right if status
         // code below 400
         .then(function(response) {
-            console.log('GOT DATA')
             if (response.status >= 200 && response.status < 400) {
-                console.log('UPLOAD SUCCESS')
                 // SUCCESS: Fetch updated file listing
                 response.json().then(json => dispatch(fetchFiles()));
             } else {
@@ -143,7 +140,6 @@ export const uploadFile = (url, file) => (dispatch) => {
                 if (response.status === 413) {
                     dispatch(uploadError('HTTP 413 Payload Too Large'))
                 } else {
-                    console.log('UPLOAD ERROR')
                     response.json().then(json => dispatch(uploadError(json.message)));
                 }
             }

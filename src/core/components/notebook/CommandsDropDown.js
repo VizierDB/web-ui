@@ -47,7 +47,15 @@ class CommandsDropDown extends React.Component {
         }
         return (
             <span className='command-dropdown'>
-                <Dropdown text={label} floating scrolling>
+                <Dropdown
+                    button
+                    className='icon'
+                    floating
+                    labeled
+                    icon='list'
+                    scrolling
+                    text={label}
+                >
                     <Dropdown.Menu>
                         { menuItems }
                     </Dropdown.Menu>
