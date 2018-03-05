@@ -7,6 +7,7 @@ import {
   REQUEST_FILES, RECEIVE_FILES, SET_FILE_DELETE_ERROR, SET_FILES_FETCH_ERROR,
   SET_FILE_UPDATE_ERROR, SET_FILE_UPLOAD_ERROR, START_UPLOAD
 } from '../../actions/fileserver/Fileserver'
+import { RECEIVE_SERVICE } from '../../actions/main/Service'
 import { HATEOASReferences } from '../../util/Api'
 import { UTC2LocalTime } from '../../util/Timestamp';
 
@@ -29,7 +30,8 @@ const INITIAL_STATE = {
     isFetching: false,
     isUploading: false,
     files: [],
-    links: null
+    links: null,
+    serviceProperties: []
 }
 
 /**
@@ -46,6 +48,7 @@ const listFiles = (files) => {
             createdAt: UTC2LocalTime(fh.createdAt),
             columns: fh.columns,
             rows: fh.rows,
+            size: fh.size,
             links: new HATEOASReferences(fh.links)
         })
     }
@@ -70,6 +73,11 @@ export const fileserver = (state = INITIAL_STATE, action) => {
                 isUploading: false,
                 files: listFiles(action.files),
                 links: new HATEOASReferences(action.links)
+            }
+        case RECEIVE_SERVICE:
+            return {
+              ...state,
+              serviceProperties: action.properties
             }
         case SET_FILE_DELETE_ERROR:
             return {

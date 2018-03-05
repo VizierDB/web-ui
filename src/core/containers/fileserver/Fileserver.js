@@ -21,6 +21,35 @@ import '../../../css/Fileserver.css'
 import '../../../css/ResourceListing.css'
 
 
+/**
+ * Convert file size bytes into string. Copied from:
+ * https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
+ */
+function formatBytes(a, b) {
+    if (a < 0) {
+        return '?'
+    } else if (a === 0) {
+        return '0 Bytes'
+    }
+    const c=1024
+    const d=b||2
+    const e=["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"]
+    const f=Math.floor(Math.log(a)/Math.log(c))
+    return parseFloat((a/Math.pow(c,f)).toFixed(d))+" "+e[f]
+}
+
+/**
+ * Return question mark if number is negative (i.e., missing file property due
+ * to parsing error on backend).
+ */
+const formatNumber = (val) => {
+    if (val < 0) {
+        return '?'
+    } else {
+        return val
+    }
+}
+
 class Fileserver extends Component {
     static propTypes = {
         deleteError: PropTypes.string,
@@ -30,7 +59,8 @@ class Fileserver extends Component {
         isFetching: PropTypes.bool.isRequired,
         isUploading: PropTypes.bool.isRequired,
         files: PropTypes.array.isRequired,
-        links: PropTypes.object
+        links: PropTypes.object,
+        serviceProperties: PropTypes.array.isRequired
     }
     constructor(props) {
         super(props);
@@ -114,7 +144,10 @@ class Fileserver extends Component {
      * 'Delete File' or a 'Update File Name' dialog are being displayed.
      */
     render() {
-        const { isFetching, isUploading, deleteError, fetchError, updateError, uploadError, files } = this.props;
+        const {
+            isFetching, isUploading, deleteError, fetchError, updateError,
+            uploadError, files, serviceProperties
+        } = this.props;
         let content = null;
         if (isFetching) {
             // Show spinner while fetching files
@@ -133,6 +166,7 @@ class Fileserver extends Component {
             const tabHead = (
                     <Table.Row>
                         <Table.HeaderCell className="resource">Name</Table.HeaderCell>
+                        <Table.HeaderCell className="resource">Size</Table.HeaderCell>
                         <Table.HeaderCell className="resource">Created at</Table.HeaderCell>
                         <Table.HeaderCell className="resource">Columns</Table.HeaderCell>
                         <Table.HeaderCell className="resource">Rows</Table.HeaderCell>
@@ -147,9 +181,10 @@ class Fileserver extends Component {
                     <Table.Cell className={'resource'}>
                         <a className={'resource-link'} href={fh.links.download}>{fh.name}</a>
                     </Table.Cell>
+                    <Table.Cell className={'resource-number'}>{formatBytes(fh.size, 2)}</Table.Cell>
                     <Table.Cell className={'resource-text'}>{fh.createdAt}</Table.Cell>
-                    <Table.Cell className={'resource-text'}>{fh.columns}</Table.Cell>
-                    <Table.Cell className={'resource-text'}>{fh.rows}</Table.Cell>
+                    <Table.Cell className={'resource-number'}>{formatNumber(fh.columns)}</Table.Cell>
+                    <Table.Cell className={'resource-number'}>{formatNumber(fh.rows)}</Table.Cell>
                     <Table.Cell className={'resource-buttons'}>
                         <span className='button-wrapper'>
                             <IconButton name="edit" onClick={(event) => {
@@ -252,13 +287,31 @@ class Fileserver extends Component {
                     </div>
                 )
             } else {
+                let property = serviceProperties.find(prop => (prop.key === 'fileserver:maxFileSize'));
+                let uploadInfo = null
+                if (property) {
+                    uploadInfo = (
+                        <p className='upload-info'>
+                            <Icon name='info circle' />
+                            <span>
+                                The size for file uploads is limited to
+                            </span>
+                            <span className='upload-size'>
+                                {' ' + formatBytes(property.value, 2)}
+                            </span>
+                        </p>
+                    )
+                }
                 fileUploadForm = (
-                    <div className='dropzone-container'>
-                        <div className="dropzone">
-                            <Dropzone onDrop={this.onDrop.bind(this)} multiple={false}>
-                                <p>Drop file here or click to select file to upload.</p>
-                            </Dropzone>
+                    <div>
+                        <div className='dropzone-container'>
+                            <div className="dropzone">
+                                <Dropzone onDrop={this.onDrop.bind(this)} multiple={false}>
+                                    <p>Drop file here or click to select file to upload.</p>
+                                </Dropzone>
+                            </div>
                         </div>
+                        {uploadInfo}
                     </div>
                 )
                 if (uploadError) {
@@ -281,7 +334,7 @@ class Fileserver extends Component {
                         <Table.Body>{rows}</Table.Body>
                         <Table.Footer fullWidth>
                             <Table.Row>
-                                <Table.HeaderCell colSpan='5'>
+                                <Table.HeaderCell colSpan='6'>
                                     <Button
                                         floated='right'
                                         icon
@@ -338,7 +391,8 @@ const mapStateToProps = state => {
         isFetching: state.fileserver.isFetching,
         isUploading: state.fileserver.isUploading,
         files: state.fileserver.files,
-        links: state.fileserver.links
+        links: state.fileserver.links,
+        serviceProperties: state.fileserver.serviceProperties
     }
 }
 

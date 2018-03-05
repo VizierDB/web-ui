@@ -19,6 +19,14 @@ td.resource-text {
     font-size: 0.8em;
 }
 
+td.resource-number {
+    text-align: right;
+    font-family: "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;
+    width: 20%;
+    font-weight: 300;
+    font-size: 0.8em;
+}
+
 td.resource-buttons {
     width: 100px;
 }

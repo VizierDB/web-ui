@@ -137,12 +137,15 @@ export const uploadFile = (url, file) => (dispatch) => {
                 // of an error that contains an error message. For some response
                 // codes, however, this is not true (e.g. 413).
                 // TODO: Catch the cases where there is no Json response
-                if (response.status === 413) {
-                    dispatch(uploadError('HTTP 413 Payload Too Large'))
-                } else {
-                    response.json().then(json => dispatch(uploadError(json.message)));
-                }
+                response.json().then(json => dispatch(uploadError(json.message)))
             }
         })
-        .catch(err => dispatch(uploadError(err.message)))
+        .catch(err => {
+            let msg = err.message
+            console.log(msg)
+            if (msg === 'NetworkError when attempting to fetch resource.') {
+                msg = 'Connection closed by server. The file size may exceed the server\'s upload limit.'
+            }
+            dispatch(uploadError(msg))
+        })
 }

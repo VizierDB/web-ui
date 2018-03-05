@@ -13,6 +13,7 @@ import { HATEOASReferences } from '../../util/Api'
  * error: Error while fetching service descriptor
  * isFetchig: Flag indicating whether fetching is in progress
  * name: Service name
+ * properties: List of service properties (e.g., max. upload file size)
  * envs: List of execution environments [{id, name, description}]
  * links: List of HATEOAS references [{rel, href}]
  */
@@ -29,6 +30,7 @@ export const serviceApi = (state = {}, action) => {
               ...state,
               isFetching: false,
               name: action.name,
+              properties: action.properties,
               envs: action.envs,
               links: new HATEOASReferences(action.links)
             }

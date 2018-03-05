@@ -12,3 +12,14 @@ div.dropzone {
 .file-name-input {
     width: 100%;
 }
+
+p.upload-info {
+    color: #1e22aa;
+    font-size: 0.9em;
+    text-align: center;
+    padding-top: 20px;
+}
+
+span.upload-size {
+    font-weight: bold;
+}

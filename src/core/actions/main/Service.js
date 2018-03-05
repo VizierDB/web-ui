@@ -31,6 +31,7 @@ const requestService = () => ({
 const receiveService = (json) => ({
   type: RECEIVE_SERVICE,
   name: json.name,
+  properties: json.properties,
   envs: json.envs,
   links: json.links
 })

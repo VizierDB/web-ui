@@ -25,3 +25,8 @@
 ### 0.3.2 - 2018-02-08
 
 * Adjust to changes in API backend
+
+### 0.3.3 - 2018-03-05
+
+* Add message with file size limit to file upload form
+* Change file listing to include file size and handle missing properties
