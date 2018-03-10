@@ -15,6 +15,7 @@ import DeleteModal from '../../components/spreadsheet/DeleteModal'
 import MoveModal from '../../components/spreadsheet/MoveModal'
 import RowDropDown from '../../components/spreadsheet/RowDropDown'
 import SpreadsheetDownload from '../../components/spreadsheet/SpreadsheetDownload'
+import StackedBarChart from '../../components/spreadsheet/StackedBarChart'
 import {
     DELETE_COLUMN, DELETE_ROW, INSERT_COLUMN, MOVE_COLUMN, MOVE_ROW,
     RENAME_COLUMN, UPDATE_CELL,
@@ -385,6 +386,7 @@ class Spreadsheet extends React.Component {
                     <SpreadsheetDownload
                         downloadUrl={dataset.links.download}
                     />
+                    /* <StackedBarChart dataset={dataset} /> */
                 </div>
             );
         }
@@ -508,7 +510,6 @@ class Spreadsheet extends React.Component {
 
 
 const mapStateToProps = state => {
-
     return {
         dataset: state.spreadsheet.dataset,
         error: state.spreadsheet.error,
