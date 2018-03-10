@@ -46,9 +46,10 @@ const listFiles = (files) => {
             id: fh.id,
             name: fh.name,
             createdAt: UTC2LocalTime(fh.createdAt),
+            lastModifiedAt: UTC2LocalTime(fh.lastModifiedAt),
             columns: fh.columns,
             rows: fh.rows,
-            size: fh.size,
+            filesize: fh.filesize,
             links: new HATEOASReferences(fh.links)
         })
     }

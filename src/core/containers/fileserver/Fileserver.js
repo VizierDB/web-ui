@@ -168,6 +168,7 @@ class Fileserver extends Component {
                         <Table.HeaderCell className="resource">Name</Table.HeaderCell>
                         <Table.HeaderCell className="resource">Size</Table.HeaderCell>
                         <Table.HeaderCell className="resource">Created at</Table.HeaderCell>
+                        <Table.HeaderCell className="resource">Last Modified at</Table.HeaderCell>
                         <Table.HeaderCell className="resource">Columns</Table.HeaderCell>
                         <Table.HeaderCell className="resource">Rows</Table.HeaderCell>
                         <Table.HeaderCell className="resource"></Table.HeaderCell>
@@ -181,8 +182,9 @@ class Fileserver extends Component {
                     <Table.Cell className={'resource'}>
                         <a className={'resource-link'} href={fh.links.download}>{fh.name}</a>
                     </Table.Cell>
-                    <Table.Cell className={'resource-number'}>{formatBytes(fh.size, 2)}</Table.Cell>
+                    <Table.Cell className={'resource-number'}>{formatBytes(fh.filesize, 2)}</Table.Cell>
                     <Table.Cell className={'resource-text'}>{fh.createdAt}</Table.Cell>
+                    <Table.Cell className={'resource-text'}>{fh.lastModifiedAt}</Table.Cell>
                     <Table.Cell className={'resource-number'}>{formatNumber(fh.columns)}</Table.Cell>
                     <Table.Cell className={'resource-number'}>{formatNumber(fh.rows)}</Table.Cell>
                     <Table.Cell className={'resource-buttons'}>
@@ -334,7 +336,7 @@ class Fileserver extends Component {
                         <Table.Body>{rows}</Table.Body>
                         <Table.Footer fullWidth>
                             <Table.Row>
-                                <Table.HeaderCell colSpan='6'>
+                                <Table.HeaderCell colSpan='7'>
                                     <Button
                                         floated='right'
                                         icon
