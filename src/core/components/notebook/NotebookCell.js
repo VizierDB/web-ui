@@ -66,6 +66,8 @@ const commandText = (command) => {
         return 'UPDATE ' + args.dataset + ' SET [' + args.column + ',' + args.row + '] = \'' + args.value + '\''
     } else if ((type === 'python') && (id === 'CODE')) {
         return args.source
+    } else if ((type === 'mimir') && (id === 'DOMAIN')) {
+        return 'DOMAIN FOR COLUMN ' + args.column + ' IN ' + args.dataset
     } else if ((type === 'mimir') && (id === 'KEY_REPAIR')) {
         return 'CREATE KEY REPAIR LENS FOR COLUMN ' + args.column + ' IN ' + args.dataset
     } else if ((type === 'mimir') && (id === 'MISSING_KEY')) {
