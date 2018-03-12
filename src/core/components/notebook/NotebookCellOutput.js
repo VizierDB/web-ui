@@ -9,7 +9,6 @@ import { ContentSpinner } from '../../components/util/Spinner'
 import { ErrorMessage } from '../../components/util/Message';
 import Dataset from './Dataset'
 import ModuleOutput from './ModuleOutput'
-import { DatasetDescriptor } from '../../util/Api'
 import '../../../css/Notebook.css'
 
 
@@ -28,13 +27,13 @@ class NotebookCellOutput extends React.Component {
         const { cell, datasets } = this.props
         this.setState({ activeItem: index })
         if (index > 0) {
-            cell.loadDataset(new DatasetDescriptor(datasets[index - 1]))
+            cell.loadDataset(datasets[index - 1])
         } else {
             cell.clearDataset()
         }
     }
     render() {
-        const { datasets, module, outputDataset } = this.props
+        const { cell, datasets, module, outputDataset } = this.props
         const { activeItem } = this.state
         let content = null
         if (module.stderr.length > 0) {
@@ -82,7 +81,7 @@ class NotebookCellOutput extends React.Component {
                                 message={outputDataset.fetchError}
                             />
                     } else if (outputDataset.dataset) {
-                        outputContent = <Dataset dataset={outputDataset.dataset} />
+                        outputContent = <Dataset cell={cell} dataset={outputDataset.dataset} />
                     }
                 }
                 /*const dataset = this.props.output.dataset;

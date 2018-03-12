@@ -12,10 +12,10 @@ class Workflow extends React.Component {
         dataset: PropTypes.object,
         fetchError: PropTypes.object,
         isFetching: PropTypes.bool.isRequired,
-        workflow: PropTypes.object
+        hasWorkflow: PropTypes.object
     }
     render() {
-        const { fetchError, isFetching, dataset, workflow } = this.props
+        const { fetchError, isFetching, dataset, hasWorkflow } = this.props
         let content = null
         if (isFetching) {
             content = (<ContentSpinner />)
@@ -24,7 +24,7 @@ class Workflow extends React.Component {
                 title={fetchError.title}
                 message={fetchError.message}
             />)
-        } else if (workflow) {
+        } else if (hasWorkflow) {
             if (dataset) {
                 content = (<Spreadsheet />)
             } else {
@@ -42,7 +42,7 @@ const mapStateToProps = state => {
         dataset: state.projectMenu.selectedDataset,
         fetchError: state.workflow.fetchError,
         isFetching: state.workflow.isFetching,
-        workflow: state.workflow.workflow
+        hasWorkflow: state.workflow.workflow
     }
 }
 

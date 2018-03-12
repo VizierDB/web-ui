@@ -88,7 +88,7 @@ export const spreadsheetOperationError = (message) => ({
  * Post a vizual operation to update the current spreadsheet. On success, try
  * to reload the updated dataset (note that the dataset Url may have changed)
  */
-export const updateSpreadsheet = (url, op, dataset) => (dispatch) => {
+export const updateSpreadsheet = (url, op, dataset, offset) => (dispatch) => {
     return postResourceData(
         dispatch,
         url,
@@ -98,11 +98,15 @@ export const updateSpreadsheet = (url, op, dataset) => (dispatch) => {
             // On success try to reload the current dataset and update the
             // current workflow handle
             if (!workflow.hasError()) {
-                const datasets = workflow.datasets
+                const datasets = workflow.activeDatasets()
                 for (let i = 0; i < datasets.length; i++) {
                     const ds = datasets[i]
                     if (ds.name === dataset) {
-                        dispatch(fetchSpreadsheet(ds.links.annotated, dataset))
+                        let fetchUrl = ds.links.annotated
+                        if (offset !== undefined) {
+                            fetchUrl = fetchUrl + '&offset=' + offset
+                        }
+                        dispatch(fetchSpreadsheet(fetchUrl, dataset))
                     }
                 }
             } else {

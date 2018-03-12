@@ -74,9 +74,9 @@ class Notebook extends React.Component {
     /**
      * Dispatch a load dataset request for output in the given notebook cell.
      */
-    loadOutputDataset = (cellId, dataset) => {
+    loadOutputDataset = (cellId, url) => {
         const { dispatch } = this.props
-        dispatch(loadNotebookCellDataset(cellId, dataset.links.self))
+        dispatch(loadNotebookCellDataset(cellId, url))
     }
     /**
      * Display a list of notebook cells, one for each cell handle and a button

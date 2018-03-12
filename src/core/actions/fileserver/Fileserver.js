@@ -142,7 +142,6 @@ export const uploadFile = (url, file) => (dispatch) => {
         })
         .catch(err => {
             let msg = err.message
-            console.log(msg)
             if (msg === 'NetworkError when attempting to fetch resource.') {
                 msg = 'Connection closed by server. The file size may exceed the server\'s upload limit.'
             }

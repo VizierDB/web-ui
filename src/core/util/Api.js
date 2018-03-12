@@ -38,9 +38,11 @@ export class BranchDescriptor {
  * Dataset descriptor containing dataset name and references.
  */
 export class DatasetDescriptor {
-    constructor(json) {
-        this.name = json.name
-        this.links = new HATEOASReferences(json.links)
+    constructor(name, columns, rows, links) {
+        this.name = name
+        this.columns = columns
+        this.rows = rows
+        this.links = links
     }
 }
 
@@ -53,6 +55,8 @@ export class DatasetHandle {
         this.name = name
         this.columns = json.columns
         this.rows = json.rows
+        this.rowcount = json.rowcount
+        this.offset = json.offset
         if (json.annotations) {
             this.annotations = json.annotations.cells
         } else {
@@ -105,22 +109,48 @@ export class ModuleRegistry {
 }
 
 /**
- * Workflow descriptor containing references.
+ * Workflow handle. Contains branch and version information, the list of
+ * modules in the workflow, an index containing informaiton about all
+ * datasets in the workflow, and HATEOAS references.
  */
 export class WorkflowHandle {
     constructor(json) {
+        // Workflow version and branch information
         this.branch = json.branch
         this.version = json.version
-        this.modules = json.modules
-        this.links = new HATEOASReferences(json.links)
+        // Index of all datasets in the workflow modules. Datasets are indexed
+        // by their id. Each dataset has a list of columns, number of rows, and
+        // HATEOAS references to fetch dataset rows
         this.datasets = []
-        if ((!this.hasError()) && (this.modules.length > 0)) {
-            const lastModule = this.modules[this.modules.length - 1]
-            for (let i = 0; i < lastModule.datasets.length; i++) {
-                this.datasets.push(new DatasetDescriptor(lastModule.datasets[i]))
-            }
+        for (let i = 0; i < json.datasets.length; i++) {
+            const ds = json.datasets[i]
+            this.datasets[ds.id] = ds
         }
+        // List of workflow modules as returned by the API
+        this.modules = []
+        for (let i = 0; i < json.modules.length; i++) {
+            const module = json.modules[i]
+            module.datasets = this.moduleDatasetDescriptors(module.datasets)
+            this.modules.push(module)
+        }
+        // Workflow HATEOAS references
+        this.links = new HATEOASReferences(json.links)
     }
+    /**
+     * Get a list of descriptors for the datasets that are available in the
+     * last module of the workflow, i.e., the active datasets that the user
+     * can manupilate in a cell that is appended to the workflow.
+     */
+    activeDatasets() {
+        let datasets = []
+        if ((!this.hasError()) && (this.modules.length > 0)) {
+            datasets = this.modules[this.modules.length - 1].datasets
+        }
+        return datasets
+    }
+    /**
+     * Flag indicating whether there was an error during workflow execution.
+     */
     hasError() {
         for (let i = 0; i < this.modules.length; i++) {
             if (this.modules[i].stderr.length > 0) {
@@ -128,6 +158,31 @@ export class WorkflowHandle {
             }
         }
         return false
+    }
+    /**
+     * Convert a list of dataset references within a workflow module into a
+     * list of dataset descriptors including metadata about column, rows, and
+     * all HATEOAS references.
+     */
+    moduleDatasetDescriptors(module_datasets) {
+        const result = []
+        for (let i = 0; i < module_datasets.length; i++) {
+            // The dataset information in the module only contains the
+            //identifier and the name that is used to reference the dataset.
+            const ds = module_datasets[i]
+            // Retrieve additional dataset metadata from the dataset
+            // index.
+            const desc = this.datasets[ds.id]
+            result.push(
+                new DatasetDescriptor(
+                    ds.name,
+                    desc.columns,
+                    desc.rows,
+                    new HATEOASReferences(desc.links)
+                )
+            )
+        }
+        return result
     }
 }
 

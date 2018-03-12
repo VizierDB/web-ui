@@ -7,16 +7,17 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Table } from 'semantic-ui-react'
-import SpreadsheetDownload from '../spreadsheet/SpreadsheetDownload'
+import SpreadsheetNavbar from '../spreadsheet/SpreadsheetNavbar'
 import '../../../css/Spreadsheet.css'
 
 
 class Dataset extends React.Component {
     static propTypes = {
+        cell: PropTypes.object.isRequired,
         dataset: PropTypes.object.isRequired
     }
     render() {
-        const { dataset } = this.props
+        const { dataset, cell } = this.props
         // Table headline containing column names.
         let columns = [];
         columns.push(
@@ -39,7 +40,7 @@ class Dataset extends React.Component {
             const cells = [];
             cells.push(
                 <Table.Cell key={'ROW-ID' + iRow} className='row-number'>
-                    {iRow}
+                    {row.index}
                 </Table.Cell>
             );
             const values = row.values;
@@ -67,7 +68,7 @@ class Dataset extends React.Component {
                     {rows}
                   </Table.Body>
                 </Table>
-                <SpreadsheetDownload downloadUrl={dataset.links.download}/>
+                <SpreadsheetNavbar dataset={dataset} container={cell}/>
             </div>
         );
     }

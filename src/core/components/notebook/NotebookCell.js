@@ -293,7 +293,14 @@ class NotebookCell extends React.Component {
      */
     loadDataset = (dataset) => {
         const { cell, notebook } = this.props
-        notebook.loadOutputDataset(cell.id, dataset)
+        notebook.loadOutputDataset(cell.id, dataset.links.self)
+    }
+    /**
+     * Fetch spreadsheet data for a given pagination Url.
+     */
+    navigate(url) {
+        const { cell, notebook } = this.props
+        notebook.loadOutputDataset(cell.id, url)
     }
     /**
      * Show notebook cell content. There are four different layouts depending on

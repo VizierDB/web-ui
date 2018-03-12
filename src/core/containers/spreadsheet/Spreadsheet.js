@@ -5,8 +5,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux'
-import { Icon, Input, Popup, Table } from 'semantic-ui-react'
-import { clearSpreadsheetOperationError, updateSpreadsheet } from '../../actions/spreadsheet/Spreadsheet'
+import { Button, Icon, Input, Popup, Table } from 'semantic-ui-react'
+import {
+    clearSpreadsheetOperationError, fetchSpreadsheet, updateSpreadsheet
+} from '../../actions/spreadsheet/Spreadsheet'
 import { ContentSpinner } from '../../components/util/Spinner'
 import { ErrorMessage } from '../../components/util/Message';
 import ColumnDropDown from '../../components/spreadsheet/ColumnDropDown'
@@ -14,8 +16,7 @@ import ColumnNameModal from '../../components/spreadsheet/ColumnNameModal'
 import DeleteModal from '../../components/spreadsheet/DeleteModal'
 import MoveModal from '../../components/spreadsheet/MoveModal'
 import RowDropDown from '../../components/spreadsheet/RowDropDown'
-import SpreadsheetDownload from '../../components/spreadsheet/SpreadsheetDownload'
-import StackedBarChart from '../../components/spreadsheet/StackedBarChart'
+import SpreadsheetNavbar from '../../components/spreadsheet/SpreadsheetNavbar'
 import {
     DELETE_COLUMN, DELETE_ROW, INSERT_COLUMN, MOVE_COLUMN, MOVE_ROW,
     RENAME_COLUMN, UPDATE_CELL,
@@ -153,6 +154,13 @@ class Spreadsheet extends React.Component {
         this.setState({action: {type: MOVE_ROW, rowIndex}})
     }
     /**
+     * Fetch spreadsheet data for a given pagination Url.
+     */
+    navigate(url) {
+        const { dispatch, dataset } = this.props
+        dispatch(fetchSpreadsheet(url, dataset.name))
+    }
+    /**
      * Request a column rename operation. Will display an input control that
      * allows the user to enter the new column name. Call submitRenameColumn
      * with to dispatch the operation after the user entered the new name.
@@ -162,18 +170,6 @@ class Spreadsheet extends React.Component {
         this.setState({
             action: {type: RENAME_COLUMN, columnIndex},
             inputValue: dataset.columns[columnIndex].name
-        })
-    }
-    /**
-     * Request an update cell operation. Will display an input control that
-     * allows the user to enter the new cell value. Call submitUpdateCell to
-     * dispatch the operation after user entered new cell value.
-     */
-    updateCell(columnIndex, rowIndex) {
-        const { dataset } = this.props
-        this.setState({
-            action: {type: UPDATE_CELL, columnIndex, rowIndex},
-            inputValue: dataset.rows[rowIndex].values[columnIndex]
         })
     }
     /**
@@ -246,15 +242,15 @@ class Spreadsheet extends React.Component {
                 let cells = []
                 cells.push(
                     <Table.Cell key={'ROW-ID' + i} className='row-number'>
-                        {i}
-                        <RowDropDown rowIndex={i} spreadsheet={this}/>
+                        {row.index}
+                        <RowDropDown rowIndex={row.index} spreadsheet={this}/>
                     </Table.Cell>
                 );
                 for (let j = 0; j < row.values.length; j++) {
                     let cell = null
                     const col = dataset.columns[j]
                     const cellKey = 'ROW-ID' + i + 'COL' + j
-                    if (isUpdateCell(action, j, i)) {
+                    if (isUpdateCell(action, j, row.index)) {
                         cell = (
                             <Table.Cell key={cellKey} >
                                 <Input
@@ -296,7 +292,11 @@ class Spreadsheet extends React.Component {
                             }
                         }
                         cell = (
-                            <Table.Cell key={cellKey} error={uncertain} onClick={() => (this.updateCell(j, i))}>
+                            <Table.Cell
+                                key={cellKey}
+                                error={uncertain}
+                                onClick={() => (this.updateCell(j, row.index))}
+                            >
                                 {row.values[j]}
                                 {annotation}
                             </Table.Cell>
@@ -306,6 +306,11 @@ class Spreadsheet extends React.Component {
                 }
                 rows.push(<Table.Row key={i}>{cells}</Table.Row>);
             }
+            /**
+             * Show controls that allow to navigate large datasets for which not
+             * all rows are being displayed at once.
+             */
+            let navbar = <SpreadsheetNavbar dataset={dataset} container={this} />
             /**
              * Depending on the user action we might dispay a modal form to
              * gather input parameter for the action.
@@ -351,7 +356,7 @@ class Spreadsheet extends React.Component {
                     modal = (
                         <MoveModal
                             name={'#' + action.rowIndex}
-                            maxValue={dataset.rows.length}
+                            maxValue={dataset.rowcount}
                             type='Row'
                             spreadsheet={this}
                             onSubmit={this.submitMoveRow}
@@ -359,7 +364,7 @@ class Spreadsheet extends React.Component {
                     )
                 }
             }
-            // Show an additional error message before the spreadsheet if a
+            // Show an additional step backwarderror message before the spreadsheet if a
             // previous update operation returned an error
             let operationError = null
             if (opError) {
@@ -382,11 +387,8 @@ class Spreadsheet extends React.Component {
                             {rows}
                         </Table.Body>
                     </Table>
+                    { navbar }
                     { modal }
-                    <SpreadsheetDownload
-                        downloadUrl={dataset.links.download}
-                    />
-                    /* <StackedBarChart dataset={dataset} /> */
                 </div>
             );
         }
@@ -402,7 +404,8 @@ class Spreadsheet extends React.Component {
             updateSpreadsheet(
                 workflow.links.append,
                 deleteColumn(dataset.name, action.columnIndex),
-                dataset.name
+                dataset.name,
+                dataset.offset
             )
         )
         this.cancelAction()
@@ -417,7 +420,8 @@ class Spreadsheet extends React.Component {
             updateSpreadsheet(
                 workflow.links.append,
                 deleteRow(dataset.name, action.rowIndex),
-                dataset.name
+                dataset.name,
+                dataset.offset
             )
         )
         this.cancelAction()
@@ -434,7 +438,8 @@ class Spreadsheet extends React.Component {
             updateSpreadsheet(
                 workflow.links.append,
                 insertColumn(dataset.name, name, action.position),
-                dataset.name
+                dataset.name,
+                dataset.offset
             )
         )
         this.cancelAction()
@@ -450,7 +455,8 @@ class Spreadsheet extends React.Component {
             updateSpreadsheet(
                 workflow.links.append,
                 moveColumn(dataset.name, action.columnIndex, position),
-                dataset.name
+                dataset.name,
+                dataset.offset
             )
         )
         this.cancelAction()
@@ -466,7 +472,8 @@ class Spreadsheet extends React.Component {
             updateSpreadsheet(
                 workflow.links.append,
                 moveRow(dataset.name, action.rowIndex, position),
-                dataset.name
+                dataset.name,
+                dataset.offset
             )
         )
         this.cancelAction()
@@ -481,7 +488,8 @@ class Spreadsheet extends React.Component {
             updateSpreadsheet(
                 workflow.links.append,
                 renameColumn(dataset.name, action.columnIndex, inputValue.trim()),
-                dataset.name
+                dataset.name,
+                dataset.offset
             )
         )
         this.cancelAction()
@@ -490,7 +498,7 @@ class Spreadsheet extends React.Component {
      * Dispatch a update cell operation with a user-entered new cell value.
      */
     submitUpdateCell = () => {
-        const { dispatch, dataset, workflow } = this.props
+        const { dispatch, dataset, workflow, offset } = this.props
         const { action, inputValue } = this.state
         dispatch(
             updateSpreadsheet(
@@ -501,10 +509,30 @@ class Spreadsheet extends React.Component {
                     action.rowIndex,
                     inputValue
                 ),
-                dataset.name
+                dataset.name,
+                dataset.offset
             )
         )
         this.cancelAction()
+    }
+    /**
+     * Request an update cell operation. Will display an input control that
+     * allows the user to enter the new cell value. Call submitUpdateCell to
+     * dispatch the operation after user entered new cell value.
+     */
+    updateCell(columnIndex, rowIndex) {
+        const { dataset } = this.props
+        let row = null
+        for (let i = 0; i < dataset.rows.length; i++) {
+            if (dataset.rows[i].index === rowIndex) {
+                row = dataset.rows[i]
+                break
+            }
+        }
+        this.setState({
+            action: {type: UPDATE_CELL, columnIndex, rowIndex},
+            inputValue: row.values[columnIndex]
+        })
     }
 }
 

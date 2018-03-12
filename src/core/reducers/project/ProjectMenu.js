@@ -59,7 +59,7 @@ export const projectMenu = (state = INITIAL_STATE, action) => {
                 branches: listBranches(action.branches)
             }
         case RECEIVE_WORKFLOW:
-            return {...state, datasets: action.workflow.datasets}
+            return {...state, datasets: action.workflow.activeDatasets()}
         case MENU_SET_CURRENT_BRANCH:
             return {
                 ...state,
