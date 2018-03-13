@@ -128,14 +128,16 @@ pre.collapsed-command-error {
     margin: 0px;
 }
 
-pre.collapsed-output {
+div.collapsed-output {
     color: #3b4151;
     padding: 0px 11px;
+    font-family: monospace,monospace;
 }
 
-pre.collapsed-output-error {
+div.collapsed-output-error {
     color: #843534;
     padding: 0px 11px;
+    font-family: monospace,monospace;
 }
 
 span.form-constant {
@@ -146,12 +148,22 @@ span.form-constant {
  * MISC
  */
 
- p.empty-cell-message {
+ p.error-text {
+     padding: 0px;
+     margin: 0px;
+ }
+
+ p.plain-text {
+     padding: 0px;
+     margin: 0px;
+ }
+
+p.empty-cell-message {
      color: #888;
      font-size: 1.5em;
      text-align: center;
      margin-bottom: 30px;
- }
+}
 
 p.empty-notebook-button {
     color: #888;

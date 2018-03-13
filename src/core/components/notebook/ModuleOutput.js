@@ -18,18 +18,33 @@ class ModuleOutput extends React.Component {
      */
     render() {
         const { module } = this.props
-        const text = module.stdout.slice(0)
+        const outputs = []
+        let lines = []
+        for (let i = 0; i < module.stdout.length; i++) {
+            lines.push(module.stdout[i].data)
+        }
+        outputs.push(
+            <pre key={outputs.length} className='plain-text'>
+                {lines.join('\n')}
+            </pre>
+        )
         let css = 'collapsed-output'
         if (module.stderr.length > 0) {
+            lines = []
             css += '-error'
             for (let i = 0; i < module.stderr.length; i++) {
-                text.push(module.stderr[i])
+                lines.push(module.stderr[i].data)
             }
+            outputs.push(
+                <pre key={outputs.length} className='error-text'>
+                    {lines.join('\n')}
+                </pre>
+            )
         }
         return (
-            <pre className={css}>
-                {text.join('\n')}
-            </pre>
+            <div className={css}>
+                { outputs }
+            </div>
         )
     }
 }

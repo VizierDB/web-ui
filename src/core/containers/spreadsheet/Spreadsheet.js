@@ -5,7 +5,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux'
-import { Button, Icon, Input, Popup, Table } from 'semantic-ui-react'
+import { Icon, Input, Popup, Table } from 'semantic-ui-react'
 import {
     clearSpreadsheetOperationError, fetchSpreadsheet, updateSpreadsheet
 } from '../../actions/spreadsheet/Spreadsheet'
@@ -498,7 +498,7 @@ class Spreadsheet extends React.Component {
      * Dispatch a update cell operation with a user-entered new cell value.
      */
     submitUpdateCell = () => {
-        const { dispatch, dataset, workflow, offset } = this.props
+        const { dispatch, dataset, workflow } = this.props
         const { action, inputValue } = this.state
         dispatch(
             updateSpreadsheet(
