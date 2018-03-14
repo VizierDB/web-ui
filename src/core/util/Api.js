@@ -35,6 +35,17 @@ export class BranchDescriptor {
 }
 
 /**
+ * Simple handle object for dataset chart views. Contains the name of the view
+ * and the Url to fect he view data.
+ */
+class DatasetChartViewHandle {
+    constructor(json) {
+        this.name = json.name
+        this.url = new HATEOASReferences(json.links).self
+    }
+}
+
+/**
  * Dataset descriptor containing dataset name and references.
  */
 export class DatasetDescriptor {
@@ -131,6 +142,14 @@ export class WorkflowHandle {
         for (let i = 0; i < json.modules.length; i++) {
             const module = json.modules[i]
             module.datasets = this.moduleDatasetDescriptors(module.datasets)
+            // Wrap view objects in the result with a simpler object that
+            // contains .name and .url properties only
+            const simple_views = []
+            for (let i = 0; i < module.views.length; i++) {
+                simple_views.push(new DatasetChartViewHandle(module.views[i]))
+            }
+            simple_views.sort(function(v1, v2) {return v1.name.localeCompare(v2.name)});
+            module.views = simple_views
             this.modules.push(module)
         }
         // Workflow HATEOAS references
@@ -147,6 +166,17 @@ export class WorkflowHandle {
             datasets = this.modules[this.modules.length - 1].datasets
         }
         return datasets
+    }
+    /**
+     * Get a list of handles for dataset chart views that are available in
+     * the last module of the workflow.
+     */
+    activeViews() {
+        let views = []
+        if ((!this.hasError()) && (this.modules.length > 0)) {
+            views = this.modules[this.modules.length - 1].views
+        }
+        return views
     }
     /**
      * Flag indicating whether there was an error during workflow execution.

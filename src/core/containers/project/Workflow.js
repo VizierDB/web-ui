@@ -2,7 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ContentSpinner } from '../../components/util/Spinner'
-import { ErrorMessage } from '../../components/util/Message';
+import { ErrorMessage } from '../../components/util/Message'
+import ChartView from '../plot/ChartView'
 import Notebook from '../notebook/Notebook'
 import Spreadsheet from '../spreadsheet/Spreadsheet'
 
@@ -15,7 +16,7 @@ class Workflow extends React.Component {
         hasWorkflow: PropTypes.object
     }
     render() {
-        const { fetchError, isFetching, dataset, hasWorkflow } = this.props
+        const { fetchError, isFetching, chartView, dataset, hasWorkflow } = this.props
         let content = null
         if (isFetching) {
             content = (<ContentSpinner />)
@@ -27,6 +28,8 @@ class Workflow extends React.Component {
         } else if (hasWorkflow) {
             if (dataset) {
                 content = (<Spreadsheet />)
+            } else if (chartView) {
+                content = (<ChartView />)
             } else {
                 content = (<Notebook />)
             }
@@ -39,6 +42,7 @@ class Workflow extends React.Component {
 const mapStateToProps = state => {
 
     return {
+        chartView: state.projectMenu.selectedChartView,
         dataset: state.projectMenu.selectedDataset,
         fetchError: state.workflow.fetchError,
         isFetching: state.workflow.isFetching,

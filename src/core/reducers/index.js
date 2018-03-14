@@ -1,4 +1,5 @@
 import { combineReducers } from 'redux'
+import { chartView } from './plot/ChartView'
 import { fileserver } from './fileserver/Fileserver'
 import { mainPage } from './main/MainPage'
 import { notebook } from './notebook/Notebook'
@@ -12,6 +13,7 @@ import { workflow } from './project/Workflow'
 import { serviceApi } from './main/Service'
 
 const rootReducer = combineReducers({
+    chartView,
     fileserver,
     projectCreate,
     projectListing,

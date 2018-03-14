@@ -3,8 +3,11 @@ import { fetchResource, WorkflowHandle } from '../../util/Api'
 import { ErrorObject } from '../../util/Error'
 
 export const CLEAR_NOTEBOOKCELL_DATASET = 'CLEAR_NOTEBOOKCELL_DATASET'
+export const FETCH_NOTEBOOKCELL_CHART_ERROR = 'FETCH_NOTEBOOKCELL_CHART_ERROR'
 export const FETCH_NOTEBOOKCELL_DATASET_ERROR = 'FETCH_NOTEBOOKCELL_DATASET_ERROR'
+export const RECEIVE_NOTEBOOKCELL_CHART = 'RECEIVE_NOTEBOOKCELL_CHART'
 export const RECEIVE_NOTEBOOKCELL_DATASET = 'RECEIVE_NOTEBOOKCELL_DATASET'
+export const REQUEST_NOTEBOOKCELL_CHART = 'REQUEST_NOTEBOOKCELL_CHART'
 export const REQUEST_NOTEBOOKCELL_DATASET = 'REQUEST_NOTEBOOKCELL_DATASET'
 export const REVERSE_NOTEBOOKCELLS = 'REVERSE_NOTEBOOKCELLS'
 export const SET_NOTEBOOKCELL_BUSY = 'SET_NOTEBOOKCELL_BUSY'
@@ -100,6 +103,31 @@ export const insertWorkflowModule = (index, url, data) => (dispatch) => {
                 )
             )
         ))
+}
+
+/**
+ * Fetch a dataset chart view for a notebook cell.
+ */
+export const loadNotebookCellChart = (index, url) => (dispatch) => {
+    dispatch(
+        fetchResource(
+            url,
+            (data) => ({
+                type: RECEIVE_NOTEBOOKCELL_CHART,
+                index,
+                data
+            }),
+            (message) => ({
+                type: FETCH_NOTEBOOKCELL_CHART_ERROR,
+                index,
+                message
+            }),
+            () => ({
+                type: REQUEST_NOTEBOOKCELL_CHART,
+                index
+            })
+        )
+    )
 }
 
 /**

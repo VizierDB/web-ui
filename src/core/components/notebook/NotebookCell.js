@@ -66,6 +66,8 @@ const commandText = (command) => {
         return 'UPDATE ' + args.dataset + ' SET [' + args.column + ',' + args.row + '] = \'' + args.value + '\''
     } else if ((type === 'python') && (id === 'CODE')) {
         return args.source
+    } else if ((type === 'plot') && (id === 'CHART')) {
+        return 'PLOT \'' + args.name + '\' FOR ' + args.dataset
     } else if ((type === 'mimir') && (id === 'DOMAIN')) {
         return 'DOMAIN FOR COLUMN ' + args.column + ' IN ' + args.dataset
     } else if ((type === 'mimir') && (id === 'KEY_REPAIR')) {
@@ -296,6 +298,14 @@ class NotebookCell extends React.Component {
         notebook.loadOutputDataset(cell.id, dataset.links.self)
     }
     /**
+     * Callback handler when user selects a moduel chart view for output. Call
+     * the respective load handler for the associated notebook.
+     */
+    loadDatasetChart = (view) => {
+        const { cell, notebook } = this.props
+        notebook.loadOutputDatasetChart(cell.id, view.url)
+    }
+    /**
      * Fetch spreadsheet data for a given pagination Url.
      */
     navigate(url) {
@@ -491,7 +501,7 @@ class NotebookCell extends React.Component {
                                 cell={this}
                                 datasets={cell.module.datasets}
                                 module={cell.module}
-                                outputDataset={cell.dataset}
+                                outputResource={cell.resource}
                             />
                             { modal }
                         </div>

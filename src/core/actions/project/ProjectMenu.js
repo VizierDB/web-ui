@@ -6,6 +6,7 @@
  */
 
 import { fetchWorkflow } from './Workflow'
+import { fetchChartView } from '../plot/ChartView'
 import { fetchSpreadsheet } from '../spreadsheet/Spreadsheet'
 import {
     deleteResource, fetchResource, postResourceData, updateResourceProperty,
@@ -16,7 +17,9 @@ export const CREATE_PROJECT_BRANCH = 'CREATE_PROJECT_BRANCH'
 export const MENU_RECEIVE_BRANCHES = 'MENU_RECEIVE_BRANCHES'
 export const MENU_SET_BUSY_FLAG = 'MENU_SET_BUSY_FLAG'
 export const MENU_SET_CURRENT_BRANCH = 'MENU_SET_CURRENT_BRANCH'
-export const MENU_SET_CURRENT_DATASET = 'MENU_SET_CURRENT_DATASET'
+export const MENU_SHOW_CHART_VIEW = 'MENU_SHOW_CHART_VIEW'
+export const MENU_SHOW_DATASET = 'MENU_SHOW_DATASET'
+export const MENU_SHOW_NOTEBOOK = 'MENU_SHOW_NOTEBOOK'
 export const MENU_SET_ERROR = 'MENU_SET_ERROR'
 
 export const clearMenuError = () => ({
@@ -178,12 +181,19 @@ export const setCurrentBranch = (branch) => (dispatch) => {
     })
 }
 
+export const showChartView = (view) => (dispatch) => {
+    dispatch({
+        type: MENU_SHOW_CHART_VIEW,
+        view
+    })
+    dispatch(fetchChartView(view.url, view.name))
+}
+
 /**
  * Set current dataset to null which will show the notebook view.
  */
 export const showNotebookView = () => ({
-    type: MENU_SET_CURRENT_DATASET,
-    dataset: null
+    type: MENU_SHOW_NOTEBOOK
 })
 
 /**
@@ -191,7 +201,7 @@ export const showNotebookView = () => ({
  */
 export const showSpreadsheetView = (dataset) => (dispatch) => {
     dispatch({
-        type: MENU_SET_CURRENT_DATASET,
+        type: MENU_SHOW_DATASET,
         dataset
     })
     dispatch(fetchSpreadsheet(dataset.links.annotated, dataset.name))

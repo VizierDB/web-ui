@@ -12,8 +12,8 @@ import { connect } from 'react-redux'
 import { IconButton } from '../../components/util/Button'
 import NotebookCell from '../../components/notebook/NotebookCell'
 import {
-    clearNotebookCellDataset, loadNotebookCellDataset, reverseNotebbokCells,
-    setCellErrorMessage
+    clearNotebookCellDataset, loadNotebookCellChart, loadNotebookCellDataset,
+    reverseNotebbokCells, setCellErrorMessage
 } from '../../actions/notebook/Notebook'
 import { createProjectBranch } from '../../actions/project/ProjectMenu'
 import {
@@ -77,6 +77,13 @@ class Notebook extends React.Component {
     loadOutputDataset = (cellId, url) => {
         const { dispatch } = this.props
         dispatch(loadNotebookCellDataset(cellId, url))
+    }
+    /**
+     * Dispatch load dataset chart request for a given cell.
+     */
+    loadOutputDatasetChart = (cellId, url) => {
+        const { dispatch } = this.props
+        dispatch(loadNotebookCellChart(cellId, url))
     }
     /**
      * Display a list of notebook cells, one for each cell handle and a button

@@ -10,8 +10,8 @@ import { Button, Dropdown, Header, Icon, Input, Menu, Modal } from 'semantic-ui-
 import { UpdateFormSpinner } from '../../components/util/Spinner';
 import { ErrorMessage } from '../../components/util/Message';
 import {
-    clearMenuError, deleteBranch, setCurrentBranch, showNotebookView,
-    showSpreadsheetView, updateBranchName
+    clearMenuError, deleteBranch, setCurrentBranch, showChartView,
+    showNotebookView, showSpreadsheetView, updateBranchName
 } from '../../actions/project/ProjectMenu'
 import { DEFAULT_BRANCH } from '../../util/Api'
 import '../../../css/ResourceListing.css'
@@ -25,7 +25,9 @@ class ProjectMenu extends React.Component {
         error: PropTypes.object,
         isBusy: PropTypes.bool.isRequired,
         selectedBranch: PropTypes.object,
-        selectedDataset: PropTypes.object
+        selectedChartView: PropTypes.object,
+        selectedDataset: PropTypes.object,
+        views: PropTypes.array.isRequired
     }
     constructor(props) {
         super(props);
@@ -93,7 +95,7 @@ class ProjectMenu extends React.Component {
      * Depending on the edit flag either show the name or the edit name form.
      */
     render() {
-        const { error, isBusy, branches, datasets, selectedBranch, selectedDataset } = this.props
+        const { error, isBusy, branches, datasets, selectedBranch, selectedChartView, selectedDataset, views } = this.props
         if (selectedBranch) {
             if (isBusy) {
                 return (<UpdateFormSpinner />);
@@ -132,6 +134,7 @@ class ProjectMenu extends React.Component {
                         onClick={this.showNotebook}
                     />
                 ]
+                // Add tabs for available datasets
                 datasets.sort(function(d1, d2) {return d1.name.localeCompare(d2.name)});
                 for (let i = 0; i < datasets.length; i++) {
                     const ds = datasets[i]
@@ -147,6 +150,24 @@ class ProjectMenu extends React.Component {
                             value={ds.name}
                             active={isActive}
                             onClick={this.selectDataset}
+                        />
+                    )
+                }
+                // Add tabs for available dataset charts
+                for (let i = 0; i < views.length; i++) {
+                    const view = views[i]
+                    let isActive = false
+                    if (selectedChartView) {
+                        isActive = (selectedChartView.name === view.name)
+                    }
+                    workflowViews.push(
+                        <Menu.Item
+                            key={'VW_' + view.name}
+                            icon='bar chart'
+                            name={view.name}
+                            value={view.name}
+                            active={isActive}
+                            onClick={this.selectChartView}
                         />
                     )
                 }
@@ -272,6 +293,19 @@ class ProjectMenu extends React.Component {
     /**
      * Set the dataset that is shown in the spreadsheet view.
      */
+    selectChartView = (e, { value }) => {
+        const { dispatch, views } = this.props
+        for (let i = 0; i < views.length; i++) {
+            const view = views[i]
+            if (view.name === value) {
+                dispatch(showChartView(view))
+                break
+            }
+        }
+    }
+    /**
+     * Set the dataset that is shown in the spreadsheet view.
+     */
     selectDataset = (e, { value }) => {
         const { dispatch, datasets } = this.props
         for (let i = 0; i < datasets.length; i++) {
@@ -333,7 +367,9 @@ const mapStateToProps = state => {
         error: state.projectMenu.error,
         isBusy: state.projectMenu.isBusy,
         selectedBranch: state.projectMenu.selectedBranch,
-        selectedDataset: state.projectMenu.selectedDataset
+        selectedChartView: state.projectMenu.selectedChartView,
+        selectedDataset: state.projectMenu.selectedDataset,
+        views: state.projectMenu.views
     }
 }
 
