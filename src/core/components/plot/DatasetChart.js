@@ -1,7 +1,5 @@
 /**
- * Display a dataset in spreadsheet format with minimal functionality for the
- * user to interact with the data. This is a static view on a historic
- * dataset that was generated as output of a workflow module.
+ * Placeholder component to render dataset charts.
  */
 
 import React from 'react'
