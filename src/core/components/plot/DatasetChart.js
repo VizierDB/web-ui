@@ -4,6 +4,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
+import Plots from './Plots'
 
 /*
  * Plot a dataset chart for given data.
@@ -28,7 +29,7 @@ class DatasetChart extends React.Component {
         )
         return (
             <div>
-                { content }
+                <Plots rows={rows} schema={schema} />
             </div>
         );
     }
