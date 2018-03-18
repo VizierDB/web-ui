@@ -12,6 +12,8 @@ import ProjectPage from '../project/ProjectPage'
 import logo from '../../../img/logo_small.png';
 import '../../../css/App.css'
 
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import injectTapEventPlugin from 'react-tap-event-plugin';
 /**
  * Set application routes. The baseHref points to the application home. Route
  * projectHref points to the web page for individual projects.
@@ -65,12 +67,14 @@ class App extends Component {
             />);
         } else {
             content = (
+              <MuiThemeProvider>
                 <Router>
                     <div>
                         <Route exact path={baseHref} component={MainPage} />
                         <Route path={projectHref} component={ProjectPage} />
                     </div>
                 </Router>
+                </MuiThemeProvider>
             );
             if (name) {
                 connection = (<ConnectionInfo api={this.props}/>)
