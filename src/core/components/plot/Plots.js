@@ -10,10 +10,10 @@ import {scaleOrdinal, scaleLinear, schemeCategory10} from 'd3-scale';
 import $ from 'jquery';
 import {line, curveBasis} from 'd3-shape';
 import {color} from 'd3-color';
-import {BarChart} from 'react-d3-components';
+import {BarChart, LineChart} from 'react-d3-components';
 import {GridList, GridTile} from 'material-ui/GridList';
-import { Dropdown } from 'semantic-ui-react'
-import '../../../css/Notebook.css'
+import { Dropdown } from 'semantic-ui-react';
+import '../../../css/Notebook.css';
 
 class Plots extends React.Component {
 
@@ -28,7 +28,7 @@ class Plots extends React.Component {
 
     constructor(props){
         super(props);
-        this.state = {value:'simplebar' };
+        this.state = {value:'Simple Bar Chart' };
         this.colorTags= [ "#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c", "#d62728", "#d62728", "#9467bd", "#c5b0d5", "#8c564b", "#c49c94", "#e377c2", "#f7b6d2", "#7f7f7f", "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf", "#9edae5"];
     }
 
@@ -75,7 +75,6 @@ class Plots extends React.Component {
 
     //Create Grouped Bar Chart.
     groupBarChart(data){
-      //var xScale = d3.scale.ordinal(); //... + set it up appropriately
       var yScale = scaleLinear();
       var colorScale = scaleOrdinal(this.colorTags);
       return <GridTile>
@@ -87,6 +86,18 @@ class Plots extends React.Component {
                   height={400}
                   margin={{top: 10, bottom: 50, left: 50, right: 10}}/>
               </GridTile>;
+    }
+
+    //Create Line Chart.
+    lineChart(data){
+      var yScale = scaleLinear();
+      var colorScale = scaleOrdinal(this.colorTags);
+      return <LineChart
+                   data={data}
+                   width={400}
+                   height={400}
+                   margin={{top: 10, bottom: 50, left: 50, right: 20}}
+                />;
     }
 
     //Get legend
@@ -112,6 +123,9 @@ class Plots extends React.Component {
       if(nameChart==this.props.charts[1]){ //groupbar chart
         chart = this.groupBarChart(data);
       }
+      if(nameChart==this.props.charts[2]){ //line chart
+        chart = this.lineChart(data);
+      }
       return chart;
     }
 
@@ -120,6 +134,8 @@ class Plots extends React.Component {
       var data = this.loadData(this.props.rows);
       var chart = this.selectedCharts(this.state.value, data);
       var legend =this.getLegend(data,this.props.schema);
+
+
 
       const options = [];
       for (let i = 0; i < this.props.charts.length; i++) {
@@ -170,7 +186,7 @@ Plots.defaultProps = {
     gridList_height:450,
     gridLis_overflowY:'auto',
     colorText:'black',
-    charts : ["simplebar", "groupbar"],
+    charts : ["Simple Bar Chart", "Grouped Bar Chart", "Line Chart"],
 };
 /*<p>Got data for {this.props.rows.length} row(s) and {this.props.schema.series.length} data series</p>*/
 
