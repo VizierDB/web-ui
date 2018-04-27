@@ -1,62 +1,294 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
-import { fetchProject } from '../../actions/project/ProjectPage'
-import { ContentSpinner } from '../../components/util/Spinner'
-import { ErrorMessage } from '../../components/util/Message';
-import ProjectMenu from './ProjectMenu'
-import ProjectNameForm from './ProjectNameForm'
-import Workflow from './Workflow'
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import {  Grid, Loader, Modal } from 'semantic-ui-react';
+import queryString from 'query-string';
+import { redirectTo } from '../../actions/main/App';
+import { showChartView } from '../../actions/chart/Chart';
+import { reverseOrder, showNotebook } from '../../actions/notebook/Notebook';
+import { deleteBranch, showBranchHistory, updateBranchName } from '../../actions/project/Branch';
+import {
+    dismissProjectActionError, fetchProject, updateProjectName
+} from '../../actions/project/ProjectPage';
+import { showSpreadsheet } from '../../actions/spreadsheet/Spreadsheet';
+import ContentSpinner from '../../components/ContentSpinner';
+import { ErrorMessage, NotFoundMessage } from '../../components/Message';
+import BranchHistory from '../../components/project/BranchHistory';
+import DatasetChart from '../../components/plot/DatasetChart';
+import ModuleError from '../../components/project/ModuleError';
+import ProjectMenu from '../../components/project/menu/ProjectMenu';
+import ProjectStatusHeader from '../../components/project/ProjectStatusHeader';
+import Notebook from '../notebook/Notebook';
+import Spreadsheet from '../spreadsheet/Spreadsheet';
+import { valueOrDefault } from '../../util/App';
+import '../../../css/App.css';
+import '../../../css/ProjectPage.css';
+import '../../../css/BranchHistory.css';
+import '../../../css/Chart.css';
 
-import '../../../css/App.css'
-import '../../../css/ProjectPage.css'
 
-
+/**
+ * The project page is one of the main point of interaction for the app. The
+ * page displays different workflow versions of a curation projects. For a
+ * workflow version different resources (i.e., notebook, dataset or chart)
+ * can be displayed. In addition, the project barnches and branch history can
+ * be shown.
+ *
+ * The page layout has two main parts:
+ *
+ * <ProjectMenu />
+ * { pageContent }
+ *
+ * The pageContent is either of the following:
+ *
+ * <BranchHistory />
+ * <Notebook />
+ * <Spreadsheet />
+ * <DatasetChart />
+ *
+ * The part of the global state that controlls the project page and its
+ * resources is as follows (only part are shown):
+ *
+ * - project (ProjectHandle)
+ *   - id (string)
+ *   - name (string)
+ *   - links (obj)
+ *   - environment
+ *     - modules
+ *     - files
+ *   - branches (list[BranchDescriptor])
+ * - workflow (WorkflowHandle)
+ *   - version (int)
+ *   - createdAt (string)
+ *   - branch (BranchDescriptor)
+ *   - datasets (list[DatasetDescriptor])
+ *   - charts (list[ChartDescriptor])
+ *   - links (obj)
+ * - resource (WorkflowResourceHandle)
+ *   - name (string) // optional
+ *   - content (obj)
+ */
 class ProjectPage extends Component {
     static propTypes = {
-        error: PropTypes.string,
+        actionError: PropTypes.object,
+        fetchError: PropTypes.object,
+        isActive: PropTypes.bool.isRequired,
         isFetching: PropTypes.bool.isRequired,
-        serviceUrl: PropTypes.object
+        project: PropTypes.object,
+        resource: PropTypes.object,
+        workflow: PropTypes.object
     }
-
+    /**
+     * Fetch project information when page is loaded.
+     */
     componentDidMount = () => {
-        const { dispatch } = this.props
-        dispatch(fetchProject(this.props.match.params.project_id))
+        const { dispatch, location } = this.props
+        const projectId = this.props.match.params.project_id
+        const { branch, version } = queryString.parse(location.search)
+        dispatch(fetchProject(projectId, branch, version))
     }
-
+    /**
+     * Dismiss resource error message.
+     */
+    dismissResourceError = () => {
+        const { dispatch } = this.props;
+        dispatch(dismissProjectActionError(null));
+    }
+    handleNotebookReverse = () => {
+        const { dispatch } = this.props;
+        dispatch(reverseOrder());
+    }
+    /**
+     * Show history for the branch of the current workflow.
+     */
+    loadBranchHistory = () => {
+        const { dispatch, workflow } = this.props;
+        dispatch(showBranchHistory(workflow.branch));
+    }
+    /**
+     * Load a chart view and dispaly it as the project page resource content.
+     */
+    loadChartView = (chart) => {
+        const { dispatch } = this.props;
+        dispatch(showChartView(chart));
+    }
+    /**
+     * Switch to spreadsheet view and load the selected dataset.
+     */
+    loadDataset = (dataset) => {
+        const { dispatch } = this.props;
+        dispatch(showSpreadsheet(dataset));
+    }
+    /**
+     * Switch the project resource to show the notebook for the current
+     * workflow.
+     */
+    loadNotebook = () => {
+        const { dispatch, workflow } = this.props;
+        dispatch(showNotebook(workflow));
+    }
+    /**
+     * Dispatch redirect request.
+     */
+    onRedirect = (url) => {
+        const { dispatch } = this.props;
+        dispatch(redirectTo(url));
+    }
     render() {
-        const { error, isFetching, project } = this.props
+        const { fetchError, isFetching, project, workflow} = this.props
         let content = null;
         if (isFetching) {
-            content = (<ContentSpinner />)
-        } else if (error) {
-            content = (<ErrorMessage
-                title="Error while loading project"
-                message={error}
-            />)
-        } else if (project) {
-            document.title = 'Vizier DB - ' + project.name
+            // Show a spinner while the project information is being fetched.
+            // There is nothing else to show yet.
+            content = <ContentSpinner text='Loading Project ...' />;
+        } else if (fetchError) {
+            // There was an error while fetching the project resource. Show
+            // different type of message depending on whether the requested
+            // project wasn't found or or a different error occured.
+            if (fetchError.is404()) {
+                content = (
+                    <div className='not-found'>
+                        <NotFoundMessage message={fetchError.message} />
+                    </div>
+                )
+            } else {
+                content = (<ErrorMessage
+                    title={fetchError.title}
+                    message={fetchError.message}
+                />)
+            }
+        } else if ((project != null) && (workflow != null)) {
+            // The project has been fetched successfully.  Set window title to
+            // contain project name
+            document.title = 'Vizier DB - ' + valueOrDefault(project.name, 'undefined');
+            // Rest of the page depends on whether a project resource is ready
+            // to be show or not. We set the pageContent accordingly.
+            let pageContent = null;
+            const { actionError, isActive, resource } = this.props;
+            // Handler for reverse notebook manu item. Only set in notebook view.
+            let onReverseHandler = this.null;
+            if (resource != null) {
+                // The resource has been fetched. Depending on the resource type
+                // we either show a notebook, the branch history, a spreadsheet,
+                // or a chart view.
+                if (resource.isChart()) {
+                    pageContent = (
+                        <div className='chart-view'>
+                            <div className='dataset-chart'>
+                                <h1 className='chart-name'>{resource.content.name}</h1>
+                                <DatasetChart dataset={resource.content.dataset} />
+                            </div>
+                        </div>
+                    );
+                } else if (resource.isDataset()) {
+                    pageContent = <Spreadsheet />;
+                } else if (resource.isHistory()) {
+                    pageContent = (
+                        <div className='history-view'>
+                            <BranchHistory
+                                project={project}
+                                branch={workflow.branch}
+                                workflows={resource.content}
+                            />
+                        </div>
+                    )
+                } else if (resource.isError()) {
+                    const { title, module } = resource.content;
+                    pageContent = <ModuleError title={title} module={module}/>;
+                } else if (resource.isNotebook()) {
+                    pageContent = <Notebook />;
+                    onReverseHandler = this.handleNotebookReverse;
+                }
+                // Show a modal with a loader that overlays the full screen if
+                // the page content is currently being fetched.
+                pageContent = (
+                    <div className='project-content'>
+                        <Modal dimmer={true} open={isActive}>
+                            <Loader size='large' active={true}>Loading</Loader>
+                        </Modal>
+                        { pageContent }
+                    </div>
+                )
+            }
+            // A resource error may be present independently of the project
+            // resource, i.e., due to resource fetch error (-> no resource) or
+            // resource update error (-> we have a resource)
+            let optionalError = null;
+            if (actionError != null) {
+                optionalError = <ErrorMessage
+                    title={actionError.title}
+                    message={actionError.message}
+                    onDismiss={this.dismissResourceError}
+                />;
+            }
             content = (
                 <div>
-                    <ProjectNameForm />
-                    <ProjectMenu />
-                    <div className='project-content'>
-                        <Workflow />
-                    </div>
+                    <Grid columns={2}>
+                        <Grid.Row>
+                            <Grid.Column width={10}>
+                            <ProjectMenu
+                                onDeleteBranch={this.submitDeleteBranch}
+                                onEditBranch={this.submitEditBranch}
+                                onEditProject={this.submitEditProject}
+                                onRedirect={this.onRedirect}
+                                onShowChart={this.loadChartView}
+                                onShowDataset={this.loadDataset}
+                                onShowHistory={this.loadBranchHistory}
+                                onShowNotebook={this.loadNotebook}
+                                project={project}
+                                resource={resource}
+                                workflow={workflow}
+                            />
+                            </Grid.Column>
+                            <Grid.Column width={6}>
+                            <ProjectStatusHeader
+                                project={project}
+                                workflow={workflow}
+                                onReverse={onReverseHandler}
+                            />
+                            </Grid.Column>
+                        </Grid.Row>
+                    </Grid>
+                    { optionalError }
+                    { pageContent }
                 </div>
             )
         }
         return content;
     }
+    /**
+     * Submit request to delete the given branch from the current project.
+     */
+    submitDeleteBranch = (branch) => {
+        const { dispatch, project } = this.props;
+        dispatch(deleteBranch(project, branch));
+    }
+    /**
+     * Submit request to update the name of the current branch.
+     */
+    submitEditBranch = (name) => {
+        const { dispatch, project, workflow } = this.props;
+        dispatch(updateBranchName(project, workflow, name));
+    }
+    /**
+     * Submit request to update the name of the project.
+     */
+    submitEditProject = (name) => {
+        const { dispatch, project } = this.props;
+        dispatch(updateProjectName(project, name))
+    }
 }
 
-const mapStateToProps = state => {
 
+const mapStateToProps = state => {
     return {
-        error: state.projectPage.error,
-        files: state.projectPage.files,
+        actionError: state.projectPage.actionError,
+        fetchError: state.projectPage.fetchError,
+        isActive: state.projectPage.isActive,
         isFetching: state.projectPage.isFetching,
-        project: state.projectPage.project
+        project: state.projectPage.project,
+        resource: state.projectPage.resource,
+        workflow: state.projectPage.workflow
     }
 }
 

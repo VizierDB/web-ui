@@ -1,120 +1,118 @@
-/**
- * Actions to interact with the spreadsheet view of a dataset.
- */
-
-import { showNotebookView } from '../project/ProjectMenu'
-import { receiveWorkflow } from '../project/Workflow'
-import { postResourceData, WorkflowHandle } from '../../util/Api'
-
-export const RECEIVE_SPREADSHEET_DATA = 'RECEIVE_SPREADSHEET_DATA'
-export const REQUEST_SPREADSHEET_DATA = 'REQUEST_SPREADSHEET_DATA'
-export const REQUEST_SPREADSHEET_UPDATE = 'REQUEST_SPREADSHEET_UPDATE'
-export const SPREADSHEET_ERROR = 'SPREADSHEET_ERROR'
-export const SPREADSHEET_OPERATION_ERROR = 'SPREADSHEET_OPERATION_ERROR'
+import {
+    projectActionError, receiveProjectResource, requestProjectAction,
+    updateWorkflowResource
+} from '../project/ProjectPage';
+import { DatasetHandle } from '../../resources/Dataset';
+import { Notebook } from '../../resources/Notebook';
+import { ErrorResource, SpreadsheetResource } from '../../resources/Project'
+import { WorkflowHandle } from '../../resources/Workflow';
+import { fetchResource } from '../../util/Api';
 
 
-export const clearSpreadsheetOperationError = () => ({
-    type: SPREADSHEET_OPERATION_ERROR,
-    error: null
-})
+// Actions to indicate that the spreadsheet is currently being updated
+export const SUBMIT_UPDATE_REQUEST = 'SUBMIT_UPDATE_REQUEST';
 
-export const fetchSpreadsheet = (url, name) => (dispatch) => {
-    // Signal start of dataset fetching
-    dispatch(requestSpreadsheet())
-    return fetch(url)
-    // Check the response. Assume that eveything is all right if status
-    // code below 400
-    .then(function(response) {
-        if (response.status >= 200 && response.status < 400) {
-            // SUCCESS: Pass the JSON result to the respective callback
-            // handler
-            response.json().then(json => {
-                dispatch(receiveSpreadsheet(json, name))
-            });
-        } else {
-            // ERROR: The API is expected to return a JSON object in case
-            // of an error that contains an error message
-            response.json().then(json => dispatch(spreadsheetFetchError(json.message)));
-        }
-    })
-    .catch(err => dispatch(spreadsheetFetchError(err.message)))
-}
-
-export const receiveSpreadsheet = (dataset, name) => ({
-    type: RECEIVE_SPREADSHEET_DATA,
-    dataset,
-    name
-})
 
 /**
- * Set busy flag during spreadsheet fetch. Will also invalidate the current
- * dataset.
+ * Show a spreadsheet as the content of the project page. The url parameter is
+ * optional. If not given, loads the spreadsheet datat using the .self url from
+ * the given dataset descriptor.
+ *
+ * Parameters:
+ *
+ * dataset: DatasetDescriptor
+ *
  */
-export const requestSpreadsheet = () => ({
-    type: REQUEST_SPREADSHEET_DATA
-})
-
-/**
- * Set busy flag during spreadsheet update. Will not invalidate the current
- * dataset.
- */
-export const requestSpreadsheetUpdate = () => ({
-    type: REQUEST_SPREADSHEET_UPDATE
-})
-
-/**
- * Signal error while fetching a spreadsheet
- */
-export const spreadsheetFetchError = (message) => ({
-    type: SPREADSHEET_ERROR,
-    error: {
-        title: 'Error while fetching data',
-        message
+export const showSpreadsheet = (dataset, url) => (dispatch) => {
+    let fetchUrl = null;
+    if (url != null) {
+        fetchUrl = url;
+    } else {
+        fetchUrl = dataset.links.self;
     }
-})
-
-/**
- * Signal error during spreadsheet update operation.
- */
-export const spreadsheetOperationError = (message) => ({
-    type: SPREADSHEET_OPERATION_ERROR,
-    error: {
-        title: 'Error while updating dataset',
-        message
-    }
-})
-
-/**
- * Post a vizual operation to update the current spreadsheet. On success, try
- * to reload the updated dataset (note that the dataset Url may have changed)
- */
-export const updateSpreadsheet = (url, op, dataset, offset) => (dispatch) => {
-    return postResourceData(
-        dispatch,
-        url,
-        op,
-        (json) => {
-            const workflow = new WorkflowHandle(json)
-            // On success try to reload the current dataset and update the
-            // current workflow handle
-            if (!workflow.hasError()) {
-                const datasets = workflow.activeDatasets()
-                for (let i = 0; i < datasets.length; i++) {
-                    const ds = datasets[i]
-                    if (ds.name === dataset) {
-                        let fetchUrl = ds.links.annotated
-                        if (offset !== undefined) {
-                            fetchUrl = fetchUrl + '&offset=' + offset
-                        }
-                        dispatch(fetchSpreadsheet(fetchUrl, dataset))
-                    }
-                }
-            } else {
-                dispatch(showNotebookView())
-            }
-            return receiveWorkflow(workflow)
-        },
-        spreadsheetOperationError,
-        requestSpreadsheetUpdate
+    dispatch(
+        fetchResource(
+            fetchUrl,
+            (json) => (dispatch) => {
+                return dispatch(receiveProjectResource(
+                    new SpreadsheetResource(
+                        new DatasetHandle(dataset.id, dataset.name)
+                            .fromJson(json)
+                    )
+                ));
+            },
+            (message) => (
+                projectActionError('Error loading spreadsheet', message)
+            ),
+            requestProjectAction
+        )
     )
 }
+
+
+export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
+    const { name, offset } = dataset;
+    dispatch(submitUpdateRequest());
+    return fetch(
+            workflow.links.append,
+            {
+                method: 'POST',
+                body: JSON.stringify({...cmd, includeDataset: {name, offset}}),
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+            }
+        )
+        // Check the response. Assume that eveything is all right if status
+        // code below 400
+        .then(function(response) {
+            if (response.status >= 200 && response.status < 400) {
+                // SUCCESS: Pass the JSON result to the respective callback
+                // handler
+                response.json().then(json => {
+                    const wf = new WorkflowHandle().fromJson(json.workflow);
+                    let resource = null;
+                    const includedDataset = json['dataset'];
+                    if (includedDataset !== undefined) {
+                        const ds = new DatasetHandle(
+                            includedDataset.id,
+                            dataset.name
+                        ).fromJson(includedDataset);
+                        resource = new SpreadsheetResource(ds);
+                    } else {
+                        // Find the first module containing an error
+                        let module = null;
+                        const cells = new Notebook().fromJson(json).cells;
+                        for (let i = 0; i < cells.length; i++) {
+                            const cell = cells[i];
+                            if (cell.hasError()) {
+                                module = cell.module;
+                                break;
+                            }
+                        }
+                        const title = 'Error updating dataset ' + dataset.name;
+                        resource = new ErrorResource(title, module);
+                    }
+                    return dispatch(updateWorkflowResource(wf, resource));
+                });
+            } else {
+                // ERROR: The API is expected to return a JSON object in case
+                // of an error that contains an error message
+                response.json().then(json => dispatch(
+                    projectActionError('Error updating spreadsheet', json.message))
+                );
+            }
+        })
+        .catch(err => dispatch(
+            projectActionError('Error updating spreadsheet', err.message))
+        )
+}
+
+
+/**
+ * Signal that the spreadsheet is currently being updated.
+ */
+export const submitUpdateRequest = () => ({
+    type: SUBMIT_UPDATE_REQUEST
+})

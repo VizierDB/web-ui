@@ -1,52 +1,19 @@
-/**
- * Component to display and interact with the spreadsheet view of a dataset.
- */
-
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux'
-import { Icon, Input, Popup, Table } from 'semantic-ui-react'
+import { connect } from 'react-redux';
+import { Dimmer, Loader } from 'semantic-ui-react';
+import { showSpreadsheet, submitUpdate } from '../../actions/spreadsheet/Spreadsheet';
+import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
+import SpreadsheetNavbar from '../../components/spreadsheet/SpreadsheetNavbar';
+import GridCell from '../../components/spreadsheet/grid/GridCell';
+import HeaderCell from '../../components/spreadsheet/grid/HeaderCell';
+import RowIndexCell from '../../components/spreadsheet/grid/RowIndexCell';
+import { MOVE, isNotEmptyString, isNonNegativeInt } from '../../util/App';
 import {
-    clearSpreadsheetOperationError, fetchSpreadsheet, updateSpreadsheet
-} from '../../actions/spreadsheet/Spreadsheet'
-import { ContentSpinner } from '../../components/util/Spinner'
-import { ErrorMessage } from '../../components/util/Message';
-import ColumnDropDown from '../../components/spreadsheet/ColumnDropDown'
-import ColumnNameModal from '../../components/spreadsheet/ColumnNameModal'
-import DeleteModal from '../../components/spreadsheet/DeleteModal'
-import MoveModal from '../../components/spreadsheet/MoveModal'
-import RowDropDown from '../../components/spreadsheet/RowDropDown'
-import SpreadsheetNavbar from '../../components/spreadsheet/SpreadsheetNavbar'
-import {
-    DELETE_COLUMN, DELETE_ROW, INSERT_COLUMN, MOVE_COLUMN, MOVE_ROW,
-    RENAME_COLUMN, UPDATE_CELL,
-    deleteColumn, deleteRow, insertColumn, insertRow, moveColumn, moveRow,
-    renameColumn, updateCell
-} from '../../util/Vizual'
-import '../../../css/App.css'
-import '../../../css/Spreadsheet.css'
-
-
-const isRenameColumn = (action, index) => {
-    if (action) {
-        if ((action.type === RENAME_COLUMN) && (action.columnIndex === index)) {
-            return true
-        }
-    }
-    return false
-}
-
-const isUpdateCell = (action, colIndex, rowIndex) => {
-    if (action) {
-        if (action.type === UPDATE_CELL) {
-            if ((action.columnIndex === colIndex) && (action.rowIndex === rowIndex)) {
-                return true
-            }
-        }
-    }
-    return false
-}
-
+    VIZUAL, deleteColumn, deleteRow, insertColumn, insertRow, moveColumn,
+    moveRow,  renameColumn, updateCell
+} from '../../util/Vizual';
+import '../../../css/Spreadsheet.css';
 
 /**
  * Component to display a dataset in spreadsheet format. Spreadsheets are
@@ -55,484 +22,437 @@ const isUpdateCell = (action, colIndex, rowIndex) => {
 class Spreadsheet extends React.Component {
     static propTypes = {
         dataset: PropTypes.object,
-        error: PropTypes.object,
-        isBusy: PropTypes.bool.isRequired,
-        opError: PropTypes.object,
-        workflow: PropTypes.object
+        isUpdating: PropTypes.bool.isRequired,
+        project: PropTypes.object.isRequired,
+        workflow: PropTypes.object.isRequired
     }
     constructor(props) {
         super(props);
-        this.state = {action: null, inputValue: ''};
+        // Keep the id and coordinates of the active cell in the local state.
+        this.state = {
+            activeColumnId: -1,
+            activeRowId: -1,
+            activeColumnIndex: -1,
+            activeRowIndex: -1,
+            modal: null,
+            modalValue: null,
+            originalCellValue: null,
+            updatedCellValue: null,
+            updatingColumnId: -1,
+            updatingRowId: -1,
+            updatingValue: null
+        }
     }
-    /**
-     * Cancel a requested user action by setting the action object to null.
-     */
-    cancelAction = () => {
-        this.setState({action: null, inputValue: ''})
-    }
-    /**
-     * Dismiss an error message shown as result of a previous update operation
-     */
-    clearUpdateError = () => {
-        const { dispatch } = this.props
-        dispatch(clearSpreadsheetOperationError())
-    }
-    /**
-     * Request deletion of a column. Will display a confirmation dialog for the
-     * user. If the user confirms, call submitDeleteColumn to dispatch the
-     * delete operation.
-     */
-    deleteColumn(columnIndex) {
-        this.setState({action: {type: DELETE_COLUMN, columnIndex}})
-    }
-    /**
-     * Request deletion of a spreadsheet row. Will display the confirm dialog
-     * for the user to confirm the action. Call submitDeleteRow to dispatch the
-     * operation after user confirmation.
-     */
-    deleteRow(rowIndex) {
-        this.setState({action: {type: DELETE_ROW, rowIndex}})
-    }
-    /**
-     * Handle change in cell input control.
-     */
-    handleChange = (event) => {
-        this.setState({inputValue: event.target.value})
-    }
-    /**
-     * Handle key down events. Detect ESC and RETURN to either hide an input
-     * control (via cancelAction) or to call the respective submit method.
-     */
-    handleKeyDown = (event) => {
-        const { action } = this.state
-        if (event.keyCode === 13) {
-            if (action.type === RENAME_COLUMN) {
-                this.submitRenameColumn()
-            } else if (action.type === UPDATE_CELL) {
-                this.submitUpdateCell()
+    componentWillReceiveProps(newProps) {
+        // Clear the active cell if a different dataset is being shown
+        let clearCell = false;
+        const currentDataset = this.props.dataset;
+        const newDataset = newProps.dataset;
+        if (currentDataset != null) {
+            if (newDataset != null) {
+                clearCell = (currentDataset.name !== newDataset.name);
+            } else {
+                clearCell = true;
             }
-        } else if (event.keyCode === 27) {
-            this.cancelAction()
+        } else {
+            clearCell = true;
+        }
+        if (clearCell === true) {
+            this.clearActiveCell();
         }
     }
     /**
-     * Request insertion of a new column. Will display a modal dialog that lets
-     * the user enter a name for the new column. After entering the new name
-     * call submitInsertColumn to dispatch the operation.
+     * Set the current active cell to undefined state.
      */
-    insertColumn(position) {
-        this.setState({action: {type: INSERT_COLUMN, position}})
-    }
-    /**
-     * Dispatch the insert row operation directly. This is the only operation
-     * that does not require any additional user input.
-     */
-    insertRow(position) {
-        const { dispatch, dataset, workflow } = this.props
-        dispatch(
-            updateSpreadsheet(
-                workflow.links.append,
-                insertRow(dataset.name, position),
-                dataset.name
-            )
-        )
-    }
-    /**
-     * Request a column move. Will display a modal that allows the user to enter
-     * the target position. Call submitMoveColumn to dispatch the operation with
-     * the user-provided target position.
-     */
-    moveColumn(columnIndex) {
-        this.setState({action: {type: MOVE_COLUMN, columnIndex}})
-    }
-    /**
-     * Request a column move. Will display a modal that allows the user to enter
-     * the target position. Call submitMoveRow to dispatch the operation with
-     * the user-provided target position.
-     */
-    moveRow(rowIndex) {
-        this.setState({action: {type: MOVE_ROW, rowIndex}})
-    }
-    /**
-     * Fetch spreadsheet data for a given pagination Url.
-     */
-    navigate(url) {
-        const { dispatch, dataset } = this.props
-        dispatch(fetchSpreadsheet(url, dataset.name))
-    }
-    /**
-     * Request a column rename operation. Will display an input control that
-     * allows the user to enter the new column name. Call submitRenameColumn
-     * with to dispatch the operation after the user entered the new name.
-     */
-    renameColumn(columnIndex) {
-        const { dataset } = this.props
+    clearActiveCell = () => {
+        // Submit any changes to the current active cell
+        this.submitPendingUpdate();
         this.setState({
-            action: {type: RENAME_COLUMN, columnIndex},
-            inputValue: dataset.columns[columnIndex].name
-        })
+            activeColumnId: -1,
+            activeRowId: -1,
+            activeColumnIndex: -1,
+            activeRowIndex: -1,
+            originalCellValue: null,
+            updatedCellValue: null
+        });
     }
     /**
-     * Show data as Html table. The implementation currently relies on the fact
-     * that the cells in the array that is being returned from the API are
-     * ordered by row and column (and that there are no missing cells).
+     * Dismiss any open modals.
+     */
+    dismissModal = () => (this.setState({modal: null, modalValue: null}))
+    /**
+     * Keep track of the value of the active cell.
+     */
+    handleCellUpdate = (value) => {
+        this.setState({updatedCellValue: value})
+    }
+    /**
+     * Move the active grid cell.
+     */
+    handleMoveCell = (direction) => {
+        const {
+            activeColumnId, activeRowId, activeColumnIndex, activeRowIndex
+        } = this.state;
+        // Do nothing if the active cell is not a grid cell.
+        if ((activeColumnId === -1) || (activeRowId === -1)) {
+            return;
+        }
+        const { dataset } = this.props;
+        const columns = dataset.columns;
+        let colIdx = activeColumnIndex;
+        let rowIdx = activeRowIndex;
+        if (direction === MOVE.UP) {
+            rowIdx -= 1;
+            if (rowIdx < 0) {
+                rowIdx = dataset.rows.length - 1;
+            }
+        } else if (direction === MOVE.DOWN) {
+            rowIdx += 1;
+            if (rowIdx >= dataset.rows.length) {
+                rowIdx = 0;
+            }
+        } else if (direction === MOVE.RIGHT) {
+            colIdx += 1;
+            if (colIdx >= columns.length) {
+                colIdx = 0;
+                rowIdx += 1;
+                if (rowIdx >= dataset.rows.length) {
+                    rowIdx = 0;
+                }
+            }
+        } else if (direction === MOVE.LEFT) {
+            colIdx -= 1;
+            if (colIdx < 0) {
+                colIdx = columns.length - 1;
+                rowIdx -= 1;
+                if (rowIdx < 0) {
+                    rowIdx = dataset.rows.length - 1;
+                }
+            }
+        }
+        // Update the active cell information
+        this.handleSelectCell(columns[colIdx].id, dataset.rows[rowIdx].id, colIdx, rowIdx);
+    }
+    /**
+     * Move the active header cell. Only supports moving left or right.
+     */
+    handleMoveHeader = (direction) => {
+        const { activeColumnId, activeRowId, activeColumnIndex } = this.state;
+        // Do nothing if the active cell is not a header cell.
+        if ((activeColumnId === -1) || (activeRowId !== -1)) {
+            return;
+        }
+        const { dataset } = this.props;
+        const columns = dataset.columns;
+        let colIdx = activeColumnIndex;
+        if (direction === MOVE.RIGHT) {
+            colIdx += 1;
+            if (colIdx >= columns.length) {
+                colIdx = 0;
+            }
+        } else if (direction === MOVE.LEFT) {
+            colIdx -= 1;
+            if (colIdx < 0) {
+                colIdx = columns.length - 1;
+            }
+        }
+        // Update the active cell information
+        this.handleSelectCell(columns[colIdx].id, -1, colIdx, -1);
+    }
+    /**
+     * Navigate to a different block of the underlying dataset.
+     */
+    handleNavigate = (url) => {
+        // Clear active cell. Will submit any changes that were made to the
+        // value of the current active cell.
+        this.clearActiveCell();
+        // Dispatch navitation request
+        const { dispatch, dataset } = this.props;
+        dispatch(showSpreadsheet(dataset, url));
+    }
+    /**
+     * Set the coordinates of the selected cell.
+     */
+    handleSelectCell = (columnId, rowId, columnIndex, rowIndex) => {
+        // Ignore event while updating
+        const { isUpdating, workflow } = this.props;
+        if ((isUpdating)  || (workflow.readOnly)) {
+            return;
+        }
+        // Submit any changes to the current active cell
+        this.submitPendingUpdate();
+        // Get the current value of the selected sell
+        let value = null;
+        if (columnIndex !== -1) {
+            const { dataset } = this.props;
+            if (rowIndex !== -1) {
+                value = dataset.rows[rowIndex].values[columnIndex];
+            } else {
+                value = dataset.columns[columnIndex].name;
+            }
+        }
+        this.setState({
+            activeColumnId: columnId,
+            activeRowId: rowId,
+            activeColumnIndex: columnIndex,
+            activeRowIndex: rowIndex,
+            originalCellValue: value,
+            updatedCellValue: value
+        });
+    }
+    handleSubmitModal = (value) => {
+        const { dataset } = this.props;
+        const { modal, modalValue } = this.state;
+        this.dismissModal();
+        if (modal === VIZUAL.INSERT_COLUMN) {
+            return this.submitVizualCommand(
+                insertColumn(dataset.name, value, modalValue)
+            );
+        } else if (modal === VIZUAL.MOVE_COLUMN) {
+            return this.submitVizualCommand(
+                moveColumn(dataset.name, modalValue, value)
+            );
+        } else if (modal === VIZUAL.MOVE_ROW) {
+            return this.submitVizualCommand(
+                moveRow(dataset.name, modalValue, value)
+            );
+        }
+    }
+    handleVizualAction = (cmdId, identifier) => {
+        const { dataset } = this.props;
+        switch (cmdId) {
+            case VIZUAL.INSERT_COLUMN:
+            case VIZUAL.MOVE_COLUMN:
+            case VIZUAL.MOVE_ROW:
+                this.setState({modal: cmdId, modalValue: identifier});
+                return;
+            case VIZUAL.DELETE_COLUMN:
+                return this.submitVizualCommand(
+                    deleteColumn(dataset.name, identifier)
+                );
+            case VIZUAL.DELETE_ROW:
+                return this.submitVizualCommand(
+                    deleteRow(dataset.name, identifier)
+                );
+            case VIZUAL.INSERT_ROW:
+                return this.submitVizualCommand(
+                    insertRow(dataset.name, identifier)
+                );
+            default:
+                return;
+        }
+    }
+    /**
+     * Render the spreadsheet as a Html table.
      */
     render() {
-        const { dataset, error, isBusy, opError } = this.props
-        const { action } = this.state
-        let content = null;
-        if (isBusy) {
-            content = (
-                <div className='spinner-padding'>
-                    <ContentSpinner />
-                </div>
-            )
-        } else if (error) {
-            content = (<ErrorMessage
-                title={error.title}
-                message={error.message}
-            />)
-        } else if (dataset) {
-            // Columns
-            let columns = []
-            columns.push(
-                <Table.HeaderCell className='spreadsheet-header' key="ROW-ID" >
-                    #
-                </Table.HeaderCell>
-            )
-            for (let i = 0; i < dataset.columns.length; i++) {
-                const col = dataset.columns[i]
-                let colCell = null
-                if (isRenameColumn(action, i)) {
-                    if ((action.type === RENAME_COLUMN) && (action.columnIndex === i)) {
-                        colCell = (
-                            <Table.HeaderCell className='spreadsheet-header' key={col.id}>
-                                <Input
-                                    autoFocus
-                                    className='spreadsheet-control'
-                                    value={this.state.inputValue}
-                                    onChange={this.handleChange}
-                                    onKeyDown={this.handleKeyDown}
-
-                                />
-                            </Table.HeaderCell>
-                        )
-                    } else {
-                        colCell = (
-                            <Table.HeaderCell className='spreadsheet-header' key={col.id}>
-                                {col.name}
-                                <ColumnDropDown columnIndex={i} spreadsheet={this}/>
-                            </Table.HeaderCell>
-                        )
-                    }
+        const { dataset, isUpdating, workflow } = this.props;
+        const {
+            activeColumnId,
+            activeRowId,
+            updatingColumnId,
+            updatingRowId,
+            updatingValue
+        } = this.state;
+        const columns = dataset.columns;
+        //
+        // Grid header
+        //
+        let header = [
+            <RowIndexCell
+                key={-1}
+                value=' '
+                onClick={this.clearActiveCell}
+            />
+        ];
+        for (let cidx = 0; cidx < columns.length; cidx++) {
+            const column = columns[cidx];
+            const isActive = (activeColumnId === column.id) && (activeRowId === -1);
+            const isBlocked = ((isUpdating) && (updatingColumnId === column.id) && (updatingRowId === -1));
+            let columnName = null;
+            if (isBlocked) {
+                columnName = updatingValue;
+            } else {
+                columnName = column.name;
+            }
+            header.push(
+                <HeaderCell
+                    key={column.id}
+                    column={column}
+                    columnIndex={cidx}
+                    disabled={isUpdating || workflow.readOnly}
+                    isActive={(!isUpdating) && (isActive)}
+                    isUpdating={isBlocked}
+                    value={columnName}
+                    onAction={this.handleVizualAction}
+                    onClick={this.handleSelectCell}
+                    onMove={this.handleMoveHeader}
+                    onUpdate={this.handleCellUpdate}
+                />
+            );
+        }
+        header = (<tr>{header}</tr>);
+        //
+        // Grid rows
+        //
+        const rows = [];
+        for (let ridx = 0; ridx < dataset.rows.length; ridx++) {
+            const row = dataset.rows[ridx];
+            const cells = [
+                <RowIndexCell
+                    key={row.id}
+                    disabled={isUpdating || workflow.readOnly}
+                    rowIndex={row.index}
+                    value={row.index}
+                    onAction={this.handleVizualAction}
+                    onClick={this.clearActiveCell}
+                />
+            ];
+            for (let cidx = 0; cidx < columns.length; cidx++) {
+                const column = columns[cidx];
+                const isActive = (activeColumnId === column.id) && (activeRowId === row.id);
+                const isBlocked = ((isUpdating) && (updatingColumnId === column.id) && (updatingRowId === row.id));
+                let value = null;
+                if (isBlocked) {
+                    value = updatingValue;
                 } else {
-                    colCell = (
-                        <Table.HeaderCell className='spreadsheet-header' key={col.id}>
-                            {col.name}
-                            <ColumnDropDown columnIndex={i} spreadsheet={this}/>
-                        </Table.HeaderCell>
-                    )
+                    value = row.values[cidx];
                 }
-                columns.push(colCell)
-            }
-            // Rows
-            let rows = []
-            for (let i = 0; i < dataset.rows.length; i++) {
-                const row = dataset.rows[i]
-                let cells = []
                 cells.push(
-                    <Table.Cell key={'ROW-ID' + i} className='row-number'>
-                        {row.index}
-                        <RowDropDown rowIndex={row.index} spreadsheet={this}/>
-                    </Table.Cell>
+                    <GridCell
+                        key={'C' + column.id + 'R' + row.id}
+                        column={column}
+                        columnIndex={cidx}
+                        isActive={(!isUpdating) && (isActive)}
+                        isUpdating={isBlocked}
+                        rowId={row.id}
+                        rowIndex={row.index}
+                        value={value}
+                        onClick={this.handleSelectCell}
+                        onMove={this.handleMoveCell}
+                        onUpdate={this.handleCellUpdate}
+                    />
                 );
-                for (let j = 0; j < row.values.length; j++) {
-                    let cell = null
-                    const col = dataset.columns[j]
-                    const cellKey = 'ROW-ID' + i + 'COL' + j
-                    if (isUpdateCell(action, j, row.index)) {
-                        cell = (
-                            <Table.Cell key={cellKey} >
-                                <Input
-                                    autoFocus
-                                    className='spreadsheet-control'
-                                    value={this.state.inputValue}
-                                    onChange={this.handleChange}
-                                    onKeyDown={this.handleKeyDown}
-                                />
-                            </Table.Cell>
-                        )
-                    } else {
-                        let uncertain = false
-                        let annotation = null
-                        const cellAnnotations = dataset.getCellAnnotations(
-                            col.id,
-                            row.id
-                        )
-                        if (cellAnnotations) {
-                            if (cellAnnotations['mimir:reason']) {
-                                annotation = (
-                                    <span className='anno-right'>
-                                        <Popup
-                                            key={cellKey}
-                                            trigger={
-                                                <Icon
-                                                    name='info circle'
-                                                    color='blue'
-                                                />
-                                            }
-                                            header='Mimir Reason'
-                                            content={cellAnnotations['mimir:reason']}
-                                        />
-                                    </span>
-                                )
-                            }
-                            if (cellAnnotations['mimir:uncertain']) {
-                                uncertain = true
-                            }
-                        }
-                        cell = (
-                            <Table.Cell
-                                key={cellKey}
-                                error={uncertain}
-                                onClick={() => (this.updateCell(j, row.index))}
-                            >
-                                {row.values[j]}
-                                {annotation}
-                            </Table.Cell>
-                        )
-                    }
-                    cells.push(cell);
-                }
-                rows.push(<Table.Row key={i}>{cells}</Table.Row>);
             }
-            /**
-             * Show controls that allow to navigate large datasets for which not
-             * all rows are being displayed at once.
-             */
-            let navbar = <SpreadsheetNavbar dataset={dataset} container={this} />
-            /**
-             * Depending on the user action we might dispay a modal form to
-             * gather input parameter for the action.
-             */
-            let modal = null;
-            if (action) {
-                if (action.type === DELETE_COLUMN) {
-                    modal = (
-                        <DeleteModal
-                            name={dataset.columns[action.columnIndex].name}
-                            type='Column'
-                            spreadsheet={this}
-                            onSubmit={this.submitDeleteColumn}
-                        />
-                    )
-                } else if (action.type === DELETE_ROW) {
-                    modal = (
-                        <DeleteModal
-                            name={'#' + action.rowIndex}
-                            type='Row'
-                            spreadsheet={this}
-                            onSubmit={this.submitDeleteRow}
-                        />
-                    )
-                } else if (action.type === INSERT_COLUMN) {
-                    modal = (
-                        <ColumnNameModal
-                            spreadsheet={this}
-                            onSubmit={this.submitInsertColumn}
-                        />
-                    )
-                } else if (action.type === MOVE_COLUMN) {
-                    modal = (
-                        <MoveModal
-                            name={dataset.columns[action.columnIndex].name}
-                            maxValue={dataset.columns.length}
-                            type='Column'
-                            spreadsheet={this}
-                            onSubmit={this.submitMoveColumn}
-                        />
-                    )
-                } else if (action.type === MOVE_ROW) {
-                    modal = (
-                        <MoveModal
-                            name={'#' + action.rowIndex}
-                            maxValue={dataset.rowcount}
-                            type='Row'
-                            spreadsheet={this}
-                            onSubmit={this.submitMoveRow}
-                        />
-                    )
-                }
-            }
-            // Show an additional step backwarderror message before the spreadsheet if a
-            // previous update operation returned an error
-            let operationError = null
-            if (opError) {
-                operationError = content = (<ErrorMessage
-                    title={opError.title}
-                    message={opError.message}
-                    handleDismiss={this.clearUpdateError}
-                />)
-            }
-            content = (
-                <div>
-                    { operationError }
-                    <Table celled striped size='small'>
-                        <Table.Header>
-                            <Table.Row>
-                                {columns}
-                            </Table.Row>
-                        </Table.Header>
-                        <Table.Body>
-                            {rows}
-                        </Table.Body>
-                    </Table>
-                    { navbar }
-                    { modal }
+            rows.push(<tr key={row.id}>{cells}</tr>);
+        }
+        return (
+            <div className='spreadsheet-container'>
+                <h1 className='dataset-name'>{dataset.name}</h1>
+                <Dimmer.Dimmable dimmed={isUpdating}>
+                    <Loader active={isUpdating}/>
+                    <table className='spreadsheet'>
+                        <thead>{header}</thead>
+                        <tbody>{rows}</tbody>
+                    </table>
+                </Dimmer.Dimmable>
+                <div className='navbar-container'>
+                    <SpreadsheetNavbar
+                        dataset={dataset}
+                        disabled={isUpdating}
+                        onNavigate={this.handleNavigate}
+                    />
                 </div>
+                {this.showModal()}
+            </div>
+        );
+    }
+    /**
+     * Show modal if the internal state .modal value is set.
+     */
+    showModal = () => {
+        const { modal, modalValue } = this.state;
+        let content = null;
+        if (modal != null) {
+            let valueValidFunc = null;
+            let modalTitle = null;
+            let modalPrompt = null;
+            if (modal === VIZUAL.INSERT_COLUMN) {
+                valueValidFunc = isNotEmptyString;
+                modalTitle = 'Insert Column';
+                modalPrompt = 'Name of new column';
+            } else if (modal === VIZUAL.MOVE_COLUMN) {
+                const { dataset } = this.props;
+                const columns = dataset.columns;
+                let column = null;
+                for (let i = 0; i < columns.length; i++) {
+                    if (columns[i].id === modalValue) {
+                        column = columns[i];
+                        break;
+                    }
+                }
+                valueValidFunc = isNonNegativeInt;
+                modalTitle = 'Move Column';
+                modalPrompt = 'Target position for column ' + column.name;
+            } else if (modal === VIZUAL.MOVE_ROW) {
+                valueValidFunc = isNonNegativeInt;
+                modalTitle = 'Move Row';
+                modalPrompt = 'Target position for row ' + modalValue;
+            }
+            return (
+                <EditResourceNameModal
+                    open={true}
+                    isValid={valueValidFunc}
+                    title={modalTitle}
+                    prompt={modalPrompt}
+                    value={''}
+                    onCancel={this.dismissModal}
+                    onSubmit={this.handleSubmitModal}
+                />
             );
         }
         return content;
     }
-    /**
-     * Dispatch the delete column operation after user confirms the action.
-     */
-    submitDeleteColumn = () => {
-        const { dispatch, dataset, workflow } = this.props
-        const { action } = this.state
-        dispatch(
-            updateSpreadsheet(
-                workflow.links.append,
-                deleteColumn(dataset.name, action.columnIndex),
-                dataset.name,
-                dataset.offset
-            )
-        )
-        this.cancelAction()
-    }
-    /**
-     * Dispatch the delete row operation after user confirms the action.
-     */
-    submitDeleteRow = () => {
-        const { dispatch, dataset, workflow } = this.props
-        const { action } = this.state
-        dispatch(
-            updateSpreadsheet(
-                workflow.links.append,
-                deleteRow(dataset.name, action.rowIndex),
-                dataset.name,
-                dataset.offset
-            )
-        )
-        this.cancelAction()
-    }
-    /**
-     * Dispatch insert column operation. Expects a user-defined name for the new
-     * column. The name, however, can be empty. Leading anf trailing whitespaces
-     * will be removed.
-     */
-    submitInsertColumn = (name) => {
-        const { dispatch, dataset, workflow } = this.props
-        const { action } = this.state
-        dispatch(
-            updateSpreadsheet(
-                workflow.links.append,
-                insertColumn(dataset.name, name, action.position),
-                dataset.name,
-                dataset.offset
-            )
-        )
-        this.cancelAction()
-    }
-    /**
-     * Dispatch the move column operation using the user-provided target
-     * position. Assumes that the given poisition is a valid value.
-     */
-    submitMoveColumn = (position) => {
-        const { dispatch, dataset, workflow } = this.props
-        const { action } = this.state
-        dispatch(
-            updateSpreadsheet(
-                workflow.links.append,
-                moveColumn(dataset.name, action.columnIndex, position),
-                dataset.name,
-                dataset.offset
-            )
-        )
-        this.cancelAction()
-    }
-    /**
-     * Dispatch the move row operation using the user-provided target
-     * position. Assumes that the given poisition is a valid value.
-     */
-    submitMoveRow = (position) => {
-        const { dispatch, dataset, workflow } = this.props
-        const { action } = this.state
-        dispatch(
-            updateSpreadsheet(
-                workflow.links.append,
-                moveRow(dataset.name, action.rowIndex, position),
-                dataset.name,
-                dataset.offset
-            )
-        )
-        this.cancelAction()
-    }
-    /**
-     * Dispatch a rename column operation with a user-entered new column name.
-     */
-    submitRenameColumn = () => {
-        const { dispatch, dataset, workflow } = this.props
-        const { action, inputValue } = this.state
-        dispatch(
-            updateSpreadsheet(
-                workflow.links.append,
-                renameColumn(dataset.name, action.columnIndex, inputValue.trim()),
-                dataset.name,
-                dataset.offset
-            )
-        )
-        this.cancelAction()
-    }
-    /**
-     * Dispatch a update cell operation with a user-entered new cell value.
-     */
-    submitUpdateCell = () => {
-        const { dispatch, dataset, workflow } = this.props
-        const { action, inputValue } = this.state
-        dispatch(
-            updateSpreadsheet(
-                workflow.links.append,
-                updateCell(
-                    dataset.name,
-                    action.columnIndex,
-                    action.rowIndex,
-                    inputValue
-                ),
-                dataset.name,
-                dataset.offset
-            )
-        )
-        this.cancelAction()
-    }
-    /**
-     * Request an update cell operation. Will display an input control that
-     * allows the user to enter the new cell value. Call submitUpdateCell to
-     * dispatch the operation after user entered new cell value.
-     */
-    updateCell(columnIndex, rowIndex) {
-        const { dataset } = this.props
-        let row = null
-        for (let i = 0; i < dataset.rows.length; i++) {
-            if (dataset.rows[i].index === rowIndex) {
-                row = dataset.rows[i]
-                break
+    submitPendingUpdate = () => {
+        const {
+            activeColumnId,
+            activeRowId,
+            activeRowIndex,
+            originalCellValue,
+            updatedCellValue
+        } = this.state;
+        if (activeColumnId !== -1) {
+            const { dispatch, dataset, workflow } = this.props;
+            if (originalCellValue !== updatedCellValue) {
+                this.setState({
+                    updatingColumnId: activeColumnId,
+                    updatingRowId: activeRowId,
+                    updatingValue: updatedCellValue
+                })
+                let cmd = null;
+                if (activeRowId !== -1) {
+                    cmd = updateCell(
+                        dataset.name,
+                        activeColumnId,
+                        activeRowIndex,
+                        updatedCellValue
+                    );
+                } else {
+                    cmd = renameColumn(
+                        dataset.name,
+                        activeColumnId,
+                        updatedCellValue
+                    );
+                }
+                dispatch(submitUpdate(workflow, dataset, cmd));
             }
         }
+    }
+    submitVizualCommand = (cmd) => {
+        const { dispatch, dataset, workflow } = this.props;
+        // Clear any active cells without submitting potential changes
         this.setState({
-            action: {type: UPDATE_CELL, columnIndex, rowIndex},
-            inputValue: row.values[columnIndex]
-        })
+            activeColumnId: -1,
+            activeRowId: -1,
+            activeColumnIndex: -1,
+            activeRowIndex: -1,
+            originalCellValue: null,
+            updatedCellValue: null,
+            updatingColumnId: -1,
+            updatingRowId: -1,
+            updatingValue: null
+        });
+        dispatch(submitUpdate(workflow, dataset, cmd));
     }
 }
 
@@ -540,10 +460,10 @@ class Spreadsheet extends React.Component {
 const mapStateToProps = state => {
     return {
         dataset: state.spreadsheet.dataset,
-        error: state.spreadsheet.error,
-        isBusy: state.spreadsheet.isBusy,
+        isUpdating: state.spreadsheet.isUpdating,
         opError: state.spreadsheet.opError,
-        workflow: state.workflow.workflow
+        project: state.projectPage.project,
+        workflow: state.projectPage.workflow
     }
 }
 

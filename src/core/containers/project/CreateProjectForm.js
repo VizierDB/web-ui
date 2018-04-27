@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux'
-import { Button, Dropdown, Input } from 'semantic-ui-react'
+import { Button, Dropdown, Loader, Input } from 'semantic-ui-react'
 import { createProject, projectCreateError } from '../../actions/project/ProjectListing'
-import { ErrorMessage } from '../../components/util/Message'
-import { UpdateFormSpinner } from '../../components/util/Spinner'
+import { ErrorMessage } from '../../components/Message'
 
 
 /**
@@ -92,7 +91,7 @@ class CreateProjectForm extends React.Component {
         // Check the isSubmitting flag to determine whether to display a spinner
         // or the form. Note that if environments are not set, null is returned.
         if (isSubmitting) {
-            return (<UpdateFormSpinner />);
+            return <Loader inline active={true} />;
         } else if (envs) {
             // Sort environments by their name
             envs.sort(function(e1, e2) {return e1.name.localeCompare(e2.name)});
@@ -113,7 +112,7 @@ class CreateProjectForm extends React.Component {
                 errorMessage = (<ErrorMessage
                     title="Server Error"
                     message={error}
-                    handleDismiss={this.clearCreateError.bind(this)}
+                    onDismiss={this.clearCreateError.bind(this)}
                 />);
             }
             return (

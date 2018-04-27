@@ -14,8 +14,8 @@ export const START_UPLOAD = 'START_UPLOAD'
 /**
  * Send DELETE request for file with given Url
  */
-export const deleteFile = (url) => (dispatch) => {
-    dispatch(deleteResource(url, fetchFiles, fileDeleteError, requestFiles))
+export const deleteFile = (fh) => (dispatch) => {
+    dispatch(deleteResource(fh.links.delete, fetchFiles, fileDeleteError, requestFiles))
 }
 
 /**
@@ -100,8 +100,16 @@ const startUpload = () => ({
 /**
  * Submit update filename request.
  */
-export const updateFileName = (url, filename) => (dispatch) => {
-    dispatch(updateResource(url, {'name': filename}, fetchFiles, fileUpdateError, requestFiles))
+export const updateFileName = (fh, name) => (dispatch) => {
+    dispatch(
+        updateResource(
+            fh.links.rename,
+            {'name': name},
+            fetchFiles,
+            fileUpdateError,
+            requestFiles
+        )
+    )
 }
 
 /**

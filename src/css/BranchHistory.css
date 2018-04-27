@@ -1,0 +1,25 @@
+div.history-view {
+    background: #fff;
+    border-radius: .28571429rem;
+    border: 1px solid rgba(34,36,38,.15);
+    /*box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);*/
+    padding: 20px 10px;
+    margin-top: 10px;
+}
+
+div.branch-history {
+    margin: 0px 20px;
+}
+
+h1.branch-history {
+    font-size: 1.5em;
+}
+
+td.version-statement {
+    padding-left: 10px;
+}
+
+td.version-timestamp {
+    padding-left: 20px;
+    font-family: "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;
+}

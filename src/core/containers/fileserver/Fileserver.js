@@ -4,21 +4,24 @@
  * edit file names, and delete files.
  */
 
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
-import { Button, Header, Icon, Input, Modal, Segment, Table } from 'semantic-ui-react'
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { Button, Icon, Loader, Segment, Table } from 'semantic-ui-react';
 import Dropzone from 'react-dropzone';
 import {
     deleteFile, fetchFiles, fileDeleteError, fileUpdateError, updateFileName,
     uploadError, uploadFile
-} from '../../actions/fileserver/Fileserver'
-import { ContentSpinner } from '../../components/util/Spinner'
-import { ErrorMessage } from '../../components/util/Message';
-import { IconButton } from '../../components/util/Button'
-
-import '../../../css/Fileserver.css'
-import '../../../css/ResourceListing.css'
+} from '../../actions/fileserver/Fileserver';
+import { IconButton } from '../../components/Button';
+import ContentSpinner from '../../components/ContentSpinner';
+import { ErrorMessage } from '../../components/Message';
+import DeleteResourceModal from '../../components/modals/DeleteResourceModal';
+import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
+import { isNotEmptyString } from '../../util/App';
+import '../../../css/App.css';
+import '../../../css/Fileserver.css';
+import '../../../css/ResourceListing.css';
 
 
 /**
@@ -68,7 +71,7 @@ class Fileserver extends Component {
         // wants to delete or edit. If either value is non-null the respective
         // modal to confirm delete or edit the file name is shown. At no point
         // should both values be non-null.
-        this.state = {deleteFile: null, editFile: null, fileName: ''}
+        this.state = {deleteFile: null, editFile: null}
     }
     /**
      * Load the file listing when the component mounts.
@@ -98,9 +101,9 @@ class Fileserver extends Component {
     /**
      * Delete the file with the given Url.
      */
-    confirmDeleteFile = (url) => {
+    confirmDeleteFile = (fh) => {
         const { dispatch } = this.props
-        dispatch(deleteFile(url))
+        dispatch(deleteFile(fh))
         this.setState({deleteFile: null})
     }
     /**
@@ -108,21 +111,7 @@ class Fileserver extends Component {
      * being shown.
      */
     hideModals = () => {
-        this.setState({deleteFile: null, editFile: null, fileName: ''})
-    }
-    /**
-     * Handle changes in the edit file name text field.
-     */
-    handleFileNameChange = (event) => {
-        this.setState({fileName: event.target.value});
-    }
-    /**
-     * Detect RETURN key press to submit edit file name form.
-     */
-    handleFileNameKeyDown = (event) => {
-        if (event.keyCode === 13) {
-            this.submitFileNameUpdate();
-        }
+        this.setState({deleteFile: null, editFile: null})
     }
     /**
      * Dispatch upload file action when a file is dropped in the Dropzone.
@@ -151,7 +140,7 @@ class Fileserver extends Component {
         let content = null;
         if (isFetching) {
             // Show spinner while fetching files
-            content = (<ContentSpinner />)
+            content = (<div className='spinner-padding-ms'><Loader inline active={true} size='massive'>Loading Files ...</Loader></div>)
         } else if (fetchError) {
             // Show error message if fetching files failed. No other components
             // are shown since this is a fatal error and something significant
@@ -211,57 +200,26 @@ class Fileserver extends Component {
             let modal = null;
             if (deleteFile) {
                 modal = (
-                    <Modal open={true} basic size='small'>
-                        <Header icon='trash' content='Delete File' />
-                        <Modal.Content>
-                            <p>Do you really want to delete '{deleteFile.name}'?</p>
-                        </Modal.Content>
-                        <Modal.Actions>
-                            <Button basic color='red' inverted onClick={this.hideModals}>
-                                <Icon name='remove' /> No
-                            </Button>
-                            <Button
-                                color='green'
-                                inverted
-                                onClick={(event) => {
-                                    event.preventDefault()
-                                    this.confirmDeleteFile(deleteFile.links.delete)
-                                }}
-                            >
-                                <Icon name='checkmark' /> Yes
-                            </Button>
-                        </Modal.Actions>
-                    </Modal>
+                    <DeleteResourceModal
+                        open={true}
+                        onCancel={this.hideModals}
+                        onSubmit={this.confirmDeleteFile}
+                        prompt={'Do you really want to delete ' +  deleteFile.name + '?'}
+                        title='Delete File'
+                        value={deleteFile}
+                    />
                 );
             } else if (editFile) {
                 modal = (
-                        <Modal open={true} size={'small'}>
-                            <Modal.Header>{'Enter a new file name ...'}</Modal.Header>
-                            <Modal.Content>
-                                <div className="resource-name">
-                                    <Input
-                                        autoFocus
-                                        className="resource-name-input"
-                                        value={this.state.fileName}
-                                        onChange={this.handleFileNameChange}
-                                        onKeyDown={this.handleFileNameKeyDown}
-                                    />
-                                </div>
-                            </Modal.Content>
-                            <Modal.Actions>
-                                <Button  negative onClick={this.hideModals}>
-                                    Cancel
-                                </Button>
-                                <Button
-                                    positive
-                                    icon='checkmark'
-                                    labelPosition='right'
-                                    content="Rename"
-                                    onClick={this.submitFileNameUpdate}
-                                />
-                            </Modal.Actions>
-                        </Modal>
-                    );
+                    <EditResourceNameModal
+                        isValid={isNotEmptyString}
+                        open={true}
+                        title='Enter a new file name ...'
+                        value={editFile.name}
+                        onCancel={this.hideModals}
+                        onSubmit={this.submitFileNameUpdate}
+                    />
+                );
             }
             // Display an error message generated while deleting or editing a
             // file. The message will be displayed at the bottom of the file
@@ -271,23 +229,24 @@ class Fileserver extends Component {
                 modalActionErrorMessage = (<ErrorMessage
                     title="Error while deleting file"
                     message={deleteError}
-                    handleDismiss={this.clearDeleteError}
+                    onDismiss={this.clearDeleteError}
                 />)
             } else if (updateError) {
                 modalActionErrorMessage = (<ErrorMessage
                     title="Error while updating file name"
                     message={updateError}
-                    handleDismiss={this.clearUpdateError}
+                    onDismiss={this.clearUpdateError}
                 />)
             }
             // Display a dropzone to upload files or a spinner during upload
             let fileUploadForm = null;
             if (isUploading) {
                 fileUploadForm = (
-                    <div className='dropzone-spinner'>
-                        <ContentSpinner />
-                    </div>
-                )
+                    <ContentSpinner
+                        text='Uploading file ...'
+                        size='medium'
+                    />
+                );
             } else {
                 let property = serviceProperties.find(prop => (prop.key === 'fileserver:maxFileSize'));
                 let uploadInfo = null
@@ -322,7 +281,7 @@ class Fileserver extends Component {
                             <ErrorMessage
                                 title="Error while uploading file"
                                 message={uploadError}
-                                handleDismiss={this.clearUploadError}
+                                onDismiss={this.clearUploadError}
                             />
                             {fileUploadForm}
                         </div>
@@ -370,15 +329,15 @@ class Fileserver extends Component {
      * Show modal to confirm file delete.
      */
     showEditFileModal(file) {
-        this.setState({editFile: file, fileName: file.name})
+        this.setState({editFile: file})
     }
     /**
      * Submit the update file name request.
      */
-    submitFileNameUpdate = () => {
+    submitFileNameUpdate = (name) => {
         const {dispatch } = this.props
-        const { editFile, fileName } = this.state
-        dispatch(updateFileName(editFile.links.rename, fileName))
+        const { editFile } = this.state
+        dispatch(updateFileName(editFile, name))
         this.hideModals()
     }
 }

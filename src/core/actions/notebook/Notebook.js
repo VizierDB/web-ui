@@ -1,225 +1,310 @@
-import { receiveWorkflow } from '../project/Workflow'
-import { fetchResource, WorkflowHandle } from '../../util/Api'
-import { ErrorObject } from '../../util/Error'
+import {
+    projectActionError, receiveProjectResource, requestProjectAction,
+    updateResource, updateWorkflowResource
+} from '../project/ProjectPage';
+import { DatasetHandle } from '../../resources/Dataset';
+import {
+    Notebook, OutputChart, OutputDataset, OutputError, OutputText
+} from '../../resources/Notebook';
+import { NotebookResource } from '../../resources/Project';
+import { WorkflowHandle } from '../../resources/Workflow';
+import { fetchResource } from '../../util/Api';
+import { ErrorObject } from '../../util/Error';
 
-export const CLEAR_NOTEBOOKCELL_DATASET = 'CLEAR_NOTEBOOKCELL_DATASET'
-export const FETCH_NOTEBOOKCELL_CHART_ERROR = 'FETCH_NOTEBOOKCELL_CHART_ERROR'
-export const FETCH_NOTEBOOKCELL_DATASET_ERROR = 'FETCH_NOTEBOOKCELL_DATASET_ERROR'
-export const RECEIVE_NOTEBOOKCELL_CHART = 'RECEIVE_NOTEBOOKCELL_CHART'
-export const RECEIVE_NOTEBOOKCELL_DATASET = 'RECEIVE_NOTEBOOKCELL_DATASET'
-export const REQUEST_NOTEBOOKCELL_CHART = 'REQUEST_NOTEBOOKCELL_CHART'
-export const REQUEST_NOTEBOOKCELL_DATASET = 'REQUEST_NOTEBOOKCELL_DATASET'
-export const REVERSE_NOTEBOOKCELLS = 'REVERSE_NOTEBOOKCELLS'
-export const SET_NOTEBOOKCELL_BUSY = 'SET_NOTEBOOKCELL_BUSY'
-export const SET_NOTEBOOKCELL_ERROR = 'SET_NOTEBOOKCELL_ERROR'
 
-/**
- * Clear any dataset information that is currently part of the notebook cell's
- * output.
- */
-export const clearNotebookCellDataset = (index) =>  ({
-    type: CLEAR_NOTEBOOKCELL_DATASET,
-    index
-})
+// Action to reverse notebook cell order
+export const REVERSE_ORDER = 'REVERSE_ORDER';
 
-/**
- * Delete a module in an existing workflow.
- */
-export const deleteWorkflowModule = (index, url) => (dispatch) => {
-    // Signal start by setting the isBusy flag of the cell
-    dispatch(setCellBusyFlag(index))
-    return fetch(url, {method: 'DELETE'})
-        // Check the response. Assume that eveything is all right if status
-        // code below 400
-        .then(function(response) {
-            if (response.status === 200) {
-                // SUCCESS: Dispatch modified workflow handle
-                response.json().then(json => dispatch(receiveWorkflow(new WorkflowHandle(json))));
-            } else {
-                // ERROR: The API is expected to return a JSON object in case
-                // of an error that contains an error message
-                response.json().then(json => dispatch(
-                    setCellErrorMessage(
-                        index,
-                        new ErrorObject(
-                            'Error while deleting module',
-                            json.message
-                        )
-                    )
-                ))
-            }
-        })
-        .catch(err => dispatch(
-            setCellErrorMessage(
-                index,
-                new ErrorObject(
-                    'Error while deleting module',
-                    err.message
-                )
-            )
-        ))
-}
 
-/**
- * Insert a new module into an existing workflow.
- */
-export const insertWorkflowModule = (index, url, data) => (dispatch) => {
-    // Signal start by setting the isBusy flag of the cell
-    dispatch(setCellBusyFlag(index))
-    return fetch(url, {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            }
-        })
-        // Check the response. Assume that eveything is all right if status
-        // code below 400
-        .then(function(response) {
-            if (response.status === 200) {
-                // SUCCESS: Dispatch modified workflow handle
-                response.json().then(json => dispatch(receiveWorkflow(new WorkflowHandle(json))));
-            } else {
-                // ERROR: The API is expected to return a JSON object in case
-                // of an error that contains an error message
-                response.json().then(json => dispatch(
-                    setCellErrorMessage(
-                        index,
-                        new ErrorObject(
-                            'Error while inserting new module',
-                            json.message
-                        )
-                    )
-                ));
-            }
-        })
-        .catch(err => dispatch(
-            setCellErrorMessage(
-                index,
-                new ErrorObject(
-                    'Error while inserting new module',
-                    err.message
-                )
-            )
-        ))
-}
-
-/**
- * Fetch a dataset chart view for a notebook cell.
- */
-export const loadNotebookCellChart = (index, url) => (dispatch) => {
-    dispatch(
-        fetchResource(
-            url,
-            (data) => ({
-                type: RECEIVE_NOTEBOOKCELL_CHART,
-                index,
-                data
-            }),
-            (message) => ({
-                type: FETCH_NOTEBOOKCELL_CHART_ERROR,
-                index,
-                message
-            }),
-            () => ({
-                type: REQUEST_NOTEBOOKCELL_CHART,
-                index
-            })
-        )
-    )
-}
-
-/**
- * Fetch a dataset as part of a notebook cell's output
- */
-export const loadNotebookCellDataset = (index, url) => (dispatch) => {
-    dispatch(
-        fetchResource(
-            url,
-            (dataset) => ({
-                type: RECEIVE_NOTEBOOKCELL_DATASET,
-                index,
-                dataset
-            }),
-            (message) => ({
-                type: FETCH_NOTEBOOKCELL_DATASET_ERROR,
-                index,
-                message
-            }),
-            () => ({
-                type: REQUEST_NOTEBOOKCELL_DATASET,
-                index
-            })
-        )
-    )
-}
-
-/**
- * Replace a module in an existing workflow.
- */
-export const replaceWorkflowModule = (index, url, data) => (dispatch) => {
-    // Signal start by setting the isBusy flag of the cell
-    dispatch(setCellBusyFlag(index))
-    return fetch(url, {
-            method: 'PUT',
-            body: JSON.stringify(data),
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            }
-        })
-        // Check the response. Assume that eveything is all right if status
-        // code below 400
-        .then(function(response) {
-            if (response.status === 200) {
-                // SUCCESS: Dispatch modified workflow handle
-                response.json().then(json => dispatch(receiveWorkflow(new WorkflowHandle(json))));
-            } else {
-                // ERROR: The API is expected to return a JSON object in case
-                // of an error that contains an error message
-                response.json().then(json => dispatch(
-                    setCellErrorMessage(
-                        index,
-                        new ErrorObject(
-                            'Error while replacing module',
-                            json.message
-                        )
-                    )
-                ));
-            }
-        })
-        .catch(err => dispatch(
-            setCellErrorMessage(
-                index,
-                new ErrorObject(
-                    'Error while replacing module',
-                    err.message
-                )
-            )
-        ))
-}
+// -----------------------------------------------------------------------------
+// Display
+// -----------------------------------------------------------------------------
 
 /**
  * Reverse ordering of notebook cells.
  */
-export const reverseNotebbokCells = () => ({
-    type: REVERSE_NOTEBOOKCELLS
+export const reverseOrder = () => ({
+    type: REVERSE_ORDER
 })
 
-/**
- * Set the isBusy flag for a given notebook cell.
- */
-export const setCellBusyFlag = (index) => ({
-    type: SET_NOTEBOOKCELL_BUSY,
-    index
-})
 
 /**
- * Set the error object for a given notebook cell.
+ * Update the cell containing the given module in the notebook to indicate that
+ * the output content is being loaded.
  */
-export const setCellErrorMessage = (index, error) => ({
-    type: SET_NOTEBOOKCELL_ERROR,
-    index,
-    error
-})
+const setNotebookCellBusy = (notebook, module) => (dispatch) => {
+    const nb = notebook.setFetching(module.id);
+    return dispatch(updateResource(new NotebookResource(nb)));
+}
+
+
+/**
+ * Update the cell containing the given module in the notebook to show an error
+ * message that was generated while fetching a cell resource.
+ */
+const setNotebookCellError = (notebook, module, resourceType, message) => (dispatch) => {
+    const err = new ErrorObject('Error loading ' + resourceType, message);
+    const nb = notebook.replaceOutput(module.id, new OutputError(err));
+    return dispatch(updateResource(new NotebookResource(nb)));
+}
+
+
+export const showCellChart = (notebook, module, name) => (dispatch) => {
+    // If the chart was in the module output we can directly dispatch it.
+    // Otherwise we need to fetch the resource from the server first.
+    let isInOutput = false;
+    if (module.stdout.length === 1) {
+        if (module.stdout[0].type === 'chart/view') {
+            isInOutput = (module.stdout[0].name === name);
+        }
+    }
+    if (isInOutput) {
+        const output = new OutputChart(name, module.stdout[0].result);
+        const nb = notebook.replaceOutput(module.id, output);
+        return dispatch(updateResource(new NotebookResource(nb)));
+    } else {
+        // Find the chart descriptor in the module
+        let chart = null;
+        for (let i = 0; i < module.views.length; i++) {
+            if (module.views[i].name === name) {
+                chart = module.views[i];
+                break;
+            }
+        }
+        if (chart !== null) {
+            // Use the chart's self reference to fetch the data frm the Web API.
+            return dispatch(
+                fetchResource(
+                    chart.links.self,
+                    (json) => {
+                        const output = new OutputChart(name, json);
+                        const nb = notebook.replaceOutput(module.id, output);
+                        return dispatch(updateResource(new NotebookResource(nb)));
+                    },
+                    (message) => (
+                        setNotebookCellError(notebook, module, 'chart', message)
+                    ),
+                    () => (setNotebookCellBusy(notebook, module))
+                )
+            )
+        }
+    }
+}
+
+
+/**
+ * Show a dataset in the output area of a notebook cell. The dataset is
+ * identified by the name and fetched from the Web API.
+ *
+ * The url to fetch the dataset is optional. If the user is navigating a dataset
+ * that is already being displayed in the output area then the url will be
+ * given. Otherwise, we use the self reference in the link collection of the
+ * dataset descriptor.
+ */
+export const showCellDataset = (notebook, module, name, url) => (dispatch) => {
+    // Find the dataset handle in the module's dataset list
+    let dataset = null;
+    for (let i = 0; i < module.datasets.length; i++) {
+        const ds = module.datasets[i];
+        if (ds.name === name) {
+            dataset = ds;
+            break;
+        }
+    }
+    if (dataset !== null) {
+        // Use dataset self reference if url is undefined.
+        let fetchUrl = (url != null) ? url : dataset.links.self;
+        return dispatch(
+            fetchResource(
+                fetchUrl,
+                (json) => {
+                    const ds = new DatasetHandle(json.id, name).fromJson(json);
+                    const output = OutputDataset(name, ds);
+                    const nb = notebook.replaceOutput(module.id, output);
+                    return dispatch(updateResource(new NotebookResource(nb)));
+                },
+                (message) => (
+                    setNotebookCellError(notebook, module, 'dataset', message)
+                ),
+                () => (setNotebookCellBusy(notebook, module))
+            )
+        )
+    }
+}
+
+
+/**
+ * Change the output of a notebook cell to show the text that was written to
+ * standard output during execution of the workflow module that is associated
+ * with the cell.
+ */
+export const showCellStdout = (notebook, module) => (dispatch) => (
+    dispatch(
+        updateResource(
+            new NotebookResource(
+                notebook.replaceOutput(module.id, OutputText(module.stdout))
+            )
+        )
+    )
+);
+
+
+/**
+ * Load notebook information for the given workflow. Set the result as the
+ * content of the project page.
+ *
+ * Parameters:
+ *
+ * workflow: WorkflowHandle
+ *
+ */
+export const showNotebook = (workflow) => (dispatch) => {
+    dispatch(
+        fetchResource(
+            workflow.links.modules,
+            (json) => (dispatch) => {
+                return dispatch(
+                    receiveProjectResource(
+                        new NotebookResource(new Notebook().fromJson(json))
+                    )
+                );
+            },
+            (message) => (
+                projectActionError('Error loading notebook', message)
+            ),
+            requestProjectAction
+        )
+    )
+}
+
+
+// -----------------------------------------------------------------------------
+// Modify Workflow
+// -----------------------------------------------------------------------------
+
+/**
+ * Delete a cell in the current notebook. This action is only applicable to
+ * cells that contain an existing module in the current workflow.
+ *
+ * Expects the module handle as argument. The handle contains the delete url
+ * in the set of HATEOAS links. The result of a successful delete request is
+ * a Json object that is expected to contain the handle for the new workflow
+ * (.workflow) and the information for the workflow notebook (.modules and
+ * (.datasets).
+ */
+export const deleteNotebookCell = (module) => (dispatch) => {
+    // Signal start by setting the project action flag
+    dispatch(requestProjectAction());
+    return fetch(
+        module.links.delete,
+        {method: 'DELETE'}
+    ).then(function(response) {
+        if (response.status === 200) {
+            // SUCCESS: Dispatch modified workflow handle
+            response.json().then(json => (dispatch(updateNotebook(json))));
+        } else {
+            // ERROR: The API is expected to return a JSON object in case
+            // of an error that contains an error message
+            response.json().then(json => dispatch(
+                projectActionError('Error deleting module', json.message)
+            ))
+        }
+    })
+    .catch(err => dispatch(
+        projectActionError('Error while deleting module', err.message)
+    ))
+}
+
+
+/**
+ * Insert a new cell into a notebook. The data object contains the moduel
+ * specification and user provided input parameters. Updates the underlying
+ * workflow by inserting a new module. The module may either be inserted before
+ * an existing module or appended at the end of the workflow. This behavior is
+ * encoded in the given url.
+ */
+export const insertNotebookCell = (url, data) => (dispatch) => {
+    // Signal start by setting the project action flag
+    dispatch(requestProjectAction());
+    // Independently of whether we insert or append the request is a POST
+    // containing the module specification as its body.
+    return fetch(
+        url,
+        {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }
+    ).then(function(response) {
+        if (response.status === 200) {
+            // SUCCESS: Dispatch modified notebook resource. The result is
+            // expected to be a Json object with WorkflowHandle (.workflow)
+            // and the new nootebook information (.modules and .datasets)
+            response.json().then(json => (dispatch(updateNotebook(json))));
+        } else {
+            // ERROR: The API is expected to return a JSON object in case
+            // of an error that contains an error message
+            response.json().then(json => (dispatch(
+                projectActionError('Error inserting module', json.message)
+            )));
+        }
+    })
+    .catch(err => dispatch(
+        projectActionError('Error inserting module', err.message)
+    ))
+}
+
+
+/**
+ * Replace a module in an existing workflow.
+ */
+export const replaceNotebookCell = (module, data) => (dispatch) => {
+    // Signal start by setting the project action flag
+    dispatch(requestProjectAction());
+    // Replace the existing module via PUT request
+    return fetch(
+        module.links.replace,
+        {
+            method: 'PUT',
+            body: JSON.stringify(data),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }
+    ).then(function(response) {
+        if (response.status === 200) {
+            // SUCCESS: Dispatch modified workflow handle
+            response.json().then(json => (dispatch(updateNotebook(json))));
+        } else {
+            // ERROR: The API is expected to return a JSON object in case
+            // of an error that contains an error message
+            response.json().then(json => (dispatch(
+                projectActionError('Error replacing module', json.message)
+            )));
+        }
+    })
+    .catch(err => dispatch(
+        projectActionError('Error replacing module', err.message)
+    ))
+}
+
+
+/**
+ * Set notebook resource and workflow handle after the notebook was updated.
+ * Expects a Josn object that contains a WorkflowUpdateResult returned by
+ * the Web API.
+ */
+const updateNotebook = (json) => (dispatch) => {
+    // Expects the Json object to have properties .workflow, .modules, and
+    // .datasets.
+    return dispatch(
+        updateWorkflowResource(
+            new WorkflowHandle().fromJson(json.workflow),
+            new NotebookResource(new Notebook().fromJson(json))
+        )
+    );
+}

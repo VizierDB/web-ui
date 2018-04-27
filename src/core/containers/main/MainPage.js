@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { Icon, Menu } from 'semantic-ui-react'
 import { setActiveItem } from '../../actions/main/MainPage'
-import { WarningMessage } from '../../components/util/Message';
+import { WarningMessage } from '../../components/Message';
 import Fileserver from '../fileserver/Fileserver'
 import HomePageContent from '../../components/main/HomePageContent'
 import ProjectListing from '../project/ProjectListing'

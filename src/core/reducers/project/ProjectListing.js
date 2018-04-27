@@ -8,10 +8,9 @@ import {
   SET_PROJECTS_FETCH_ERROR
 } from '../../actions/project/ProjectListing'
 import { RECEIVE_SERVICE } from '../../actions/main/Service'
-import {
-    HATEOASReferences, getProperty
-} from '../../util/Api'
-import { UTC2LocalTime } from '../../util/Timestamp';
+import { getProperty } from '../../util/Api'
+import { HATEOASReferences } from '../../util/HATEOAS';
+import { utc2LocalTime } from '../../util/Timestamp';
 
 
 /**
@@ -46,8 +45,8 @@ const listProjects = (projects) => {
             id: prj.id,
             name: getProperty(prj, 'name', 'undefined'),
             envId: prj.environment,
-            createdAt: UTC2LocalTime(prj.createdAt),
-            lastModifiedAt: UTC2LocalTime(prj.lastModifiedAt),
+            createdAt: utc2LocalTime(prj.createdAt),
+            lastModifiedAt: utc2LocalTime(prj.lastModifiedAt),
             links: new HATEOASReferences(prj.links)
         })
     }

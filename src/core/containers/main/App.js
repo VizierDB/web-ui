@@ -1,29 +1,19 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { connect } from 'react-redux'
 import { fetchService } from '../../actions/main/Service'
-import { ContentSpinner } from '../../components/util/Spinner'
-import { ErrorMessage } from '../../components/util/Message';
-import { ConnectionInfo } from '../../components/util/Api'
+import ContentSpinner from '../../components/ContentSpinner';
+import { ErrorMessage } from '../../components/Message';
+import { ConnectionInfo } from '../../components/Api'
 import MainPage from './MainPage'
 import ProjectPage from '../project/ProjectPage'
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+
+import { baseHref, projectHref } from '../../util/App';
 
 import logo from '../../../img/logo_small.png';
 import '../../../css/App.css'
-
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import injectTapEventPlugin from 'react-tap-event-plugin';
-/**
- * Set application routes. The baseHref points to the application home. Route
- * projectHref points to the web page for individual projects.
- */
-let href = '';
-if (process.env.NODE_ENV === 'production') {
-    href = href + 'vizier-db';
-}
-export const baseHref = '/' + href;
-export const projectHref = baseHref + 'projects/:project_id';
 
 
 class App extends Component {
@@ -55,7 +45,7 @@ class App extends Component {
         let content = null;
         let connection = null;
         if (isFetching) {
-            content = (<ContentSpinner />)
+            content = <ContentSpinner />;
         } else if (error) {
             let title = 'Error while loading service descriptor'
             if (this.props.serviceUrl) {
@@ -67,13 +57,13 @@ class App extends Component {
             />);
         } else {
             content = (
-              <MuiThemeProvider>
-                <Router>
-                    <div>
-                        <Route exact path={baseHref} component={MainPage} />
-                        <Route path={projectHref} component={ProjectPage} />
-                    </div>
-                </Router>
+                <MuiThemeProvider>
+                    <Router>
+                        <Switch>
+                            <Route exact path={baseHref} component={MainPage} />
+                            <Route path={projectHref} component={ProjectPage} />
+                        </Switch>
+                    </Router>
                 </MuiThemeProvider>
             );
             if (name) {

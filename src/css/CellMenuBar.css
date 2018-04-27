@@ -1,0 +1,26 @@
+div.cell-input-menu {
+    padding: 1px 5px;
+    margin: 0px;
+}
+
+span.command-dropdown {
+    font-size: 1em;
+    font-weight: 500;
+    margin-left: 0px;
+}
+
+span.run-button {
+    border-left: 1px solid #e8e8e9;
+    padding-left: 20px;
+    margin-left: 20px;
+}
+
+span.option-buttons {
+    border-left: 1px solid #e8e8e9;
+    padding-left: 20px;
+    margin-left: 20px;
+}
+
+span.delete-button {
+    margin-left: 10px;
+}

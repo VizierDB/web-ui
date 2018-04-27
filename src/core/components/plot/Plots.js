@@ -3,179 +3,284 @@
  * Create Plots
  */
 import React from 'react'
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types'
-import { Button } from 'semantic-ui-react'
 
-import {scaleOrdinal, scaleLinear, schemeCategory10} from 'd3-scale';
-import $ from 'jquery';
-import {line, curveBasis} from 'd3-shape';
-import {color} from 'd3-color';
-import {BarChart, LineChart} from 'react-d3-components';
-import {GridList, GridTile} from 'material-ui/GridList';
-import { Dropdown } from 'semantic-ui-react';
-import '../../../css/Notebook.css';
+import {scaleOrdinal} from 'd3-scale';
+import { AreaChart, BarChart, LineChart, ScatterPlot } from 'react-d3-components';
+import { GridList, GridTile} from 'material-ui/GridList';
+import { Checkbox, Dropdown } from 'semantic-ui-react';
+import '../../../css/Chart.css'
+
 
 class Plots extends React.Component {
 
     static propTypes = {
-        dataset: PropTypes.object,
-        handler: PropTypes.object.isRequired,
-        id: PropTypes.string.isRequired,
-        label: PropTypes.string.isRequired,
-        options: PropTypes.array.isRequired,
-      //  value: PropTypes.string
+        dataset: PropTypes.object.isRequired
     }
 
     constructor(props){
         super(props);
-        this.state = {value:'Simple Bar Chart' };
-        this.colorTags= [ "#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c", "#d62728", "#d62728", "#9467bd", "#c5b0d5", "#8c564b", "#c49c94", "#e377c2", "#f7b6d2", "#7f7f7f", "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf", "#9edae5"];
-    }
-
-    /*Load data on the format:
-    data = [ { label: 'somethingA', values: [{x: 'SomethingA', y: 10}, {x: 'SomethingB', y: 4}, {x: 'SomethingC', y: 3}] },
-             { label: 'somethingB', values: [{x: 'SomethingA', y: 6}, {x: 'SomethingB', y: 8}, {x: 'SomethingC', y: 5}]  }
-           ];
-    */
-    loadData(dataset){
-      var total_data = [];
-      for(var i=0; i<dataset[0].length; i++){
-        let data_i = {};
-        data_i['label']=i;
-        let values = [];
-        for(var j=0; j<dataset.length; j++){
-          let index = {};
-          index['x']= j.toString();
-          index['y']= parseInt(dataset[j][i]);
-          values.push(index);
+        const { dataset } = props;
+        // Set grouped to true if only one data series is given (in this case
+        // the grouped checkbox is hidden) and grouped layout should be
+        // default.
+        this.state = {
+            chartType: dataset.chart.type,
+            grouped: (dataset.chart.grouped || (dataset.series.length === 1)),
+            width: 400
+        };
+        // Get list of series labels and set global color scale
+        this.labels = [];
+        for (let i = 0; i < dataset.series.length; i++) {
+            this.labels.push(dataset.series[i].label)
         }
-        data_i['values']=values;
-        total_data.push(data_i);
-      }
-      return total_data;
+        this.colorScale = scaleOrdinal()
+            .domain(this.labels)
+            .range([
+                "#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c", "#d62728",
+                "#d62728", "#9467bd", "#c5b0d5", "#8c564b", "#c49c94", "#e377c2",
+                "#f7b6d2", "#7f7f7f", "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf",
+                "#9edae5"
+            ]);
     }
-
-    //Create a simple barchar. If there is more than one 'series' (columns), then it will create multiples simpleBarCharts.
-    simpleBarChart(data){
-      var simpleBarCharts = [];
-      for(let i=0; i<data.length; i++)
-      {
-          let data_ = [];
-          data_.push(data[i]);
-          simpleBarCharts.push(<GridTile>
-                                  <BarChart
-                                    data={data_}
-                                    width={400}
-                                    height={400}
-                                    margin={{top: 10, bottom: 50, left: 50, right: 10}}/> </GridTile
-                                  >)
-      }
-      return simpleBarCharts;
+    /**
+     * Add event handler to keep track of the container width.
+     */
+    componentDidMount() {
+        window.addEventListener('resize', this.handleResize);
+        this.handleResize();
     }
-
-    //Create Grouped Bar Chart.
-    groupBarChart(data){
-      var yScale = scaleLinear();
-      var colorScale = scaleOrdinal(this.colorTags);
-      return <GridTile>
-                <BarChart
-                  groupedBars
-                  colorScale={colorScale}
-                  data={data}
-                  width={400}
-                  height={400}
-                  margin={{top: 10, bottom: 50, left: 50, right: 10}}/>
-              </GridTile>;
+    /**
+     * Keep track of the elements width to adjust charts on resize.
+     */
+    handleResize = (e) => {
+        // This seems to fail in some situations.
+        try {
+            let elem = ReactDOM.findDOMNode(this);
+            this.setState({
+                width: elem.offsetWidth
+            });
+        } catch (err) {
+        }
     }
-
-    //Create Line Chart.
-    lineChart(data){
-      var yScale = scaleLinear();
-      var colorScale = scaleOrdinal(this.colorTags);
-      return <LineChart
-                   data={data}
-                   width={400}
-                   height={400}
-                   margin={{top: 10, bottom: 50, left: 50, right: 20}}
-                />;
+    /**
+     * Handle selection of a chart type.
+     */
+    handleSelectChart = (event, { value }) => {
+        this.setState({'chartType': value});
     }
-
+    /**
+     * Handle change of the grouped checkbox.
+     */
+    handleToggleGrouped = (e, { checked }) => {
+        this.setState({'grouped': checked});
+    }
     //Get legend
-    getLegend(data,schema){
-      var legend = [];
-      for(let i=0; i<data.length; i++)
-      {
-          legend.push(<li style={{background:this.colorTags[i],  width:10,  marginTop:5, height:10, listStyleType: 'none'}}> <span style={{margin:15}}>{schema["series"][i]["label"]}</span></li>
-        );
-      }
-      return legend;
-
+    getLegend = (schema) => {
+        let legend = [];
+        for (let i=0; i<schema.length; i++) {
+            const label = schema[i].label;
+            legend.push(
+                <li
+                    key={i}
+                    style={{background:this.colorScale(label), width:10, marginTop:5, listStyleType: 'none'}}>
+                    <span style={{marginLeft:15}}>{label}</span>
+                </li>
+            );
+        }
+        return legend;
     }
-    handleChange = (event, { value }) => {
-        this.setState({'value': value});
+    /*
+     * Load data on the format:
+     *   data = [
+     *     { label: 'somethingA', values: [{x: 'SomethingA', y: 10}, {x: 'SomethingB', y: 4}, {x: 'SomethingC', y: 3}] },
+     *     { label: 'somethingB', values: [{x: 'SomethingA', y: 6}, {x: 'SomethingB', y: 8}, {x: 'SomethingC', y: 5}]  }
+     *  ];
+     *
+     * The format of the dataset object is expected to be:
+     * {
+     *     "series": [{
+     *         "label": "string",
+     *         "data": [0]
+     *     }],
+     *     "xAxis": {
+     *         "data": [0]
+     *    }
+     * }
+     */
+    loadData(dataset) {
+        // Check if a data series for x-axis is given. If not we use 1-n as
+        // x-axis labels.
+        let xAxis = null;
+        if (dataset.xAxis !== undefined) {
+            xAxis = dataset.xAxis.data;
+        } else {
+            xAxis = [];
+            for (let i = 0; i < dataset.series[0].data.length; i++) {
+                xAxis.push(i + 1);
+            }
+        }
+        let total_data = [];
+        for (let i=0; i<dataset.series.length; i++) {
+            const series = dataset.series[i];
+            let data_i = {};
+            data_i['label'] = series.label;
+            let values = [];
+            for (let j=0; j<series.data.length; j++){
+                let index = {};
+                let xLabel = xAxis[j];
+                if (xLabel === null) {
+                    xLabel = j;
+                }
+                index['x'] = xLabel.toString();
+                index['y'] = series.data[j];
+                values.push(index);
+            }
+            data_i['values'] = values;
+            total_data.push(data_i);
+        }
+        return total_data;
+    }
+    /**
+     * Render a single chart or a GridList of charts (if grouped is true).
+     */
+    selectedCharts = (nameChart, data, grouped, width) => {
+        // Get function to plot chart of specified type. The result is undefined
+        // if the chartName is unknown.
+        const chart = this.selectedChart(nameChart);
+        if (chart === undefined) {
+            return null;
+        }
+        if (grouped) {
+            // If grouped we just plot one chart with the all the data series
+            return chart(data, width);
+        } else {
+            // Display a flex grids of individual charts for each data series.
+            const charts = [];
+            for (let i=0; i<data.length; i++) {
+                let data_ = [];
+                data_.push(data[i]);
+                charts.push(<GridTile key={i}>{chart(data_, 400)}</GridTile>);
+            }
+            return <GridList
+                    cellHeight={this.props.gridList_cellHeight}
+                    cols={Math.floor(width / 400)}
+                    style={{width: {width}, height: this.props.gridList_height, overflowY: this.props.gridLis_overflowY,}}>
+                    {charts}
+                </GridList>;
+        }
+    }
+    /**
+     * Return a function that takes a list of data series and width as parameter
+     * and renders a chart of the type that is specified in chartName.
+     */
+    selectedChart = (nameChart) => {
+        if (nameChart === 'Area Chart') { // area chart
+            return (data, width) => (
+                <AreaChart
+                    data={data}
+                    colorScale={this.colorScale}
+                    width={width}
+                    height={400}
+                    margin={{top: 10, bottom: 50, left: 50, right: 10}}
+                />
+            );
+        } else if (nameChart==='Bar Chart') { // bar chart
+            return (data, width) => (
+                <BarChart
+                    groupedBars
+                    data={data}
+                    colorScale={this.colorScale}
+                    width={width}
+                    height={400}
+                    margin={{top: 10, bottom: 50, left: 50, right: 10}}
+                />
+            );
+        } else if (nameChart==='Line Chart') { // line chart
+            return (data, width, colorScale) => (
+                <LineChart
+                    data={data}
+                    colorScale={this.colorScale}
+                    width={width}
+                    height={400}
+                    margin={{top: 10, bottom: 50, left: 50, right: 10}}
+                />
+            );
+        } else if (nameChart==='Scatter Plot') { // scatter plot
+            return (data, width, colorScale) => (
+                <ScatterPlot
+                    data={data}
+                    colorScale={colorScale}
+                    width={width}
+                    height={400}
+                    margin={{top: 10, bottom: 50, left: 50, right: 10}}
+                />
+            );
+        }
     }
 
-    selectedCharts(nameChart, data){
-      var chart=<div></div>;
-      if(nameChart==this.props.charts[0]){ //simplebar chart
-        chart = this.simpleBarChart(data);
-      }
-      if(nameChart==this.props.charts[1]){ //groupbar chart
-        chart = this.groupBarChart(data);
-      }
-      if(nameChart==this.props.charts[2]){ //line chart
-        chart = this.lineChart(data);
-      }
-      return chart;
-    }
+    render() {
 
-    render(){
-      const { row ,  schema} = this.props
-      var data = this.loadData(this.props.rows);
-      var chart = this.selectedCharts(this.state.value, data);
-      var legend =this.getLegend(data,this.props.schema);
+        const { dataset } = this.props;
+        // Return null if the dataset is empty
+        if (dataset.series.length === 0) {
+            return null;
+        }
+        const { chartType, grouped, width } = this.state;
+        var data = this.loadData(dataset);
+        var chart = this.selectedCharts(chartType, data, grouped, width);
+        var legend =this.getLegend(dataset.series);
 
-
-
-      const options = [];
-      for (let i = 0; i < this.props.charts.length; i++) {
-          const file = this.props.charts[i];
+        const options = [];
+        for (let i = 0; i < this.props.charts.length; i++) {
           options.push({
               key: i,
               text: this.props.charts[i],
               value: this.props.charts[i]
           })
-      }
-            return ( <div>
-                        <div style={{marginTop:10, marginBottom:10}}>
-                        <tr>
-                            <td className='form-label'>{"Charts"}</td>
-                            <td className='form-control'>
-                                <Dropdown
-                                    text={this.state.value}
-                                    selection
-                                    fluid
-                                    scrolling
-                                    options={options}
-                                    onChange={this.handleChange}
-                                />
-                            </td>
-                        </tr>
-                        </div>
-
-                        <div>
-                          <GridList cellHeight={this.props.gridList_cellHeight} style={{width: this.props.gridList_width, height: this.props.gridList_height, overflowY: this.props.gridLis_overflowY,}} >
-                            {chart}
-                          </GridList>
-                        </div>
-                        <ul>
-                          {legend}
-                        </ul>
-                      </div>
-                );
-
+        }
+        // Show a 'grouped' checkbox if the dataset has more than one data
+        // series.
+        let groupedCheckbox = null;
+        if (dataset.series.length > 1) {
+            groupedCheckbox = (
+                <td className='plot-form-check'>
+                    <Checkbox
+                        checked={grouped}
+                        label='Grouped'
+                        onChange={this.handleToggleGrouped}
+                    />
+                </td>
+            );
+        }
+        return (
+            <div>
+                <div className='plot-menu'>
+                    <table className='plot-form-table'><tbody><tr>
+                        <td className='plot-form-label'>{"Charts"}</td>
+                        <td className='plot-form-dropdown'>
+                            <Dropdown
+                                text={chartType}
+                                selection
+                                fluid
+                                scrolling
+                                options={options}
+                                onChange={this.handleSelectChart}
+                            />
+                        </td>
+                        { groupedCheckbox }
+                    </tr></tbody></table>
+                </div>
+                <ul className='plot-legend'>
+                    {legend}
+                </ul>
+                <div>
+                    {chart}
+                </div>
+            </div>
+        );
     }
-
 }
 
 Plots.defaultProps = {
@@ -186,7 +291,7 @@ Plots.defaultProps = {
     gridList_height:450,
     gridLis_overflowY:'auto',
     colorText:'black',
-    charts : ["Simple Bar Chart", "Grouped Bar Chart", "Line Chart"],
+    charts : ["Area Chart", "Bar Chart", "Line Chart", "Scatter Plot"],
 };
 /*<p>Got data for {this.props.rows.length} row(s) and {this.props.schema.series.length} data series</p>*/
 

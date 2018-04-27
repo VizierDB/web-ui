@@ -34,8 +34,15 @@ export const createProject = (url, env, name) => (dispatch) =>  {
 /**
  * Send DELETE request for project with given Url
  */
-export const deleteProject = (url) => (dispatch) => {
-    dispatch(deleteResource(url, fetchProjects, projectDeleteError, requestProjects))
+export const deleteProject = (project) => (dispatch) => {
+    dispatch(
+        deleteResource(
+            project.links.delete,
+            fetchProjects,
+            projectDeleteError,
+            requestProjects
+        )
+    )
 }
 
 /**
@@ -135,6 +142,13 @@ const receiveProjects = (json) => ({
 /**
  * Submit request to update project name in project listing.
  */
-export const updateProjectNameInListing = (url, projectName) => {
-    return updateResourceProperty(url, 'name', projectName, fetchProjects, projectEditErrorInListing, requestProjects)
+export const updateProjectNameInListing = (project, name) => {
+    return updateResourceProperty(
+        project.links.update,
+        'name',
+        name,
+        fetchProjects,
+        projectEditErrorInListing,
+        requestProjects
+    )
 }

@@ -5,33 +5,43 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Plots from './Plots'
+import '../../../css/Chart.css'
 
 /*
  * Plot a dataset chart for given data.
  */
 
 class DatasetChart extends React.Component {
-    // .rows: Array of rows. Each row is a list of values. Note that
-    //       values in a row can be null
-    // .schema:
-    //    .series: List of data series definitions. Each series has
-    //             a .label and .index (the index of the data for the
-    //             series in elements of rows)
-    //    .xAxis: Optional index of x-axis labels in elements of rows
+    /*
+     * The format of the given dataset object is as follows:
+     *
+     * "series": {
+     *   "label": "string",
+     *   "data": [0]
+     *  },
+     * "xAxis": {
+     *   "data": [0]
+     * },
+     * "chart": {
+     *   "type": "string",
+     *   "grouped": true,
+     * }
+ }
+     */
     static propTypes = {
-        rows: PropTypes.array.isRequired,
-        schema: PropTypes.object.isRequired
+        dataset: PropTypes.object.isRequired
     }
     render() {
-        const { rows, schema } = this.props
-        const content = (
-            <p>Got data for {rows.length} row(s) and {schema.series.length} data series</p>
-        )
-        return (
-            <div>
-                <Plots rows={rows} schema={schema} />
-            </div>
-        );
+        const { dataset } = this.props
+        if (dataset !== undefined) {
+            return (
+                <div className='plot'>
+                    <Plots dataset={dataset} />
+                </div>
+            );
+        } else {
+            return null
+        }
     }
 }
 

@@ -8,8 +8,8 @@ import {
   SET_FILE_UPDATE_ERROR, SET_FILE_UPLOAD_ERROR, START_UPLOAD
 } from '../../actions/fileserver/Fileserver'
 import { RECEIVE_SERVICE } from '../../actions/main/Service'
-import { HATEOASReferences } from '../../util/Api'
-import { UTC2LocalTime } from '../../util/Timestamp';
+import { HATEOASReferences } from '../../util/HATEOAS'
+import { utc2LocalTime } from '../../util/Timestamp';
 
 
 /**
@@ -45,8 +45,8 @@ const listFiles = (files) => {
         result.push({
             id: fh.id,
             name: fh.name,
-            createdAt: UTC2LocalTime(fh.createdAt),
-            lastModifiedAt: UTC2LocalTime(fh.lastModifiedAt),
+            createdAt: utc2LocalTime(fh.createdAt),
+            lastModifiedAt: utc2LocalTime(fh.lastModifiedAt),
             columns: fh.columns,
             rows: fh.rows,
             filesize: fh.filesize,

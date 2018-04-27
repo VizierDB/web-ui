@@ -2,15 +2,53 @@ div.project-name {
     margin-bottom: 10px;
 }
 
-div.project-content {
+/*div.project-content {
     background: #fff;
-    box-shadow: 0px 0px 12px 1px rgba(87, 87, 87, 0.2);
+    border-radius: .28571429rem;
+    border: 1px solid rgba(34,36,38,.15);
+    box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
     padding: 10px 10px;
     margin-bottom: 10px;
     margin-top: 10px;
-}
-
+}*/
 
 div.project-menu-bar {
     padding-top: 5px;
+}
+
+div.project-status {
+    color: #3b4151;
+    font-size: 1em;
+    min-height: 2.85714286em;
+    padding-top: 0.5em;
+    margin-top: 4px;
+    text-align: right;
+}
+
+p.project-status {
+    font-size: 1em;
+    padding-top: 0.5em;
+}
+
+span.highlight-branch {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    font-weight: 700;
+}
+
+span.highlight-date {
+    font-family: "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;
+}
+
+span.project-name {
+    font-weight:bold;
+}
+
+span.project-status-dropdown {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+div.not-found {
+    margin: 50px 100px;
 }

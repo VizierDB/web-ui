@@ -18,18 +18,18 @@ const INITIAL_STATE = {
 }
 
 export const mainPage = (state = INITIAL_STATE, action) => {
-  switch (action.type) {
-    case SET_ACTIVE_ITEM:
-        return {
-          ...state,
-          activeItem: action.item
-        }
-    case RECEIVE_SERVICE:
-        return {
-          ...state,
-          homePageContent: action.welcome
-        }
-    default:
-      return state
-  }
+    switch (action.type) {
+        case SET_ACTIVE_ITEM:
+            return {
+                ...state,
+                activeItem: action.item
+            }
+        case RECEIVE_SERVICE:
+            return {
+                ...state,
+                homePageContent: action.welcome
+            }
+        default:
+            return state
+    }
 }

@@ -5,7 +5,7 @@
 import {
   REQUEST_SERVICE, RECEIVE_SERVICE, SERVICE_ERROR
 } from '../../actions/main/Service'
-import { HATEOASReferences } from '../../util/Api'
+import { HATEOASReferences } from '../../util/HATEOAS'
 
 /**
  * STATE:

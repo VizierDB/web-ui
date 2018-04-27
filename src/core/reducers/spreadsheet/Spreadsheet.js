@@ -1,70 +1,45 @@
 /**
-* Reducer for spreadsheet view of a dataset.
+* Reducer for spreadsheet.
 */
 
 import {
-    RECEIVE_SPREADSHEET_DATA, REQUEST_SPREADSHEET_DATA,
-    REQUEST_SPREADSHEET_UPDATE, SPREADSHEET_ERROR, SPREADSHEET_OPERATION_ERROR
-} from '../../actions/spreadsheet/Spreadsheet'
-import { DatasetHandle } from '../../util/Api'
-
+    PROJECT_ACTION_ERROR, RECEIVE_PROJECT_RESOURCE, UPDATE_WORKFLOW
+} from '../../actions/project/ProjectPage';
+import { SUBMIT_UPDATE_REQUEST } from '../../actions/spreadsheet/Spreadsheet';
 
 /**
  * STATE:
  *
- * dataset: Dataset object with columns and rows
- * error: Error while fetching or updating the spreadsheet
- * isBusy: Flag indicating whether fetching or updating is in progress
- * workflow: Workflow with which the dataset is associated
+ * dataset: DatasetHandle
+ * isUpdating: Flag indicating whether update is in progress
+ * opError: ErrorObject in case of an update error
  */
 
 const INITIAL_STATE = {
     dataset: null,
-    error: null,
-    isBusy: false,
-    opError: null,
-    workflow: null
+    isUpdating: false
 }
+
 
 export const spreadsheet = (state = INITIAL_STATE, action) => {
     switch (action.type) {
-        case REQUEST_SPREADSHEET_DATA:
-            return {
-                ...state,
-                dataset: null,
-                error: null,
-                opError: null,
-                isBusy: true
+        case RECEIVE_PROJECT_RESOURCE:
+        case UPDATE_WORKFLOW:
+            const resource = action.resource;
+            if (resource != null) {
+                if (resource.isDataset()) {
+                    return {
+                        ...state,
+                        dataset: resource.content,
+                        isUpdating: false
+                    }
+                }
             }
-        case REQUEST_SPREADSHEET_UPDATE:
-            return {
-                ...state,
-                error: null,
-                opError: null,
-                isBusy: true
-            }
-        case SPREADSHEET_ERROR:
-            return {
-                ...state,
-                error: action.error,
-                opError: null,
-                isBusy: false
-            }
-        case SPREADSHEET_OPERATION_ERROR:
-            return {
-                ...state,
-                error: null,
-                opError: action.error,
-                isBusy: false
-            }
-        case RECEIVE_SPREADSHEET_DATA:
-            return {
-                ...state,
-                dataset: new DatasetHandle(action.dataset, action.name),
-                error: null,
-                opError: null,
-                isBusy: false
-            }
+            return state;
+        case PROJECT_ACTION_ERROR:
+        return {...state, isUpdating: false};
+        case SUBMIT_UPDATE_REQUEST:
+            return {...state, isUpdating: true};
         default:
             return state
     }

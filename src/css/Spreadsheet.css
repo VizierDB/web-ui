@@ -1,37 +1,97 @@
-div.spreadsheet {
-    padding: 10px;
+div.spreadsheet-container {
+    background: #fff;
+    border-radius: .28571429rem;
+    border: 1px solid rgba(34,36,38,.15);
+    color: #3b4151;
+    font-size: 12px;
+    padding: 20px 20px;
+    margin-top: 10px;
 }
 
-.spreadsheet-control {
+h1.dataset-name {
+    font-size: 1.5em;
+}
+
+table.spreadsheet {
+    background: #dadada; /*dadada; c0c0c0; dddddd*/
+    border: 0px;
+    border-spacing: 1px;
+    color: #3b4151;
+    font-size: 12px;
+    table-layout:fixed;
     width: 100%;
-    margin: 0px;
-    padding: 0px;
 }
 
-th.spreadsheet-topcorner {
-    background: #f2f2f2 !important;
-    text-align: center;
-    width: 100px;
+td.grid-row-index {
+    background: #f3f3f3;
+    border: 2px solid transparent;
+    padding-right: 5px;
+    text-align: right;
+    width: 50px;
 }
 
-th.spreadsheet-header {
-    background: #f2f2f2 !important;
+td.grid-cell {
+    background: #fff;
+    border: 2px solid transparent;
 }
 
-td.row-number {
-    background: #f2f2f2;
-    width: 100px;
+td.grid-cell.active {
+    background: #fff;
+    border: 2px solid #4285f4;
 }
 
-.centered-button {
+td.grid-cell.updating {
+    background: #fff;
+    border: 2px solid transparent;
+    color: #888;
+}
+
+th.grid-header {
+    height: 20px;
+    background: #f3f3f3;
+    border: 2px solid transparent;
+}
+
+th.grid-header.active {
+    height: 20px;
+    background: #f3f3f3;
+    border: 2px solid #4acda7;
+}
+
+th.grid-header.updating {
+    height: 20px;
+    background: #f3f3f3;
+    border: 2px solid transparent;
+    color: #888;
+}
+
+div.cell-value {
+    height: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space:nowrap;
+}
+
+
+/* INPUT */
+
+.spreadsheet-input {
+    resize: none;
+    height: 100%;
     width: 100%;
-    text-align: center;
+    border: 0px;
+    border-radius: 0;
+    font-size: 12px;
+    outline: none;
+    overflow: auto;
+    font-family: Arial;
+    background: transparent;
+    text-overflow: ellipsis;
 }
 
-span.anno-right {
-    float: right;
-}
 
-td.uncertain-cell {
-    background: #f2dede;
+/* NAVBAR */
+
+div.navbar-container {
+    margin-top: 5px;
 }

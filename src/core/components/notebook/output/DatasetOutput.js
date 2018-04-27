@@ -1,0 +1,75 @@
+import React from 'react'
+import PropTypes from 'prop-types'
+import GridCell from '../../spreadsheet/grid/GridCell';
+import HeaderCell from '../../spreadsheet/grid/HeaderCell';
+import RowIndexCell from '../../spreadsheet/grid/RowIndexCell';
+import SpreadsheetNavbar from '../../spreadsheet/SpreadsheetNavbar'
+import '../../../../css/Notebook.css'
+import '../../../../css/Spreadsheet.css'
+
+
+/**
+ * Display a dataset in spreadsheet format with minimal functionality for the
+ * user to interact with the data. This is a static view on a historic
+ * dataset that was generated as output of a workflow module.
+ */
+class DatasetOutput extends React.Component {
+    static propTypes = {
+        dataset: PropTypes.object.isRequired,
+        onNavigate: PropTypes.func.isRequired
+    }
+    render() {
+        const { dataset, onNavigate } = this.props;
+        const columns = dataset.columns;
+        // Grid header
+        let header = [<RowIndexCell key={-1} value=' ' />];
+        for (let cidx = 0; cidx < columns.length; cidx++) {
+            const column = columns[cidx];
+            header.push(
+                <HeaderCell
+                    key={column.id}
+                    column={column}
+                    columnIndex={cidx}
+                />
+            );
+        }
+        header = (<tr>{header}</tr>);
+        // Grid rows
+        const rows = [];
+        for (let ridx = 0; ridx < dataset.rows.length; ridx++) {
+            const row = dataset.rows[ridx];
+            const cells = [<RowIndexCell key={row.id} value={row.index} />];
+            for (let cidx = 0; cidx < columns.length; cidx++) {
+                const column = columns[cidx];
+                cells.push(
+                    <GridCell
+                        key={'C' + column.id + 'R' + row.id}
+                        column={column}
+                        columnIndex={cidx}
+                        rowId={row.id}
+                        rowIndex={ridx}
+                        value={row.values[cidx]}
+                    />
+                );
+            }
+            rows.push(<tr key={row.id}>{cells}</tr>);
+        }
+        return (
+            <div className='dataset'>
+                <table className='spreadsheet'>
+                    <thead>{header}</thead>
+                    <tbody>{rows}</tbody>
+                </table>
+                <div className='navbar-container'>
+                    <SpreadsheetNavbar
+                        dataset={dataset}
+                        disabled={false}
+                        onNavigate={onNavigate}
+                    />
+                </div>
+            </div>
+        );
+    }
+}
+
+export default DatasetOutput;

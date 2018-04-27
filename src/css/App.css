@@ -57,7 +57,7 @@ color: #fff;
 }
 
 .main-content {
-    margin: 25px;
+    margin: 10px 25px 25px 25px;
 }
 
 .home-content {
@@ -142,10 +142,28 @@ span.left-padding-lg {
     padding-left: 20px;
 }
 
+span.right-padding-md {
+    padding-right: 10px;
+}
+
 span.sys-name {
     font-weight: bold;
 }
 
-div.spinner-padding {
+
+/* Spinner */
+
+div.spinner-padding-md {
+    text-align: center;
+    margin: 25px;
+}
+
+div.spinner-padding-lg {
+    text-align: center;
     margin: 50px;
+}
+
+div.spinner-padding-ms {
+    text-align: center;
+    margin: 150px;
 }

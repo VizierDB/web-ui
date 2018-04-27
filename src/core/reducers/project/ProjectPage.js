@@ -2,31 +2,33 @@
  * Reducer for actions that retrieve the Vizier DB Web Service API descriptor.
  */
 
-import { RECEIVE_FILES } from '../../actions/fileserver/Fileserver'
 import {
-  REQUEST_PROJECT, RECEIVE_MODULE_REGISTRY, RECEIVE_PROJECT,
-  SET_PROJECT_FETCH_ERROR
+  PROJECT_ACTION_ERROR, PROJECT_FETCH_ERROR, RECEIVE_PROJECT,
+  RECEIVE_PROJECT_RESOURCE, REQUEST_PROJECT, REQUEST_PROJECT_ACTION,
+  UPDATE_BRANCH, UPDATE_PROJECT, UPDATE_RESOURCE, UPDATE_WORKFLOW
 } from '../../actions/project/ProjectPage'
-import {
-    HATEOASReferences, getProperty
-} from '../../util/Api'
-import { UTC2LocalTime } from '../../util/Timestamp';
 
 
 /**
  * STATE:
  *
- * error: Error while fetching the project
- * isFetchig: Flag indicating whether fetching is in progress
- * project: Retrieved project resource
+ * actionError: Error while loading or updating a project resource
+ * fetchError: Error while loading the project handle
+ * isActive: Loading or updating a project resource is in progress
+ * isFetching: Load of project handle in progress
+ * project: The project handle
+ * resource: A project resource object that has been loaded
+ * workflow: Workflow handle
  */
 
 const INITIAL_STATE = {
-    moduleRegistry: null,
-    error: null,
-    files: [],
+    actionError: null,
+    fetchError: null,
+    isActive: false,
     isFetching: false,
-    project: null
+    project: null,
+    resource: null,
+    workflow: null
 }
 
 export const projectPage = (state = INITIAL_STATE, action) => {
@@ -34,40 +36,77 @@ export const projectPage = (state = INITIAL_STATE, action) => {
         case REQUEST_PROJECT:
             return {
                 ...state,
-                isFetching: true
-            }
-        case RECEIVE_MODULE_REGISTRY:
+                isFetching: true,
+            };
+        case REQUEST_PROJECT_ACTION:
             return {
                 ...state,
-                moduleRegistry: action.moduleRegistry
-            }
-        case RECEIVE_FILES:
-            return {...state, files: action.files}
+                isActive: true
+            };
+        case PROJECT_FETCH_ERROR:
+            return {
+                ...state,
+                isFetching: false,
+                fetchError: action.error
+            };
+        case PROJECT_ACTION_ERROR:
+            return {
+                ...state,
+                isActive: false,
+                isFetching: false,
+                actionError: action.error
+            };
         case RECEIVE_PROJECT:
-            const prj = action.project
-            let project = null;
-            if (prj !== null) {
-                project = {
-                    id: prj.id,
-                    name: getProperty(prj, 'name', 'undefined'),
-                    createdAt: UTC2LocalTime(prj.createdAt),
-                    lastModifiedAt: UTC2LocalTime(prj.lastModifiedAt),
-                    links: new HATEOASReferences(prj.links)
-                }
-            }
             return {
                 ...state,
-                error: null,
+                actionError: null,
+                fetchError: null,
+                isActive: false,
                 isFetching: false,
-                project: project
-            }
-        case SET_PROJECT_FETCH_ERROR:
+                project: action.project,
+                resource: null,
+                workflow: action.workflow
+
+            };
+        case RECEIVE_PROJECT_RESOURCE:
             return {
                 ...state,
-                isFetching: false,
-                error: action.error
-            }
-    default:
-      return state
-  }
+                actionError: null,
+                isActive: false,
+                resource: action.resource
+
+            };
+        case UPDATE_BRANCH:
+            return {
+                ...state,
+                actionError: null,
+                isActive: false,
+                project: action.project,
+                workflow: action.workflow
+            };
+        case UPDATE_PROJECT:
+            return {
+                ...state,
+                actionError: null,
+                isActive: false,
+                project: action.project
+            };
+        case UPDATE_RESOURCE:
+            return {
+                ...state,
+                actionError: null,
+                isActive: false,
+                resource: action.resource
+            };
+        case UPDATE_WORKFLOW:
+            return {
+                ...state,
+                actionError: null,
+                isActive: false,
+                resource: action.resource,
+                workflow: action.workflow
+            };
+        default:
+            return state
+    }
 }

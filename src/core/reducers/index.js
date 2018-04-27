@@ -1,30 +1,26 @@
 import { combineReducers } from 'redux'
-import { chartView } from './plot/ChartView'
+import { routerReducer } from 'react-router-redux'
+import { app } from './main/App'
 import { fileserver } from './fileserver/Fileserver'
 import { mainPage } from './main/MainPage'
 import { notebook } from './notebook/Notebook'
 import { projectCreate } from './project/CreateProjectForm'
 import { projectListing } from './project/ProjectListing'
-import { projectMenu } from './project/ProjectMenu'
-import { projectName } from './project/ProjectNameForm'
 import { projectPage} from './project/ProjectPage'
-import { spreadsheet } from './spreadsheet/Spreadsheet'
-import { workflow } from './project/Workflow'
 import { serviceApi } from './main/Service'
+import { spreadsheet } from './spreadsheet/Spreadsheet'
 
 const rootReducer = combineReducers({
-    chartView,
+    app,
     fileserver,
-    projectCreate,
-    projectListing,
-    projectMenu,
-    projectName,
-    projectPage,
     mainPage,
     notebook,
+    projectCreate,
+    projectListing,
+    projectPage,
     serviceApi,
     spreadsheet,
-    workflow
+    router: routerReducer
 })
 
 export default rootReducer

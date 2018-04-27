@@ -25,6 +25,8 @@ table.form-table {
 
 td.form-label {
     font-weight: bold;
+    padding-top: 1em;
+    vertical-align: top;
     width: 100px;
 }
 
@@ -35,6 +37,8 @@ td.form-group-label {
 }
 
 td.form-constant {
+    border-top: solid 1px rgba(97,175,254, .25);
+    border-bottom: solid 1px rgba(97,175,254, .25);
     padding-left: 10px;
 }
 
@@ -43,14 +47,34 @@ td.form-control {
 }
 
 td.inner-form-header {
-    color: #888;
+    color: #708cb3;
     font-size: 0.95em;
     font-weight: bold;
+    padding: 1em 5px 5px 5px;
+}
+
+td.inner-form-control {
+    min-width: 200px;
+}
+
+td.inner-form-button {
+    text-align: center;
+    width: 50px;
+}
+
+td.inner-form-checkbox {
+    padding-left: 20px;
 }
 
 table.inner-form {
     border-spacing: 0px;
     border-collapse: collapse;
+}
+
+/* Checkboxes */
+
+span.boolctrl {
+    padding-left: 10px;
 }
 
 /* Code Editor Form */

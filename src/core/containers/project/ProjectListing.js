@@ -1,16 +1,18 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { Button, Header, Icon, Input, Modal, Table } from 'semantic-ui-react'
+import { Button, Icon, Table } from 'semantic-ui-react'
 import {
     deleteProject, fetchProjects, projectDeleteError, projectEditErrorInListing,
     updateProjectNameInListing
 } from '../../actions/project/ProjectListing'
 import CreateProjectForm from './CreateProjectForm'
-import { ContentSpinner } from '../../components/util/Spinner'
-import { ErrorMessage } from '../../components/util/Message';
-import { IconButton } from '../../components/util/Button'
-import { baseHref } from '../main/App.js';
+import { IconButton } from '../../components/Button'
+import { ErrorMessage } from '../../components/Message';
+import DeleteResourceModal from '../../components/modals/DeleteResourceModal'
+import EditResourceNameModal from '../../components/modals/EditResourceNameModal'
+import ContentSpinner from '../../components/ContentSpinner'
+import { isNotEmptyString, pageUrl } from '../../util/App.js';
 
 import '../../../css/ResourceListing.css'
 
@@ -31,7 +33,7 @@ class ProjectListing extends Component {
         // or edit. If either value is non-null the respective modal to confirm
         // delete or edit the project is shown. At no point should both values
         // be non-null.
-        this.state = {deleteProject: null, editProject: null, projectName: ''}
+        this.state = {deleteProject: null, editProject: null}
     }
     /**
      * Load the project listing when the component mounts.
@@ -54,30 +56,16 @@ class ProjectListing extends Component {
     /**
      * Delete the project with the given Url.Delete
      */
-    confirmDeleteProject = (url) => {
+    confirmDeleteProject = (project) => {
         const { dispatch } = this.props
-        dispatch(deleteProject(url))
+        dispatch(deleteProject(project))
         this.hideModals()
-    }
-    /**
-     * Handle changes in the edit project name text field.
-     */
-    handleProjectNameChange = (event) => {
-        this.setState({projectName: event.target.value});
-    }
-    /**
-     * Detect RETURN key press to submit form.
-     */
-    handleProjectNameKeyDown = (event) => {
-        if (event.keyCode === 13) {
-            this.submitProjectNameUpdate();
-        }
     }
     /**
      * Hide all modals by setting the respective state variables to null..
      */
     hideModals = () => {
-        this.setState({deleteProject: null, editProject: null, projectName: ''})
+        this.setState({deleteProject: null, editProject: null})
     }
     /**
      * Re-load project lsiting (either when component mounts or when user
@@ -95,7 +83,7 @@ class ProjectListing extends Component {
         const { isFetching, deleteError, editError, envs, fetchError, projects } = this.props;
         let content = null;
         if (isFetching) {
-            content = (<ContentSpinner />)
+            content = <ContentSpinner text='Loading Projects ...'/>;
         } else if (fetchError) {
             content = (<ErrorMessage
                 title="Error while loading project list"
@@ -115,7 +103,7 @@ class ProjectListing extends Component {
             let rows = [];
             for (let i = 0; i < projects.length; i++) {
                 const pj = projects[i];
-                const link = baseHref + 'projects/' + pj.id;
+                const link = pageUrl(pj.id);
                 rows.push(<Table.Row key={pj.id}>
                     <Table.Cell className={'resource'}>
                         <a className={'resource-link'} href={link}>{pj.name}</a>
@@ -145,61 +133,30 @@ class ProjectListing extends Component {
             // display a modal dialog for the user to either confirm (or cancel)
             // project deletion or enter the new Pproject name. It is assumed
             // that at most one of the two values is non-null.
-            const { deleteProject, editProject, projectName } = this.state
+            const { deleteProject, editProject } = this.state
             let modal = null;
             if (deleteProject) {
                 modal = (
-                    <Modal open={true} basic size='small'>
-                        <Header icon='trash' content='Delete Project' />
-                        <Modal.Content>
-                            <p>Do you really want to delete '{deleteProject.name}'?</p>
-                        </Modal.Content>
-                        <Modal.Actions>
-                            <Button basic color='red' inverted onClick={this.hideModals}>
-                                <Icon name='remove' /> No
-                            </Button>
-                            <Button
-                                color='green'
-                                inverted
-                                onClick={(event) => {
-                                    event.preventDefault()
-                                    this.confirmDeleteProject(deleteProject.links.delete)
-                                }}
-                            >
-                                <Icon name='checkmark' /> Yes
-                            </Button>
-                        </Modal.Actions>
-                    </Modal>
+                    <DeleteResourceModal
+                        open={true}
+                        prompt={'Do you really want to delete ' + deleteProject.name + '?'}
+                        title='Delete Project'
+                        value={deleteProject}
+                        onCancel={this.hideModals}
+                        onSubmit={this.confirmDeleteProject}
+                    />
                 );
             } else if (editProject) {
                 modal = (
-                        <Modal open={true} size={'small'}>
-                            <Modal.Header>{'Enter a new project name ...'}</Modal.Header>
-                            <Modal.Content>
-                                <div className="resource-name">
-                                    <Input
-                                        autoFocus
-                                        className="resource-name-input"
-                                        value={projectName}
-                                        onChange={this.handleProjectNameChange}
-                                        onKeyDown={this.handleProjectNameKeyDown}
-                                    />
-                                </div>
-                            </Modal.Content>
-                            <Modal.Actions>
-                                <Button  negative onClick={this.hideModals}>
-                                    Cancel
-                                </Button>
-                                <Button
-                                    positive
-                                    icon='checkmark'
-                                    labelPosition='right'
-                                    content="Rename"
-                                    onClick={this.submitProjectNameUpdate}
-                                />
-                            </Modal.Actions>
-                        </Modal>
-                    );
+                    <EditResourceNameModal
+                        isValid={isNotEmptyString}
+                        open={true}
+                        title='Enter a new project name ...'
+                        value={editProject.name}
+                        onCancel={this.hideModals}
+                        onSubmit={this.submitProjectNameUpdate}
+                    />
+                );
             }
             // Display an error message generated while deleting or updating a
             // project. The message is shown at the bottom of the project
@@ -209,13 +166,13 @@ class ProjectListing extends Component {
                 projectActionErrorMessage = (<ErrorMessage
                     title="Error while deleting project"
                     message={deleteError}
-                    handleDismiss={this.clearDeleteProjectError}
+                    onDismiss={this.clearDeleteProjectError}
                 />)
             } else if (editError) {
                 projectActionErrorMessage = (<ErrorMessage
                     title="Error while updating project name"
                     message={editError}
-                    handleDismiss={this.clearEditProjectError}
+                    onDismiss={this.clearEditProjectError}
                 />)
             }
             content = (
@@ -251,21 +208,21 @@ class ProjectListing extends Component {
      * Show modal to confirm project deletion.
      */
     showDeleteProjectModal = (project) => {
-        this.setState({deleteProject: project, editProject: null, projectName: ''})
+        this.setState({deleteProject: project, editProject: null})
     }
     /**
      * Show modal to edit project name.
      */
     showEditProjectModal = (project) => {
-        this.setState({deleteProject: null, editProject: project, projectName: project.name})
+        this.setState({deleteProject: null, editProject: project})
     }
     /**
     * Submit the update file name request.
     */
-   submitProjectNameUpdate = () => {
+   submitProjectNameUpdate = (name) => {
        const {dispatch } = this.props
-       const { editProject, projectName } = this.state
-       dispatch(updateProjectNameInListing(editProject.links.update, projectName))
+       const { editProject } = this.state
+       dispatch(updateProjectNameInListing(editProject, name))
        this.hideModals()
    }
 }

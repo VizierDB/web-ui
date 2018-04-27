@@ -1,0 +1,14 @@
+/*
+ * Link Sharing
+ */
+
+p.share-header {
+    color: #888;
+    font-size: 0.9em;
+    margin-bottom: 5px;
+    padding-bottom: 0px;
+}
+
+p.share-link {
+    font-size: 0.95em;
+}
