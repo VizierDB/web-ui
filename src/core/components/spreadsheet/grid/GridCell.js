@@ -5,6 +5,7 @@ import GridInput from './GridInput';
 
 class GridCell extends React.Component {
     static propTypes = {
+        annotations: PropTypes.array,
         column: PropTypes.object.isRequired,
         columnIndex: PropTypes.number.isRequired,
         isActive: PropTypes.bool.isRequired,
@@ -48,12 +49,22 @@ class GridCell extends React.Component {
         }
     }
     render() {
-        const { isActive, isUpdating, value } = this.props;
+        const { annotations, isActive, isUpdating, value, onUpdate } = this.props;
         // The cell style depends on whether the column is active or not.
         let cellCss = 'grid-cell';
-        let cellValue = null;
         if (isActive) {
             cellCss += ' active';
+        } else if (isUpdating) {
+            cellCss += ' updating';
+        }
+        if ((annotations != null) && ((!isActive) || (onUpdate == null))) {
+            if (annotations.find(key => ((key === 'mimir:uncertain') || (key === 'user:comment')))) {
+                cellCss += ' highlight';
+            }
+        }
+        // The cell value depends on whether the cell is active and updatable
+        let cellValue = null;
+        if ((isActive) && (onUpdate != null)) {
             cellValue = (
                 <GridInput
                     cellValue={value}
@@ -61,9 +72,6 @@ class GridCell extends React.Component {
                     onUpdate={this.handleChange}
                 />
             );
-        } else if (isUpdating) {
-            cellCss += ' updating';
-            cellValue = (<div className='cell-value'>{value}</div>);
         } else {
             cellValue = (<div className='cell-value'>{value}</div>);
         }

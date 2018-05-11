@@ -73,7 +73,7 @@ class GridInput extends React.Component {
         el.focus();
         // At the moment we select the full value. Could set the cursor to the
         // end alternatively.
-        el.setSelectionRange(0, value.length);
+        el.setSelectionRange(0, value.toString().length);
     }
     /**
      * Show a text control to edit the cell value.

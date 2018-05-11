@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {
     deleteNotebookCell, insertNotebookCell, replaceNotebookCell, showCellChart,
-    showCellDataset, showCellStdout
+    showCellAnnotations, showCellDataset, showCellStdout
 } from '../../actions/notebook/Notebook';
 import { createBranch } from '../../actions/project/Branch';
 import EditableNotebookCell from '../../components/notebook/EditableNotebookCell';
@@ -76,6 +76,14 @@ class Notebook extends React.Component {
         dispatch(showCellDataset(notebook, module, name, url));
     }
     /**
+     * Handle select cell event for dataset output. Load the annotations for the
+     * specified cell.
+     */
+    handleSelectCell = (module, dataset, columnId, rowId) => {
+        const { dispatch, notebook } = this.props;
+        dispatch(showCellAnnotations(notebook, module, dataset, columnId, rowId));
+    }
+    /**
      * Display a list of notebook cells. Insert placeholders for new cells
      * inbetween cells that represent workflow modules (only if workflow is
      * not read only).
@@ -100,6 +108,7 @@ class Notebook extends React.Component {
                         onCreateBranch={this.createBranch}
                         onNavigateDataset={this.navigateDataset}
                         onOutputSelect={this.selectOutput}
+                        onSelectCell={this.handleSelectCell}
                     />
                 );
             }
@@ -113,6 +122,7 @@ class Notebook extends React.Component {
                     datasets={datasets}
                     env={project.environment}
                     isEmptyNotebook={isEmptyNotebook}
+                    onSelectCell={this.handleSelectCell}
                     onSubmit={this.submitUpdate}
                 />
             );
@@ -128,6 +138,7 @@ class Notebook extends React.Component {
                             sequenceIndex={i + 1}
                             onNavigateDataset={this.navigateDataset}
                             onOutputSelect={this.selectOutput}
+                            onSelectCell={this.handleSelectCell}
                         />
                     );
                 } else {
@@ -145,6 +156,7 @@ class Notebook extends React.Component {
                             onDeleteModule={this.deleteModule}
                             onNavigateDataset={this.navigateDataset}
                             onOutputSelect={this.selectOutput}
+                            onSelectCell={this.handleSelectCell}
                             onSubmit={this.submitUpdate}
                         />
                     );
@@ -160,6 +172,7 @@ class Notebook extends React.Component {
                             datasets={datasets}
                             env={project.environment}
                             isEmptyNotebook={isEmptyNotebook}
+                            onSelectCell={this.handleSelectCell}
                             onSubmit={this.submitUpdate}
                         />
                     );

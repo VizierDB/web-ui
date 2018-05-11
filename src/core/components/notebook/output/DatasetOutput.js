@@ -15,11 +15,13 @@ import '../../../../css/Spreadsheet.css'
  */
 class DatasetOutput extends React.Component {
     static propTypes = {
+        activeCell: PropTypes.object.isRequired,
         dataset: PropTypes.object.isRequired,
-        onNavigate: PropTypes.func.isRequired
+        onNavigate: PropTypes.func.isRequired,
+        onSelectCell: PropTypes.func.isRequired
     }
     render() {
-        const { dataset, onNavigate } = this.props;
+        const { activeCell, dataset, onNavigate, onSelectCell } = this.props;
         const columns = dataset.columns;
         // Grid header
         let header = [<RowIndexCell key={-1} value=' ' />];
@@ -44,11 +46,14 @@ class DatasetOutput extends React.Component {
                 cells.push(
                     <GridCell
                         key={'C' + column.id + 'R' + row.id}
+                        annotations={dataset.getAnnotations(column.id, row.id)}
                         column={column}
                         columnIndex={cidx}
                         rowId={row.id}
                         rowIndex={ridx}
+                        isActive={activeCell.isActive(column.id, row.id)}
                         value={row.values[cidx]}
+                        onClick={onSelectCell}
                     />
                 );
             }

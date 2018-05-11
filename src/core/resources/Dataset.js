@@ -56,8 +56,14 @@ export class DatasetHandle {
         this.rows = json.rows;
         this.offset = json.offset;
         this.links = new HATEOASReferences(json.links);
+        this.annotations = {};
         if (json.annotations) {
-            this.annotations = json.annotations;
+            // Convert annotations to associative array with cell columnid_rowid
+            for (let i = 0; i < json.annotations.length; i++) {
+                const anno = json.annotations[i];
+                const key = anno.column + '_' + anno.row;
+                this.annotations[key] = anno.types;
+            }
         }
         return this;
     }
@@ -66,22 +72,13 @@ export class DatasetHandle {
      * row identifier. If there are no annotations for the given cell the result
      * is null.
      */
-    getCellAnnotations(columnId, rowId) {
-        if (this.annotations == null) {
-            return null;
-        }
-        const annoList = this.annotations.find(
-            anno => ((anno.column === columnId) && (anno.row === rowId))
-        )
-        if (annoList) {
-            const anno = {}
-            for (let i = 0; i < annoList.annotations.length; i++) {
-                const kvp = annoList.annotations[i]
-                anno[kvp.key] = kvp.value
-            }
-            return anno
-        } else {
-            return null
-        }
+    getAnnotations(columnId, rowId) {
+        return this.annotations[columnId + '_' + rowId];
+    }
+    /**
+     * Test if there exist annotations for a given dataset cell
+     */
+    hasAnnotations(columnId, rowId) {
+        return (this.annotations[columnId + '_' + rowId] != null);
     }
 }

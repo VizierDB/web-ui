@@ -2,6 +2,9 @@ import {
     projectActionError, receiveProjectResource, requestProjectAction,
     updateResource, updateWorkflowResource
 } from '../project/ProjectPage';
+import {
+    CellAnnotation, NoAnnotation, IsFetching, FetchError, AnnotationList
+} from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
 import {
     Notebook, OutputChart, OutputDataset, OutputError, OutputText
@@ -89,6 +92,47 @@ export const showCellChart = (notebook, module, name) => (dispatch) => {
             )
         }
     }
+}
+
+
+/**
+ * Load annotations for a given dataset cell to be displayed in a notebook cell.
+ * If columnId or rowId are negative a shown annotation is discarded instead.
+ */
+export const showCellAnnotations = (notebook, module, dataset, columnId, rowId) => (dispatch) => {
+    if ((columnId < 0) || (rowId < 0)) {
+        return dispatch(setCellAnnotations(notebook, module, new NoAnnotation()));
+    } else {
+        return dispatch(
+            fetchResource(
+                dataset.links.annotations + '?column=' + columnId + '&row=' + rowId,
+                (json) => {
+                    const content = new AnnotationList(json['annotations'])
+                    const annotation = new CellAnnotation(columnId, rowId, content);
+                    return setCellAnnotations(notebook, module, annotation);
+                },
+                (message) => {
+                    const err = new FetchError('Error loading annotations', message);
+                    const annotation = new CellAnnotation(columnId, rowId, err);
+                    return setCellAnnotations(notebook, module, annotation);
+                },
+                () => (setCellAnnotations(notebook, module, new CellAnnotation(columnId, rowId, new IsFetching())))
+            )
+        )
+    }
+}
+
+
+/**
+ * Set the annotation object for a given notebook module.
+ */
+const setCellAnnotations = (notebook, module, annotation) => (dispatch) => {
+    dispatch(updateResource(
+            new NotebookResource(
+                notebook.showAnnotations(module.id, annotation)
+            )
+        )
+    );
 }
 
 

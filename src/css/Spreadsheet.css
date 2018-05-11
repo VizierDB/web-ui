@@ -40,6 +40,11 @@ td.grid-cell.active {
     border: 2px solid #4285f4;
 }
 
+td.grid-cell.highlight {
+    background: #f7faff;
+    color: #004b87;
+}
+
 td.grid-cell.updating {
     background: #fff;
     border: 2px solid transparent;

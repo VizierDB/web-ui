@@ -16,7 +16,8 @@ class ReadOnlyNotebookCell extends React.Component {
         sequenceIndex: PropTypes.number,
         onCreateBranch: PropTypes.func,
         onNavigateDataset: PropTypes.func,
-        onOutputSelect: PropTypes.func
+        onOutputSelect: PropTypes.func,
+        onSelectCell: PropTypes.func
     }
     render() {
         const {
@@ -25,7 +26,8 @@ class ReadOnlyNotebookCell extends React.Component {
             sequenceIndex,
             onCreateBranch,
             onNavigateDataset,
-            onOutputSelect
+            onOutputSelect,
+            onSelectCell
         } = this.props;
         const { module, output } = cell;
         // The input area is read-only.
@@ -42,10 +44,12 @@ class ReadOnlyNotebookCell extends React.Component {
         if ((!errorState) || (module.stdout.length > 0) || (module.stderr.length > 0)) {
             outputArea = (
                 <CellOutputArea
+                    activeDatasetCell={cell.activeDatasetCell}
                     module={module}
                     output={output}
                     onOutputSelect={onOutputSelect}
                     onNavigateDataset={onNavigateDataset}
+                    onSelectCell={onSelectCell}
                 />
             );
         }

@@ -1,3 +1,4 @@
+import { NoAnnotation } from './Annotation';
 import { ChartDescriptor } from './Chart';
 import { DatasetDescriptor } from './Dataset';
 import { HATEOASReferences } from '../util/HATEOAS';
@@ -158,6 +159,19 @@ export class Notebook {
         }
         return new Notebook(modCells);
     }
+    showAnnotations(moduleId, annotation) {
+        // Modified list of notebook cells
+        const modCells = [];
+        for (let i = 0; i < this.cells.length; i++) {
+            const cell = this.cells[i];
+            if (cell.module.id === moduleId) {
+                modCells.push(new NotebookCell(cell.module, cell.output, annotation));
+            } else {
+                modCells.push(cell);
+            }
+        }
+        return new Notebook(modCells);
+    }
     /**
      * Set the isFetching flag in the notebook cell that that contains the
      * module with the given id. Returns a modified copy of the notebook.
@@ -189,9 +203,15 @@ export class Notebook {
  * output area.
  */
 class NotebookCell {
-    constructor(module, output) {
+    constructor(module, output, annotationObject) {
         this.module = module;
         this.output = output;
+        if (annotationObject != null) {
+            this.activeDatasetCell = annotationObject
+        } else {
+            this.activeDatasetCell = new NoAnnotation();
+        }
+
     }
     hasError() {
         if (this.module != null) {

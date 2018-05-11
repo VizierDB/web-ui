@@ -1,8 +1,9 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
 import { Dimmer, Loader } from 'semantic-ui-react';
-import { IconButton } from '../../../components/Button';
-import { ErrorMessage } from '../../../components/Message';
+import AnnotationObject from '../../annotation/AnnotationObject';
+import { IconButton } from '../..//Button';
+import { ErrorMessage } from '../../Message';
 import DatasetChart from '../../plot/DatasetChart';
 import DatasetOutput from './DatasetOutput';
 import TextOutput from './TextOutput';
@@ -20,11 +21,20 @@ import '../../../../css/Notebook.css';
  */
 class CellOutputArea extends React.Component {
     static propTypes = {
+        activeDatasetCell: PropTypes.object.isRequired,
         module: PropTypes.object.isRequired,
         output: PropTypes.object.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
-        onNavigateDataset: PropTypes.func.isRequired
+        onNavigateDataset: PropTypes.func.isRequired,
+        onSelectCell: PropTypes.func.isRequired
     };
+    /**
+     * Discard a displayed annotation.
+     */
+    handleDiscardAnnotation = () => {
+        const { module, output, onSelectCell } = this.props;
+        onSelectCell(module, output.content.dataset, -1, -1);
+    }
     /**
      * Simulate user selecting console output when dismissing an error message
      * or an ouput resource.
@@ -41,8 +51,17 @@ class CellOutputArea extends React.Component {
         const { module, output, onNavigateDataset} = this.props;
         onNavigateDataset(url, module, output.content.name);
     }
+    handleSelectCell = (columnId, rowId) => {
+        const { module, output, onSelectCell } = this.props;
+        const dataset = output.content.dataset;
+        if (dataset.hasAnnotations(columnId, rowId)) {
+            onSelectCell(module, dataset, columnId, rowId);
+        } else {
+            onSelectCell(module, dataset, -1, -1);
+        }
+    }
     render() {
-        const { module, output, onOutputSelect } = this.props;
+        const { activeDatasetCell, module, output, onOutputSelect } = this.props;
         // Only show an output selector if there are datasets or views, no
         // errors, and fetching is not in progress.
         let outputSelector = null;
@@ -102,9 +121,15 @@ class CellOutputArea extends React.Component {
                                 {output.content.name}
                             </span>
                             { homeButton}
+                            <AnnotationObject
+                                annotation={activeDatasetCell}
+                                onDiscard={this.handleDiscardAnnotation}
+                            />
                             <DatasetOutput
+                                activeCell={activeDatasetCell}
                                 dataset={output.content.dataset}
                                 onNavigate={this.handleNavigateDataset}
+                                onSelectCell={this.handleSelectCell}
                             />
                         </div>
                     );

@@ -39,6 +39,7 @@ class EditableNotebookCell extends React.Component {
         onDeleteModule: PropTypes.func,
         onNavigateDataset: PropTypes.func,
         onOutputSelect: PropTypes.func,
+        onSelectCell: PropTypes.func,
         onSubmit: PropTypes.func.isRequired
     }
     constructor(props) {
@@ -76,7 +77,8 @@ class EditableNotebookCell extends React.Component {
     render() {
         const {
             cell, cellId, datasets, env, isEmptyNotebook,
-            sequenceIndex, onNavigateDataset, onOutputSelect, onSubmit
+            sequenceIndex, onNavigateDataset, onOutputSelect, onSelectCell,
+            onSubmit
         } = this.props;
         let module = null;
         let hasError = false;
@@ -155,10 +157,12 @@ class EditableNotebookCell extends React.Component {
         if (cell != null) {
             outputArea = (
                 <CellOutputArea
+                    activeDatasetCell={cell.activeDatasetCell}
                     module={module}
                     output={cell.output}
                     onOutputSelect={onOutputSelect}
                     onNavigateDataset={onNavigateDataset}
+                    onSelectCell={onSelectCell}
                 />
             );
         }

@@ -1,8 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Dimmer, Loader } from 'semantic-ui-react';
-import { showSpreadsheet, submitUpdate } from '../../actions/spreadsheet/Spreadsheet';
+import { Dimmer, Icon, Loader } from 'semantic-ui-react';
+import {
+    clearAnnotations, fetchAnnotations, showSpreadsheet, submitUpdate,
+    updateAnnotations
+} from '../../actions/spreadsheet/Spreadsheet';
+import AnnotationObject from '../../components/annotation/AnnotationObject';
 import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
 import SpreadsheetNavbar from '../../components/spreadsheet/SpreadsheetNavbar';
 import GridCell from '../../components/spreadsheet/grid/GridCell';
@@ -13,6 +17,7 @@ import {
     VIZUAL, deleteColumn, deleteRow, insertColumn, insertRow, moveColumn,
     moveRow,  renameColumn, updateCell
 } from '../../util/Vizual';
+import '../../../css/App.css';
 import '../../../css/Spreadsheet.css';
 
 /**
@@ -21,6 +26,7 @@ import '../../../css/Spreadsheet.css';
  */
 class Spreadsheet extends React.Component {
     static propTypes = {
+        annotations: PropTypes.object,
         dataset: PropTypes.object,
         isUpdating: PropTypes.bool.isRequired,
         project: PropTypes.object.isRequired,
@@ -75,6 +81,13 @@ class Spreadsheet extends React.Component {
             originalCellValue: null,
             updatedCellValue: null
         });
+    }
+    /**
+     * Dismiss an open cell annotations modal.
+     */
+    dismissAnnotationModal = () => {
+        const { dispatch } = this.props;
+        dispatch(clearAnnotations());
     }
     /**
      * Dismiss any open modals.
@@ -246,7 +259,7 @@ class Spreadsheet extends React.Component {
      * Render the spreadsheet as a Html table.
      */
     render() {
-        const { dataset, isUpdating, workflow } = this.props;
+        const { annotations, dataset, isUpdating, workflow } = this.props;
         const {
             activeColumnId,
             activeRowId,
@@ -321,6 +334,7 @@ class Spreadsheet extends React.Component {
                 cells.push(
                     <GridCell
                         key={'C' + column.id + 'R' + row.id}
+                        annotations={dataset.annotations[column.id + '_' + row.id]}
                         column={column}
                         columnIndex={cidx}
                         isActive={(!isUpdating) && (isActive)}
@@ -336,9 +350,27 @@ class Spreadsheet extends React.Component {
             }
             rows.push(<tr key={row.id}>{cells}</tr>);
         }
+        let showAnnoHandler = null;
+        if ((activeColumnId >= 0) && (activeRowId >= 0)) {
+            showAnnoHandler = this.showAnnotationModal;
+        }
         return (
             <div className='spreadsheet-container'>
-                <h1 className='dataset-name'>{dataset.name}</h1>
+                <h1 className='dataset-name'>
+                    {dataset.name}
+                    <span className='left-padding-md'>
+                        <Icon
+                            name='talk outline'
+                            disabled={showAnnoHandler === null}
+                            onClick={showAnnoHandler}
+                        />
+                    </span>
+                </h1>
+                <AnnotationObject
+                    annotation={annotations}
+                    onDiscard={this.dismissAnnotationModal}
+                    onSubmit={this.submitUserAnnotation}
+                />
                 <Dimmer.Dimmable dimmed={isUpdating}>
                     <Loader active={isUpdating}/>
                     <table className='spreadsheet'>
@@ -356,6 +388,14 @@ class Spreadsheet extends React.Component {
                 {this.showModal()}
             </div>
         );
+    }
+    /**
+     * Show the annotations modal for the current active cell.
+     */
+    showAnnotationModal = () => {
+        const { dispatch, dataset } = this.props;
+        const { activeColumnId, activeRowId } = this.state;
+        dispatch(fetchAnnotations(dataset, activeColumnId, activeRowId));
     }
     /**
      * Show modal if the internal state .modal value is set.
@@ -438,6 +478,10 @@ class Spreadsheet extends React.Component {
             }
         }
     }
+    submitUserAnnotation = (annotation, value) => {
+        const { dispatch, dataset } = this.props;
+        dispatch(updateAnnotations(dataset, annotation.column, annotation.row, value));
+    }
     submitVizualCommand = (cmd) => {
         const { dispatch, dataset, workflow } = this.props;
         // Clear any active cells without submitting potential changes
@@ -459,6 +503,7 @@ class Spreadsheet extends React.Component {
 
 const mapStateToProps = state => {
     return {
+        annotations: state.spreadsheet.annotations,
         dataset: state.spreadsheet.dataset,
         isUpdating: state.spreadsheet.isUpdating,
         opError: state.spreadsheet.opError,
