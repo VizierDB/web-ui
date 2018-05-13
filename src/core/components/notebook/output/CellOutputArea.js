@@ -81,7 +81,7 @@ class CellOutputArea extends React.Component {
         // messages
         let outputContent = null;
         if (module.stderr.length > 0) {
-            const lines = OutputText(module.stderr).content.lines;
+            const lines = OutputText(module.stdout.concat(module.stderr)).content.lines;
             outputContent = <TextOutput isError={true} lines={lines} />;
         } else {
             if (output.isError()) {
