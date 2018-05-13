@@ -6,7 +6,7 @@ import {
     PROJECT_ACTION_ERROR, RECEIVE_PROJECT_RESOURCE, UPDATE_WORKFLOW
 } from '../../actions/project/ProjectPage';
 import {
-    SET_ANNOTATIONS, SUBMIT_UPDATE_REQUEST
+    SET_ANNOTATIONS, SUBMIT_UPDATE_REQUEST, UPDATE_DATASET_ANNOTATIONS
 } from '../../actions/spreadsheet/Spreadsheet';
 import { NoAnnotation } from '../../resources/Annotation';
 
@@ -49,6 +49,8 @@ export const spreadsheet = (state = INITIAL_STATE, action) => {
             return {...state, annotations: action.annotations};
         case SUBMIT_UPDATE_REQUEST:
             return {...state, isUpdating: true};
+        case UPDATE_DATASET_ANNOTATIONS:
+            return {...state, dataset: action.dataset};
         default:
             return state
     }

@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Dimmer, Icon, Loader } from 'semantic-ui-react';
 import {
-    clearAnnotations, fetchAnnotations, showSpreadsheet, submitUpdate,
-    updateAnnotations
+    clearAnnotations, deleteAnnotations, fetchAnnotations, showSpreadsheet,
+    submitUpdate, updateAnnotations
 } from '../../actions/spreadsheet/Spreadsheet';
 import AnnotationObject from '../../components/annotation/AnnotationObject';
 import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
@@ -81,6 +81,11 @@ class Spreadsheet extends React.Component {
             originalCellValue: null,
             updatedCellValue: null
         });
+    }
+    deleteUserAnnotation = (annotation, annoId) => {
+        const { dispatch, dataset } = this.props;
+        const { column, row } = annotation;
+        dispatch(deleteAnnotations(dataset, column, row, annoId));
     }
     /**
      * Dismiss an open cell annotations modal.
@@ -334,9 +339,9 @@ class Spreadsheet extends React.Component {
                 cells.push(
                     <GridCell
                         key={'C' + column.id + 'R' + row.id}
-                        annotations={dataset.annotations[column.id + '_' + row.id]}
                         column={column}
                         columnIndex={cidx}
+                        hasAnnotations={dataset.hasAnnotations(column.id, row.id)}
                         isActive={(!isUpdating) && (isActive)}
                         isUpdating={isBlocked}
                         rowId={row.id}
@@ -368,6 +373,7 @@ class Spreadsheet extends React.Component {
                 </h1>
                 <AnnotationObject
                     annotation={annotations}
+                    onDelete={this.deleteUserAnnotation}
                     onDiscard={this.dismissAnnotationModal}
                     onSubmit={this.submitUserAnnotation}
                 />
@@ -478,9 +484,10 @@ class Spreadsheet extends React.Component {
             }
         }
     }
-    submitUserAnnotation = (annotation, value) => {
+    submitUserAnnotation = (annotation, key, value) => {
         const { dispatch, dataset } = this.props;
-        dispatch(updateAnnotations(dataset, annotation.column, annotation.row, value));
+        const { column, row } = annotation;
+        dispatch(updateAnnotations(dataset, column, row, key, value));
     }
     submitVizualCommand = (cmd) => {
         const { dispatch, dataset, workflow } = this.props;

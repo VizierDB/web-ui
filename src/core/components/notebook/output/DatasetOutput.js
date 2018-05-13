@@ -46,12 +46,12 @@ class DatasetOutput extends React.Component {
                 cells.push(
                     <GridCell
                         key={'C' + column.id + 'R' + row.id}
-                        annotations={dataset.getAnnotations(column.id, row.id)}
                         column={column}
                         columnIndex={cidx}
+                        hasAnnotations={dataset.hasAnnotations(column.id, row.id)}
+                        isActive={activeCell.isActive(column.id, row.id)}
                         rowId={row.id}
                         rowIndex={ridx}
-                        isActive={activeCell.isActive(column.id, row.id)}
                         value={row.values[cidx]}
                         onClick={onSelectCell}
                     />

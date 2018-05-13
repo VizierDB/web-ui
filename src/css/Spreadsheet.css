@@ -41,8 +41,8 @@ td.grid-cell.active {
 }
 
 td.grid-cell.highlight {
-    background: #f7faff;
-    color: #004b87;
+    background: #eff2fc;
+    color: #1e22aa;
 }
 
 td.grid-cell.updating {

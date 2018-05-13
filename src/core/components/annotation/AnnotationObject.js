@@ -1,6 +1,6 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
-import { Button, Grid, Input, List, Loader, Modal, Message } from 'semantic-ui-react';
+import { Button, Dropdown, Grid, Icon, Input, List, Loader, Modal, Message } from 'semantic-ui-react';
 import { IconButton } from '../Button'
 import '../../../css/Annotation.css';
 import '../../../css/App.css';
@@ -8,18 +8,38 @@ import '../../../css/App.css';
 class AnnotationObject extends React.Component {
     static propTypes = {
         annotation: PropTypes.object.isRequired,
+        onDelete: PropTypes.func,
         onDiscard: PropTypes.func.isRequired,
         onSubmit: PropTypes.func
     }
     constructor(props) {
         super(props);
-        this.state = {value: ''};
+        this.keys = [
+            { key: 'user:comment', text: 'Comment', value: 'user:comment' },
+            { key: 'user:issue', text: 'Issue', value: 'user:issue' },
+        ];
+        this.state = {key: 'user:comment', value: '', selectedAnnotation: -1};
+    }
+    handleDelete = () => {
+        const { annotation, onDelete } = this.props;
+        const { selectedAnnotation } = this.state;
+        onDelete(annotation, selectedAnnotation);
+        // Make sure to clear the selected item
+        this.setState({selectedAnnotation: -1});
     }
     /**
      * Handle changes in the form control element by updating the internal state.
      */
     handleChange = (event) => {
         this.setState({value: event.target.value});
+    }
+    /**
+     * Clear the selected items and text input when closing the modal.
+     */
+    handleClose = () => {
+        const { onDiscard } = this.props;
+        this.setState({key: 'user:comment', value: '', selectedAnnotation: -1});
+        onDiscard()
     }
     /**
      * Detect RETURN key press to submit form.
@@ -29,16 +49,28 @@ class AnnotationObject extends React.Component {
             this.handleSubmit();
         }
     }
+    handleSelectAnnotation = (e, { id }) => {
+        const { selectedAnnotation } = this.state;
+        if (selectedAnnotation === id) {
+            this.setState({selectedAnnotation: -1});
+        } else {
+            this.setState({selectedAnnotation: id});
+        }
+    }
+    handleSelectKey = (e, { value }) => {
+        this.setState({key: value});
+    }
     handleSubmit = () => {
         const { annotation, onSubmit } = this.props;
-        const { value } = this.state;
+        const { key, value } = this.state;
         if (value.trim() !== '') {
-            onSubmit(annotation, value);
+            onSubmit(annotation, key, value);
         }
-        this.setState({value: ''});
+        this.setState({value: '', selectedAnnotation: -1});
     }
     render() {
-        const { annotation, onDiscard, onSubmit } = this.props;
+        const { annotation, onDelete, onSubmit } = this.props;
+        const { selectedAnnotation } = this.state;
         if (annotation.content != null) {
             let content = null;
             if (annotation.content.isFetching()) {
@@ -52,32 +84,64 @@ class AnnotationObject extends React.Component {
                 );
             } else {
                 if (annotation.content.items.length > 0) {
-                    const listItems = [];
+                    const rows = [];
                     for (let i = 0; i < annotation.content.items.length; i++) {
                         const anno = annotation.content.items[i];
+                        let color = null;
                         let icon = null;
                         let title = null;
                         if (anno.key === 'mimir:uncertain') {
                             icon = 'warning sign';
                             title = 'Mimir';
+                            color = 'yellow';
+                        } else if (anno.key === 'user:issue') {
+                            icon = 'info circle';
+                            title = 'Issue';
                         } else {
                             icon = 'talk outline';
                             title = 'Comment';
                         }
-                        listItems.push(
-                            <List.Item key={i}>
-                              <List.Icon name={icon} size='large' verticalAlign='middle' />
-                              <List.Content>
-                                <List.Header>{title}</List.Header>
-                                <List.Description>{anno.value}</List.Description>
-                              </List.Content>
-                            </List.Item>
+                        let cssSuffix = '';
+                        if ((anno.key === 'mimir:uncertain') || (onSubmit == null)) {
+                            cssSuffix = ' disabled';
+                        }
+                        let annoIcon = null;
+                        if ((onDelete != null) && (anno.key !== 'mimir:uncertain') && (anno.id === selectedAnnotation)) {
+                            annoIcon = (
+                                <Icon
+                                    name='trash'
+                                    size='large'
+                                    onClick={this.handleDelete}
+                                />
+                            );
+                            cssSuffix = ' delete';
+                        } else {
+                            annoIcon = (<Icon name={icon} size='large' color={color}/>);
+                        }
+                        rows.push(
+                            <tr key={i}>
+                                <td className={'list-icon' + cssSuffix}>
+                                    { annoIcon }
+                                </td>
+                                <td className={'list-text' + cssSuffix}>
+                                    <List relaxed>
+                                        <List.Item id={anno.id} onClick={this.handleSelectAnnotation}>
+                                          <List.Content>
+                                            <List.Header>{title}</List.Header>
+                                            <List.Description>
+                                                {anno.value}
+                                                </List.Description>
+                                          </List.Content>
+                                        </List.Item>
+                                    </List>
+                                </td>
+                            </tr>
                         );
                     }
                     content = (
-                        <List divided relaxed>
-                            { listItems }
-                        </List>
+                        <table className='annotations'><tbody>
+                            { rows }
+                        </tbody></table>
                     );
                 } else {
                     content = (
@@ -93,7 +157,11 @@ class AnnotationObject extends React.Component {
                     <Modal.Actions>
                         <Input
                             fluid
-                            label='Comment'
+                            label={<Dropdown
+                                defaultValue='user:comment'
+                                options={this.keys}
+                                onChange={this.handleSelectKey}
+                            />}
                             action={<Button
                                 color='green'
                                 icon='plus'
@@ -117,7 +185,7 @@ class AnnotationObject extends React.Component {
                                 </Grid.Column>
                                 <Grid.Column>
                                     <div className='header-button'>
-                                        <IconButton name="close" onClick={onDiscard}/>
+                                        <IconButton name="close" onClick={this.handleClose}/>
                                     </div>
                                 </Grid.Column>
                             </Grid.Row>

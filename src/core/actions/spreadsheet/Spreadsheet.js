@@ -16,6 +16,9 @@ import { fetchResource, postResourceData } from '../../util/Api';
 export const SUBMIT_UPDATE_REQUEST = 'SUBMIT_UPDATE_REQUEST';
 // Set the cell annotation object for a selected dataset cell
 export const SET_ANNOTATIONS = 'SET_ANNOTATIONS';
+// Signal an update to the datasets annotations
+export const UPDATE_DATASET_ANNOTATIONS = 'UPDATE_DATASET_ANNOTATIONS'
+
 
 /**
  * Show a spreadsheet as the content of the project page. The url parameter is
@@ -130,6 +133,22 @@ export const submitUpdateRequest = () => ({
  */
 export const clearAnnotations = () => (setAnnotations(new NoAnnotation()));
 
+export const deleteAnnotations = (dataset, columnId, rowId, annoId) => (dispatch) => {
+    const data = {
+        columnId,
+        rowId,
+        annoId
+    }
+    return postUpdateRequest(
+        dispatch,
+        dataset.links.annotations,
+        data,
+        dataset,
+        columnId,
+        rowId
+    );
+}
+
 export const fetchAnnotations = (dataset, columnId, rowId) => (dispatch) => {
     if ((columnId < 0) || (rowId < 0)) {
         return dispatch(clearAnnotations());
@@ -153,25 +172,19 @@ export const fetchAnnotations = (dataset, columnId, rowId) => (dispatch) => {
     }
 }
 
-export const setAnnotations = (annotations) => ({
-    type: SET_ANNOTATIONS,
-    annotations
-})
-
-export const updateAnnotations = (dataset, columnId, rowId, value) => (dispatch) => {
-    const data = {
-        columnId: columnId,
-        rowId: rowId,
-        key: 'user:comment',
-        value: value
-    }
+const postUpdateRequest = (dispatch, url, data, dataset, columnId, rowId) => {
     return postResourceData(
         dispatch,
-        dataset.links.annotations,
+        url,
         data,
         (json) => {
             const content = new AnnotationList(json['annotations'])
             const annotation = new CellAnnotation(columnId, rowId, content);
+            const isAnnotated = (json['annotations'].length > 0);
+            dispatch({
+                type: UPDATE_DATASET_ANNOTATIONS,
+                dataset: dataset.updateAnnotations(columnId, rowId, isAnnotated)
+            });
             return setAnnotations(annotation);
         },
         (message) => {
@@ -180,5 +193,27 @@ export const updateAnnotations = (dataset, columnId, rowId, value) => (dispatch)
             return setAnnotations(annotation);
         },
         () => (setAnnotations(new CellAnnotation(columnId, rowId, new IsFetching())))
+    );
+}
+
+export const setAnnotations = (annotations) => ({
+    type: SET_ANNOTATIONS,
+    annotations
+})
+
+export const updateAnnotations = (dataset, columnId, rowId, key, value) => (dispatch) => {
+    const data = {
+        columnId,
+        rowId,
+        key,
+        value
+    }
+    return postUpdateRequest(
+        dispatch,
+        dataset.links.annotations,
+        data,
+        dataset,
+        columnId,
+        rowId
     );
 }
