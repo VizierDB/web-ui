@@ -31,8 +31,9 @@
 * Add message with file size limit to file upload form
 * Change file listing to include file size and handle missing properties
 
-### 0.4.0 - 2018-04-??
+### 0.4.0 - 2018-05-23
 
 * Add dataset chart views
 * Notebook history and shareable links
 * Redesign project menu, notebook cell output, and spreadsheet view
+* Python cell code snippets for dataset manipulation
