@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Form } from 'semantic-ui-react';
 import { ErrorListMessage } from '../../Message';
-import CodeEditor from './form/CodeEditor';
+import PythonCell from './form/PythonCell';
 import ModuleFormControl from './form/ModuleFormControl';
 import { DT_DATASET_ID, DT_PYTHON_CODE } from './ModuleSpec';
 import '../../../../css/ModuleForm.css';
@@ -77,17 +77,15 @@ class ModuleInputForm extends React.Component {
             return (
                 <div className='code-form'>
                     { error }
-                    <div className='editor-container'>
-                        <Form>
-                            <CodeEditor
-                                key={arg.id}
-                                id={arg.id}
-                                name={arg.id}
-                                value={values[arg.id]}
-                                onChange={onChange}
-                            />
-                        </Form>
-                    </div>
+                    <Form>
+                        <PythonCell
+                            key={arg.id}
+                            id={arg.id}
+                            name={arg.id}
+                            value={values[arg.id]}
+                            onChange={onChange}
+                        />
+                    </Form>
                 </div>
             );
         } else {

@@ -83,7 +83,26 @@ div.code-form {
     margin: 10px 0px;
 }
 
+div.python-examples {
+    font-size: 0.9em;
+    padding: 10px 0px;
+}
 
 div.editor-container {
     border: solid 1px #dedede;
+}
+
+div.snippet-header {
+    cursor: pointer;
+}
+
+div.snippet-header.expanded {
+    margin-bottom: 10px;
+}
+
+div.snippet-selector {
+    background: #fff;
+    border: solid 1px #dedede;
+    border-radius: .28571429rem;
+    padding: 10px 10px 10px 20px;
 }
