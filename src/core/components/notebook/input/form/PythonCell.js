@@ -13,7 +13,9 @@ import '../../../../../css/App.css';
 import '../../../../../css/ModuleForm.css';
 
 
+const ADD_ANNOTATION = 'ADD_ANNOTATION';
 const CREATE_DATASET = 'CREATE_DATASET';
+const DELETE_ANNOTATION = 'DELETE_ANNOTATION';
 const DELETE_COLUMN = 'DELETE_COLUMN';
 const DELETE_DATASET = 'DELETE_DATASET';
 const DELETE_ROW = 'DELETE_ROW';
@@ -21,10 +23,12 @@ const GET_DATASET = 'GET_DATASET';
 const INSERT_COLUMN = 'INSERT_COLUMN';
 const INSERT_ROW = 'INSERT_ROW';
 const NEW_DATASET_OBJECT = 'NEW_DATASET_OBJECT';
+const OUTPUT_ANNOTATIONS = 'OUTPUT_ANNOTATIONS';
 const OUTPUT_COLUMN_NAMES = 'OUTPUT_COLUMN_NAMES';
 const OUTPUT_CELL_VALUES = 'OUTPUT_CELL_VALUES';
 const RENAME_DATASET = 'RENAME_DATASET';
 const UPDATE_CELL_VALUE = 'UPDATE_CELL_VALUE';
+const UPDATE_ANNOTATION = 'UPDATE_ANNOTATION';
 const UPDATE_DATASET = 'UPDATE_DATASET';
 
 
@@ -40,10 +44,27 @@ class CodeSnippetsSelector extends React.Component {
     handleSelect = (e, { value }) => {
         const { onSelect } = this.props;
         let lines = [];
-        if (value === CREATE_DATASET) {
+        if (value === ADD_ANNOTATION) {
+            lines.push('# Add new annotation for dataset cells. Note that rows');
+            lines.push('# and columns are referenced by their unique identifiers.')
+            lines.push('col = ds.columns[ds.column_index(\'name-label-or-index\')]');
+            lines.push('for row in ds.rows:');
+            lines.push('    annos = ds.annotations.for_cell(col.identifier, row.identifier)');
+            lines.push('    if not annos.contains(\'some:key\'):');
+            lines.push('        annos.add(\'some:key\', \'some-value\')');
+        } else if (value === CREATE_DATASET) {
             lines.push('# Create a new dataset in the data store. Expects a');
             lines.push('# dataset object and a unique dataset name.');
             lines.push('vizierdb.create_dataset(\'unique-ds-name\', ds)')
+        } else if (value === DELETE_ANNOTATION) {
+            lines.push('# Delete annotations for dataset cell. Delete is similar to');
+            lines.push('# update. Delete an annotation by setting its value to None.');
+            lines.push('# Rows and columns are referenced by their unique identifiers.')
+            lines.push('col = ds.columns[ds.column_index(\'name-label-or-index\')]');
+            lines.push('for row in ds.rows:');
+            lines.push('    annos = ds.annotations.for_cell(col.identifier, row.identifier)');
+            lines.push('    for a in annos.find_all(\'some:key\'):');
+            lines.push('        annos.update(identifier=a.identifier, value=None)');
         } else if (value === DELETE_COLUMN) {
             lines.push('# Delete dataset column by name (only if column names');
             lines.push('# are unique), spreadsheet label (\'A\', \'B\', ...), or');
@@ -70,6 +91,15 @@ class CodeSnippetsSelector extends React.Component {
         } else if (value === NEW_DATASET_OBJECT) {
             lines.push('# Get object containing an empty dataset.');
             lines.push('ds = vizierdb.new_dataset()');
+        } else if (value === OUTPUT_ANNOTATIONS) {
+            lines.push('# Print all annotations for dataset column. Note that');
+            lines.push('# rows and columns are referenced by their unique identifiers.')
+            lines.push('col = ds.columns[ds.column_index(\'name-label-or-index\')]');
+            lines.push('for row in ds.rows:');
+            lines.push('    annos = ds.annotations.for_cell(col.identifier, row.identifier)');
+            lines.push('    for key in annos.keys():');
+            lines.push('        for a in annos.find_all(key):');
+            lines.push('            print a.key + \' = \' + str(a.value)');
         } else if (value === OUTPUT_COLUMN_NAMES) {
             lines.push('# Iterate over list of dataset columns and print column name');
             lines.push('for col in ds.columns:');
@@ -89,6 +119,14 @@ class CodeSnippetsSelector extends React.Component {
             lines.push('# column index (0, 1, ...).');
             lines.push('for row in ds.rows:');
             lines.push('    row.set_value(\'name-label-or-index\', value)');
+        } else if (value === UPDATE_ANNOTATION) {
+            lines.push('# Update all annotations for dataset cell. Note that');
+            lines.push('# rows and columns are referenced by their unique identifiers.')
+            lines.push('col = ds.columns[ds.column_index(\'name-label-or-index\')]');
+            lines.push('for row in ds.rows:');
+            lines.push('    annos = ds.annotations.for_cell(col.identifier, row.identifier)');
+            lines.push('    for a in annos.find_all(\'some:key\'):');
+            lines.push('        annos.update(identifier=a.identifier, value=\'some-value\')');
         } else if (value === UPDATE_DATASET) {
             lines.push('# Update existing dataset with given name.');
             lines.push('vizierdb.update_dataset(\'unique-ds-name\', ds)');
@@ -114,6 +152,9 @@ class CodeSnippetsSelector extends React.Component {
                                 <List.Item value={OUTPUT_CELL_VALUES} onClick={this.handleSelect}>
                                     <List.Content as='a'>Print Cell Values</List.Content>
                                 </List.Item>
+                                <List.Item value={OUTPUT_ANNOTATIONS} onClick={this.handleSelect}>
+                                    <List.Content as='a'>Print Cell Annotations</List.Content>
+                                </List.Item>
                             </List>
                         </Grid.Column>
                         <Grid.Column width={4} key='new'>
@@ -130,6 +171,9 @@ class CodeSnippetsSelector extends React.Component {
                                 <List.Item value={INSERT_ROW} onClick={this.handleSelect}>
                                     <List.Content as='a'>Insert Row</List.Content>
                                 </List.Item>
+                                <List.Item value={ADD_ANNOTATION} onClick={this.handleSelect}>
+                                    <List.Content as='a'>Annotate Cell Value</List.Content>
+                                </List.Item>
                             </List>
                         </Grid.Column>
                         <Grid.Column width={4} key='update'>
@@ -139,6 +183,9 @@ class CodeSnippetsSelector extends React.Component {
                                 </List.Item>
                                 <List.Item value={UPDATE_CELL_VALUE} onClick={this.handleSelect}>
                                     <List.Content as='a'>Edit Cell Values</List.Content>
+                                </List.Item>
+                                <List.Item value={UPDATE_ANNOTATION} onClick={this.handleSelect}>
+                                    <List.Content as='a'>Update Cell Annotations</List.Content>
                                 </List.Item>
                                 <List.Item value={UPDATE_DATASET} onClick={this.handleSelect}>
                                     <List.Content as='a'>Save Dataset</List.Content>
@@ -164,6 +211,9 @@ class CodeSnippetsSelector extends React.Component {
                                 </List.Item>
                                 <List.Item value={DELETE_ROW} onClick={this.handleSelect}>
                                     <List.Content as='a'>Delete Dataset Row</List.Content>
+                                </List.Item>
+                                <List.Item value={DELETE_ANNOTATION} onClick={this.handleSelect}>
+                                    <List.Content as='a'>Delete Cell Annotations</List.Content>
                                 </List.Item>
                             </List>
                         </Grid.Column>

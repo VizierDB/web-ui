@@ -1,6 +1,11 @@
 /* General notebook and cell frame */
 
 div.notebook {
+    background: #fff;
+    border-radius: .28571429rem;
+    border: 1px solid rgba(34,36,38,.15);
+    box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
+    padding: 10px 20px;
     margin-bottom: 10px;
 }
 
@@ -10,8 +15,8 @@ div.notebook-footer {
 
 div.notebook-cell {
     background: #fff;
-    border-radius: .28571429rem;
-    border: 1px solid rgba(34,36,38,.15);
+    /*border-radius: .28571429rem;
+    border: 1px solid rgba(34,36,38,.15);*/
     padding: 10px 10px 10px 0px;
 }
 
@@ -24,18 +29,9 @@ div.notebook-cell-xp {
 
 div.notebook-cell-ro {
     background: #fff;
-    border-radius: .28571429rem;
+    /*border-radius: .28571429rem;
     border: 1px solid rgba(34,36,38,.15);
-    /*box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);*/
-    padding: 10px 10px 10px 0px;
-    margin: 10px 0px;
-}
-
-div.notebook-cell-ro-error {
-    background: #f4e8e8;
-    border: solid 1px #ebccd1;
-    border-radius: .28571429rem;
-    /*box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);*/
+    box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);*/
     padding: 10px 10px 10px 0px;
     margin: 10px 0px;
 }
@@ -50,9 +46,9 @@ div.notebook-cell-xp-new {
 }
 
 div.notebook-cell-error {
-    background: #f4e8e8;
+    /*background: #f4e8e8;
     border: solid 1px #ebccd1;
-    border-radius: .28571429rem;
+    border-radius: .28571429rem;*/
     color: #843534;
     padding: 20px;
     margin: 10px 0px;

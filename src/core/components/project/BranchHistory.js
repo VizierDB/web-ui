@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 import { Icon } from 'semantic-ui-react';
 import { pageUrl } from '../../util/App'
 import '../../../css/BranchHistory.css'
-import '../../../css/ResourceListing.css'
 
 
 /**
@@ -52,7 +51,7 @@ class BranchHistory extends React.Component {
                 <tr key={wf.version}>
                     <td><Icon name={icon} /></td>
                     <td className='version-statement'>
-                        <a className={'resource-link'} href={link}>
+                        <a className={'version-link'} href={link}>
                             {wf.statement}
                         </a>
                     </td>
@@ -63,7 +62,8 @@ class BranchHistory extends React.Component {
         return (
             <div className='branch-history'>
                 <h1 className='branch-history'>
-                    {'History for branch ' + branch.name}
+                    {'History for branch '}
+                    <span className='branch-highlight'>{branch.name}</span>
                 </h1>
                 <table><tbody>{rows}</tbody></table>
             </div>

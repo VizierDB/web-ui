@@ -205,7 +205,7 @@ class ProjectPage extends Component {
                 } else if (resource.isNotebook()) {
                     pageContent = <Notebook />;
                     onReverseHandler = this.handleNotebookReverse;
-                    contentCss += ' notebook';
+                    contentCss += ' slim';
                 }
                 // Show a modal with a loader that overlays the full screen if
                 // the page content is currently being fetched.

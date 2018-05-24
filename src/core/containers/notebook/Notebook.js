@@ -187,7 +187,7 @@ class Notebook extends React.Component {
             <EditResourceNameModal
                 isValid={isNotEmptyString}
                 open={modalOpen}
-                propmpt='Enter a name for the new branch'
+                prompt='Enter a name for the new branch'
                 title='Create branch'
                 onCancel={this.hideModal}
                 onSubmit={this.createBranchForReadOnly}

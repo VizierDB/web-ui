@@ -11,6 +11,7 @@ div.branch-history {
 }
 
 h1.branch-history {
+    font-weight: normal;
     font-size: 1.5em;
 }
 
@@ -21,4 +22,18 @@ td.version-statement {
 td.version-timestamp {
     padding-left: 20px;
     font-family: "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;
+}
+
+span.branch-highlight {
+    font-weight: bold;
+}
+
+a.version-link {
+    color: #3b4151;
+    text-decoration: none;
+    outline: 0;
+}
+
+a.version-link:hover {
+    color: #4286f4;
 }
