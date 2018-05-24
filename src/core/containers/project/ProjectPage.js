@@ -11,6 +11,7 @@ import {
     dismissProjectActionError, fetchProject, updateProjectName
 } from '../../actions/project/ProjectPage';
 import { showSpreadsheet } from '../../actions/spreadsheet/Spreadsheet';
+import { ConnectionInfo } from '../../components/Api'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage, NotFoundMessage } from '../../components/Message';
 import BranchHistory from '../../components/project/BranchHistory';
@@ -76,6 +77,7 @@ class ProjectPage extends Component {
         isFetching: PropTypes.bool.isRequired,
         project: PropTypes.object,
         resource: PropTypes.object,
+        serviceApi: PropTypes.object,
         workflow: PropTypes.object
     }
     /**
@@ -135,7 +137,7 @@ class ProjectPage extends Component {
         dispatch(redirectTo(url));
     }
     render() {
-        const { fetchError, isFetching, project, workflow} = this.props
+        const { fetchError, isFetching, project, serviceApi, workflow} = this.props
         let content = null;
         if (isFetching) {
             // Show a spinner while the project information is being fetched.
@@ -171,6 +173,7 @@ class ProjectPage extends Component {
                 // The resource has been fetched. Depending on the resource type
                 // we either show a notebook, the branch history, a spreadsheet,
                 // or a chart view.
+                let contentCss = 'project-content';
                 if (resource.isChart()) {
                     pageContent = (
                         <div className='chart-view'>
@@ -180,8 +183,10 @@ class ProjectPage extends Component {
                             </div>
                         </div>
                     );
+                    contentCss += ' wide';
                 } else if (resource.isDataset()) {
                     pageContent = <Spreadsheet />;
+                    contentCss += ' wide';
                 } else if (resource.isHistory()) {
                     pageContent = (
                         <div className='history-view'>
@@ -192,21 +197,25 @@ class ProjectPage extends Component {
                             />
                         </div>
                     )
+                    contentCss += ' slim';
                 } else if (resource.isError()) {
                     const { title, module } = resource.content;
                     pageContent = <ModuleError title={title} module={module}/>;
+                    contentCss += ' slim';
                 } else if (resource.isNotebook()) {
                     pageContent = <Notebook />;
                     onReverseHandler = this.handleNotebookReverse;
+                    contentCss += ' notebook';
                 }
                 // Show a modal with a loader that overlays the full screen if
                 // the page content is currently being fetched.
                 pageContent = (
-                    <div className='project-content'>
+                    <div className={contentCss}>
                         <Modal dimmer={true} open={isActive}>
                             <Loader size='large' active={true}>Loading</Loader>
                         </Modal>
                         { pageContent }
+                        <ConnectionInfo api={serviceApi}/>
                     </div>
                 )
             }
@@ -225,7 +234,7 @@ class ProjectPage extends Component {
                 <div>
                     <Grid columns={2}>
                         <Grid.Row>
-                            <Grid.Column width={10}>
+                            <Grid.Column className='project-menu-bar' width={10}>
                             <ProjectMenu
                                 onDeleteBranch={this.submitDeleteBranch}
                                 onEditBranch={this.submitEditBranch}
@@ -240,7 +249,7 @@ class ProjectPage extends Component {
                                 workflow={workflow}
                             />
                             </Grid.Column>
-                            <Grid.Column width={6}>
+                            <Grid.Column className='project-menu-bar' width={6}>
                             <ProjectStatusHeader
                                 project={project}
                                 workflow={workflow}
@@ -288,6 +297,7 @@ const mapStateToProps = state => {
         isFetching: state.projectPage.isFetching,
         project: state.projectPage.project,
         resource: state.projectPage.resource,
+        serviceApi: state.serviceApi,
         workflow: state.projectPage.workflow
     }
 }

@@ -5,7 +5,6 @@ import { connect } from 'react-redux'
 import { fetchService } from '../../actions/main/Service'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage } from '../../components/Message';
-import { ConnectionInfo } from '../../components/Api'
 import MainPage from './MainPage'
 import ProjectPage from '../project/ProjectPage'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -18,11 +17,8 @@ import '../../../css/App.css'
 
 class App extends Component {
     static propTypes = {
-        envs: PropTypes.array,
         error: PropTypes.string,
         isFetching: PropTypes.bool.isRequired,
-        links: PropTypes.object,
-        name: PropTypes.string,
         serviceUrl: PropTypes.string
     }
 
@@ -41,7 +37,7 @@ class App extends Component {
         } else {
             document.title = 'Vizier DB'
         }
-        const { isFetching, error, name } = this.props;
+        const { isFetching, error } = this.props;
         let content = null;
         let connection = null;
         if (isFetching) {
@@ -66,9 +62,6 @@ class App extends Component {
                     </Router>
                 </MuiThemeProvider>
             );
-            if (name) {
-                connection = (<ConnectionInfo api={this.props}/>)
-            }
         }
         return (
             <div className="app">
@@ -93,9 +86,6 @@ const mapStateToProps = state => {
     return {
         error: state.serviceApi.error,
         isFetching: state.serviceApi.isFetching,
-        name: state.serviceApi.name,
-        envs: state.serviceApi.envs,
-        links: state.serviceApi.links,
         serviceUrl: state.serviceApi.serviceUrl
     }
 }

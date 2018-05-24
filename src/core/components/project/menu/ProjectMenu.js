@@ -158,7 +158,7 @@ class ProjectMenu extends React.Component {
             }
         }
         return (
-            <div className='project-menu-bar'>
+            <div className='project-menu'>
                 { menuBar }
                 { optionalModalOrMessage }
             </div>

@@ -2,7 +2,7 @@ div.chart-view {
     background: #fff;
     border-radius: .28571429rem;
     border: 1px solid rgba(34,36,38,.15);
-    /*box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);*/
+    box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
     padding: 20px 10px;
     margin-top: 10px;
 }
