@@ -159,6 +159,7 @@ class ProjectPage extends Component {
                     message={fetchError.message}
                 />)
             }
+            content = (<div className='page-content wide'>{content}</div>);
         } else if ((project != null) && (workflow != null)) {
             // The project has been fetched successfully.  Set window title to
             // contain project name
@@ -167,6 +168,17 @@ class ProjectPage extends Component {
             // to be show or not. We set the pageContent accordingly.
             let pageContent = null;
             const { actionError, isActive, resource } = this.props;
+            // A resource error may be present independently of the project
+            // resource, i.e., due to resource fetch error (-> no resource) or
+            // resource update error (-> we have a resource)
+            let optionalError = null;
+            if (actionError != null) {
+                optionalError = <ErrorMessage
+                    title={actionError.title}
+                    message={actionError.message}
+                    onDismiss={this.dismissResourceError}
+                />;
+            }
             // Handler for reverse notebook manu item. Only set in notebook view.
             let onReverseHandler = this.null;
             if (resource != null) {
@@ -214,21 +226,11 @@ class ProjectPage extends Component {
                         <Modal dimmer={true} open={isActive}>
                             <Loader size='large' active={true}>Loading</Loader>
                         </Modal>
+                        { optionalError }
                         { pageContent }
                         <ConnectionInfo api={serviceApi}/>
                     </div>
                 )
-            }
-            // A resource error may be present independently of the project
-            // resource, i.e., due to resource fetch error (-> no resource) or
-            // resource update error (-> we have a resource)
-            let optionalError = null;
-            if (actionError != null) {
-                optionalError = <ErrorMessage
-                    title={actionError.title}
-                    message={actionError.message}
-                    onDismiss={this.dismissResourceError}
-                />;
             }
             content = (
                 <div>
@@ -258,7 +260,6 @@ class ProjectPage extends Component {
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>
-                    { optionalError }
                     { pageContent }
                 </div>
             )

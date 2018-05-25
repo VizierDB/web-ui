@@ -47,10 +47,14 @@ class App extends Component {
             if (this.props.serviceUrl) {
                 title = title + ' @ ' + this.props.serviceUrl
             }
-            content = (<ErrorMessage
-                title={title}
-                message={error}
-            />);
+            content = (
+                <div className='page-content slim'>
+                    <ErrorMessage
+                        title={title}
+                        message={error}
+                        />
+                </div>
+            );
         } else {
             content = (
                 <MuiThemeProvider>
