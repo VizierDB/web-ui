@@ -95,7 +95,6 @@ class ProjectMenu extends React.Component {
             if (!resource.isNotebook()) {
                 notebookOnClickHandler = onShowNotebook;
             }
-            console.log(workflow);
             menuItems.push(
                 <Menu.Item
                     key='notebook'
