@@ -2,21 +2,6 @@ div.project-name {
     margin-bottom: 10px;
 }
 
-div.project-content {
-    margin-top: 20px;
-}
-
-div.project-content.slim {
-    margin-left: auto;
-    margin-right: auto;
-    width: 1140px;
-}
-
-div.project-content.wide {
-    margin-left: 25px;
-    margin-right: 25px;
-}
-
 div.project-menu-bar {
     background: #fff;
     border-bottom: 1px solid rgba(34,36,38,.15);

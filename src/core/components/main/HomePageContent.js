@@ -18,7 +18,10 @@ class HomePageContent extends React.Component {
         if (!content) {
             content = (
                 <div>
-                    <h1 className='home-headline'>Welcome to Vizier - A Better Data Curation Experience</h1>
+                    <h1 className='home-headline'>
+                        Welcome to Vizier
+                        <span className='headline-small'>Streamlined Data Curation</span>
+                    </h1>
                     <Grid>
                         <Grid.Row>
                             <Grid.Column width={8}>

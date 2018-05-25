@@ -3,10 +3,12 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { Icon, Menu } from 'semantic-ui-react'
 import { setActiveItem } from '../../actions/main/MainPage'
+import { ConnectionInfo } from '../../components/Api'
 import { WarningMessage } from '../../components/Message';
 import Fileserver from '../fileserver/Fileserver'
 import HomePageContent from '../../components/main/HomePageContent'
 import ProjectListing from '../project/ProjectListing'
+import '../../../css/App.css'
 
 
 /**
@@ -20,7 +22,8 @@ export const MENU_ITEM_PROJECTS = 'projects'
 class MainPage extends Component {
     static propTypes = {
         activeItem: PropTypes.string.isRequired,
-        homePageContent: PropTypes.string
+        homePageContent: PropTypes.string,
+        serviceApi: PropTypes.object
     }
     /**
      * Change active item in main content menu
@@ -32,7 +35,7 @@ class MainPage extends Component {
     /**
      */
     render() {
-        const { activeItem, homePageContent } = this.props
+        const { activeItem, homePageContent, serviceApi } = this.props
         let content = null;
         if (activeItem === MENU_ITEM_HOME) {
             content = <HomePageContent content={homePageContent}/>
@@ -48,36 +51,41 @@ class MainPage extends Component {
         }
         return (
             <div className='main-page'>
-                <Menu pointing secondary>
-                    <Menu.Item header>
-                        {window.env.APP_TITLE}
-                    </Menu.Item>
-                    <Menu.Item
-                        name={MENU_ITEM_HOME}
-                        active={activeItem === MENU_ITEM_HOME}
-                        onClick={this.handleItemClick.bind(this)}
-                    >
-                        <Icon name='home' />
-                        Home
-                    </Menu.Item>
-                    <Menu.Item
-                        name={MENU_ITEM_PROJECTS}
-                        active={activeItem === MENU_ITEM_PROJECTS}
-                        onClick={this.handleItemClick.bind(this)}
-                    >
-                        <Icon name='database' />
-                        Projects
-                    </Menu.Item>
-                    <Menu.Item
-                        name={MENU_ITEM_FILES}
-                        active={activeItem === MENU_ITEM_FILES}
-                        onClick={this.handleItemClick.bind(this)}
-                    >
-                        <Icon name='file outline' />
-                        Files
-                    </Menu.Item>
-                </Menu>
-                { content }
+                <div className='main-menu'>
+                    <Menu secondary>
+                        <Menu.Item header>
+                            {window.env.APP_TITLE}
+                        </Menu.Item>
+                        <Menu.Item
+                            name={MENU_ITEM_HOME}
+                            active={activeItem === MENU_ITEM_HOME}
+                            onClick={this.handleItemClick.bind(this)}
+                        >
+                            <Icon name='home' />
+                            Home
+                        </Menu.Item>
+                        <Menu.Item
+                            name={MENU_ITEM_PROJECTS}
+                            active={activeItem === MENU_ITEM_PROJECTS}
+                            onClick={this.handleItemClick.bind(this)}
+                        >
+                            <Icon name='database' />
+                            Projects
+                        </Menu.Item>
+                        <Menu.Item
+                            name={MENU_ITEM_FILES}
+                            active={activeItem === MENU_ITEM_FILES}
+                            onClick={this.handleItemClick.bind(this)}
+                        >
+                            <Icon name='file outline' />
+                            Files
+                        </Menu.Item>
+                    </Menu>
+                </div>
+                <div className='page-content wide'>
+                    { content }
+                    <ConnectionInfo api={serviceApi}/>
+                </div>
             </div>
         );
     }
@@ -87,7 +95,8 @@ const mapStateToProps = state => {
 
     return {
         activeItem: state.mainPage.activeItem,
-        homePageContent: state.mainPage.homePageContent
+        homePageContent: state.mainPage.homePageContent,
+        serviceApi: state.serviceApi,
     }
 }
 

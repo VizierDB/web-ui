@@ -173,7 +173,7 @@ class ProjectPage extends Component {
                 // The resource has been fetched. Depending on the resource type
                 // we either show a notebook, the branch history, a spreadsheet,
                 // or a chart view.
-                let contentCss = 'project-content';
+                let contentCss = 'page-content';
                 if (resource.isChart()) {
                     pageContent = (
                         <div className='chart-view'>
