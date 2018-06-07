@@ -20,7 +20,7 @@ class GridInput extends React.Component {
         super(props);
         // Keep the current value in the local state.
         const { cellValue } = props;
-        this.state = {value: valueOrDefault(cellValue, '')};
+        this.state = { value: valueOrDefault(cellValue, '') };
     }
     componentDidMount() {
         const { value } = this.state;
@@ -29,7 +29,7 @@ class GridInput extends React.Component {
 
     onKeyDown = (event) => {
         const { cellValue, onMove, onUpdate } = this.props;
-        const {keyCode, shiftKey} = event;
+        const {ctrlKey, keyCode, shiftKey} = event;
         if (keyCode === KEY.ENTER) {
             event.preventDefault();
             onMove(MOVE.DOWN);
@@ -54,6 +54,10 @@ class GridInput extends React.Component {
                 () => (this.setFocus(defaultValue))
             );
             onUpdate(defaultValue);
+        } else if ((ctrlKey) && (keyCode === KEY.NULL)) {
+            event.preventDefault();
+            this.setState({ value: '', isNull: true });
+            onUpdate(null);
         }
     }
     /**

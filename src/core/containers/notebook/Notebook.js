@@ -234,11 +234,12 @@ class Notebook extends React.Component {
     /**
      * Handle modification of the current workflow. The cell id is used to
      * identify the cell that is being submitted. Depending on whether the
-     * cell contains a workflow module of not the action inserts a new module
+     * cell contains a workflow module or not the action inserts a new module
      * or replaces an existing one in the workflow.
      *
-     * If inserting a new module we distinguish whether the module is inserted
-     * before an existing module or appended to the end of the workflow.
+     * In case a new module is inserted, we need to check whether the module is
+     * inserted before an existing module or appended to the end of the
+     * workflow (because of the different Urls used for the request).
      */
     submitUpdate = (cellId, command, data) => {
         const { dispatch, notebook, workflow } = this.props;

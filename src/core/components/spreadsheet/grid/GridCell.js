@@ -14,7 +14,8 @@ class GridCell extends React.Component {
         rowIndex: PropTypes.number.isRequired,
         value: PropTypes.oneOfType([
              PropTypes.string,
-             PropTypes.number
+             PropTypes.number,
+             PropTypes.bool
          ]),
          onClick: PropTypes.func,
          onMove: PropTypes.func,
@@ -62,16 +63,27 @@ class GridCell extends React.Component {
         }
         // The cell value depends on whether the cell is active and updatable
         let cellValue = null;
+        // Get a string representation of the cell value. The value could be a
+        // number, boolean, string or null.
+        let strValue = null;
+        if (value == null) {
+            strValue = '';
+        } else {
+            strValue = value.toString();
+        }
         if ((isActive) && (onUpdate != null)) {
             cellValue = (
                 <GridInput
-                    cellValue={value}
+                    cellValue={strValue}
                     onMove={this.handleMove}
                     onUpdate={this.handleChange}
                 />
             );
         } else {
-            cellValue = (<div className='cell-value'>{value}</div>);
+            if (value == null) {
+                cellCss += '  is-null';
+            }
+            cellValue = (<div className='cell-value'>{strValue}</div>);
         }
         return (
             <td className={cellCss} onClick={this.handleClick}>

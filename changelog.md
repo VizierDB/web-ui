@@ -37,3 +37,7 @@
 * Notebook history and shareable links
 * Redesign project menu, notebook cell output, and spreadsheet view
 * Python cell code snippets for dataset manipulation
+
+### 0.4.1 - 2018-06-07
+
+* Use Ctrl+Del to update cell value to NULL

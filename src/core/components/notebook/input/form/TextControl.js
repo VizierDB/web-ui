@@ -5,6 +5,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Form } from 'semantic-ui-react'
+import { KEY } from '../../../../util/App';
 
 
 /**
@@ -35,18 +36,30 @@ class TextControl extends React.Component {
      * onSubmit handler is given).
      */
     handleKeyDown = (event) => {
-        const { onSubmit } = this.props;
-        if ((onSubmit != null) && (event.keyCode === 13)) {
+        const { id, onChange, onSubmit } = this.props;
+        const { ctrlKey, keyCode } = event;
+        if ((onSubmit != null) && (keyCode === KEY.ENTER)) {
             onSubmit();
+        } else if ((ctrlKey) && (keyCode === KEY.NULL)) {
+            event.preventDefault();
+            onChange(id, null);
         }
     }
     render() {
         const { placeholder, value } = this.props;
+        // Get a string representation of the cell value. The value could be a
+        // number, boolean, string or null.
+        let strValue = null;
+        if (value == null) {
+            strValue = '';
+        } else {
+            strValue = value.toString();
+        }
         return (
             <Form.Input
                 placeholder={placeholder}
                 fluid
-                value={value}
+                value={strValue}
                 onChange={this.handleChange}
                 onKeyDown={this.handleKeyDown}
             />

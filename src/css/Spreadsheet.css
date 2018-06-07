@@ -12,6 +12,10 @@ h1.dataset-name {
     font-size: 1.5em;
 }
 
+.is-null {
+    background: #f8f8f8;
+}
+
 table.spreadsheet {
     background: #dadada; /*dadada; c0c0c0; dddddd*/
     border: 0px;
@@ -45,6 +49,11 @@ td.grid-cell.highlight {
     color: #1e22aa;*/
     background: #fff;
     color: #e4002b;
+}
+
+td.grid-cell.is-null {
+    background: #f8f8f8;
+    border: 2px solid transparent;
 }
 
 td.grid-cell.updating {

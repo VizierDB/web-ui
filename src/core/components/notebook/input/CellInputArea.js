@@ -187,11 +187,14 @@ const FORM_VALUES_2_REQUEST_DATA = (command, values) => {
     for (let i = 0; i < command.arguments.length; i++) {
         const arg = command.arguments[i];
         if (arg.parent == null) {
-            result[arg.id] = ARGUMENT_VALUE_2_REQUEST_DATA(
-                arg,
-                command,
-                values[arg.id]
-            );
+            const f_val = values[arg.id];
+            if (arg.datatype === DT_COLUMN_ID) {
+                if ((f_val !== '')  || (arg.required)) {
+                    result[arg.id] = ARGUMENT_VALUE_2_REQUEST_DATA(arg, command, f_val);
+                }
+            } else {
+                result[arg.id] = ARGUMENT_VALUE_2_REQUEST_DATA(arg, command, f_val);
+            }
         }
     }
     return result;
