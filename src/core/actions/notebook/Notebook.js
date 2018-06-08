@@ -15,13 +15,24 @@ import { fetchResource } from '../../util/Api';
 import { ErrorObject } from '../../util/Error';
 
 
-// Action to reverse notebook cell order
+// Change the value of the group mode state
+export const CHANGE_GROUP_MODE = 'CHANGE_GROUP_MODE';
+// Reverse notebook cell order
 export const REVERSE_ORDER = 'REVERSE_ORDER';
 
 
 // -----------------------------------------------------------------------------
 // Display
 // -----------------------------------------------------------------------------
+
+/**
+ * Change the value of group mode.
+ */
+export const changeGroupMode = (mode) => ({
+    type: CHANGE_GROUP_MODE,
+    mode
+})
+
 
 /**
  * Reverse ordering of notebook cells.
@@ -220,6 +231,7 @@ export const showNotebook = (workflow) => (dispatch) => {
         )
     )
 }
+
 
 
 // -----------------------------------------------------------------------------

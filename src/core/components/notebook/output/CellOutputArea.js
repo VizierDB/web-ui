@@ -2,7 +2,6 @@ import React from 'react';
 import { PropTypes } from 'prop-types';
 import { Dimmer, Loader } from 'semantic-ui-react';
 import AnnotationObject from '../../annotation/AnnotationObject';
-import { IconButton } from '../..//Button';
 import { ErrorMessage } from '../../Message';
 import DatasetChart from '../../plot/DatasetChart';
 import DatasetOutput from './DatasetOutput';
@@ -26,14 +25,14 @@ class CellOutputArea extends React.Component {
         output: PropTypes.object.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
         onNavigateDataset: PropTypes.func.isRequired,
-        onSelectCell: PropTypes.func.isRequired
+        onShowAnnotations: PropTypes.func.isRequired
     };
     /**
      * Discard a displayed annotation.
      */
     handleDiscardAnnotation = () => {
-        const { module, output, onSelectCell } = this.props;
-        onSelectCell(module, output.content.dataset, -1, -1);
+        const { module, output, onShowAnnotations } = this.props;
+        onShowAnnotations(module, output.content.dataset, -1, -1);
     }
     /**
      * Simulate user selecting console output when dismissing an error message
@@ -52,12 +51,12 @@ class CellOutputArea extends React.Component {
         onNavigateDataset(url, module, output.content.name);
     }
     handleSelectCell = (columnId, rowId) => {
-        const { module, output, onSelectCell } = this.props;
+        const { module, output, onShowAnnotations } = this.props;
         const dataset = output.content.dataset;
         if (dataset.hasAnnotations(columnId, rowId)) {
-            onSelectCell(module, dataset, columnId, rowId);
+            onShowAnnotations(module, dataset, columnId, rowId);
         } else {
-            onSelectCell(module, dataset, -1, -1);
+            onShowAnnotations(module, dataset, -1, -1);
         }
     }
     render() {
@@ -92,16 +91,6 @@ class CellOutputArea extends React.Component {
                     onDismiss={this.handleOutputDismiss}
                 />;
             } else {
-                // Show a 'home' button to switch to standard output
-                let homeButton = null;
-                if ((!output.isFetching) && (!output.isText())) {
-                    homeButton = (
-                        <IconButton
-                            name='laptop'
-                            onClick={this.handleOutputDismiss}
-                        />
-                    );
-                }
                 if (output.isText()) {
                     outputContent = <TextOutput isError={false} lines={output.content.lines} />;
                 } else if (output.isChart()) {
@@ -110,7 +99,6 @@ class CellOutputArea extends React.Component {
                             <span className='output-content-header'>
                                 {output.content.name}
                             </span>
-                            { homeButton}
                             <DatasetChart dataset={output.content.dataset} />
                         </div>
                     );
@@ -120,7 +108,6 @@ class CellOutputArea extends React.Component {
                             <span className='output-content-header'>
                                 {output.content.name}
                             </span>
-                            { homeButton}
                             <AnnotationObject
                                 annotation={activeDatasetCell}
                                 onDiscard={this.handleDiscardAnnotation}

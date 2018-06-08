@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Dropdown, Icon } from 'semantic-ui-react';
+import { Button, Icon } from 'semantic-ui-react';
 import ShareLinkModal from '../modals/ShareLinkModal'
 import { pageUrl } from '../../util/App'
 import '../../../css/App.css'
@@ -9,22 +9,27 @@ import '../../../css/ProjectPage.css'
 
 /**
  * Display a status header for the current resource workflow. Shows the workflow
- * branch and shareable link. For read only workflows the creating data and a
- * 'Go Live' link are shown as well.
+ * branch and shareable link.
  */
 class ProjectStatusHeader extends Component {
     static propTypes = {
         project: PropTypes.object.isRequired,
-        workflow: PropTypes.object.isRequired,
-        onReverse: PropTypes.func
+        workflow: PropTypes.object.isRequired
     }
     constructor(props) {
         super(props);
         this.state = {showModal: false};
     }
+    /**
+     * Close the shareable link modal.
+     */
     closeModal = () => (this.setState({showModal: false}));
+    /**
+     * Show information about the current workflow version and a button to
+     * display the shareable link modal.
+     */
     render() {
-        const { project, workflow, onReverse } = this.props;
+        const { project, workflow } = this.props;
         const { showModal } = this.state;
         let readOnlyContent = null;
         if (workflow.readOnly) {
@@ -38,36 +43,19 @@ class ProjectStatusHeader extends Component {
                 </span>
             );
         }
-        // Show the reverse order menu  item only if handler is given
-        let reverseItem = null;
-        if (onReverse != null) {
-            reverseItem = (
-                <Dropdown.Item
-                    key='reverse'
-                    icon='sort'
-                    text='Reverse Order'
-                    onClick={onReverse}
-                />
-            );
-        }
-        const trigger = (<Icon name='bars' />);
         return (
             <div className='project-status'>
                 <span>{<Icon name='fork' />}</span>
                 <span className='highlight-branch'>{workflow.branch.name}</span>
                 { readOnlyContent }
                 <span className='project-status-dropdown'>
-                    <Dropdown trigger={trigger} pointing='top right' icon={null}>
-                        <Dropdown.Menu>
-                            <Dropdown.Item
-                                key='share'
-                                icon='linkify'
-                                text='Share Link'
-                                onClick={this.openModal}
-                            />
-                            {reverseItem}
-                        </Dropdown.Menu>
-                    </Dropdown>
+                    <Button
+                        icon='linkify'
+                        circular
+                        size='mini'
+                        title='Share link to this notebook'
+                        onClick={this.openModal}
+                    />
                 </span>
                 <ShareLinkModal
                     open={showModal}

@@ -5,8 +5,12 @@ import {  Grid, Loader, Modal } from 'semantic-ui-react';
 import queryString from 'query-string';
 import { redirectTo } from '../../actions/main/App';
 import { showChartView } from '../../actions/chart/Chart';
-import { reverseOrder, showNotebook } from '../../actions/notebook/Notebook';
-import { deleteBranch, showBranchHistory, updateBranchName } from '../../actions/project/Branch';
+import {
+    changeGroupMode, reverseOrder, showNotebook
+} from '../../actions/notebook/Notebook';
+import {
+    deleteBranch, showBranchHistory, updateBranchName
+} from '../../actions/project/Branch';
 import {
     dismissProjectActionError, fetchProject, updateProjectName
 } from '../../actions/project/ProjectPage';
@@ -73,6 +77,7 @@ class ProjectPage extends Component {
     static propTypes = {
         actionError: PropTypes.object,
         fetchError: PropTypes.object,
+        groupMode: PropTypes.number,
         isActive: PropTypes.bool.isRequired,
         isFetching: PropTypes.bool.isRequired,
         project: PropTypes.object,
@@ -99,6 +104,10 @@ class ProjectPage extends Component {
     handleNotebookReverse = () => {
         const { dispatch } = this.props;
         dispatch(reverseOrder());
+    }
+    handleChangeGroupMode = (mode) => {
+        const { dispatch } = this.props;
+        dispatch(changeGroupMode(mode));
     }
     /**
      * Show history for the branch of the current workflow.
@@ -137,7 +146,14 @@ class ProjectPage extends Component {
         dispatch(redirectTo(url));
     }
     render() {
-        const { fetchError, isFetching, project, serviceApi, workflow} = this.props
+        const {
+            fetchError,
+            groupMode,
+            isFetching,
+            project,
+            serviceApi,
+            workflow
+        } = this.props
         let content = null;
         if (isFetching) {
             // Show a spinner while the project information is being fetched.
@@ -179,8 +195,6 @@ class ProjectPage extends Component {
                     onDismiss={this.dismissResourceError}
                 />;
             }
-            // Handler for reverse notebook manu item. Only set in notebook view.
-            let onReverseHandler = this.null;
             if (resource != null) {
                 // The resource has been fetched. Depending on the resource type
                 // we either show a notebook, the branch history, a spreadsheet,
@@ -216,7 +230,6 @@ class ProjectPage extends Component {
                     contentCss += ' slim';
                 } else if (resource.isNotebook()) {
                     pageContent = <Notebook />;
-                    onReverseHandler = this.handleNotebookReverse;
                     contentCss += ' slim';
                 }
                 // Show a modal with a loader that overlays the full screen if
@@ -238,10 +251,13 @@ class ProjectPage extends Component {
                         <Grid.Row>
                             <Grid.Column className='project-menu-bar' width={10}>
                             <ProjectMenu
+                                groupMode={groupMode}
+                                onChangeGrouping={this.handleChangeGroupMode}
                                 onDeleteBranch={this.submitDeleteBranch}
                                 onEditBranch={this.submitEditBranch}
                                 onEditProject={this.submitEditProject}
                                 onRedirect={this.onRedirect}
+                                onReverse={this.handleNotebookReverse}
                                 onShowChart={this.loadChartView}
                                 onShowDataset={this.loadDataset}
                                 onShowHistory={this.loadBranchHistory}
@@ -255,7 +271,6 @@ class ProjectPage extends Component {
                             <ProjectStatusHeader
                                 project={project}
                                 workflow={workflow}
-                                onReverse={onReverseHandler}
                             />
                             </Grid.Column>
                         </Grid.Row>
@@ -294,6 +309,7 @@ const mapStateToProps = state => {
     return {
         actionError: state.projectPage.actionError,
         fetchError: state.projectPage.fetchError,
+        groupMode: state.notebook.groupMode,
         isActive: state.projectPage.isActive,
         isFetching: state.projectPage.isFetching,
         project: state.projectPage.project,

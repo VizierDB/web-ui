@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import { Dropdown, Menu } from 'semantic-ui-react';
 
 
-class DatasetMenu extends React.Component {
+class ChartMenuDropdown extends React.Component {
     static propTypes = {
         charts: PropTypes.array.isRequired,
         onSelect: PropTypes.func.isRequired,
@@ -87,4 +87,4 @@ class DatasetMenu extends React.Component {
     }
 }
 
-export default DatasetMenu;
+export default ChartMenuDropdown;

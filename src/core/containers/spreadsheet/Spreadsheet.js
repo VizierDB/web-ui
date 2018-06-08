@@ -365,7 +365,7 @@ class Spreadsheet extends React.Component {
                     {dataset.name}
                     <span className='left-padding-md'>
                         <Icon
-                            name='talk outline'
+                            name='comment alternate outline'
                             disabled={showAnnoHandler === null}
                             onClick={showAnnoHandler}
                         />

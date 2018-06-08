@@ -369,7 +369,6 @@ const VALIDATE_FORM = (command, values) => {
  */
 class CellInputArea extends React.Component {
     static propTypes = {
-        cellId: PropTypes.number.isRequired,
         datasets: PropTypes.array.isRequired,
         env: PropTypes.object.isRequired,
         module: PropTypes.object,
@@ -430,7 +429,7 @@ class CellInputArea extends React.Component {
      * Submit the form by ...
      */
     handleFormSubmit = () => {
-        const { cellId, onSubmit } = this.props;
+        const { onSubmit } = this.props;
         const { formValues, selectedCommand } = this.state;
         // Validate the current input values. The result is a list of error
         // messages, one for each command argument that has an invalid or
@@ -440,7 +439,6 @@ class CellInputArea extends React.Component {
             this.setState({hasError: true, errors});
         } else{
             onSubmit(
-                cellId,
                 selectedCommand,
                 FORM_VALUES_2_REQUEST_DATA(selectedCommand, formValues)
             );

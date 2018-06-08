@@ -9,7 +9,7 @@ import { Dropdown } from 'semantic-ui-react';
 import { DEFAULT_BRANCH } from '../../../resources/Branch'
 
 
-class BranchMenu extends React.Component {
+class BranchMenuDropdown extends React.Component {
     static propTypes = {
         branches: PropTypes.array.isRequired,
         isLive: PropTypes.bool.isRequired,
@@ -90,4 +90,4 @@ class BranchMenu extends React.Component {
     }
 }
 
-export default BranchMenu;
+export default BranchMenuDropdown;

@@ -9,14 +9,20 @@ import '../../../../css/Notebook.css';
  */
 class CellIndex extends React.Component {
     static propTypes = {
-        sequenceIndex: PropTypes.number.isRequired,
+        sequenceIndex: PropTypes.oneOfType([
+             PropTypes.string,
+             PropTypes.number
+         ]),
+         title: PropTypes.string,
         onClick: PropTypes.func.isRequired
     }
     render() {
-        const { sequenceIndex, onClick } = this.props;
+        const { sequenceIndex, title, onClick } = this.props;
         return (
             <span>[
-                <a className='cell-index' onClick={onClick}>{sequenceIndex}</a>
+                <a className='cell-index' title={title} onClick={onClick}>
+                    {sequenceIndex}
+                </a>
             ]</span>
         );
     }

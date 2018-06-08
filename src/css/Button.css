@@ -9,6 +9,36 @@
     cursor: pointer;
 }
 
+.code-text {
+    color: rgba(59, 65, 81, 0.5);
+    font-family: monospace,monospace;
+    /*font-weight: 700;*/
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    outline: 0;
+}
+
+.code-text:hover {
+    color: rgb(59, 65, 81);
+    outline: 0;
+    cursor: pointer;
+}
+
+.code-text-err {
+    color: rgba(132, 53, 52, 0.5);
+    font-family: monospace,monospace;
+    /*font-weight: 700;*/
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    outline: 0;
+}
+
+.code-text-err:hover {
+    color: rgb(132, 53, 52);
+    outline: 0;
+    cursor: pointer;
+}
+
 .close-button {
     color: #303f9f;
     outline: 0;

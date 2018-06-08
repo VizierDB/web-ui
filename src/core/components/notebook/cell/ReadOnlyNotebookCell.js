@@ -1,8 +1,8 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
-import ReadOnlyWorkflowCellInput from './input/ReadOnlyWorkflowCellInput';
-import CellOutputArea from './output/CellOutputArea';
-import '../../../css/Notebook.css';
+import ReadOnlyWorkflowCellInput from '../input/ReadOnlyWorkflowCellInput';
+import CellOutputArea from '../output/CellOutputArea';
+import '../../../../css/Notebook.css';
 
 
 /**
@@ -17,7 +17,7 @@ class ReadOnlyNotebookCell extends React.Component {
         onCreateBranch: PropTypes.func,
         onNavigateDataset: PropTypes.func,
         onOutputSelect: PropTypes.func,
-        onSelectCell: PropTypes.func
+        onShowAnnotations: PropTypes.func
     }
     render() {
         const {
@@ -27,7 +27,7 @@ class ReadOnlyNotebookCell extends React.Component {
             onCreateBranch,
             onNavigateDataset,
             onOutputSelect,
-            onSelectCell
+            onShowAnnotations
         } = this.props;
         const { module, output } = cell;
         // The input area is read-only.
@@ -49,7 +49,7 @@ class ReadOnlyNotebookCell extends React.Component {
                     output={output}
                     onOutputSelect={onOutputSelect}
                     onNavigateDataset={onNavigateDataset}
-                    onSelectCell={onSelectCell}
+                    onShowAnnotations={onShowAnnotations}
                 />
             );
         }

@@ -27,7 +27,7 @@ class ShareLinkModal extends React.Component {
         let url = window.location.protocol + '//' + window.location.host
         url += pageUrl(project.id, workflow.branch.id, workflow.version);
         return (
-            <Modal open={open} dimmer={false} size={'small'}>
+            <Modal open={open} dimmer={'inverted'} size={'small'}>
                 <Modal.Header>Share Link</Modal.Header>
                 <Modal.Content>
                     <div>

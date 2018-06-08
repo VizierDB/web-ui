@@ -11,13 +11,14 @@ export const VIZUAL = {
     DELETE_ROW: 'DELETE_ROW',
     INSERT_COLUMN: 'INSERT_COLUMN',
     INSERT_ROW: 'INSERT_ROW',
+    LOAD: 'LOAD',
     MOVE_COLUMN: 'MOVE_COLUMN',
     MOVE_ROW: 'MOVE_ROW',
     RENAME_COLUMN: 'RENAME_COLUMN',
     UPDATE_CELL: 'UPDATE_CELL'
 }
 
-const VIZUAL_OP = 'vizual';
+export const VIZUAL_OP = 'vizual';
 
 /**
  * DELETE COLUMN operation request body

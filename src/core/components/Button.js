@@ -48,3 +48,31 @@ LargeMessageButton.propTypes = {
     message: PropTypes.string.isRequired,
     onClick: PropTypes.func.isRequired
 };
+
+
+/**
+ * Text button shows a clickable text.
+ */
+
+export class TextButton extends React.Component {
+    static propTypes = {
+        css: PropTypes.string,
+        text: PropTypes.string.isRequired,
+        title: PropTypes.string,
+        onClick: PropTypes.func.isRequired
+    }
+    render() {
+        const { css, text, title, onClick } = this.props;
+        let linkCss = null;
+        if (css != null) {
+            linkCss = css;
+        } else {
+            linkCss = 'icon-button';
+        }
+        return (
+            <a className={linkCss} title={title} onClick={onClick}>
+                {text}
+            </a>
+        );
+    }
+}

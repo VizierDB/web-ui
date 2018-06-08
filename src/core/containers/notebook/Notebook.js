@@ -10,15 +10,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {
-    deleteNotebookCell, insertNotebookCell, replaceNotebookCell, showCellChart,
-    showCellAnnotations, showCellDataset, showCellStdout
+    changeGroupMode, deleteNotebookCell, insertNotebookCell,
+    replaceNotebookCell, showCellChart, showCellAnnotations, showCellDataset,
+    showCellStdout
 } from '../../actions/notebook/Notebook';
 import { createBranch } from '../../actions/project/Branch';
-import EditableNotebookCell from '../../components/notebook/EditableNotebookCell';
-import ReadOnlyNotebookCell from '../../components/notebook/ReadOnlyNotebookCell';
+import EditableNotebook from '../../components/notebook/EditableNotebook';
+import ReadOnlyNotebook from '../../components/notebook/ReadOnlyNotebook';
 import { LargeMessageButton } from '../../components/Button';
 import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
-import { CONTENT_CHART, CONTENT_DATASET, CONTENT_TEXT } from '../../resources/Notebook';
+import {
+    CONTENT_CHART, CONTENT_DATASET, CONTENT_TEXT,
+    GRP_COLLAPSE, GRP_HIDE, GRP_SHOW
+} from '../../resources/Notebook';
 import { isNotEmptyString } from '../../util/App';
 import '../../../css/Notebook.css';
 
@@ -29,6 +33,7 @@ import '../../../css/Notebook.css';
  */
 class Notebook extends React.Component {
     static propTypes = {
+        groupMode: PropTypes.number.isRequired,
         notebook: PropTypes.object.isRequired,
         project: PropTypes.object.isRequired,
         reversed: PropTypes.bool.isRequired,
@@ -79,9 +84,39 @@ class Notebook extends React.Component {
      * Handle select cell event for dataset output. Load the annotations for the
      * specified cell.
      */
-    handleSelectCell = (module, dataset, columnId, rowId) => {
+    handleShowAnnotations = (module, dataset, columnId, rowId) => {
         const { dispatch, notebook } = this.props;
         dispatch(showCellAnnotations(notebook, module, dataset, columnId, rowId));
+    }
+    /**
+    * Change the state of group VizUAL commands mode.
+    */
+    handleChangeGrouping = () => {
+        const { dispatch, groupMode } = this.props;
+        if (groupMode === GRP_HIDE) {
+            dispatch(changeGroupMode(GRP_COLLAPSE));
+        } else {
+            dispatch(changeGroupMode(GRP_SHOW));
+        }
+    }
+    /**
+     * Insert a module into the current workflow before the given module. If
+     * the module is undefined a new module is appended to the workflow.
+     */
+    insertModule = (command, data, module) => {
+        const { dispatch, workflow } = this.props;
+        // Create data object for request.
+        const reqData = {type: command.type, id: command.id, arguments: data};
+        // Get the request Url. Depending on whether the module argument is
+        // given we use the module's insert Url or append to the current
+        // workflow.
+        let url = null;
+        if (module != null) {
+            url = module.links.insert;
+        } else {
+            url = workflow.links.append;
+        }
+        dispatch(insertNotebookCell(url, reqData))
     }
     /**
      * Display a list of notebook cells. Insert placeholders for new cells
@@ -89,99 +124,44 @@ class Notebook extends React.Component {
      * not read only).
      */
     render() {
-        const { notebook, project, reversed, workflow } = this.props
+        const { groupMode, notebook, project, reversed, workflow } = this.props
         const { modalOpen } = this.state;
         // List of notebook cells
-        const isEmptyNotebook = (notebook.cells.length === 0);
         let notebookCells = [];
         if (workflow.readOnly) {
-            let errorState = false;
-            for (let i = 0; i < notebook.cells.length; i++) {
-                const cell = notebook.cells[i];
-                errorState = cell.hasError() ? true : errorState;
-                notebookCells.push(
-                    <ReadOnlyNotebookCell
-                        key={workflow.version + '#' + notebookCells.length}
-                        cell={cell}
-                        errorState={errorState}
-                        sequenceIndex={i + 1}
-                        onCreateBranch={this.createBranch}
-                        onNavigateDataset={this.navigateDataset}
-                        onOutputSelect={this.selectOutput}
-                        onSelectCell={this.handleSelectCell}
-                    />
-                );
-            }
-        } else {
-            // Keep track of the datasets that are available to each cell.
-            let datasets = [];
-            notebookCells.push(
-                <EditableNotebookCell
-                    key={workflow.version + '#0'}
-                    cellId={0}
-                    datasets={datasets}
-                    env={project.environment}
-                    isEmptyNotebook={isEmptyNotebook}
-                    onSelectCell={this.handleSelectCell}
-                    onSubmit={this.submitUpdate}
+            notebookCells = (
+                <ReadOnlyNotebook
+                    groupMode={groupMode}
+                    notebook={notebook}
+                    project={project}
+                    reversed={reversed}
+                    workflow={workflow}
+                    onChangeGrouping={this.handleChangeGrouping}
+                    onCreateBranch={this.createBranch}
+                    onNavigateDataset={this.navigateDataset}
+                    onOutputSelect={this.selectOutput}
+                    onShowAnnotations={this.handleShowAnnotations}
                 />
             );
-            let errorState = false;
-            for (let i = 0; i < notebook.cells.length; i++) {
-                const cell = notebook.cells[i];
-                if (errorState) {
-                    notebookCells.push(
-                        <ReadOnlyNotebookCell
-                            key={workflow.version + '#' + notebookCells.length}
-                            cell={cell}
-                            errorState={errorState}
-                            sequenceIndex={i + 1}
-                            onNavigateDataset={this.navigateDataset}
-                            onOutputSelect={this.selectOutput}
-                            onSelectCell={this.handleSelectCell}
-                        />
-                    );
-                } else {
-                    errorState = cell.hasError() ? true : errorState;
-                    notebookCells.push(
-                        <EditableNotebookCell
-                            key={workflow.version + '#' + notebookCells.length}
-                            cellId={notebookCells.length}
-                            datasets={datasets}
-                            env={project.environment}
-                            isEmptyNotebook={isEmptyNotebook}
-                            cell={cell}
-                            sequenceIndex={i + 1}
-                            onCreateBranch={this.createBranch}
-                            onDeleteModule={this.deleteModule}
-                            onNavigateDataset={this.navigateDataset}
-                            onOutputSelect={this.selectOutput}
-                            onSelectCell={this.handleSelectCell}
-                            onSubmit={this.submitUpdate}
-                        />
-                    );
-                }
-                datasets = cell.module.datasets;
-                if (errorState) {
-
-                } else {
-                    notebookCells.push(
-                        <EditableNotebookCell
-                            key={workflow.version + '#' + notebookCells.length}
-                            cellId={notebookCells.length}
-                            datasets={datasets}
-                            env={project.environment}
-                            isEmptyNotebook={isEmptyNotebook}
-                            onSelectCell={this.handleSelectCell}
-                            onSubmit={this.submitUpdate}
-                        />
-                    );
-                }
-            }
-        }
-        // Reverse cell order if reversed flag is true
-        if (reversed) {
-            notebookCells = notebookCells.reverse()
+        } else {
+            notebookCells = (
+                <EditableNotebook
+                    isEmptyNotebook={(notebook.cells.length === 0)}
+                    groupMode={groupMode}
+                    notebook={notebook}
+                    project={project}
+                    reversed={reversed}
+                    workflow={workflow}
+                    onChangeGrouping={this.handleChangeGrouping}
+                    onCreateBranch={this.createBranch}
+                    onDeleteModule={this.deleteModule}
+                    onInsertModule={this.insertModule}
+                    onNavigateDataset={this.navigateDataset}
+                    onOutputSelect={this.selectOutput}
+                    onReplaceModule={this.replaceModule}
+                    onShowAnnotations={this.handleShowAnnotations}
+                />
+            );
         }
         let notebookFooter = (
             <EditResourceNameModal
@@ -214,6 +194,16 @@ class Notebook extends React.Component {
         );
     }
     /**
+     * Replace a module in the current workflow with the given command and
+     * arguments.
+     */
+    replaceModule = (command, data, module) => {
+        const { dispatch } = this.props;
+        // Create data object for request.
+        const reqData = {type: command.type, id: command.id, arguments: data};
+        dispatch(replaceNotebookCell(module, reqData))
+    }
+    /**
      * Dispatch an action to load the resource that is being shown as output
      * for the notebook cell that displays the given workflow module.
      */
@@ -231,44 +221,12 @@ class Notebook extends React.Component {
      * Show the create branch modal.
      */
     showModal = () => (this.setState({modalOpen: true}));
-    /**
-     * Handle modification of the current workflow. The cell id is used to
-     * identify the cell that is being submitted. Depending on whether the
-     * cell contains a workflow module or not the action inserts a new module
-     * or replaces an existing one in the workflow.
-     *
-     * In case a new module is inserted, we need to check whether the module is
-     * inserted before an existing module or appended to the end of the
-     * workflow (because of the different Urls used for the request).
-     */
-    submitUpdate = (cellId, command, data) => {
-        const { dispatch, notebook, workflow } = this.props;
-        // Create data object for request. Independent of insert or replace
-        const reqData = {type: command.type, id: command.id, arguments: data};
-        // Determine whether a new cell is being inserted or an existing cell
-        // is modified.
-        if ((cellId % 2) === 0) {
-            // Even cell ids belong to new cells. Distinguish between inserting
-            // before an existing module or the end of the workflow.
-            let url = null;
-            const moduleIndex = Math.floor(cellId / 2);
-            if (moduleIndex < notebook.cells.length) {
-                url = notebook.cells[moduleIndex].module.links.insert;
-            } else {
-                url = workflow.links.append;
-            }
-            dispatch(insertNotebookCell(url, reqData))
-        } else {
-            // Odd cell ids belong to existing modules
-            const module = notebook.cells[Math.floor(cellId / 2)].module;
-            dispatch(replaceNotebookCell(module, reqData))
-        }
-    }
 }
 
 
 const mapStateToProps = state => {
     return {
+        groupMode: state.notebook.groupMode,
         notebook: state.notebook.notebook,
         project: state.projectPage.project,
         reversed: state.notebook.reversed,

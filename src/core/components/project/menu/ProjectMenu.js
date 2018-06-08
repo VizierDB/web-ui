@@ -9,6 +9,7 @@ import { Icon, Menu } from 'semantic-ui-react';
 import BranchMenuDropdown from './BranchMenuDropdown';
 import ChartMenuDropdown from './ChartMenuDropdown';
 import DatasetMenuDropdown from './DatasetMenuDropdown';
+import NotebookMenuDropdown from './NotebookMenuDropdown';
 import DeleteResourceModal from '../../modals/DeleteResourceModal';
 import EditResourceNameModal from '../../modals/EditResourceNameModal';
 import { isNotEmptyString, pageUrl } from '../../../util/App';
@@ -25,17 +26,20 @@ const MODAL_EDIT_PROJECT_NAME = 'MODAL_EDIT_PROJECT_NAME';
 
 class ProjectMenu extends React.Component {
     static propTypes = {
+        groupMode: PropTypes.number.isRequired,
+        project: PropTypes.object.isRequired,
+        resource: PropTypes.object,
+        workflow: PropTypes.object.isRequired,
+        onChangeGrouping: PropTypes.func.isRequired,
         onDeleteBranch: PropTypes.func.isRequired,
         onEditBranch: PropTypes.func.isRequired,
         onEditProject: PropTypes.func.isRequired,
         onRedirect: PropTypes.func.isRequired,
+        onReverse: PropTypes.func.isRequired,
         onShowChart: PropTypes.func.isRequired,
         onShowDataset: PropTypes.func.isRequired,
         onShowHistory: PropTypes.func.isRequired,
         onShowNotebook: PropTypes.func.isRequired,
-        project: PropTypes.object.isRequired,
-        resource: PropTypes.object,
-        workflow: PropTypes.object.isRequired,
     }
     /**
      * Initialize internal state to keep track of any modal that may be shown.
@@ -61,14 +65,26 @@ class ProjectMenu extends React.Component {
      */
     render() {
         const {
-            project, resource, workflow, onShowChart, onShowDataset,
-            onShowHistory, onShowNotebook
+            groupMode,
+            project,
+            resource,
+            workflow,
+            onChangeGrouping,
+            onReverse,
+            onShowChart,
+            onShowDataset,
+            onShowHistory,
+            onShowNotebook
         } = this.props;
         // The basic layout contains a menu bar and an optional modal or error
         // message.
         // Start by generating the list of elements in the menu bar.
         let menuItems = [
-            <Menu.Item key='project' onClick={this.showEditProjectNameModal}>
+            <Menu.Item
+                key='project'
+                title='Edit project name'
+                onClick={this.showEditProjectNameModal}
+            >
                 <Icon name='database' />
                 <span className='project-name'>{project.name}</span>
             </Menu.Item>
@@ -87,23 +103,29 @@ class ProjectMenu extends React.Component {
                     selectedBranch={workflow.branch}
                 />
             );
-            // When using disabled property the menu item is still getting
-            // highlighted onHover (maybe a bug or feature of semantic-ui?).
-            // To avoid this problem we set the onClick property to null in
-            // addition to the disabled property when the notebook is shown.
-            let notebookOnClickHandler = null;
+            // Depending on whether the resource is a notebook or not the
+            // notebook menue is changed. If the resource is not a notebook the
+            // menu item is a button that allows to show the notebook. If the
+            // resource is a notebook the menu is a dropdown that allows th user
+            // to select properties of how the notebook is displayed.
             if (!resource.isNotebook()) {
-                notebookOnClickHandler = onShowNotebook;
+                menuItems.push(
+                    <Menu.Item
+                        key='notebook'
+                        icon='file alternate outline'
+                        name='Notebook'
+                        onClick={onShowNotebook}
+                    />
+                );
+            } else {
+                menuItems.push(
+                    <NotebookMenuDropdown
+                        key='notebook'
+                        groupMode={groupMode}
+                        onChangeGrouping={onChangeGrouping}
+                        onReverse={onReverse}
+                    />);
             }
-            menuItems.push(
-                <Menu.Item
-                    key='notebook'
-                    icon='file text outline'
-                    name='Notebook'
-                    disabled={resource.isNotebook() || workflow.isEmpty}
-                    onClick={notebookOnClickHandler}
-                />
-            );
             menuItems.push(
                 <DatasetMenuDropdown
                     key='datasets'

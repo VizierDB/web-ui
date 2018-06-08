@@ -24,11 +24,34 @@ class CommandsListing extends React.Component {
     render() {
         const { env } = this.props;
         // Get a list of command types
-        const gridColumns = []
-        for (let value of env.modules.types) {
-            const typeCommands = env.modules.package[value]
-            typeCommands.sort((c1, c2) => (c1.name.localeCompare(c2.name)))
-            let listItems = []
+        const gridColumns = [];
+        // Sort he list of module group identifier.
+        const groups = Array.from(env.modules.types);
+        groups.sort();
+        // Further group modules by name
+        let list_index = '';
+        let listItems = [];
+        for (let value of groups) {
+            const typeCommands = env.modules.package[value];
+            typeCommands.sort((c1, c2) => (c1.name.localeCompare(c2.name)));
+            if (value.charAt(0) !== list_index) {
+                if (listItems.length > 0) {
+                    gridColumns.push(
+                        <Grid.Column width={4} key={gridColumns.length}>
+                            <List link>
+                                { listItems }
+                            </List>
+                        </Grid.Column>
+                    );
+                    listItems = [];
+                }
+                list_index = value.charAt(0);
+            }
+            listItems.push(
+                <List.Item key={value}>
+                    <List.Header>{value.toUpperCase()}</List.Header>
+                </List.Item>
+            );
             for (let i = 0; i < typeCommands.length; i++) {
                 const cmd = typeCommands[i]
                 listItems.push(
@@ -43,16 +66,15 @@ class CommandsListing extends React.Component {
                     </List.Item>
                 )
             }
+        }
+        if (listItems.length > 0) {
             gridColumns.push(
                 <Grid.Column width={4} key={gridColumns.length}>
                     <List link>
-                        <List.Item>
-                            <List.Header>{value.toUpperCase()}</List.Header>
-                        </List.Item>
                         { listItems }
                     </List>
                 </Grid.Column>
-            )
+            );
         }
         return (
             <div className='commands-listing'>

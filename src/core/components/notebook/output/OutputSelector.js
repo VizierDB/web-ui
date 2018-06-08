@@ -23,13 +23,16 @@ class OutputSelector extends React.Component {
         // Determine the key of the selected output to disable the
         // respective menu entry.
         let selectedKey = null;
+        let selectorIcon = 'desktop';
         if (output != null) {
             if (output.isText()) {
                 selectedKey = 'stdout';
             } else if (output.isDataset()) {
                 selectedKey = 'ds-' + output.content.name;
+                selectorIcon = 'table';
             } else if (output.isChart()) {
                 selectedKey = 'vw-' + output.content.name;
+                selectorIcon = 'bar chart';
             }
         }
         // Create list of dropdon menu items
@@ -38,7 +41,7 @@ class OutputSelector extends React.Component {
         dropdownItems.push(
             <Dropdown.Item
                 key='stdout'
-                icon='laptop'
+                icon='desktop'
                 text='Standard Output'
                 disabled={selectedKey === 'stdout'}
                 onClick={this.handleSelectStdout}
@@ -82,7 +85,7 @@ class OutputSelector extends React.Component {
         }
         return (
             <div className={'output-selector'}>
-                <Dropdown icon='bars'>
+                <Dropdown icon={selectorIcon} title='Select output'>
                     <Dropdown.Menu>{dropdownItems}</Dropdown.Menu>
                 </Dropdown>
             </div>

@@ -2,6 +2,7 @@ import { BranchDescriptor } from './Branch';
 import { getProperty } from '../util/Api';
 import { HATEOASReferences } from '../util/HATEOAS';
 import { sortByName } from '../util/Sort';
+import { VIZUAL, VIZUAL_OP } from '../util/Vizual';
 
 
 /**
@@ -28,12 +29,22 @@ class ModuleRegistry {
         this.types = new Set()
         for (let i = 0; i < commands.length; i++) {
             const cmd = commands[i]
-            this.module[moduleId(cmd)] = cmd
-            if (this.types.has(cmd.type)) {
-                this.package[cmd.type].push(cmd)
+            this.module[moduleId(cmd)] = cmd;
+            // Get the class identifier for the command. By default the class is
+            // defined by the command type. However, we may want to group
+            // commands of different types in the UI (or separate them). This
+            // can be done using the optional .group attribute.
+            let cmdClass = null;
+            if (cmd.group != null) {
+                cmdClass = cmd.group;
             } else {
-                this.package[cmd.type] = [cmd]
-                this.types.add(cmd.type)
+                cmdClass = cmd.type;
+            }
+            if (this.types.has(cmdClass)) {
+                this.package[cmdClass].push(cmd)
+            } else {
+                this.package[cmdClass] = [cmd]
+                this.types.add(cmdClass)
             }
         }
     }
@@ -79,6 +90,15 @@ export class ProjectHandle {
         }
         sortByName(this.branches);
         return this;
+    }
+    /**
+     * This method is used to identify cells in a notebook that are grouped.
+     * The information about which cells are grouped should be encoded in the
+     * project environment.
+     * Note: For now, the information is hard-coded.
+     */
+    isGrouped(module) {
+        return (module.command.type === VIZUAL_OP) && (module.command.id !== VIZUAL.LOAD);
     }
     /**
      * Create a copy of the project handle where the branch listing is modified

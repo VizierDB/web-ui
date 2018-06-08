@@ -98,7 +98,7 @@ class AnnotationObject extends React.Component {
                             icon = 'info circle';
                             title = 'Issue';
                         } else {
-                            icon = 'talk outline';
+                            icon = 'comment alternate outline';
                             title = 'Comment';
                         }
                         let cssSuffix = '';

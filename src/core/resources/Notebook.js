@@ -52,6 +52,12 @@ export const OutputText = (outputObjects) => {
 // Notebook
 // -----------------------------------------------------------------------------
 
+// Cell grouping mode states
+export const GRP_COLLAPSE = 1;
+export const GRP_HIDE = 2;
+export const GRP_SHOW = 0;
+
+
 /**
  * A notebook resource is a list of cells. Each cell corresponds to a module
  * in an underlying workflow. In addition to the workflow module each cell in

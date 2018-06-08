@@ -59,6 +59,7 @@ class ReadOnlyWorkflowCellInput extends React.Component {
                 <CellIndex
                     onClick={this.handleShowModal}
                     sequenceIndex={sequenceIndex}
+                    title='Create new branch unitl here'
                 />
             );
         }

@@ -41,3 +41,9 @@
 ### 0.4.1 - 2018-06-07
 
 * Use Ctrl+Del to update cell value to NULL
+
+### 0.4.2 - 2018-06-08
+
+* Different modes for showing VizUAL cells in a notebook (collapse and hide)
+* Move notebook display options to separate dropdown menu
+* Switch to semantic-ui-react 0.81 (change icon names)

@@ -1,15 +1,15 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
-import { CloseButton } from '../Button'
-import EditResourceNameModal from '../modals/EditResourceNameModal';
-import DeleteResourceModal from '../modals/DeleteResourceModal';
-import CellIndex from './input/CellIndex';
-import CellInputArea from './input/CellInputArea';
-import CollapsedEmptyCellInput from './input/CollapsedEmptyCellInput';
-import CollapsedWorkflowCellInput from './input/CollapsedWorkflowCellInput';
-import CellOutputArea from './output/CellOutputArea';
-import { isNotEmptyString } from '../../util/App';
-import '../../../css/Notebook.css';
+import { CloseButton } from '../../Button'
+import EditResourceNameModal from '../../modals/EditResourceNameModal';
+import DeleteResourceModal from '../../modals/DeleteResourceModal';
+import CellIndex from '../input/CellIndex';
+import CellInputArea from '../input/CellInputArea';
+import CollapsedEmptyCellInput from '../input/CollapsedEmptyCellInput';
+import CollapsedWorkflowCellInput from '../input/CollapsedWorkflowCellInput';
+import CellOutputArea from '../output/CellOutputArea';
+import { isNotEmptyString } from '../../../util/App';
+import '../../../../css/Notebook.css';
 
 
 // MODAL IDENTIFIER
@@ -30,16 +30,14 @@ const MODAL_DELETE = 'DELETE';
 class EditableNotebookCell extends React.Component {
     static propTypes = {
         cell: PropTypes.object,
-        cellId: PropTypes.number.isRequired,
         datasets: PropTypes.array.isRequired,
         env: PropTypes.object.isRequired,
-        isEmptyNotebook: PropTypes.bool.isRequired,
         sequenceIndex: PropTypes.number,
         onCreateBranch: PropTypes.func,
         onDeleteModule: PropTypes.func,
         onNavigateDataset: PropTypes.func,
         onOutputSelect: PropTypes.func,
-        onSelectCell: PropTypes.func,
+        onShowAnnotations: PropTypes.func,
         onSubmit: PropTypes.func.isRequired
     }
     constructor(props) {
@@ -71,14 +69,22 @@ class EditableNotebookCell extends React.Component {
      */
     handleExpand = () => (this.setState({expanded: true}));
     /**
+     * Handle command submit. Call the provided onSubmit method and pass along
+     * the module in the notebook (needed to get the Url for the submit
+     * request).
+     */
+    handleSubmit = (command, data) => {
+        const { cell, onSubmit } = this.props;
+        onSubmit(command, data, cell.module);
+    }
+    /**
      * Hide any open modal.
      */
     hideModal = () => (this.setState({showModal: null}));
     render() {
         const {
-            cell, cellId, datasets, env, isEmptyNotebook,
-            sequenceIndex, onNavigateDataset, onOutputSelect, onSelectCell,
-            onSubmit
+            cell, datasets, env, sequenceIndex, onNavigateDataset,
+            onOutputSelect, onShowAnnotations
         } = this.props;
         let module = null;
         let hasError = false;
@@ -93,7 +99,7 @@ class EditableNotebookCell extends React.Component {
         if ((isEmptyCell) && (!expanded)) {
             return (
                 <CollapsedEmptyCellInput
-                    isEmptyNotebook={isEmptyNotebook}
+                    isEmptyNotebook={false}
                     onExpand={this.handleExpand}
                 />
             );
@@ -128,13 +134,12 @@ class EditableNotebookCell extends React.Component {
                         <td className='cell-cmd'>
                             <div className='cell-form'>
                                 <CellInputArea
-                                    cellId={cellId}
                                     datasets={datasets}
                                     env={env}
                                     module={module}
                                     onCreateBranch={this.showCreateBranchModal}
                                     onDeleteModule={this.showDeleteModuleModal}
-                                    onSubmit={onSubmit}
+                                    onSubmit={this.handleSubmit}
                                 />
                             </div>
                         </td>
@@ -162,7 +167,7 @@ class EditableNotebookCell extends React.Component {
                     output={cell.output}
                     onOutputSelect={onOutputSelect}
                     onNavigateDataset={onNavigateDataset}
-                    onSelectCell={onSelectCell}
+                    onShowAnnotations={onShowAnnotations}
                 />
             );
         }
