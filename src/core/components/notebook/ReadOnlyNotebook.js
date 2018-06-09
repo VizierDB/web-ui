@@ -28,13 +28,17 @@ class ReadOnlyNotebook extends React.Component {
         // come after a cell with error in the notebook sequence are also in
         // error state.
         let errorState = false;
+        let wasErrorState = errorState;
         // Keep a list of grouped cells. Output them when a non-grouped cell is
         // encountered in the sequence or when the end of the cell list is
         // reached.
         let groupedCells = [];
         for (let i = 0; i < notebook.cells.length; i++) {
             const cell = notebook.cells[i];
-            // Update the error state if the current cell has errors
+            // Update the error state if the current cell has errors. Here we
+            // need to keep track of the previous error state to allow the
+            // cell that caused the error to be editable.
+            wasErrorState = errorState;
             errorState = cell.hasError() ? true : errorState;
             if ((groupMode !== GRP_SHOW) && (project.isGrouped(cell.module))) {
                 groupedCells.push(cell);
@@ -48,7 +52,7 @@ class ReadOnlyNotebook extends React.Component {
             }
         }
         if (groupedCells.length > 0) {
-            notebookCells.push(GroupCell(this.props, groupedCells, errorState, notebook.cells.length));
+            notebookCells.push(GroupCell(this.props, groupedCells, wasErrorState, notebook.cells.length));
         }
         // Reverse the notebook cells if flag is true
         if (reversed) {
