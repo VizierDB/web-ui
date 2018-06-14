@@ -55,6 +55,7 @@ class EditableNotebook extends React.Component {
         // come after a cell with error in the notebook sequence are also in
         // error state.
         let errorState = false;
+        let wasErrorState = errorState;
         // Keep a list of grouped cells. Output them when a non-grouped cell is
         // encountered in the sequence or when the end of the cell list is
         // reached.
@@ -64,7 +65,7 @@ class EditableNotebook extends React.Component {
             // Update the error state if the current cell has errors. Here we
             // need to keep track of the previous error state to allow the
             // cell that caused the error to be editable.
-            const wasErrorState = errorState;
+            wasErrorState = errorState;
             errorState = cell.hasError() ? true : errorState;
             // If the cell belongs to the type of cells that are grouped we
             // simply add it to the array.
@@ -76,7 +77,7 @@ class EditableNotebook extends React.Component {
                 // to check if there are any previously grouped cells that
                 // have not been added yet.
                 if (groupedCells.length > 0) {
-                    notebookCells.push(GroupCell(this.props, groupedCells, errorState, i));
+                    notebookCells.push(GroupCell(this.props, groupedCells, wasErrorState, i));
                     groupedCells = [];
                     // Add an empty cell after the cell group (if not in error
                     // state). The index of the cell is i-1 because it appears
@@ -105,7 +106,7 @@ class EditableNotebook extends React.Component {
         // Make sure to append any grouped cells that have not been added to the
         // notebook yey.
         if (groupedCells.length > 0) {
-            notebookCells.push(GroupCell(this.props, groupedCells, errorState, notebook.cells.length));
+            notebookCells.push(GroupCell(this.props, groupedCells, wasErrorState, notebook.cells.length));
             // Add empty cell at the end.
             if (!errorState) {
                 notebookCells.push(EmptyCell(this.props, datasets, notebook.cells.length));
