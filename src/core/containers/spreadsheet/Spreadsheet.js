@@ -1,24 +1,47 @@
+/**
+ * Copyright (C) 2018 New York University
+ *                    University at Buffalo,
+ *                    Illinois Institute of Technology.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Dimmer, Icon, Loader } from 'semantic-ui-react';
+import { insertNotebookCell } from '../../actions/notebook/Notebook';
 import {
     clearAnnotations, deleteAnnotations, fetchAnnotations, showSpreadsheet,
     submitUpdate, updateAnnotations
 } from '../../actions/spreadsheet/Spreadsheet';
+import { CloseButton } from '../../components/Button'
 import AnnotationObject from '../../components/annotation/AnnotationObject';
 import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
+import CellInputArea  from '../../components/notebook/input/CellInputArea';
 import SpreadsheetNavbar from '../../components/spreadsheet/SpreadsheetNavbar';
 import GridCell from '../../components/spreadsheet/grid/GridCell';
 import HeaderCell from '../../components/spreadsheet/grid/HeaderCell';
 import RowIndexCell from '../../components/spreadsheet/grid/RowIndexCell';
 import { MOVE, isNotEmptyString, isNonNegativeInt } from '../../util/App';
 import {
-    VIZUAL, deleteColumn, deleteRow, insertColumn, insertRow, moveColumn,
-    moveRow,  renameColumn, updateCell
+    VIZUAL, VIZUAL_OP, deleteColumn, deleteRow, insertColumn, insertRow, moveColumn,
+    moveRow,  renameColumn, sortDataset, updateCell
 } from '../../util/Vizual';
 import '../../../css/App.css';
+import '../../../css/Notebook.css';
 import '../../../css/Spreadsheet.css';
+
 
 /**
  * Component to display a dataset in spreadsheet format. Spreadsheets are
@@ -43,6 +66,7 @@ class Spreadsheet extends React.Component {
             modal: null,
             modalValue: null,
             originalCellValue: null,
+            showNotebookCell: false,
             updatedCellValue: null,
             updatingColumnId: -1,
             updatingRowId: -1,
@@ -65,6 +89,26 @@ class Spreadsheet extends React.Component {
         }
         if (clearCell === true) {
             this.clearActiveCell();
+        }
+    }
+    /**
+     * Append a module to the current workflow.
+     */
+    appendModule = (command, data) => {
+        const { dispatch, dataset, workflow } = this.props;
+        // Create data object for request.
+        const reqData = {type: command.type, id: command.id, arguments: data};
+        // Hide notebook cell
+        this.toggleNotebookCell();
+        // Dispatch update request. If the current dataset is being renamed or
+        // deleted we need to switch to notebook view
+        if (
+            (command.type === VIZUAL_OP) &&
+            ((command.id === VIZUAL.DROP_DATASET) || (command.id === VIZUAL.RENAME_DATASET))
+        ) {
+            dispatch(insertNotebookCell(workflow.links.append, reqData))
+        } else {
+            dispatch(submitUpdate(workflow, dataset, reqData))
         }
     }
     /**
@@ -116,26 +160,29 @@ class Spreadsheet extends React.Component {
             return;
         }
         const { dataset } = this.props;
+        // Get the index of the first and last row in the dataset
+        const minRowIndex = dataset.rows[0].index;
+        const maxRowIndex = dataset.rows[dataset.rows.length - 1].index;
         const columns = dataset.columns;
         let colIdx = activeColumnIndex;
         let rowIdx = activeRowIndex;
         if (direction === MOVE.UP) {
             rowIdx -= 1;
-            if (rowIdx < 0) {
-                rowIdx = dataset.rows.length - 1;
+            if (rowIdx < minRowIndex) {
+                rowIdx = maxRowIndex;
             }
         } else if (direction === MOVE.DOWN) {
             rowIdx += 1;
-            if (rowIdx >= dataset.rows.length) {
-                rowIdx = 0;
+            if (rowIdx > maxRowIndex) {
+                rowIdx = minRowIndex;
             }
         } else if (direction === MOVE.RIGHT) {
             colIdx += 1;
             if (colIdx >= columns.length) {
                 colIdx = 0;
                 rowIdx += 1;
-                if (rowIdx >= dataset.rows.length) {
-                    rowIdx = 0;
+                if (rowIdx > maxRowIndex) {
+                    rowIdx = minRowIndex;
                 }
             }
         } else if (direction === MOVE.LEFT) {
@@ -143,13 +190,13 @@ class Spreadsheet extends React.Component {
             if (colIdx < 0) {
                 colIdx = columns.length - 1;
                 rowIdx -= 1;
-                if (rowIdx < 0) {
-                    rowIdx = dataset.rows.length - 1;
+                if (rowIdx < minRowIndex) {
+                    rowIdx = maxRowIndex;
                 }
             }
         }
         // Update the active cell information
-        this.handleSelectCell(columns[colIdx].id, dataset.rows[rowIdx].id, colIdx, rowIdx);
+        this.handleSelectCell(columns[colIdx].id, dataset.rowAtIndex(rowIdx).id, colIdx, rowIdx);
     }
     /**
      * Move the active header cell. Only supports moving left or right.
@@ -204,7 +251,7 @@ class Spreadsheet extends React.Component {
         if (columnIndex !== -1) {
             const { dataset } = this.props;
             if (rowIndex !== -1) {
-                value = dataset.rows[rowIndex].values[columnIndex];
+                value = dataset.rowAtIndex(rowIndex).values[columnIndex];
             } else {
                 value = dataset.columns[columnIndex].name;
             }
@@ -236,7 +283,11 @@ class Spreadsheet extends React.Component {
             );
         }
     }
-    handleVizualAction = (cmdId, identifier) => {
+    /**
+     * Handle a VizUAL action triggered by one of the context menues. The third
+     * argument (para) is optional (e.g., used to specify the sort order).
+     */
+    handleVizualAction = (cmdId, identifier, para) => {
         const { dataset } = this.props;
         switch (cmdId) {
             case VIZUAL.INSERT_COLUMN:
@@ -256,18 +307,27 @@ class Spreadsheet extends React.Component {
                 return this.submitVizualCommand(
                     insertRow(dataset.name, identifier)
                 );
+            case VIZUAL.SORT:
+            return this.submitVizualCommand(
+                sortDataset(dataset.name, identifier, para)
+            );
             default:
                 return;
         }
+    }
+    toggleNotebookCell = () => {
+        const { showNotebookCell } = this.state;
+        this.setState({showNotebookCell: !showNotebookCell});
     }
     /**
      * Render the spreadsheet as a Html table.
      */
     render() {
-        const { annotations, dataset, isUpdating, workflow } = this.props;
+        const { annotations, dataset, isUpdating, project, workflow } = this.props;
         const {
             activeColumnId,
             activeRowId,
+            showNotebookCell,
             updatingColumnId,
             updatingRowId,
             updatingValue
@@ -359,15 +419,61 @@ class Spreadsheet extends React.Component {
         if ((activeColumnId >= 0) && (activeRowId >= 0)) {
             showAnnoHandler = this.showAnnotationModal;
         }
+        // Show a notebook cell to append at the end of the current workflow.
+        let notebookCell = null;
+        if (showNotebookCell) {
+            notebookCell = (
+                <div className='notebook-cell-xp-new'>
+                    <table className='cell-area'><tbody>
+                        <tr>
+                            <td className='cell-index'>
+                                <CloseButton
+                                    name='minus-square-o'
+                                    onClick={this.toggleNotebookCell}
+                                />
+                            </td>
+                            <td className='cell-cmd'>
+                                <div className='cell-form'>
+                                    <CellInputArea
+                                        datasets={[dataset]}
+                                        env={project.environment}
+                                        onSubmit={this.appendModule}
+                                    />
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody></table>
+                </div>
+            );
+        }
+
+        let annoButtonCss = null;
+        if (showAnnoHandler != null) {
+            annoButtonCss = 'icon-button';
+        }
+        let cellIcon = 'plus square outline';
+        if (showNotebookCell) {
+            cellIcon = 'minus square outline';
+        }
         return (
             <div className='spreadsheet-container'>
                 <h1 className='dataset-name'>
                     {dataset.name}
-                    <span className='left-padding-md'>
+                    <span className='left-padding-lg'>
                         <Icon
+                            className={annoButtonCss}
                             name='comment alternate outline'
+                            title='Show annotations'
                             disabled={showAnnoHandler === null}
                             onClick={showAnnoHandler}
+                        />
+                    </span>
+                    <span className='left-padding-md'>
+                        <Icon
+                            className='icon-button'
+                            title='Add notebook cell'
+                            name={cellIcon}
+                            onClick={this.toggleNotebookCell}
                         />
                     </span>
                 </h1>
@@ -379,6 +485,7 @@ class Spreadsheet extends React.Component {
                 />
                 <Dimmer.Dimmable dimmed={isUpdating}>
                     <Loader active={isUpdating}/>
+                    { notebookCell }
                     <table className='spreadsheet'>
                         <thead>{header}</thead>
                         <tbody>{rows}</tbody>

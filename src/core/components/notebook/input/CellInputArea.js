@@ -1,14 +1,21 @@
 /**
- * The cell input area contains the two main components for editing a notebook
- * cell. The cell menu bar allows selecting the cell module, as well as to
- * execute the module, delete the cell, and create a new branch starting at the
- * module represented by the cell. The cell module form allows to enter module
- * specific parameter values.
+ * Copyright (C) 2018 New York University
+ *                    University at Buffalo,
+ *                    Illinois Institute of Technology.
  *
- * Since the cell input area contains the form data and the buttons used to
- * submit the module form, this is also the place where we maintain the internal
- * state of the module form.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import ModuleInputForm from './ModuleInputForm';
@@ -20,6 +27,18 @@ import {
     DT_GROUP, DT_INT, DT_ROW_ID, DT_STRING
 } from './ModuleSpec';
 
+
+/**
+ * The cell input area contains the two main components for editing a notebook
+ * cell. The cell menu bar allows selecting the cell module, as well as to
+ * execute the module, delete the cell, and create a new branch starting at the
+ * module represented by the cell. The cell module form allows to enter module
+ * specific parameter values.
+ *
+ * Since the cell input area contains the form data and the buttons used to
+ * submit the module form, this is also the place where we maintain the internal
+ * state of the module form.
+ */
 
 // -----------------------------------------------------------------------------
 //
@@ -140,7 +159,7 @@ const DEFAULT_VALUE = (argument, command, datasets, files, argValue) => {
     } else if ((dt === DT_STRING) && (argument.values)) {
         for (let i = 0; i < argument.values.length; i++) {
             const entry = argument.values[i];
-            // Check whether the entry is a structired value or a string
+            // Check whether the entry is a structured value or a string
             if (typeof entry === 'object') {
                 // If the entry has .isDefault set to true return the entry key
                 // or value (depending on whether there is a key or not; the

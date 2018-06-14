@@ -1,7 +1,19 @@
 /**
- * Menu bar for a notebook cell. Contains the module selector drop down and
- * buttons to run a module, delete the module, create an new branch, insert
- * a new cell (if appropriate).
+ * Copyright (C) 2018 New York University
+ *                    University at Buffalo,
+ *                    Illinois Institute of Technology.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import React from 'react'
@@ -11,6 +23,11 @@ import CommandsDropDown from './listing/CommandsDropDown'
 import '../../../../css/CellMenuBar.css'
 
 
+/**
+* Menu bar for a notebook cell. Contains the module selector drop down and
+* buttons to run a module, delete the module, create an new branch, insert
+* a new cell (if appropriate).
+*/
 class CellMenuBar extends React.Component {
     static propTypes = {
         env: PropTypes.object.isRequired,

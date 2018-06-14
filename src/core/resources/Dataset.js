@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2018 New York University
+ *                    University at Buffalo,
+ *                    Illinois Institute of Technology.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { HATEOASReferences } from '../util/HATEOAS';
 
 
@@ -71,6 +89,13 @@ export class DatasetHandle {
             (anno) => ((anno.column === columnId) && (anno.row === rowId))
         );
         return (cell != null);
+    }
+    /**
+     * Get the dataset row at with the given index position. Note that the
+     * row index position is not the same as the index in the row array.
+     */
+    rowAtIndex(index) {
+        return this.rows.find((row) => (row.index === index));
     }
     /**
      * Create an updated copy of the dataset where annotation information for

@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2018 New York University
+ *                    University at Buffalo,
+ *                    Illinois Institute of Technology.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -21,7 +39,7 @@ import { ErrorMessage, NotFoundMessage } from '../../components/Message';
 import BranchHistory from '../../components/project/BranchHistory';
 import DatasetChart from '../../components/plot/DatasetChart';
 import ModuleError from '../../components/project/ModuleError';
-import ProjectMenu from '../../components/project/menu/ProjectMenu';
+import MainProjectMenu from '../../components/project/menu/MainProjectMenu';
 import ProjectStatusHeader from '../../components/project/ProjectStatusHeader';
 import Notebook from '../notebook/Notebook';
 import Spreadsheet from '../spreadsheet/Spreadsheet';
@@ -41,7 +59,7 @@ import '../../../css/Chart.css';
  *
  * The page layout has two main parts:
  *
- * <ProjectMenu />
+ * <MainProjectMenu />
  * { pageContent }
  *
  * The pageContent is either of the following:
@@ -250,7 +268,7 @@ class ProjectPage extends Component {
                     <Grid columns={2}>
                         <Grid.Row>
                             <Grid.Column className='project-menu-bar' width={10}>
-                            <ProjectMenu
+                            <MainProjectMenu
                                 groupMode={groupMode}
                                 onChangeGrouping={this.handleChangeGroupMode}
                                 onDeleteBranch={this.submitDeleteBranch}

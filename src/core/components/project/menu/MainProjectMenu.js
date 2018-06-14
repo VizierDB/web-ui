@@ -1,8 +1,21 @@
 /**
- * Component that allows to select the current branch. In addition to switching
- * between branches the component allows to edit the branch name and to delete
- * selected branch.
+ * Copyright (C) 2018 New York University
+ *                    University at Buffalo,
+ *                    Illinois Institute of Technology.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Icon, Menu } from 'semantic-ui-react';
@@ -10,11 +23,18 @@ import BranchMenuDropdown from './BranchMenuDropdown';
 import ChartMenuDropdown from './ChartMenuDropdown';
 import DatasetMenuDropdown from './DatasetMenuDropdown';
 import NotebookMenuDropdown from './NotebookMenuDropdown';
+import ProjectMenuDropdown from './ProjectMenuDropdown';
 import DeleteResourceModal from '../../modals/DeleteResourceModal';
 import EditResourceNameModal from '../../modals/EditResourceNameModal';
 import { isNotEmptyString, pageUrl } from '../../../util/App';
 import '../../../../css/ResourceListing.css';
 import '../../../../css/ProjectPage.css';
+
+/**
+ * Component that allows to select the current branch. In addition to switching
+ * between branches the component allows to edit the branch name and to delete
+ * selected branch.
+ */
 
 /*
  * Identify the different types of modals that may be displayed.
@@ -24,7 +44,7 @@ const MODAL_DELETE_BRANCH = 'MODAL_DELETE_BRANCH';
 const MODAL_EDIT_BRANCH_NAME = 'MODAL_EDIT_BRANCH_NAME';
 const MODAL_EDIT_PROJECT_NAME = 'MODAL_EDIT_PROJECT_NAME';
 
-class ProjectMenu extends React.Component {
+class MainProjectMenu extends React.Component {
     static propTypes = {
         groupMode: PropTypes.number.isRequired,
         project: PropTypes.object.isRequired,
@@ -81,14 +101,19 @@ class ProjectMenu extends React.Component {
         // Start by generating the list of elements in the menu bar.
         let menuItems = [
             <Menu.Item
-                key='project'
-                title='Edit project name'
-                onClick={this.showEditProjectNameModal}
+                header
+                key='title'
             >
                 <Icon name='database' />
                 <span className='project-name'>{project.name}</span>
             </Menu.Item>
         ];
+        menuItems.push(
+            <ProjectMenuDropdown
+                key='project'
+                onEdit={this.showEditProjectNameModal}
+            />
+        );
         if (resource != null) {
             menuItems.push(
                 <BranchMenuDropdown
@@ -245,4 +270,4 @@ class ProjectMenu extends React.Component {
     }
 }
 
-export default ProjectMenu;
+export default MainProjectMenu;

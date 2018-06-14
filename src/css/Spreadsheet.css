@@ -4,7 +4,6 @@ div.spreadsheet-container {
     border: 1px solid rgba(34,36,38,.15);
     box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
     color: #3b4151;
-    font-size: 12px;
     padding: 20px 20px;
 }
 
@@ -31,7 +30,7 @@ td.grid-row-index {
     border: 2px solid transparent;
     padding-right: 5px;
     text-align: right;
-    width: 50px;
+    width: 60px;
 }
 
 td.grid-cell {

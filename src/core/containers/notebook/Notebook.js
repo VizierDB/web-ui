@@ -1,9 +1,19 @@
 /**
- * Notebook component that displays a data curation workflow. Allows to view
- * datasets for individual workflow modules.
+ * Copyright (C) 2018 New York University
+ *                    University at Buffalo,
+ *                    Illinois Institute of Technology.
  *
- * Existing modules can be modified or a new module be inserted at any point in
- * the workflow.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import React from 'react';
@@ -26,8 +36,13 @@ import {
 import { isNotEmptyString } from '../../util/App';
 import '../../../css/Notebook.css';
 
-
 /**
+ * Notebook component that displays a data curation workflow. Allows to view
+ * datasets for individual workflow modules.
+ *
+ * Existing modules can be modified or a new module be inserted at any point in
+ * the workflow.
+ *
  * A notebook containing a curation workflow contains (1) a list of notebook
  * cells and (2) a section to display the latest stae of a selected dataset.
  */

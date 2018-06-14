@@ -1,6 +1,7 @@
 .icon-button {
     color: rgba(59, 65, 81, 0.5);
     outline: 0;
+    cursor: pointer;
 }
 
 .icon-button:hover {

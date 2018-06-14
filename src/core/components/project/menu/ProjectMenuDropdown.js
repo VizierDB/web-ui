@@ -16,37 +16,34 @@
  * limitations under the License.
  */
 
-import React from 'react'
-import PropTypes from 'prop-types'
-import { Checkbox } from 'semantic-ui-react'
-import '../../../../../css/ModuleForm.css';
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Dropdown } from 'semantic-ui-react';
 
 /**
-* Checkbox for boolean input
-*/
+ * Project Menu: The only menu item is for renaming the project.
+ */
 
-class BoolInput extends React.Component {
+class ProjectMenuDropdown extends React.Component {
     static propTypes = {
-        id: PropTypes.string.isRequired,
-        value: PropTypes.bool.isRequired,
-        onChange: PropTypes.func.isRequired
-    }
-    handleChange = (e, { checked }) => {
-        const { id, onChange } = this.props
-        onChange(id, checked)
+        onEdit: PropTypes.func.isRequired
     }
     render() {
-        const { value } = this.props
+        const { onEdit } = this.props;
         return (
-            <span className='boolctrl'>
-                <Checkbox checked={value} onChange={this.handleChange}/>
-            </span>
+            <Dropdown item text='Project'>
+                <Dropdown.Menu>
+                    <Dropdown.Item
+                        key='edit'
+                        icon='edit'
+                        text='Rename'
+                        title='Edit project name'
+                        onClick={onEdit}
+                    />
+                </Dropdown.Menu>
+            </Dropdown>
         );
     }
 }
-/*<Form.Checkbox
-    checked={value}
-    onChange={this.handleChange}
-/>*/
 
-export default BoolInput
+export default ProjectMenuDropdown;
