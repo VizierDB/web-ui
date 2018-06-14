@@ -451,9 +451,22 @@ class Spreadsheet extends React.Component {
         if (showAnnoHandler != null) {
             annoButtonCss = 'icon-button';
         }
-        let cellIcon = 'plus square outline';
-        if (showNotebookCell) {
-            cellIcon = 'minus square outline';
+        let notebookCellButton = null;
+        if (!workflow.readOnly) {
+            let cellIcon = 'plus square outline';
+            if (showNotebookCell) {
+                cellIcon = 'minus square outline';
+            }
+            notebookCellButton = (
+                <span className='left-padding-md'>
+                    <Icon
+                        className='icon-button'
+                        title='Add notebook cell'
+                        name={cellIcon}
+                        onClick={this.toggleNotebookCell}
+                    />
+                </span>
+            );
         }
         return (
             <div className='spreadsheet-container'>
@@ -468,14 +481,7 @@ class Spreadsheet extends React.Component {
                             onClick={showAnnoHandler}
                         />
                     </span>
-                    <span className='left-padding-md'>
-                        <Icon
-                            className='icon-button'
-                            title='Add notebook cell'
-                            name={cellIcon}
-                            onClick={this.toggleNotebookCell}
-                        />
-                    </span>
+                    { notebookCellButton }
                 </h1>
                 <AnnotationObject
                     annotation={annotations}
