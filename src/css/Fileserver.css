@@ -6,7 +6,7 @@ div.dropzone-container {
 div.dropzone {
     position: absolute;
     left: 50%;
-    margin-left: -100px;
+    margin-left: -50px;
 }
 
 .file-name-input {

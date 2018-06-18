@@ -28,6 +28,50 @@ import '../../../css/Spreadsheet.css'
 const BUTTON_SIZE = 'tiny';
 
 
+class DatasetDownloadUrl extends React.Component {
+    static propTypes = {
+        disabled: PropTypes.bool.isRequired,
+        url: PropTypes.string.isRequired
+    }
+    constructor(props) {
+        super(props);
+        this.state = {copied: false};
+    }
+    handleCopy = () => {
+        const { url } = this.props
+        const textField = document.createElement('textarea');
+        textField.innerText = url;
+        document.body.appendChild(textField);
+        textField.select();
+        document.execCommand('copy');
+        textField.remove();
+        this.setState({copied: true});
+    }
+    render() {
+        const { disabled } = this.props;
+        const { copied } = this.state;
+        let message = null;
+        if (copied) {
+            message = (
+                <span className='notification'>Url copied to clipboard.</span>
+            );
+        }
+        return (
+            <span>
+                <Button
+                    disabled={disabled}
+                    icon='linkify'
+                    size={BUTTON_SIZE}
+                    title='Copy dataset Url to clipboard'
+                    onClick={this.handleCopy}
+                />
+                {message}
+            </span>
+        )
+    }
+}
+
+
 class SpreadsheetDownload extends React.Component {
     static propTypes = {
         disabled: PropTypes.bool.isRequired,
@@ -44,6 +88,7 @@ class SpreadsheetDownload extends React.Component {
                 disabled={disabled}
                 icon='download'
                 size={BUTTON_SIZE}
+                title='Download dataset'
                 onClick={this.handleDownload}
             />
         )
@@ -93,30 +138,40 @@ class SpreadsheetNavbar extends React.Component {
                     <SpreadsheetNavigate
                         disabled={disabled}
                         icon='fast backward'
+                        title='First page'
                         url={dataset.links.pagefirstanno}
                         onClick={onNavigate}
                     />
                     <SpreadsheetNavigate
                         disabled={disabled}
                         icon='chevron left'
+                        title='Previous page'
                         url={dataset.links.pageprevanno}
                         onClick={onNavigate}
                     />
                     <SpreadsheetNavigate
                         disabled={disabled}
                         icon='chevron right'
+                        title='Next page'
                         url={dataset.links.pagenextanno}
                         onClick={onNavigate}
                     />
                     <SpreadsheetNavigate
                         disabled={disabled}
                         icon='fast forward'
+                        title='Last page'
                         url={dataset.links.pagelastanno}
                         onClick={onNavigate}
                     />
                 </Button.Group>
                 <span className='left-padding-lg'>
                     <SpreadsheetDownload
+                        disabled={disabled}
+                        url={dataset.links.download}
+                    />
+                </span>
+                <span className='left-padding-sm'>
+                    <DatasetDownloadUrl
                         disabled={disabled}
                         url={dataset.links.download}
                     />

@@ -37,7 +37,13 @@ import ReadOnlyNotebookCell from './ReadOnlyNotebookCell';
   * Get an empty notebook cell.
   */
  export const EmptyCell = (props, datasets, index) => {
-     const { notebook, project, workflow, onInsertModule } = props;
+     const {
+         notebook,
+         project,
+         serviceApi,
+         workflow,
+         onInsertModule,
+     } = props;
      // Get the next module in the workflow (if not at end of workflow).
      let nextModule = null;
      if (index < notebook.cells.length - 1) {
@@ -51,6 +57,7 @@ import ReadOnlyNotebookCell from './ReadOnlyNotebookCell';
              env={project.environment}
              nextModule={nextModule}
              notebook={notebook}
+             serviceApi={serviceApi}
              onSubmit={onInsertModule}
          />
      );
@@ -90,6 +97,7 @@ import ReadOnlyNotebookCell from './ReadOnlyNotebookCell';
  export const ModuleCell = (props, cell, datasets, index) => {
      const {
          project,
+         serviceApi,
          workflow,
          onCreateBranch,
          onDeleteModule,
@@ -105,6 +113,7 @@ import ReadOnlyNotebookCell from './ReadOnlyNotebookCell';
              env={project.environment}
              cell={cell}
              sequenceIndex={index + 1}
+             serviceApi={serviceApi}
              onCreateBranch={onCreateBranch}
              onDeleteModule={onDeleteModule}
              onNavigateDataset={onNavigateDataset}

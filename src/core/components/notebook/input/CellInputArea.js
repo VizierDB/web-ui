@@ -98,7 +98,7 @@ const ARGUMENT_VALUE_2_REQUEST_DATA = (argument, command, value) => {
 
 /**
  * Get default value for an argument in a command specification. The given
- * argValue variable contains values in thecorresponding values in the module
+ * argValue variable contains values in the corresponding values in the module
  * arguments from the workflow (if they exist). The value may be undefined.
  *
  * The supported argument data types and their respective default values are:
@@ -155,7 +155,7 @@ const DEFAULT_VALUE = (argument, command, datasets, files, argValue) => {
     } else if (dt === DT_DATASET_ID) {
         return datasets.length > 0 ? datasets[0].name : '';
     } else if (dt === DT_FILE_ID) {
-        return files.length > 0 ? files[0].id : '';
+        return {fileid: null, filename: null, url: null};
     } else if ((dt === DT_STRING) && (argument.values)) {
         for (let i = 0; i < argument.values.length; i++) {
             const entry = argument.values[i];
@@ -301,6 +301,16 @@ const RESET_COLUMN_VALUES = (command, values) => {
 const VALIDATE_ARGUMENT = (argument, command, value, name) => {
     if ((value === null) && (argument.required)) {
         return ['Missing value for ' + name];
+    } else if ((value !== null) && (argument.datatype === DT_FILE_ID)) {
+        // For source file arguments there needs to be a filename/file or
+        // url combination.
+        const { file, fileid, filename, url } = value;
+        if ((file != null) && (filename != null)) {
+        } else if ((fileid != null) && (filename != null)) {
+        } else if (url != null) {
+        } else {
+            return ['No file selected for ' + name];
+        }
     } else if (value !== null) {
         // Check if we can trim the value
         if (value.trim) {
@@ -391,6 +401,7 @@ class CellInputArea extends React.Component {
         datasets: PropTypes.array.isRequired,
         env: PropTypes.object.isRequired,
         module: PropTypes.object,
+        serviceApi: PropTypes.object.isRequired,
         onCreateBranch: PropTypes.func,
         onDeleteModule: PropTypes.func,
         onSubmit: PropTypes.func.isRequired
@@ -464,7 +475,14 @@ class CellInputArea extends React.Component {
         }
     }
     render() {
-        const { datasets, env, module, onCreateBranch, onDeleteModule } = this.props
+        const {
+            datasets,
+            env,
+            module,
+            serviceApi,
+            onCreateBranch,
+            onDeleteModule
+        } = this.props
         const { hasError, errors, formValues, selectedCommand } = this.state
         let content = null;
         if (selectedCommand !== null) {
@@ -485,6 +503,7 @@ class CellInputArea extends React.Component {
                         errors={errors}
                         hasError={hasError}
                         selectedCommand={selectedCommand}
+                        serviceApi={serviceApi}
                         values={formValues}
                         onChange={this.setFormValue}
                         onDismissErrors={this.dismissErrors}
@@ -507,11 +526,16 @@ class CellInputArea extends React.Component {
      */
     setFormValue = (name, value) => {
         const { formValues, selectedCommand } = this.state;
+        const arg = selectedCommand.arguments.find((arg) => (arg.id === name));
         let values = {...formValues};
-        values[name] = value;
+        if (arg.datatype === DT_FILE_ID) {
+            const { filename, url, file } = value;
+            values[name] = {fileid: null, filename, url, file};
+        } else {
+            values[name] = value;
+        }
         // If the modified argument is a dataset selector we need to reset all
         // selected column values.
-        const arg = selectedCommand.arguments.find((arg) => (arg.id === name));
         if (arg.datatype === DT_DATASET_ID) {
             values = RESET_COLUMN_VALUES(selectedCommand, values);
         }

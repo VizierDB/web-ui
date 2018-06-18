@@ -55,6 +55,24 @@ export const MOVE = {
 }
 
 
+/**
+ * Convert file size bytes into string. Copied from:
+ * https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
+ */
+export const formatBytes = (a, b) => {
+    if (a < 0) {
+        return '?'
+    } else if (a === 0) {
+        return '0 Bytes'
+    }
+    const c=1024
+    const d=b||2
+    const e=["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"]
+    const f=Math.floor(Math.log(a)/Math.log(c))
+    return parseFloat((a/Math.pow(c,f)).toFixed(d))+" "+e[f]
+}
+
+
 /*
  * Name validity function that returns true if a given value is not equal to
  * a string that is empty or only contains whitespaces.

@@ -33,6 +33,7 @@ class EditableNotebook extends React.Component {
         notebook: PropTypes.object.isRequired,
         project: PropTypes.object.isRequired,
         reversed: PropTypes.bool.isRequired,
+        serviceApi: PropTypes.object.isRequired,
         workflow: PropTypes.object.isRequired,
         onChangeGrouping: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,

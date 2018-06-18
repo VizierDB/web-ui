@@ -51,6 +51,7 @@ class EditableNotebookCell extends React.Component {
         datasets: PropTypes.array.isRequired,
         env: PropTypes.object.isRequired,
         sequenceIndex: PropTypes.number,
+        serviceApi: PropTypes.object.isRequired,
         onCreateBranch: PropTypes.func,
         onDeleteModule: PropTypes.func,
         onNavigateDataset: PropTypes.func,
@@ -101,8 +102,14 @@ class EditableNotebookCell extends React.Component {
     hideModal = () => (this.setState({showModal: null}));
     render() {
         const {
-            cell, datasets, env, sequenceIndex, onNavigateDataset,
-            onOutputSelect, onShowAnnotations
+            cell,
+            datasets,
+            env,
+            sequenceIndex,
+            serviceApi,
+            onNavigateDataset,
+            onOutputSelect,
+            onShowAnnotations
         } = this.props;
         let module = null;
         let hasError = false;
@@ -155,6 +162,7 @@ class EditableNotebookCell extends React.Component {
                                     datasets={datasets}
                                     env={env}
                                     module={module}
+                                    serviceApi={serviceApi}
                                     onCreateBranch={this.showCreateBranchModal}
                                     onDeleteModule={this.showDeleteModuleModal}
                                     onSubmit={this.handleSubmit}

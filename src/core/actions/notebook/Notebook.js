@@ -31,7 +31,7 @@ import { NotebookResource } from '../../resources/Project';
 import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource } from '../../util/Api';
 import { ErrorObject } from '../../util/Error';
-
+import { VIZUAL, VIZUAL_OP } from '../../util/Vizual';
 
 // Change the value of the group mode state
 export const CHANGE_GROUP_MODE = 'CHANGE_GROUP_MODE';
@@ -291,79 +291,32 @@ export const deleteNotebookCell = (module) => (dispatch) => {
 
 
 /**
- * Insert a new cell into a notebook. The data object contains the moduel
- * specification and user provided input parameters. Updates the underlying
- * workflow by inserting a new module. The module may either be inserted before
- * an existing module or appended at the end of the workflow. This behavior is
- * encoded in the given url.
+ * Insert a new cell into a notebook. The position at which the cell is inserted
+ * is identified by the given Url. Creates a POST request using the given
+ * data object. The object is expected to contain a valid request body.
+ *
+ * Parameters:
+ *
+ * url: string
+ * data: {type: string, id: string, arguments: object}
  */
 export const insertNotebookCell = (url, data) => (dispatch) => {
-    // Signal start by setting the project action flag
-    dispatch(requestProjectAction());
-    // Independently of whether we insert or append the request is a POST
-    // containing the module specification as its body.
-    return fetch(
-        url,
-        {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        }
-    ).then(function(response) {
-        if (response.status === 200) {
-            // SUCCESS: Dispatch modified notebook resource. The result is
-            // expected to be a Json object with WorkflowHandle (.workflow)
-            // and the new nootebook information (.modules and .datasets)
-            response.json().then(json => (dispatch(updateNotebook(json))));
-        } else {
-            // ERROR: The API is expected to return a JSON object in case
-            // of an error that contains an error message
-            response.json().then(json => (dispatch(
-                projectActionError('Error inserting module', json.message)
-            )));
-        }
-    })
-    .catch(err => dispatch(
-        projectActionError('Error inserting module', err.message)
-    ))
+    return dispatch(updateNotebookCell(url, 'POST', data));
 }
 
 
 /**
- * Replace a module in an existing workflow.
+ * Replace a cell in a notebook. The replaced cell is identified by the given
+ * Url. Creates a PUT request using the given data object. The object is
+ * expected to contain a valid request body.
+ *
+ * Parameters:
+ *
+ * url: string
+ * data: {type: string, id: string, arguments: object}
  */
-export const replaceNotebookCell = (module, data) => (dispatch) => {
-    // Signal start by setting the project action flag
-    dispatch(requestProjectAction());
-    // Replace the existing module via PUT request
-    return fetch(
-        module.links.replace,
-        {
-            method: 'PUT',
-            body: JSON.stringify(data),
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        }
-    ).then(function(response) {
-        if (response.status === 200) {
-            // SUCCESS: Dispatch modified workflow handle
-            response.json().then(json => (dispatch(updateNotebook(json))));
-        } else {
-            // ERROR: The API is expected to return a JSON object in case
-            // of an error that contains an error message
-            response.json().then(json => (dispatch(
-                projectActionError('Error replacing module', json.message)
-            )));
-        }
-    })
-    .catch(err => dispatch(
-        projectActionError('Error replacing module', err.message)
-    ))
+export const replaceNotebookCell = (url, data) => (dispatch) => {
+    return dispatch(updateNotebookCell(url, 'PUT', data));
 }
 
 
@@ -381,4 +334,126 @@ const updateNotebook = (json) => (dispatch) => {
             new NotebookResource(new Notebook().fromJson(json))
         )
     );
+}
+
+
+/**
+ * Update a cell in a notebook. This could either insert a new notebook cell or
+ * replace an existing cell. The data object contains the module specification
+ * and user provided input parameters.
+ *
+ * Parameters:
+ *
+ * url: string
+ * action: POST or PUT
+ * data: {type: string, id: string, arguments: object}
+ */
+export const updateNotebookCell = (url, action, data) => (dispatch) => {
+    // Signal start by setting the project action flag
+    dispatch(requestProjectAction());
+    // Independently of whether we insert or append the request is a POST
+    // containing the module specification as its body.
+    return fetch(
+        url,
+        {
+            method: action,
+            body: JSON.stringify(data),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }
+    ).then(function(response) {
+        if (response.status === 200) {
+            // SUCCESS: Dispatch modified notebook resource. The result is
+            // expected to be a Json object with WorkflowHandle (.workflow)
+            // and the new nootebook information (.modules and .datasets)
+            response.json().then(json => (dispatch(updateNotebook(json))));
+        } else {
+            // ERROR: The API is expected to return a JSON object in case
+            // of an error that contains an error message
+            response.json().then(json => (dispatch(
+                projectActionError('Error updating notebook', json.message)
+            )));
+        }
+    })
+    .catch(err => dispatch(
+        projectActionError('Error updating notebook', err.message)
+    ))
+}
+
+
+/**
+ * Update a cell in a notebook. If the new cell command is VIZUAL LOAD we need
+ * to upload any specified file first (unless the file has already been uploaded
+ * previously which is indicated by a fileid that is not null).
+ * After any potential file upload the provided notebook modifier function is
+ * called with the approriate request body data.
+ *
+ * Parameters:
+ *
+ * modifyUrl: string
+ * data: {type: string, id: string, arguments: object}
+ * notebookModifier: func(url, data)
+ * uploadUrl: string
+ *
+ */
+export const updateNotebookCellWithUpload = (modifyUrl, data, notebookModifier, uploadUrl) => (dispatch) => {
+    // Check if the command is a VIZUAL LOAD that does not have a fileid yet. In
+    // this case we need to upload a given file.
+    const {file, fileid, url } = data.arguments.file;
+    if ((data.type === VIZUAL_OP) && (data.id === VIZUAL.LOAD) && (fileid === null)) {
+        // The request body for the upload depends on whether we upload file
+        // from local disk or from an Url.
+        let uploadReqData = null;
+        let req = {
+            method: 'POST'
+        }
+        if (file != null) {
+            uploadReqData = new FormData();
+            uploadReqData.append('file', file);
+            req['body'] = uploadReqData
+        } else {
+            req['body'] = JSON.stringify({'url': url});
+            req['headers'] = {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }
+        return fetch(
+                uploadUrl,
+                req
+            )
+            // Check the response. Assume that eveything is all right if status
+            // code below 400
+            .then(function(response) {
+                if (response.status >= 200 && response.status < 400) {
+                    // SUCCESS: Fetch updated file identifier and modify the
+                    // request body to update the notebook.
+                    response.json().then(json => {
+                        const { filename, url } = data.arguments.file;
+                        const modArgs = {...data.arguments, file: {fileid: json.id, filename, url}}
+                        const modData = {...data, arguments: modArgs};
+                        return dispatch(notebookModifier(modifyUrl, modData));
+                    });
+                } else {
+                    // ERROR: The API is expected to return a JSON object in case
+                    // of an error that contains an error message. For some response
+                    // codes, however, this is not true (e.g. 413).
+                    // TODO: Catch the cases where there is no Json response
+                    response.json().then(json => dispatch(
+                        projectActionError('Error updating workflow', json.message))
+                    )
+                }
+            })
+            .catch(err => {
+                let msg = err.message;
+                if (msg === 'NetworkError when attempting to fetch resource.') {
+                    msg = 'Connection closed by server. The file size may exceed the server\'s upload limit.'
+                }
+                dispatch(projectActionError('Error updating workflow', msg))
+            });
+    } else {
+        return dispatch(notebookModifier(modifyUrl, data));
+    }
 }

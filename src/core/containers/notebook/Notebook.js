@@ -22,7 +22,7 @@ import { connect } from 'react-redux';
 import {
     changeGroupMode, deleteNotebookCell, insertNotebookCell,
     replaceNotebookCell, showCellChart, showCellAnnotations, showCellDataset,
-    showCellStdout
+    showCellStdout, updateNotebookCellWithUpload
 } from '../../actions/notebook/Notebook';
 import { createBranch } from '../../actions/project/Branch';
 import EditableNotebook from '../../components/notebook/EditableNotebook';
@@ -52,6 +52,7 @@ class Notebook extends React.Component {
         notebook: PropTypes.object.isRequired,
         project: PropTypes.object.isRequired,
         reversed: PropTypes.bool.isRequired,
+        serviceApi: PropTypes.object.isRequired,
         workflow: PropTypes.object.isRequired
     }
     constructor(props) {
@@ -119,7 +120,7 @@ class Notebook extends React.Component {
      * the module is undefined a new module is appended to the workflow.
      */
     insertModule = (command, data, module) => {
-        const { dispatch, workflow } = this.props;
+        const { dispatch, serviceApi, workflow } = this.props;
         // Create data object for request.
         const reqData = {type: command.type, id: command.id, arguments: data};
         // Get the request Url. Depending on whether the module argument is
@@ -131,7 +132,14 @@ class Notebook extends React.Component {
         } else {
             url = workflow.links.append;
         }
-        dispatch(insertNotebookCell(url, reqData))
+        dispatch(
+            updateNotebookCellWithUpload(
+                url,
+                reqData,
+                insertNotebookCell,
+                serviceApi.links.upload
+            )
+        )
     }
     /**
      * Display a list of notebook cells. Insert placeholders for new cells
@@ -139,7 +147,14 @@ class Notebook extends React.Component {
      * not read only).
      */
     render() {
-        const { groupMode, notebook, project, reversed, workflow } = this.props
+        const {
+            groupMode,
+            notebook,
+            project,
+            reversed,
+            serviceApi,
+            workflow
+        } = this.props
         const { modalOpen } = this.state;
         // List of notebook cells
         let notebookCells = [];
@@ -166,6 +181,7 @@ class Notebook extends React.Component {
                     notebook={notebook}
                     project={project}
                     reversed={reversed}
+                    serviceApi={serviceApi}
                     workflow={workflow}
                     onChangeGrouping={this.handleChangeGrouping}
                     onCreateBranch={this.createBranch}
@@ -213,10 +229,17 @@ class Notebook extends React.Component {
      * arguments.
      */
     replaceModule = (command, data, module) => {
-        const { dispatch } = this.props;
+        const { dispatch, serviceApi } = this.props;
         // Create data object for request.
         const reqData = {type: command.type, id: command.id, arguments: data};
-        dispatch(replaceNotebookCell(module, reqData))
+        dispatch(
+            updateNotebookCellWithUpload(
+                module.links.replace,
+                reqData,
+                replaceNotebookCell,
+                serviceApi.links.upload
+            )
+        );
     }
     /**
      * Dispatch an action to load the resource that is being shown as output
@@ -245,6 +268,7 @@ const mapStateToProps = state => {
         notebook: state.notebook.notebook,
         project: state.projectPage.project,
         reversed: state.notebook.reversed,
+        serviceApi: state.serviceApi,
         workflow: state.projectPage.workflow
     }
 }

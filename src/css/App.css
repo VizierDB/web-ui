@@ -152,6 +152,10 @@ p.info-text {
     margin-top: 5px;
 }
 
+p.info-text.md-top {
+    margin-top: 10px;
+}
+
 span.info-bold {
     color: #000;
     padding-left: 0.25em;

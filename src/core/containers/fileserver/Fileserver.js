@@ -30,7 +30,7 @@ import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage } from '../../components/Message';
 import DeleteResourceModal from '../../components/modals/DeleteResourceModal';
 import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
-import { isNotEmptyString } from '../../util/App';
+import { formatBytes, isNotEmptyString } from '../../util/App';
 import '../../../css/App.css';
 import '../../../css/Fileserver.css';
 import '../../../css/ResourceListing.css';
@@ -41,23 +41,6 @@ import '../../../css/ResourceListing.css';
  * edit file names, and delete files.
  */
 
-
-/**
- * Convert file size bytes into string. Copied from:
- * https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
- */
-function formatBytes(a, b) {
-    if (a < 0) {
-        return '?'
-    } else if (a === 0) {
-        return '0 Bytes'
-    }
-    const c=1024
-    const d=b||2
-    const e=["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"]
-    const f=Math.floor(Math.log(a)/Math.log(c))
-    return parseFloat((a/Math.pow(c,f)).toFixed(d))+" "+e[f]
-}
 
 /**
  * Return question mark if number is negative (i.e., missing file property due

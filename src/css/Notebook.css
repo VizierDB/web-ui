@@ -57,6 +57,7 @@ div.notebook-cell-error {
 /* Divider */
 div.horizontal-divider {
     color: rgba(0,0,0,.85);
+    font-size: 0.8em;
     display: table;
     height: auto;
     line-height: 1;

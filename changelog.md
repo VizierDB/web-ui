@@ -62,3 +62,8 @@
 * Cell index bug fix in spreadsheet
 * Separate dropdown menu for project in main menu
 * Append notebook cells in spreadsheet view
+
+
+### 0.4.4 - 2018-06-18
+
+* Direct upload of files from disk or Url in VIZUAL LOAD cell

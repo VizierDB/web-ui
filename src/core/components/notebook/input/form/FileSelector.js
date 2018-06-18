@@ -18,56 +18,162 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Dropdown } from 'semantic-ui-react'
+import { Button, Divider, Icon, Form } from 'semantic-ui-react'
+import Dropzone from 'react-dropzone';
+import { KEY, formatBytes } from '../../../../util/App';
 
 /**
-* Dropdown selector for uploaded files
-*/
+ * Dropdown selector for uploaded files. The value is an object that contains
+ * the following fields: fileid, oneOf(filename, url). The fileid is the unique
+ * identifier of the selected file. If null, no file has been selected. The
+ * filename is the name of a file that was uploaded from disk. The url is
+ * the Url of a file that has been uploaded from the Web.
+ *
+ */
 class FileSelector extends React.Component {
     static propTypes = {
         files: PropTypes.array.isRequired,
         id: PropTypes.string.isRequired,
         isRequired: PropTypes.bool.isRequired,
-        value: PropTypes.string,
+        serviceProperties: PropTypes.array.isRequired,
+        value: PropTypes.object.isRequired,
         onChange: PropTypes.func.isRequired
     }
-    handleChange = (event, { value }) => {
+    constructor(props) {
+        super(props);
+        this.state = {downloadUrl: ''};
+    }
+    /**
+     * Clear the currently selected source file.
+     */
+    clearSourceFile = () => {
         const { id, onChange } = this.props
-        onChange(id, value)
+        onChange(id, {fileid: null, filename: null, url: null});
+    }
+    /**
+     * Dispatch upload file action when a file is dropped in the Dropzone.
+     */
+    handleFileDrop = (files) => {
+        const { id, onChange } = this.props
+        // Submit new value with additional file information
+        onChange(id, {fileid: null, filename: files[0].name, file: files[0], url: null});
+        this.setState({downloadUrl: ''});
+    }
+    /**
+     * Handle changes in the Url form control.
+     */
+    handleUrlChange = (event) => {
+        this.setState({downloadUrl: event.target.value});
+    }
+    /**
+     * Detect RETURN key press in the Url control to submit form.
+     */
+    handleUrlKeyDown = (event) => {
+        if (event.keyCode === KEY.ENTER) {
+            this.uploadFromUrl();
+        }
     }
     render() {
-        const { files, isRequired, value } = this.props
-        let selectedFileName = ''
-        const options = [];
-        if (!isRequired) {
-            // Add entry to set value to empty if not required
-            options.push({
-                key: '',
-                text: '<none>',
-                value: ''
-            })
-        }
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            options.push({
-                key: file.id,
-                text: file.name,
-                value: file.id
-            })
-            if (file.id === value) {
-                selectedFileName = file.name
+        const { serviceProperties } = this.props;
+        const { fileid, filename, url } = this.props.value;
+        const { downloadUrl } = this.state;
+        let content = null;
+        let css = null;
+        if ((filename != null) || (url != null)) {
+            let action = null;
+            if (fileid != null) {
+                action = 'Uploaded';
+            } else {
+                action = 'Upload';
             }
+            let name = null;
+            let text = null;
+            if (filename != null) {
+                text = action + ' file from local disk'
+                name = filename;
+            } else if (url != null) {
+                text = action + 'file from the Internet'
+                name = url;
+            } else {
+                name = 'unknown';
+            }
+            css = 'file-content';
+            content = (
+                <div>
+                    <p className='info-text'>{text}</p>
+                    <p className='file-name'>{name}</p>
+                    <Button
+                        icon='trash'
+                        title='Clear source file'
+                        size='large'
+                        negative
+                        onClick={this.clearSourceFile}
+                    />
+                </div>
+            );
+        } else {
+            let property = serviceProperties.find(prop => (prop.key === 'fileserver:maxFileSize'));
+            let uploadInfo = null
+            if (property) {
+                uploadInfo = (
+                    <p className='upload-info'>
+                        <Icon name='info circle' />
+                        <span>
+                            The size for file uploads is limited to
+                        </span>
+                        <span className='upload-size'>
+                            {' ' + formatBytes(property.value, 2)}
+                        </span>
+                    </p>
+                )
+            }
+            css = 'file-selector';
+            content = (
+                <div>
+                    <p className='info-text md-top'>Upload file from local disk</p>
+                    <div className='dropzone-container'>
+                        <div className='dropzone'>
+                            <Dropzone onDrop={this.handleFileDrop} multiple={false}>
+                                <p>Drop file here or click to select file to upload.</p>
+                            </Dropzone>
+                        </div>
+                    </div>
+                    { uploadInfo }
+                    <Divider />
+                    <p className='info-text'>Upload file from the Internet</p>
+                    <Form.Input
+                        type='text'
+                        value={downloadUrl}
+                        placeholder={'Upload File from Url'}
+                        icon='world'
+                        iconPosition='left'
+                        fluid
+                        action={<Button
+                            icon='upload'
+                            onClick={this.uploadFromUrl}
+                        />}
+                        onChange={this.handleUrlChange}
+                        onKeyDown={this.handleUrlKeyDown}
+                    />
+                </div>
+            );
         }
         return (
-            <Dropdown
-                text={selectedFileName}
-                selection
-                fluid
-                scrolling
-                options={options}
-                onChange={this.handleChange}
-            />
+            <div className={css}>
+                {content}
+            </div>
         );
+    }
+    /**
+     * Submit upload request from a given Url.
+     */
+    uploadFromUrl = () => {
+        const { id, onChange } = this.props
+        const { downloadUrl } = this.state;
+        if (downloadUrl.trim() !== '') {
+            onChange(id, {fileid: null, filename: null, url: downloadUrl});
+            this.setState({downloadUrl: ''});
+        }
     }
 }
 

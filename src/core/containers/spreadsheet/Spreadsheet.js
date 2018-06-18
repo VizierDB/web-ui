@@ -20,7 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Dimmer, Icon, Loader } from 'semantic-ui-react';
-import { insertNotebookCell } from '../../actions/notebook/Notebook';
+import { insertNotebookCell, updateNotebookCellWithUpload } from '../../actions/notebook/Notebook';
 import {
     clearAnnotations, deleteAnnotations, fetchAnnotations, showSpreadsheet,
     submitUpdate, updateAnnotations
@@ -53,6 +53,7 @@ class Spreadsheet extends React.Component {
         dataset: PropTypes.object,
         isUpdating: PropTypes.bool.isRequired,
         project: PropTypes.object.isRequired,
+        serviceApi: PropTypes.object.isRequired,
         workflow: PropTypes.object.isRequired
     }
     constructor(props) {
@@ -95,7 +96,7 @@ class Spreadsheet extends React.Component {
      * Append a module to the current workflow.
      */
     appendModule = (command, data) => {
-        const { dispatch, dataset, workflow } = this.props;
+        const { dispatch, dataset, serviceApi, workflow } = this.props;
         // Create data object for request.
         const reqData = {type: command.type, id: command.id, arguments: data};
         // Hide notebook cell
@@ -106,7 +107,17 @@ class Spreadsheet extends React.Component {
             (command.type === VIZUAL_OP) &&
             ((command.id === VIZUAL.DROP_DATASET) || (command.id === VIZUAL.RENAME_DATASET))
         ) {
-            dispatch(insertNotebookCell(workflow.links.append, reqData))
+            dispatch(insertNotebookCell(workflow.links.append, reqData));
+        } else if ((command.type === VIZUAL_OP) && (command.id === VIZUAL.LOAD)) {
+            const name = data.name;
+            dispatch(
+                updateNotebookCellWithUpload(
+                    workflow.links.append,
+                    reqData,
+                    (url, data) => (submitUpdate(workflow, {name: name, offset:0}, data)),
+                    serviceApi.links.upload
+                )
+            );
         } else {
             dispatch(submitUpdate(workflow, dataset, reqData))
         }
@@ -323,7 +334,14 @@ class Spreadsheet extends React.Component {
      * Render the spreadsheet as a Html table.
      */
     render() {
-        const { annotations, dataset, isUpdating, project, workflow } = this.props;
+        const {
+            annotations,
+            dataset,
+            isUpdating,
+            project,
+            serviceApi,
+            workflow
+        } = this.props;
         const {
             activeColumnId,
             activeRowId,
@@ -437,6 +455,7 @@ class Spreadsheet extends React.Component {
                                     <CellInputArea
                                         datasets={[dataset]}
                                         env={project.environment}
+                                        serviceApi={serviceApi}
                                         onSubmit={this.appendModule}
                                     />
                                 </div>
@@ -628,6 +647,7 @@ const mapStateToProps = state => {
         isUpdating: state.spreadsheet.isUpdating,
         opError: state.spreadsheet.opError,
         project: state.projectPage.project,
+        serviceApi: state.serviceApi,
         workflow: state.projectPage.workflow
     }
 }

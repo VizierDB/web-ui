@@ -22,7 +22,7 @@ import { Form } from 'semantic-ui-react';
 import { ErrorListMessage } from '../../Message';
 import PythonCell from './form/PythonCell';
 import ModuleFormControl from './form/ModuleFormControl';
-import { DT_DATASET_ID, DT_PYTHON_CODE } from './ModuleSpec';
+import { DT_DATASET_ID, DT_FILE_ID, DT_PYTHON_CODE } from './ModuleSpec';
 import '../../../../css/ModuleForm.css';
 
 
@@ -64,6 +64,7 @@ class ModuleInputForm extends React.Component {
         errors: PropTypes.array,
         hasError: PropTypes.bool.isRequired,
         selectedCommand: PropTypes.object.isRequired,
+        serviceApi: PropTypes.object.isRequired,
         values: PropTypes.object.isRequired,
         onChange: PropTypes.func.isRequired,
         onDismissErrors: PropTypes.func.isRequired,
@@ -71,8 +72,16 @@ class ModuleInputForm extends React.Component {
     }
     render() {
         const {
-            datasets, env, errors, hasError, selectedCommand, values,
-            onChange, onDismissErrors, onSubmit
+            datasets,
+            env,
+            errors,
+            hasError,
+            selectedCommand,
+            serviceApi,
+            values,
+            onChange,
+            onDismissErrors,
+            onSubmit
         } = this.props;
         // The for is a table that contains one row per (top-level) argument.
         // Output differs, however, if the command is a Python cell.
@@ -110,12 +119,13 @@ class ModuleInputForm extends React.Component {
             // Check if the command specification contains a dataset column. If so,
             // try to find the dataset that is being selected.
             const selectedDataset = SELECTED_DATASET(selectedCommand, values, datasets);
-            args.sort((a1, a2) => (a1.index > a2.index))
-            let components = []
+            args.sort((a1, a2) => (a1.index > a2.index));
+            let cssTable = 'form-table';
+            let components = [];
             for (let i = 0; i < args.length; i++) {
                 const arg = args[i]
-                // Skip elements that are part of a group
-                if (arg.parent) {
+                // Skip elements that are part of a group or hidden
+                if ((arg.parent) || (arg.hidden === true)) {
                     continue
                 }
                 components.push(
@@ -129,6 +139,7 @@ class ModuleInputForm extends React.Component {
                                 datasets={datasets}
                                 env={env}
                                 selectedDataset={selectedDataset}
+                                serviceApi={serviceApi}
                                 value={values[arg.id]}
                                 onChange={onChange}
                                 onSubmit={onSubmit}
@@ -136,6 +147,9 @@ class ModuleInputForm extends React.Component {
                         </td>
                     </tr>
                 );
+                if (arg.datatype === DT_FILE_ID) {
+                    cssTable += ' wide';
+                }
             }
             let formCss = 'module-form'
             if (hasError) {
@@ -144,7 +158,7 @@ class ModuleInputForm extends React.Component {
             return (
                 <div className={formCss}>
                     { error }
-                    <table className='form-table'>
+                    <table className={cssTable}>
                         <tbody>
                             { components }
                         </tbody>

@@ -110,3 +110,10 @@ div.cell-value {
 div.navbar-container {
     margin-top: 5px;
 }
+
+span.notification {
+    color: #12bc00;
+    font-size: 0.8em;
+    margin-top: 5px;
+    padding-left: 10px;
+}

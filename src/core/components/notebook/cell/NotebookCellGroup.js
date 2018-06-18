@@ -54,9 +54,9 @@ class NotebookCellGroup extends React.Component {
         if (groupMode === GRP_HIDE) {
             let text = null;
             if (startIndex < endIndex) {
-                text = '[VIZUAL CELLS ' + startIndex + '-' + endIndex + ']';
+                text = '[HIDDEN CELLS ' + startIndex + '-' + endIndex + ']';
             } else {
-                text = '[VIZUAL CELL ' + startIndex + ']';
+                text = '[HIDDEN CELL ' + startIndex + ']';
 
             }
             let buttonCss = 'code-text';

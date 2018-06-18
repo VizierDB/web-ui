@@ -43,6 +43,7 @@ class ModuleFormControl extends React.Component {
         datasets: PropTypes.array.isRequired,
         env: PropTypes.object.isRequired,
         selectedDataset: PropTypes.object,
+        serviceApi: PropTypes.object.isRequired,
         value: PropTypes.oneOfType([
             PropTypes.string,
             PropTypes.number,
@@ -54,8 +55,15 @@ class ModuleFormControl extends React.Component {
     }
     render() {
         const {
-            commandArgs, controlSpec, datasets, env, selectedDataset, value,
-            onChange, onSubmit
+            commandArgs,
+            controlSpec,
+            datasets,
+            env,
+            selectedDataset,
+            serviceApi,
+            value,
+            onChange,
+            onSubmit
         } = this.props;
         if (controlSpec.datatype === DT_COLUMN_ID) {
              return (
@@ -128,6 +136,7 @@ class ModuleFormControl extends React.Component {
                     isRequired={controlSpec.required ? true : false}
                     name={controlSpec.id}
                     files={env.files}
+                    serviceProperties={serviceApi.properties}
                     value={value}
                     onChange={onChange}
                 />
