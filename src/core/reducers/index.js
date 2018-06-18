@@ -22,7 +22,6 @@ import { app } from './main/App'
 import { fileserver } from './fileserver/Fileserver'
 import { mainPage } from './main/MainPage'
 import { notebook } from './notebook/Notebook'
-import { projectCreate } from './project/CreateProjectForm'
 import { projectListing } from './project/ProjectListing'
 import { projectPage} from './project/ProjectPage'
 import { serviceApi } from './main/Service'
@@ -33,7 +32,6 @@ const rootReducer = combineReducers({
     fileserver,
     mainPage,
     notebook,
-    projectCreate,
     projectListing,
     projectPage,
     serviceApi,

@@ -103,8 +103,26 @@ a.home-link:hover {
     outline: 0;
 }
 
+span.action {
+    cursor: pointer
+}
+
+a.action-link {
+    color: #21ba45;
+    font-weight: bold;
+    text-decoration: none;
+    outline: 0;
+}
+
+a.action-link:hover {
+    color: #1fb141;
+    font-weight: bold;
+    text-decoration: none;
+    outline: 0;
+}
+
 a.external-link {
-    color: #3b4151;
+    color: #41b6e6;
     font-weight: bold;
     text-decoration: none;
     outline: 0;

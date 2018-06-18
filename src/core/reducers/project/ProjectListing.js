@@ -17,12 +17,13 @@
  */
 
 import {
-  REQUEST_PROJECTS, RECEIVE_PROJECTS,
-  SET_PROJECT_DELETE_ERROR, SET_PROJECT_EDIT_ERROR_LISTING,
-  SET_PROJECTS_FETCH_ERROR
+  CLEAR_PROJECT_ACTION_ERROR, REQUEST_PROJECTS, RECEIVE_PROJECTS,
+  SET_PROJECT_CREATE_ERROR, SET_PROJECT_DELETE_ERROR, SET_PROJECTS_FETCH_ERROR,
+  TOGGLE_SHOW_PROJECT_FORM
 } from '../../actions/project/ProjectListing'
 import { RECEIVE_SERVICE } from '../../actions/main/Service'
-import { getProperty } from '../../util/Api'
+import { getProperty } from '../../util/Api';
+import { ErrorObject } from '../../util/Error';
 import { HATEOASReferences } from '../../util/HATEOAS';
 import { utc2LocalTime } from '../../util/Timestamp';
 
@@ -39,16 +40,17 @@ import { utc2LocalTime } from '../../util/Timestamp';
  * isFetchig: Flag indicating whether fetching is in progress
  * projects: List of retrieved project resources.
  * links: HATEOASReferences
+ * showForm: Flagindicating whether the 'New Project ...' form is visible
  */
 
 const INITIAL_STATE = {
-    deleteError: null,
-    editError: null,
+    actionError: null,
     envs: null,
     fetchError: null,
     isFetching: false,
     projects: [],
-    links: null
+    links: null,
+    showForm: false
 }
 
 /**
@@ -68,11 +70,14 @@ const listProjects = (projects) => {
             links: new HATEOASReferences(prj.links)
         })
     }
+    result.sort(function(p1, p2) {return p1.name.localeCompare(p2.name)});
     return result;
 }
 
 export const projectListing = (state = INITIAL_STATE, action) => {
     switch (action.type) {
+        case CLEAR_PROJECT_ACTION_ERROR:
+            return {...state, actionError: null};
         case REQUEST_PROJECTS:
             return {
                 ...state,
@@ -81,8 +86,7 @@ export const projectListing = (state = INITIAL_STATE, action) => {
         case RECEIVE_PROJECTS:
             return {
                 ...state,
-                deleteError: null,
-                editError: null,
+                actionError: null,
                 fetchError: null,
                 isFetching: false,
                 projects: listProjects(action.projects),
@@ -90,24 +94,31 @@ export const projectListing = (state = INITIAL_STATE, action) => {
             }
         case RECEIVE_SERVICE:
             return {...state, envs: action.envs}
+        case SET_PROJECT_CREATE_ERROR:
+            return {
+                ...state,
+                isFetching: false,
+                actionError: new ErrorObject('Error creating project', action.error)
+            }
         case SET_PROJECT_DELETE_ERROR:
             return {
                 ...state,
                 isFetching: false,
-                deleteError: action.error
-            }
-        case SET_PROJECT_EDIT_ERROR_LISTING:
-            return {
-                ...state,
-                isFetching: false,
-                editError: action.error
+                actionError: new ErrorObject('Error deleting project', action.error)
             }
         case SET_PROJECTS_FETCH_ERROR:
             return {
                 ...state,
                 isFetching: false,
-                fetchError: action.error
+                fetchError: action.error,
+                projects: []
             }
+        case TOGGLE_SHOW_PROJECT_FORM:
+            let visibility = !state.showForm;
+            if (action.value != null) {
+                visibility = action.value;
+            }
+            return {...state, showForm: visibility}
     default:
       return state
   }

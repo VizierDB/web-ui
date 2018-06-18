@@ -16,22 +16,30 @@
  * limitations under the License.
  */
 
-import {
-    createResource, deleteResource, updateResourceProperty
-} from '../../util/Api'
+import { createResource, deleteResource } from '../../util/Api'
 
 
 /**
 * Actions to update the internal state maintaining the project listing on
 * the main page.
 */
-export const PROJECT_SUBMITTING = 'PROJECT_SUBMITTING'
+export const CLEAR_PROJECT_ACTION_ERROR = 'CLEAR_PROJECT_ACTION_ERROR'
 export const REQUEST_PROJECTS = 'REQUEST_PROJECTS'
 export const RECEIVE_PROJECTS = 'RECEIVE_PROJECTS'
 export const SET_PROJECT_CREATE_ERROR = 'SET_PROJECT_CREATE_ERROR'
 export const SET_PROJECT_DELETE_ERROR = 'SET_PROJECT_DELETE_ERROR'
-export const SET_PROJECT_EDIT_ERROR_LISTING = 'SET_PROJECT_EDIT_ERROR_LISTING'
 export const SET_PROJECTS_FETCH_ERROR = 'SET_PROJECTS_FETCH_ERROR'
+export const TOGGLE_SHOW_PROJECT_FORM = 'TOGGLE_SHOW_PROJECT_FORM'
+
+
+
+
+/**
+ * Handle errors when deleting a project.
+ */
+export const clearProjectActionError = () => ({
+    type: CLEAR_PROJECT_ACTION_ERROR
+})
 
 
 /**
@@ -39,7 +47,7 @@ export const SET_PROJECTS_FETCH_ERROR = 'SET_PROJECTS_FETCH_ERROR'
  */
 export const createProject = (url, env, name) => (dispatch) =>  {
     // Signal start of create project action
-    dispatch(projectSubmitting(true))
+    dispatch(requestProjects())
     // Set request body
     const data = {environment: env.id, properties: []}
     if (name.trim() !== '') {
@@ -48,6 +56,7 @@ export const createProject = (url, env, name) => (dispatch) =>  {
     // Dispatch create resource request
     dispatch(createResource(url, data, projectCreateSuccess, projectCreateError))
 }
+
 
 /**
  * Send DELETE request for project with given Url
@@ -62,6 +71,7 @@ export const deleteProject = (project) => (dispatch) => {
         )
     )
 }
+
 
 /**
  * Action to retrieve project listing. Expects that the Web Service Url has been
@@ -93,6 +103,7 @@ export const fetchProjects = () => (dispatch, getState) => {
     }
 }
 
+
 /**
  * Handle errors when retrieving the project listing.
  */
@@ -101,29 +112,23 @@ export const projectCreateError = (error) => ({
     error
 })
 
-/**
- * Handle errors when retrieving the project listing.
- */
-const projectCreateSuccess = () => (dispatch) => {
-    dispatch(projectSubmitting(false))
-    dispatch(fetchProjects())
-}
 
 /**
  * Handle errors when deleting a project.
  */
-export const projectDeleteError = (error) => ({
+const projectDeleteError = (error) => ({
     type: SET_PROJECT_DELETE_ERROR,
     error
 })
 
+
 /**
- * Handle errors during update of project name in project listing component.
+ * Handle errors when retrieving the project listing.
  */
-export const projectEditErrorInListing = (error) => ({
-    type: SET_PROJECT_EDIT_ERROR_LISTING,
-    error
-})
+const projectCreateSuccess = () => (dispatch) => {
+    dispatch(fetchProjects())
+}
+
 
 /**
  * Handle errors when retrieving the project listing.
@@ -133,13 +138,6 @@ const projectsFetchError = (error) => ({
     error
 })
 
-/**
- * Set the isSubmitting flag for the create project form.
- */
-const projectSubmitting = (flag) => ({
-    type: PROJECT_SUBMITTING,
-    flag
-})
 
 /**
  * Signal start of project listing fetch.
@@ -147,6 +145,7 @@ const projectSubmitting = (flag) => ({
 const requestProjects = () => ({
   type: REQUEST_PROJECTS
 })
+
 
 /**
  * Handler for successful retrieval of project listing.
@@ -157,16 +156,12 @@ const receiveProjects = (json) => ({
   links: json.links
 })
 
+
 /**
- * Submit request to update project name in project listing.
+ * Toggle visibility of the create project form (showForm flag).
  */
-export const updateProjectNameInListing = (project, name) => {
-    return updateResourceProperty(
-        project.links.update,
-        'name',
-        name,
-        fetchProjects,
-        projectEditErrorInListing,
-        requestProjects
-    )
-}
+
+export const toggleShowProjectForm = (value) => ({
+    type: TOGGLE_SHOW_PROJECT_FORM,
+    value
+})

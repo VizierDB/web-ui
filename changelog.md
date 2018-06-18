@@ -67,3 +67,6 @@
 ### 0.4.4 - 2018-06-18
 
 * Direct upload of files from disk or Url in VIZUAL LOAD cell
+* Remove file server tab from home page
+* Show welcome message and project listing on home page
+

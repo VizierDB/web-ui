@@ -1,9 +1,3 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
-import { Icon, Menu } from 'semantic-ui-react'
-import { setActiveItem } from '../../actions/main/MainPage'
-import { ConnectionInfo } from '../../components/Api'
 /**
  * Copyright (C) 2018 New York University
  *                    University at Buffalo,
@@ -22,82 +16,151 @@ import { ConnectionInfo } from '../../components/Api'
  * limitations under the License.
  */
 
-import { WarningMessage } from '../../components/Message';
-import Fileserver from '../fileserver/Fileserver'
-import HomePageContent from '../../components/main/HomePageContent'
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
+import { Dropdown, Grid, Icon, Menu } from 'semantic-ui-react'
+import { toggleShowProjectForm } from '../../actions/project/ProjectListing'
+import { ConnectionInfo } from '../../components/Api'
 import ProjectListing from '../project/ProjectListing'
+import { pageUrl } from '../../util/App.js';
 import '../../../css/App.css'
-
-
-/**
- * Unique identifier for menu items.
- */
-export const MENU_ITEM_FILES = 'files'
-export const MENU_ITEM_HOME = 'home'
-export const MENU_ITEM_PROJECTS = 'projects'
 
 
 class MainPage extends Component {
     static propTypes = {
-        activeItem: PropTypes.string.isRequired,
         homePageContent: PropTypes.string,
-        serviceApi: PropTypes.object
-    }
-    /**
-     * Change active item in main content menu
-     */
-    handleItemClick(e, {name}) {
-        const { dispatch } = this.props
-        dispatch(setActiveItem(name))
+        isFetching: PropTypes.bool.isRequired,
+        projects: PropTypes.array,
+        serviceApi: PropTypes.object,
+        showForm: PropTypes.bool.isRequired
     }
     /**
      */
     render() {
-        const { activeItem, homePageContent, serviceApi } = this.props
-        let content = null;
-        if (activeItem === MENU_ITEM_HOME) {
-            content = <HomePageContent content={homePageContent}/>
-        } else if (activeItem === MENU_ITEM_PROJECTS) {
-                content = <ProjectListing />
-        } else if (activeItem === MENU_ITEM_FILES) {
-            content = <Fileserver />
+        const {
+            homePageContent,
+            isFetching,
+            projects,
+            serviceApi,
+            showForm
+        } = this.props;
+        let headline = null;
+        let description = null;
+        if (homePageContent != null) {
+            headline  = homePageContent.headline;
+            description = homePageContent.description;
         } else {
-            content = (<WarningMessage
-                title="Invalid State"
-                message="Unknown content selector"
-            />);
+            headline = (
+                <span>
+                    Welcome to Vizier
+                    <span className='headline-small'>
+                        Streamlined Data Curation
+                    </span>
+                </span>
+            );
+        }
+        let createProjectLink = ' creating a new project';
+        if ((!showForm) && (!isFetching)) {
+            createProjectLink = (
+                <span className='action'>
+                    <a className='action-link' onClick={this.toggleCreateProjectForm}>
+                        {createProjectLink}
+                    </a>
+                </span>
+            );
+        }
+        const content = (
+            <div className='home-content'>
+                <h1 className='home-headline'>{headline}</h1>
+                { description }
+                <Grid>
+                    <Grid.Row>
+                        <Grid.Column width={8}>
+                            <h3 className='home-headline'>Getting Started</h3>
+                            <p className='home-text'>
+                                <span className='sys-name'>Vizier</span>  organizes
+                                data curation workflows into projects. Start by
+                                {createProjectLink} or by selecting a project from
+                                the menu or the list on the left.
+                            </p>
+                            <ProjectListing />
+                        </Grid.Column>
+                        <Grid.Column width={8}>
+                            <div>
+                                <h3 className='home-headline'>About Vizier</h3>
+                                <p className='home-text'>
+                                    <span className='sys-name'>Vizier</span> is a new powerful tool to streamline the data
+                                    curation process. Data curation (also known as data preparation,
+                                    wrangling, or cleaning) is a critical stage in data science
+                                    in which raw data is structured, validated, and repaired.
+                                    Data validation and repair establish trust in analytical
+                                    results, while appropriate structuring streamlines
+                                    analytics.
+                                </p>
+                                <p className='home-text'>
+                                    <span className='sys-name'>Vizier</span>  makes it easier and faster to explore and
+                                    analyze raw data by combining a simple notebook interface
+                                    with spreadsheet views of your data. Powerful back-end
+                                    tools that track changes, edits, and the effects of
+                                    automation. These forms of <span className='text-highlight'>provenance</span> capture
+                                    both parts of the exploratory curation process - how the
+                                    cleaning workflows evolve, and how the data changes over time.
+                                </p>
+                                <p className='home-text'>
+                                    <span className='sys-name'>Vizier</span> is
+                                    a collaboration between the <a href='http://www.buffalo.edu/' className='external-link'>University at Buffalo</a>, <a href='http://www.nyu.edu/' className='external-link'>New York University</a>, and the <a href='https://web.iit.edu/' className='external-link'>Illinois Institute of Technology</a>.
+                                </p>
+                            </div>
+                        </Grid.Column>
+                    </Grid.Row>
+                </Grid>
+            </div>
+        );
+        let projectsMenu = null;
+        if (projects != null) {
+            const projectItems = [];
+            for (let i = 0; i < projects.length; i++) {
+                const pj = projects[i];
+                const link = pageUrl(pj.id);
+                projectItems.push(
+                    <Dropdown.Item
+                        key={pj.id}
+                        icon='database'
+                        text={pj.name}
+                        href={link}
+                    />
+                );
+            }
+            projectsMenu = (
+                <Dropdown
+                    disabled={projects.length === 0}
+                    item
+                    text='Projects'
+                >
+                    <Dropdown.Menu>
+                        { projectItems }
+                        <Dropdown.Divider />
+                        <Dropdown.Item
+                            key='new'
+                            icon='plus'
+                            text='New Project ...'
+                            disabled={showForm || isFetching}
+                            onClick={this.toggleCreateProjectForm}
+                        />
+                    </Dropdown.Menu>
+                </Dropdown>
+            );
         }
         return (
             <div className='main-page'>
                 <div className='main-menu'>
                     <Menu secondary>
                         <Menu.Item header>
+                            <Icon name='home' />
                             {window.env.APP_TITLE}
                         </Menu.Item>
-                        <Menu.Item
-                            name={MENU_ITEM_HOME}
-                            active={activeItem === MENU_ITEM_HOME}
-                            onClick={this.handleItemClick.bind(this)}
-                        >
-                            <Icon name='home' />
-                            Home
-                        </Menu.Item>
-                        <Menu.Item
-                            name={MENU_ITEM_PROJECTS}
-                            active={activeItem === MENU_ITEM_PROJECTS}
-                            onClick={this.handleItemClick.bind(this)}
-                        >
-                            <Icon name='database' />
-                            Projects
-                        </Menu.Item>
-                        <Menu.Item
-                            name={MENU_ITEM_FILES}
-                            active={activeItem === MENU_ITEM_FILES}
-                            onClick={this.handleItemClick.bind(this)}
-                        >
-                            <Icon name='file outline' />
-                            Files
-                        </Menu.Item>
+                        { projectsMenu }
                     </Menu>
                 </div>
                 <div className='page-content wide'>
@@ -107,14 +170,23 @@ class MainPage extends Component {
             </div>
         );
     }
+    /**
+     * Toggle visibility of the create project form.
+     */
+    toggleCreateProjectForm = () => {
+        const { dispatch } = this.props;
+        dispatch(toggleShowProjectForm())
+    }
 }
 
 const mapStateToProps = state => {
 
     return {
-        activeItem: state.mainPage.activeItem,
         homePageContent: state.mainPage.homePageContent,
+        isFetching: state.projectListing.isFetching,
+        projects: state.projectListing.projects,
         serviceApi: state.serviceApi,
+        showForm: state.projectListing.showForm
     }
 }
 
