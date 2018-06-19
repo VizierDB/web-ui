@@ -219,11 +219,15 @@ class ProjectPage extends Component {
                 // or a chart view.
                 let contentCss = 'page-content';
                 if (resource.isChart()) {
+                    const dataset = resource.content.dataset;
                     pageContent = (
                         <div className='chart-view'>
                             <div className='dataset-chart'>
                                 <h1 className='chart-name'>{resource.content.name}</h1>
-                                <DatasetChart dataset={resource.content.dataset} />
+                                <DatasetChart
+                                    identifier={dataset.name + '_' + workflow.version}
+                                    dataset={dataset}
+                                />
                             </div>
                         </div>
                     );

@@ -117,7 +117,10 @@ class CellOutputArea extends React.Component {
                             <span className='output-content-header'>
                                 {output.content.name}
                             </span>
-                            <DatasetChart dataset={output.content.dataset} />
+                            <DatasetChart
+                                identifier={output.content.name}
+                                dataset={output.content.dataset}
+                            />
                         </div>
                     );
                 } else if (output.isDataset()) {

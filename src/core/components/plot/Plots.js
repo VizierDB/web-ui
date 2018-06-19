@@ -98,7 +98,13 @@ class Plots extends React.Component {
             legend.push(
                 <li
                     key={i}
-                    style={{background:this.colorScale(label), width:10, marginTop:5, listStyleType: 'none'}}>
+                    style={{
+                        background:this.colorScale(label),
+                        width:10,
+                        marginTop:5,
+                        listStyleType: 'none',
+                        whiteSpace: 'nowrap'
+                    }}>
                     <span style={{marginLeft:15}}>{label}</span>
                 </li>
             );
@@ -233,7 +239,6 @@ class Plots extends React.Component {
             );
         }
     }
-
     render() {
 
         const { dataset } = this.props;

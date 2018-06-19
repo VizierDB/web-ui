@@ -43,14 +43,15 @@ class DatasetChart extends React.Component {
  }
      */
     static propTypes = {
-        dataset: PropTypes.object.isRequired
+        dataset: PropTypes.object.isRequired,
+        identifier: PropTypes.string.isRequired
     }
     render() {
-        const { dataset } = this.props
+        const { dataset, identifier } = this.props
         if (dataset !== undefined) {
             return (
                 <div className='plot'>
-                    <Plots dataset={dataset} />
+                    <Plots key={identifier} dataset={dataset} />
                 </div>
             );
         } else {
