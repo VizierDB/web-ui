@@ -115,7 +115,7 @@ const ARGUMENT_VALUE_2_REQUEST_DATA = (argument, command, value) => {
  * rowid: ''
  * string: ''
  */
-const DEFAULT_VALUE = (argument, command, datasets, files, argValue) => {
+const DEFAULT_VALUE = (argument, command, datasets, argValue) => {
     const dt = argument.datatype;
     // Test for a structured argument data type first.
     if (dt === DT_AS_ROW) {
@@ -127,7 +127,7 @@ const DEFAULT_VALUE = (argument, command, datasets, files, argValue) => {
                 if (argValue !== undefined) {
                     val = argValue[arg.id];
                 }
-                values[arg.id] = DEFAULT_VALUE(arg, command, datasets, files, val);
+                values[arg.id] = DEFAULT_VALUE(arg, command, datasets, val);
             }
         }
         return {values};
@@ -136,7 +136,7 @@ const DEFAULT_VALUE = (argument, command, datasets, files, argValue) => {
         for (let i = 0; i < command.arguments.length; i++) {
             const arg = command.arguments[i];
             if (arg.parent === argument.id) {
-                values[arg.id] = DEFAULT_VALUE(arg, command, datasets, files);
+                values[arg.id] = DEFAULT_VALUE(arg, command, datasets);
             }
         }
         let tuples = argValue;
@@ -185,13 +185,13 @@ const DEFAULT_VALUE = (argument, command, datasets, files, argValue) => {
  * command specification. Initialize values from the given module arguments,
  * where possible.
  */
-const DEFAULT_VALUES = (command, datasets, files, moduleArgs) => {
+const DEFAULT_VALUES = (command, datasets, moduleArgs) => {
     const values = {};
     for (let i = 0; i < command.arguments.length; i++) {
         const arg = command.arguments[i];
         if (arg.parent == null) {
             const args = moduleArgs[arg.id];
-            values[arg.id] = DEFAULT_VALUE(arg, command, datasets, files, args);
+            values[arg.id] = DEFAULT_VALUE(arg, command, datasets, args);
         }
     }
     return values;
@@ -401,7 +401,6 @@ class CellInputArea extends React.Component {
         datasets: PropTypes.array.isRequired,
         env: PropTypes.object.isRequired,
         module: PropTypes.object,
-        serviceApi: PropTypes.object.isRequired,
         onCreateBranch: PropTypes.func,
         onDeleteModule: PropTypes.func,
         onSubmit: PropTypes.func.isRequired
@@ -420,7 +419,6 @@ class CellInputArea extends React.Component {
             formValues = DEFAULT_VALUES(
                 selectedCommand,
                 datasets,
-                env.files,
                 module.arguments
             );
             hasError = (module.stderr.length > 0);
@@ -441,7 +439,7 @@ class CellInputArea extends React.Component {
      * for the cell.
      */
     handleModuleSelect = (command) => {
-        const { datasets, env, module } = this.props;
+        const { datasets, module } = this.props;
         let modArgs = {};
         if (module != null) {
             if (moduleId(module.command) === moduleId(command)) {
@@ -452,7 +450,7 @@ class CellInputArea extends React.Component {
             hasError: false,
             errors: null,
             selectedCommand: command,
-            formValues: DEFAULT_VALUES(command, datasets, env.files, modArgs)
+            formValues: DEFAULT_VALUES(command, datasets, modArgs)
         });
     }
     /**
@@ -479,7 +477,6 @@ class CellInputArea extends React.Component {
             datasets,
             env,
             module,
-            serviceApi,
             onCreateBranch,
             onDeleteModule
         } = this.props
@@ -503,7 +500,6 @@ class CellInputArea extends React.Component {
                         errors={errors}
                         hasError={hasError}
                         selectedCommand={selectedCommand}
-                        serviceApi={serviceApi}
                         values={formValues}
                         onChange={this.setFormValue}
                         onDismissErrors={this.dismissErrors}

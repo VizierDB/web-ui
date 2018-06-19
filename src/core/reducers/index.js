@@ -19,7 +19,6 @@
 import { combineReducers } from 'redux'
 import { routerReducer } from 'react-router-redux'
 import { app } from './main/App'
-import { fileserver } from './fileserver/Fileserver'
 import { mainPage } from './main/MainPage'
 import { notebook } from './notebook/Notebook'
 import { projectListing } from './project/ProjectListing'
@@ -29,7 +28,6 @@ import { spreadsheet } from './spreadsheet/Spreadsheet'
 
 const rootReducer = combineReducers({
     app,
-    fileserver,
     mainPage,
     notebook,
     projectListing,

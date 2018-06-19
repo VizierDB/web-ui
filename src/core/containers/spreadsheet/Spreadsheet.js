@@ -339,7 +339,6 @@ class Spreadsheet extends React.Component {
             dataset,
             isUpdating,
             project,
-            serviceApi,
             workflow
         } = this.props;
         const {
@@ -455,7 +454,6 @@ class Spreadsheet extends React.Component {
                                     <CellInputArea
                                         datasets={[dataset]}
                                         env={project.environment}
-                                        serviceApi={serviceApi}
                                         onSubmit={this.appendModule}
                                     />
                                 </div>

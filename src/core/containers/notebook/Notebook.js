@@ -152,7 +152,6 @@ class Notebook extends React.Component {
             notebook,
             project,
             reversed,
-            serviceApi,
             workflow
         } = this.props
         const { modalOpen } = this.state;
@@ -181,7 +180,6 @@ class Notebook extends React.Component {
                     notebook={notebook}
                     project={project}
                     reversed={reversed}
-                    serviceApi={serviceApi}
                     workflow={workflow}
                     onChangeGrouping={this.handleChangeGrouping}
                     onCreateBranch={this.createBranch}

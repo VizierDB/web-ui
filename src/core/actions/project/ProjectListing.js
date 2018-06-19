@@ -47,7 +47,7 @@ export const clearProjectActionError = () => ({
  */
 export const createProject = (url, env, name) => (dispatch) =>  {
     // Signal start of create project action
-    dispatch(requestProjects())
+    dispatch(requestProjects('Create Project ...'))
     // Set request body
     const data = {environment: env.id, properties: []}
     if (name.trim() !== '') {
@@ -67,7 +67,7 @@ export const deleteProject = (project) => (dispatch) => {
             project.links.delete,
             fetchProjects,
             projectDeleteError,
-            requestProjects
+            () => (requestProjects('Delete Project ...'))
         )
     )
 }
@@ -142,8 +142,9 @@ const projectsFetchError = (error) => ({
 /**
  * Signal start of project listing fetch.
  */
-const requestProjects = () => ({
-  type: REQUEST_PROJECTS
+const requestProjects = (message) => ({
+    type: REQUEST_PROJECTS,
+    message
 })
 
 

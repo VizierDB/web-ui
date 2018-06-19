@@ -82,7 +82,7 @@ class MainPage extends Component {
                                 <span className='sys-name'>Vizier</span>  organizes
                                 data curation workflows into projects. Start by
                                 {createProjectLink} or by selecting a project from
-                                the menu or the list on the left.
+                                the menu or the list below.
                             </p>
                             <ProjectListing />
                         </Grid.Column>

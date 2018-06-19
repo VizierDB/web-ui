@@ -73,7 +73,10 @@ export const fetchProject = (identifier, branch, version) => (dispatch, getState
                 response.json().then(json => {
                     dispatch({
                         type: RECEIVE_PROJECT,
-                        project: new ProjectHandle().fromJson(json.project),
+                        project: new ProjectHandle().fromJson(
+                            json.project,
+                            getState().serviceApi.properties
+                        ),
                         workflow: new WorkflowHandle().fromJson(json.workflow)
                     });
                     return dispatch(

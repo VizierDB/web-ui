@@ -64,7 +64,6 @@ class ModuleInputForm extends React.Component {
         errors: PropTypes.array,
         hasError: PropTypes.bool.isRequired,
         selectedCommand: PropTypes.object.isRequired,
-        serviceApi: PropTypes.object.isRequired,
         values: PropTypes.object.isRequired,
         onChange: PropTypes.func.isRequired,
         onDismissErrors: PropTypes.func.isRequired,
@@ -77,7 +76,6 @@ class ModuleInputForm extends React.Component {
             errors,
             hasError,
             selectedCommand,
-            serviceApi,
             values,
             onChange,
             onDismissErrors,
@@ -139,7 +137,6 @@ class ModuleInputForm extends React.Component {
                                 datasets={datasets}
                                 env={env}
                                 selectedDataset={selectedDataset}
-                                serviceApi={serviceApi}
                                 value={values[arg.id]}
                                 onChange={onChange}
                                 onSubmit={onSubmit}

@@ -39,6 +39,7 @@ class ProjectListing extends Component {
         actionError: PropTypes.object,
         envs: PropTypes.array,
         fetchError: PropTypes.string,
+        fetchMessage: PropTypes.string.isRequired,
         isFetching: PropTypes.bool.isRequired,
         projects: PropTypes.array.isRequired,
         links: PropTypes.object,
@@ -91,16 +92,17 @@ class ProjectListing extends Component {
      */
     render() {
         const {
-            isFetching,
             actionError,
             envs,
             fetchError,
+            fetchMessage,
+            isFetching,
             projects,
             showForm
         } = this.props;
         let content = null;
         if (isFetching) {
-            content = <ContentSpinner text='Loading Projects ...'/>;
+            content = <ContentSpinner text={fetchMessage}/>;
         } else if (fetchError) {
             content = (<ErrorMessage
                 title="Error while loading project list"
@@ -249,6 +251,7 @@ const mapStateToProps = state => {
         actionError: state.projectListing.actionError,
         envs: state.projectListing.envs,
         fetchError: state.projectListing.fetchError,
+        fetchMessage: state.projectListing.fetchMessage,
         isFetching: state.projectListing.isFetching,
         projects: state.projectListing.projects,
         links: state.projectListing.links,

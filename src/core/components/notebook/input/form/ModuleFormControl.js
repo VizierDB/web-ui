@@ -43,7 +43,6 @@ class ModuleFormControl extends React.Component {
         datasets: PropTypes.array.isRequired,
         env: PropTypes.object.isRequired,
         selectedDataset: PropTypes.object,
-        serviceApi: PropTypes.object.isRequired,
         value: PropTypes.oneOfType([
             PropTypes.string,
             PropTypes.number,
@@ -60,7 +59,6 @@ class ModuleFormControl extends React.Component {
             datasets,
             env,
             selectedDataset,
-            serviceApi,
             value,
             onChange,
             onSubmit
@@ -135,8 +133,7 @@ class ModuleFormControl extends React.Component {
                     id={controlSpec.id}
                     isRequired={controlSpec.required ? true : false}
                     name={controlSpec.id}
-                    files={env.files}
-                    serviceProperties={serviceApi.properties}
+                    serviceProperties={env.serviceProperties}
                     value={value}
                     onChange={onChange}
                 />

@@ -32,7 +32,6 @@ import { KEY, formatBytes } from '../../../../util/App';
  */
 class FileSelector extends React.Component {
     static propTypes = {
-        files: PropTypes.array.isRequired,
         id: PropTypes.string.isRequired,
         isRequired: PropTypes.bool.isRequired,
         serviceProperties: PropTypes.array.isRequired,

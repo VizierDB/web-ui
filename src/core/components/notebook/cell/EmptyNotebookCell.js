@@ -35,7 +35,6 @@ class EmptyNotebookCell extends React.Component {
         env: PropTypes.object.isRequired,
         nextModule: PropTypes.object,
         notebook: PropTypes.object.isRequired,
-        serviceApi: PropTypes.object.isRequired,
         onSubmit: PropTypes.func.isRequired
     }
     constructor(props) {
@@ -64,7 +63,7 @@ class EmptyNotebookCell extends React.Component {
      * flag.
      */
     render() {
-        const { datasets, env, notebook, serviceApi } = this.props;
+        const { datasets, env, notebook } = this.props;
         const { expanded } = this.state;
         // The general output is different for collapsed empty cells. In this
         // case no cell frame is shown but simply a divider or a message button.
@@ -93,7 +92,6 @@ class EmptyNotebookCell extends React.Component {
                                 <CellInputArea
                                     datasets={datasets}
                                     env={env}
-                                    serviceApi={serviceApi}
                                     onSubmit={this.handleSubmit}
                                 />
                             </div>

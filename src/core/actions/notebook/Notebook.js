@@ -401,58 +401,62 @@ export const updateNotebookCell = (url, action, data) => (dispatch) => {
 export const updateNotebookCellWithUpload = (modifyUrl, data, notebookModifier, uploadUrl) => (dispatch) => {
     // Check if the command is a VIZUAL LOAD that does not have a fileid yet. In
     // this case we need to upload a given file.
-    const {file, fileid, url } = data.arguments.file;
-    if ((data.type === VIZUAL_OP) && (data.id === VIZUAL.LOAD) && (fileid === null)) {
-        // The request body for the upload depends on whether we upload file
-        // from local disk or from an Url.
-        let uploadReqData = null;
-        let req = {
-            method: 'POST'
-        }
-        if (file != null) {
-            uploadReqData = new FormData();
-            uploadReqData.append('file', file);
-            req['body'] = uploadReqData
-        } else {
-            req['body'] = JSON.stringify({'url': url});
-            req['headers'] = {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+    if (data.arguments.file != null) {
+        const {file, fileid, url } = data.arguments.file;
+        if ((data.type === VIZUAL_OP) && (data.id === VIZUAL.LOAD) && (fileid === null)) {
+            // The request body for the upload depends on whether we upload file
+            // from local disk or from an Url.
+            let uploadReqData = null;
+            let req = {
+                method: 'POST'
             }
+            if (file != null) {
+                uploadReqData = new FormData();
+                uploadReqData.append('file', file);
+                req['body'] = uploadReqData
+            } else {
+                req['body'] = JSON.stringify({'url': url});
+                req['headers'] = {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            }
+            return fetch(
+                    uploadUrl,
+                    req
+                )
+                // Check the response. Assume that eveything is all right if status
+                // code below 400
+                .then(function(response) {
+                    if (response.status >= 200 && response.status < 400) {
+                        // SUCCESS: Fetch updated file identifier and modify the
+                        // request body to update the notebook.
+                        response.json().then(json => {
+                            const { filename, url } = data.arguments.file;
+                            const modArgs = {...data.arguments, file: {fileid: json.id, filename, url}}
+                            const modData = {...data, arguments: modArgs};
+                            return dispatch(notebookModifier(modifyUrl, modData));
+                        });
+                    } else {
+                        // ERROR: The API is expected to return a JSON object in case
+                        // of an error that contains an error message. For some response
+                        // codes, however, this is not true (e.g. 413).
+                        // TODO: Catch the cases where there is no Json response
+                        response.json().then(json => dispatch(
+                            projectActionError('Error updating workflow', json.message))
+                        )
+                    }
+                })
+                .catch(err => {
+                    let msg = err.message;
+                    if (msg === 'NetworkError when attempting to fetch resource.') {
+                        msg = 'Connection closed by server. The file size may exceed the server\'s upload limit.'
+                    }
+                    dispatch(projectActionError('Error updating workflow', msg))
+                });
+        } else {
+            return dispatch(notebookModifier(modifyUrl, data));
         }
-        return fetch(
-                uploadUrl,
-                req
-            )
-            // Check the response. Assume that eveything is all right if status
-            // code below 400
-            .then(function(response) {
-                if (response.status >= 200 && response.status < 400) {
-                    // SUCCESS: Fetch updated file identifier and modify the
-                    // request body to update the notebook.
-                    response.json().then(json => {
-                        const { filename, url } = data.arguments.file;
-                        const modArgs = {...data.arguments, file: {fileid: json.id, filename, url}}
-                        const modData = {...data, arguments: modArgs};
-                        return dispatch(notebookModifier(modifyUrl, modData));
-                    });
-                } else {
-                    // ERROR: The API is expected to return a JSON object in case
-                    // of an error that contains an error message. For some response
-                    // codes, however, this is not true (e.g. 413).
-                    // TODO: Catch the cases where there is no Json response
-                    response.json().then(json => dispatch(
-                        projectActionError('Error updating workflow', json.message))
-                    )
-                }
-            })
-            .catch(err => {
-                let msg = err.message;
-                if (msg === 'NetworkError when attempting to fetch resource.') {
-                    msg = 'Connection closed by server. The file size may exceed the server\'s upload limit.'
-                }
-                dispatch(projectActionError('Error updating workflow', msg))
-            });
     } else {
         return dispatch(notebookModifier(modifyUrl, data));
     }

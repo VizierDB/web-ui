@@ -90,7 +90,7 @@ export class ProjectHandle {
      * Initialize the object properties from a Json object that is returned by
      * Web API calls that return a ProjectHandle.
      */
-    fromJson(json) {
+    fromJson(json, serviceProperties) {
         this.id = json.id;
         this.name = getProperty(json, 'name');
         this.links = new HATEOASReferences(json.links);
@@ -99,7 +99,7 @@ export class ProjectHandle {
         // file handles ((id,name)-pairs) on the file server.
         this.environment = {
             modules: new ModuleRegistry(json.environment.modules),
-            files: sortByName(json.environment.files)
+            serviceProperties
         };
         // List of project branchs (sorted by name)
         this.branches = [];

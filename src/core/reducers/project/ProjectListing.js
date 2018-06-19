@@ -32,6 +32,9 @@ import { utc2LocalTime } from '../../util/Timestamp';
 */
 
 
+const DEFAULT_FETCH_MESSAGE = 'Loading Projects ...';
+
+
 /**
  * STATE:
  *
@@ -47,6 +50,7 @@ const INITIAL_STATE = {
     actionError: null,
     envs: null,
     fetchError: null,
+    fetchMessage: DEFAULT_FETCH_MESSAGE,
     isFetching: false,
     projects: [],
     links: null,
@@ -79,9 +83,14 @@ export const projectListing = (state = INITIAL_STATE, action) => {
         case CLEAR_PROJECT_ACTION_ERROR:
             return {...state, actionError: null};
         case REQUEST_PROJECTS:
+            let message = DEFAULT_FETCH_MESSAGE;
+            if (action.message != null) {
+                message = action.message;
+            }
             return {
                 ...state,
-                isFetching: true
+                isFetching: true,
+                fetchMessage: message
             }
         case RECEIVE_PROJECTS:
             return {

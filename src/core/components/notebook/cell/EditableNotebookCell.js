@@ -51,7 +51,6 @@ class EditableNotebookCell extends React.Component {
         datasets: PropTypes.array.isRequired,
         env: PropTypes.object.isRequired,
         sequenceIndex: PropTypes.number,
-        serviceApi: PropTypes.object.isRequired,
         onCreateBranch: PropTypes.func,
         onDeleteModule: PropTypes.func,
         onNavigateDataset: PropTypes.func,
@@ -106,7 +105,6 @@ class EditableNotebookCell extends React.Component {
             datasets,
             env,
             sequenceIndex,
-            serviceApi,
             onNavigateDataset,
             onOutputSelect,
             onShowAnnotations
@@ -162,7 +160,6 @@ class EditableNotebookCell extends React.Component {
                                     datasets={datasets}
                                     env={env}
                                     module={module}
-                                    serviceApi={serviceApi}
                                     onCreateBranch={this.showCreateBranchModal}
                                     onDeleteModule={this.showDeleteModuleModal}
                                     onSubmit={this.handleSubmit}

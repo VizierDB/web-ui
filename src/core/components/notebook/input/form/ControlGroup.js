@@ -177,7 +177,7 @@ class ControlGroup extends React.Component {
                 } else if ((child.datatype === DT_COLUMN_ID) && (selectedDataset == null)) {
                         tval = 'unknown';
                 } else if (child.datatype === DT_FILE_ID) {
-                    tval = resourceName(env.files, tval);
+                    tval = 'file';
                 }
                 row.push(
                     <td key={i + '#' + j} className='form-constant'>
