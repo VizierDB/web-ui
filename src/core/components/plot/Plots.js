@@ -157,7 +157,8 @@ class Plots extends React.Component {
                 index['y'] = series.data[j];
                 values.push(index);
             }
-            data_i['values'] = values;
+            let sort_values = values.sort(function(a, b){return a.x - b.x});
+            data_i['values'] = sort_values;
             total_data.push(data_i);
         }
         return total_data;
