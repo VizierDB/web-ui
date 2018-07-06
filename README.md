@@ -1,3 +1,5 @@
+[![Documentation Status](https://media.readthedocs.org/static/projects/badges/passing-flat.svg)](https://test-vizier-db.readthedocs.io/en/latest/)
+
 # Vizier DB - Web User Interface
 
 This repository contains the code for the Vizier DB Web User Interface. This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
