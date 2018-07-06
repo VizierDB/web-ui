@@ -20,3 +20,8 @@ Step 3
 ~~~~~~
 
 .. include:: load_data_project.rst
+
+Step 4
+~~~~~~
+
+.. include:: create_chart.rst
