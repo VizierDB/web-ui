@@ -20,7 +20,10 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Plots from './Plots'
 import '../../../css/Chart.css'
-
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
+import { Button, Dropdown, Grid, Icon, Input, List, Loader, Modal, Message } from 'semantic-ui-react';
+import { IconButton } from '../Button'
 /*
  * Plot a dataset chart for given data.
  */
@@ -42,17 +45,46 @@ class DatasetChart extends React.Component {
      * }
  }
      */
+
     static propTypes = {
         dataset: PropTypes.object.isRequired,
         identifier: PropTypes.string.isRequired
     }
+
+    /**
+     * Export chart as a PDF. Generating a PDF file from react component which contains the chart.
+     */
+    generatePDF = () => {
+        const input = document.getElementById('plot');
+        html2canvas(input)
+          .then((canvas) => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({
+              orientation: 'landscape',
+              unit: 'in'
+            });
+            pdf.addImage(imgData, 'JPEG', 0, 0);
+            pdf.save("download.pdf");
+          })
+        ;
+    }
+
+
     render() {
         const { dataset, identifier } = this.props
         if (dataset !== undefined) {
             return (
+              <div>
                 <div className='plot'>
                     <Plots key={identifier} dataset={dataset} />
                 </div>
+                <div className='header-button'>
+                <Button size='small' color='green' onClick={this.generatePDF}>
+                  <Icon name='download' />
+                  Download Chart
+                </Button>
+                </div>
+              </div>
             );
         } else {
             return null

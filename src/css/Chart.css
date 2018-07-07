@@ -20,6 +20,10 @@ div.plot {
     font-size: 12px;
 }
 
+div.plot-view {
+    padding: 20px 10px;
+}
+
 div.plot-menu {
     background: #f6f6f6;
     border-top: 1px solid #f2f0ed;

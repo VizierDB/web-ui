@@ -292,11 +292,13 @@ class Plots extends React.Component {
                         { groupedCheckbox }
                     </tr></tbody></table>
                 </div>
-                <ul className='plot-legend'>
-                    {legend}
-                </ul>
-                <div>
-                    {chart}
+                  <div id="plot" className='plot-view'>
+                  <ul className='plot-legend'>
+                      {legend}
+                  </ul>
+                  <div>
+                      {chart}
+                  </div>
                 </div>
             </div>
         );
