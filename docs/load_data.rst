@@ -29,7 +29,7 @@ Then, go to the column **DATASET**, and click on **Load Dataset**
    :height: 350px
    :alt: alternate text
 
-Then, upload the data set. You have to provide the data set name and the source file. For example, we selected ccard.csv dataset and entered **credit card data** as the name of the dataset for that project, then, click on the blue **play** icon.
+Then, upload the data set. You have to provide the data set name and the source file.
 
  .. image:: figures/load_data_2.png
     :width: 750px
@@ -37,11 +37,14 @@ Then, upload the data set. You have to provide the data set name and the source 
     :height: 350px
     :alt: alternate text
 
-  .. image:: figures/load_data_3.png
-     :width: 750px
-     :align: center
-     :height: 300px
-     :alt: alternate text
+For example, we entered **credit card data** as the name of the dataset for that project and selected ccard.csv dataset, then, click on the blue **play** icon.
+
+
+ .. image:: figures/load_data_3.png
+    :width: 750px
+    :align: center
+    :height: 300px
+    :alt: alternate text
 
 After loading the **credit card dataset**, we can start to explore and curate our data.
 
