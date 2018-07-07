@@ -1,3 +1,4 @@
+[![Documentation Status](https://media.readthedocs.org/static/projects/badges/passing-flat.svg)](https://test-vizier-db.readthedocs.io/en/latest/)
 
 # Vizier DB - Web User Interface
 
