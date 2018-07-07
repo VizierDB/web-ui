@@ -11,4 +11,4 @@ Vizier makes it easier and faster to explore and analyze raw data by combining a
 
 ## Documentation
 
-Documentation for installation and usage is available [HERE!](http://test-vizier-db.readthedocs.io/en/latest/).
+Documentation for installation and usage is available [HERE!](https://test-vizier-db.readthedocs.io/en/latest/).
