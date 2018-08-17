@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 import { Form } from 'semantic-ui-react';
 import { ErrorListMessage } from '../../Message';
 import PythonCell from './form/PythonCell';
+import SQLCell from './form/SQLCell';
 import ModuleFormControl from './form/ModuleFormControl';
 import { DT_DATASET_ID, DT_FILE_ID, DT_PYTHON_CODE, DT_SQL_CODE } from './ModuleSpec';
 import '../../../../css/ModuleForm.css';
