@@ -33,5 +33,6 @@ export const DT_FILE_ID = 'fileid';
 export const DT_GROUP = 'group';
 export const DT_INT = 'int';
 export const DT_PYTHON_CODE = 'pyCode';
+export const DT_SQL_CODE = 'sqlCode';
 export const DT_ROW_ID = 'rowidx';
 export const DT_STRING = 'string'

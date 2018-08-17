@@ -172,6 +172,17 @@ class SQLCell extends React.Component {
         }
         return (
             <div>
+                <div className='ds-selector'>
+		        	<DatasetSelector
+		                key={id}
+		                id={id}
+		                isRequired={true}
+		                name={id}
+		                datasets={datasets}
+		                value={value}
+		                onChange={onChange}
+		        	/>
+                </div>
                 <div className='sql-examples'>
                     <div className={'snippet-header' + headerCss}>
                         <Icon name='help circle' color='blue' onClick={this.toggleSnippetSelector} />

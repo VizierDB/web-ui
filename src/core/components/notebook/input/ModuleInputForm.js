@@ -22,7 +22,7 @@ import { Form } from 'semantic-ui-react';
 import { ErrorListMessage } from '../../Message';
 import PythonCell from './form/PythonCell';
 import ModuleFormControl from './form/ModuleFormControl';
-import { DT_DATASET_ID, DT_FILE_ID, DT_PYTHON_CODE } from './ModuleSpec';
+import { DT_DATASET_ID, DT_FILE_ID, DT_PYTHON_CODE, DT_SQL_CODE } from './ModuleSpec';
 import '../../../../css/ModuleForm.css';
 
 
@@ -113,7 +113,27 @@ class ModuleInputForm extends React.Component {
                     </Form>
                 </div>
             );
-        } else {
+        }
+        else if ((args.length === 2) && (args[0].datatype === DT_SQL_CODE)) {
+        	const selectedDataset = SELECTED_DATASET(selectedCommand, values, datasets);
+            const arg = args[1];
+            return (
+                <div className='code-form'>
+                    { error }
+                    <Form>
+                        <SQLCell
+                            key={arg.id}
+                            id={arg.id}
+                            name={arg.id}
+                        	selectedDataset={selectedDataset}
+                            value={values[arg.id]}
+                            onChange={onChange}
+                        />
+                    </Form>
+                </div>
+            );
+        }
+        else {
             // Check if the command specification contains a dataset column. If so,
             // try to find the dataset that is being selected.
             const selectedDataset = SELECTED_DATASET(selectedCommand, values, datasets);
