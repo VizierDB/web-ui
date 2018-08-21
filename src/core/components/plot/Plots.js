@@ -35,7 +35,7 @@ class Plots extends React.Component {
 
     constructor(props){
         super(props);
-        const { dataset } = props;
+        const { dataset, identifier} = props;
         // Set grouped to true if only one data series is given (in this case
         // the grouped checkbox is hidden) and grouped layout should be
         // default.
@@ -242,7 +242,7 @@ class Plots extends React.Component {
     }
     render() {
 
-        const { dataset } = this.props;
+        const { dataset, identifier } = this.props;
         // Return null if the dataset is empty
         if (dataset.series.length === 0) {
             return null;
@@ -292,7 +292,7 @@ class Plots extends React.Component {
                         { groupedCheckbox }
                     </tr></tbody></table>
                 </div>
-                  <div id="plot" className='plot-view'>
+                  <div id={identifier} className='plot-view'>
                   <ul className='plot-legend'>
                       {legend}
                   </ul>
