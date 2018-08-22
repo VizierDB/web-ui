@@ -70,8 +70,29 @@ export const store = createStore(
     composedEnhancers
 )
 
+//add analytics
+const injectOWA = () => {
+	if (typeof window == 'undefined') {
+		return;
+	}
+	window.owa_cmds = window.owa_cmds || [];
+	function owatag() {
+		window.owa_cmds.push(arguments);
+	}
+	owatag('js', new Date());
+	owatag('setSiteId', '805ffb2592b7e9dc85bb1ba24f4ce924');
+	owatag('trackPageView');
+	owatag('trackClicks');
+};
+
 render(
-    <Provider store={store}>
+	{/* Global site tag (owatag.js) - Open Web Analytics */}
+	<script
+	  async
+	  src="https://analytics.vizier.app/modules/base/js/owa.tracker-combined-min.js"
+	/>
+	<script>{injectOWA()}</script>
+	<Provider store={store}>
         <ConnectedRouter history={history}>
             <App />
         </ConnectedRouter>

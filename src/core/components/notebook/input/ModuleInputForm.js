@@ -116,8 +116,7 @@ class ModuleInputForm extends React.Component {
             );
         }
         else if ((args.length === 2) && (args[0].datatype === DT_SQL_CODE)) {
-        	const selectedDataset = SELECTED_DATASET(selectedCommand, values, datasets);
-            const arg = args[1];
+        	const arg = args[1];
             return (
                 <div className='code-form'>
                     { error }
@@ -126,7 +125,7 @@ class ModuleInputForm extends React.Component {
                             key={arg.id}
                             id={arg.id}
                             name={arg.id}
-                        	selectedDataset={selectedDataset}
+                        	datasets={datasets}
                             value={values[arg.id]}
                             onChange={onChange}
                         />
