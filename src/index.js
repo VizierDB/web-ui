@@ -86,11 +86,7 @@ const injectOWA = () => {
 };
 
 render(
-	{/* Global site tag (owatag.js) - Open Web Analytics */}
-	<script
-	  async
-	  src="https://analytics.vizier.app/modules/base/js/owa.tracker-combined-min.js"
-	/>
+	<script src="https://analytics.vizier.app/modules/base/js/owa.tracker-combined-min.js" async ></script>
 	<script>{injectOWA()}</script>
 	<Provider store={store}>
         <ConnectedRouter history={history}>
