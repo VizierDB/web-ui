@@ -78,17 +78,17 @@ const injectOWA = () => {
 	window._owa = document.createElement('script');                      
     window._owa.type = 'text/javascript';                                                                 
     window._owa.async = true;
-    window._owa.src = 'https://analytics.vizier.app/modules/base/js/owa.tracker-combined-min.js';
+    window._owa.src = window.env.ANALYTICS_URL + 'modules/base/js/owa.tracker-combined-min.js';
     window._owa_s = document.getElementsByTagName('script')[0];
     window._owa_s.parentNode.insertBefore(window._owa, window._owa_s);
 	
-    window.owa_baseUrl = 'https://analytics.vizier.app/';
+    window.owa_baseUrl = window.env.ANALYTICS_URL;
 	window.owa_cmds = window.owa_cmds || [];
 	function owatag() {
 		window.owa_cmds.push(arguments);
 	}
 	//owatag('js', new Date());
-	owatag('setSiteId', '805ffb2592b7e9dc85bb1ba24f4ce924');
+	owatag('setSiteId', window.env.ANALYTICS_SITE_ID);
 	owatag('trackPageView');
 	owatag('trackClicks');
 };
