@@ -75,22 +75,29 @@ const injectOWA = () => {
 	if (typeof window == 'undefined') {
 		return;
 	}
+	window._owa = document.createElement('script');                      
+    window._owa.type = 'text/javascript';                                                                 
+    window._owa.async = true;
+    window._owa.src = 'https://analytics.vizier.app/modules/base/js/owa.tracker-combined-min.js';
+    window._owa_s = document.getElementsByTagName('script')[0];
+    window._owa_s.parentNode.insertBefore(window._owa, window._owa_s);
+	
 	window.owa_cmds = window.owa_cmds || [];
 	function owatag() {
 		window.owa_cmds.push(arguments);
 	}
-	owatag('js', new Date());
+	//owatag('js', new Date());
 	owatag('setSiteId', '805ffb2592b7e9dc85bb1ba24f4ce924');
 	owatag('trackPageView');
 	owatag('trackClicks');
 };
 
 render(
-	<script src="https://analytics.vizier.app/modules/base/js/owa.tracker-combined-min.js" async ></script>,
-	<script>{injectOWA()}</script>,	
 	<Provider store={store}>
         <ConnectedRouter history={history}>
-            <App />
+            <App>
+                <script>{injectOWA()}</script>
+            </App>
         </ConnectedRouter>
     </Provider>,
     document.getElementById('root')
