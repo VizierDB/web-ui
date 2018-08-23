@@ -82,6 +82,7 @@ const injectOWA = () => {
     window._owa_s = document.getElementsByTagName('script')[0];
     window._owa_s.parentNode.insertBefore(window._owa, window._owa_s);
 	
+    window.owa_baseUrl = 'https://analytics.vizier.app/';
 	window.owa_cmds = window.owa_cmds || [];
 	function owatag() {
 		window.owa_cmds.push(arguments);
