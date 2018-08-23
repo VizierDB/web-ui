@@ -86,8 +86,8 @@ const injectOWA = () => {
 };
 
 render(
-	<script src="https://analytics.vizier.app/modules/base/js/owa.tracker-combined-min.js" async ></script>
-	<script>{injectOWA()}</script>
+	<script src="https://analytics.vizier.app/modules/base/js/owa.tracker-combined-min.js" async ></script>,
+	<script>{injectOWA()}</script>,	
 	<Provider store={store}>
         <ConnectedRouter history={history}>
             <App />

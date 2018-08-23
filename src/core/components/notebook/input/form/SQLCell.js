@@ -20,7 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Icon, Grid, List } from 'semantic-ui-react';
 import {Controlled as CodeMirror} from 'react-codemirror2'
-import DatasetSelector from './form/DatasetSelector';
+import DatasetSelector from './DatasetSelector';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/sql/sql';
 import '../../../../../css/App.css';
