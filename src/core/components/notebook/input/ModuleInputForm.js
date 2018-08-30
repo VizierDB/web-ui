@@ -116,7 +116,7 @@ class ModuleInputForm extends React.Component {
             );
         }
         else if ((args.length === 2) && (args[0].datatype === DT_SQL_CODE)) {
-        	const arg = args[1];
+        	const arg = args[0];
             return (
                 <div className='code-form'>
                     { error }

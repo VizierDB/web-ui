@@ -93,13 +93,14 @@ class SQLCodeSnippetsSelector extends React.Component {
 class SQLCell extends React.Component {
     static propTypes = {
         id: PropTypes.string.isRequired,
+        dataset: PropTypes.string,
         value: PropTypes.string,
         onChange: PropTypes.func.isRequired
     }
     constructor(props) {
         super(props);
-        const { value } = props;
-        this.state = {editorValue: value, snippetSelectorVisible: false};
+        const { dataset, value } = props;
+        this.state = {datasetValue: dataset, editorValue: value, snippetSelectorVisible: false};
     }
     /**
      * Append a code snippet to the current editor value. The code snippet is
@@ -110,7 +111,7 @@ class SQLCell extends React.Component {
      */
     appendCode = (lines) => {
         const { id, onChange } = this.props;
-        const  { editorValue } = this.state;
+        const  { datasetValue, editorValue } = this.state;
         // Get the current indent from the last line of the editor value
         let indent = '';
         let script = editorValue.split('\n');
@@ -146,7 +147,7 @@ class SQLCell extends React.Component {
         // Update the local state and propagate the change to the conrolling
         // notebook cell
         this.setState({editorValue: value});
-        onChange(id, value);
+        onChange(id,  value);
         // Hide the snippet selector
         this.toggleSnippetSelector();
     }
@@ -161,10 +162,17 @@ class SQLCell extends React.Component {
         onChange(id, value);
     }
     /**
+     * Handle change of dataset
+     */
+    handleDatasetChange = (value) => {
+        const { id, onChange } = this.props;
+        this.setState({datasetValue: value});
+    }
+    /**
      * Show the code editor and optionally the code snippet selector.
      */
     render() {
-        const  { editorValue, snippetSelectorVisible } = this.state;
+        const  { datasetValue, editorValue, snippetSelectorVisible } = this.state;
         const {
             id,
             datasets,
@@ -186,8 +194,10 @@ class SQLCell extends React.Component {
 		                isRequired={true}
 		                name={id}
 		                datasets={datasets}
-		                value={value}
-		                onChange={onChange}
+		                value={datasetValue}
+		                onChange={(dsselector, value) => {
+		                	this.handleDatasetChange(value)
+                        }}
 		        	/>
                 </div>
                 <div className='sql-examples'>
