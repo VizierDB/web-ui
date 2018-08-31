@@ -33,7 +33,7 @@ import '../../../../../css/ModuleForm.css';
 */
 
 const SELECT_TABLE = 'SELECT_TABLE';
-const CREATE_LENS = 'CREATE_LENS';
+const DATASET = 'DATASET';
 
 
 
@@ -47,18 +47,18 @@ class SQLCodeSnippetsSelector extends React.Component {
      * lines.
      */
     handleSelect = (e, { value }) => {
-        const { onSelect } = this.props;
+    	const { datasets, datasetValue, onDatasetChange, onSelect } = this.props;
         let lines = [];
         if (value === SELECT_TABLE) {
             lines.push('-- SELECT rows from a table');
-            lines.push('SELECT * FROM TABLE_NAME');
-        } else if (value === CREATE_LENS) {
-            lines.push('-- Create a new Lens');
-            lines.push('CREATE LENS LENS_NAME AS SELECT * FROM TABLE_NAME WITH MISSING_VALUE(\'A\')');
+            lines.push('SELECT * FROM {{input_'+datasets.findIndex(ds => ds.name == datasetValue)+'}} ');
+        } else if (value === DATASET) {
+            lines.push(' {{input_'+datasets.findIndex(ds => ds.name == datasetValue)+'}} ');
         } 
         onSelect(lines);
     }
     render() {
+    	const { id, datasets, datasetValue, onDatasetChange, onSelect } = this.props;
         return (
             <div className='snippet-selector'>
                 <Grid columns={4} divided>
@@ -69,17 +69,47 @@ class SQLCodeSnippetsSelector extends React.Component {
                                     <List.Header><Icon name='desktop' /> Access & Output</List.Header>
                                 </List.Item>
                                 <List.Item value={SELECT_TABLE} onClick={this.handleSelect}>
-                                    <List.Content as='a'>Get Dataset</List.Content>
+                                    <List.Content as='a'>
+	                                    <div className='ds-selector'>
+		                		        	<DatasetSelector
+		                		                key={id}
+		                		                id={id}
+		                		                isRequired={true}
+		                		                name={id}
+		                		                datasets={datasets}
+		                		                value={datasetValue}
+		                		                onChange={(dsselector, value) => {
+		                		                	onDatasetChange(value)
+		                                        }}
+		                		        	/>
+		                                </div>
+		                		        Select from
+                                    </List.Content>
                                 </List.Item>
                             </List>
                         </Grid.Column>
                         <Grid.Column width={4} key='new'>
                             <List link>
                                 <List.Item>
-                                    <List.Header><Icon name='plus' /> New</List.Header>
+                                    <List.Header><Icon name='plus' /> Dataset</List.Header>
                                 </List.Item>
-                                <List.Item value={CREATE_LENS} onClick={this.handleSelect}>
-                                    <List.Content as='a'>New Lens</List.Content>
+                                <List.Item value={DATASET} onClick={this.handleSelect}>
+                                    <List.Content as='a'>
+	                                    <div className='ds-selector'>
+		                		        	<DatasetSelector
+		                		                key={id}
+		                		                id={id}
+		                		                isRequired={true}
+		                		                name={id}
+		                		                datasets={datasets}
+		                		                value={datasetValue}
+		                		                onChange={(dsselector, value) => {
+		                		                	onDatasetChange(value)
+		                                        }}
+		                		        	/>
+		                                </div>
+		                		        Dataset
+                                    </List.Content>
                                 </List.Item>
                             </List>
                         </Grid.Column>
@@ -183,28 +213,15 @@ class SQLCell extends React.Component {
         let selectorPanel = null;
         if (snippetSelectorVisible) {
             headerCss = ' expanded';
-            selectorPanel = <SQLCodeSnippetsSelector onSelect={this.appendCode}/>
+            selectorPanel = <SQLCodeSnippetsSelector datasets={datasets} datasetValue={datasetValue} onDatasetChange={this.handleDatasetChange} onSelect={this.appendCode}/>
         }
         return (
             <div>
-                <div className='ds-selector'>
-		        	<DatasetSelector
-		                key={id}
-		                id={id}
-		                isRequired={true}
-		                name={id}
-		                datasets={datasets}
-		                value={datasetValue}
-		                onChange={(dsselector, value) => {
-		                	this.handleDatasetChange(value)
-                        }}
-		        	/>
-                </div>
                 <div className='sql-examples'>
                     <div className={'snippet-header' + headerCss}>
                         <Icon name='help circle' color='blue' onClick={this.toggleSnippetSelector} />
                         <span className='left-padding-sm' onClick={this.toggleSnippetSelector}>
-                            Code examples for dataset manipulation
+                            Code examples for dataset queries
                         </span>
                     </div>
                     { selectorPanel }
