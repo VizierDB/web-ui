@@ -33,6 +33,8 @@ import '../../../../../css/ModuleForm.css';
 */
 
 const SELECT_TABLE = 'SELECT_TABLE';
+const JOIN_TABLES = 'JOIN_TABLES';
+const UNION_TABLES = 'UNION_TABLES';
 const DATASET = 'DATASET';
 
 
@@ -41,6 +43,10 @@ class SQLCodeSnippetsSelector extends React.Component {
     static propTypes = {
         onSelect: PropTypes.func.isRequired
     }
+    constructor(props) {
+        super(props);
+        this.state = {secondaryDatasetValue: ""}
+    }
     /**
      * Depending on the selected list item pass code snippet to controlling
      * elements. Assumes the the .onSelect() method expects a list of code
@@ -48,18 +54,26 @@ class SQLCodeSnippetsSelector extends React.Component {
      */
     handleSelect = (e, { value }) => {
     	const { datasets, datasetValue, onDatasetChange, onSelect } = this.props;
-        let lines = [];
+    	const { secondaryDatasetValue } = this.state
+    	let lines = [];
         if (value === SELECT_TABLE) {
-            lines.push('-- SELECT rows from a table');
             lines.push('SELECT * FROM {{input_'+datasets.findIndex(ds => ds.name == datasetValue)+'}} ');
+        } else if (value === JOIN_TABLES) {
+        	lines.push('SELECT * FROM {{input_'+datasets.findIndex(ds => ds.name == datasetValue)+'}} JOIN {{input_'+datasets.findIndex(ds => ds.name == secondaryDatasetValue)+'}}');
+        } else if (value === UNION_TABLES) {
+        	lines.push('SELECT * FROM {{input_'+datasets.findIndex(ds => ds.name == datasetValue)+'}} UNION {{input_'+datasets.findIndex(ds => ds.name == secondaryDatasetValue)+'}}');
         } else if (value === DATASET) {
             lines.push(' {{input_'+datasets.findIndex(ds => ds.name == datasetValue)+'}} ');
         } 
         onSelect(lines);
     }
+    handleSecondaryDatasetChange = (value) => {
+        this.setState({secondaryDatasetValue: value});
+    }
     render() {
     	const { id, datasets, datasetValue, onDatasetChange, onSelect } = this.props;
-        return (
+    	const { secondaryDatasetValue } = this.state;
+    	return (
             <div className='snippet-selector'>
                 <Grid columns={4} divided>
                     <Grid.Row>
@@ -86,6 +100,64 @@ class SQLCodeSnippetsSelector extends React.Component {
 		                		        Select from
                                     </List.Content>
                                 </List.Item>
+                                <List.Item value={JOIN_TABLES} onClick={this.handleSelect}>
+	                                <List.Content as='a'>
+	                                    <div className='ds-selector'>
+		                		        	<DatasetSelector
+		                		                key={id}
+		                		                id={id}
+		                		                isRequired={true}
+		                		                name={id}
+		                		                datasets={datasets}
+		                		                value={datasetValue}
+		                		                onChange={(dsselector, value) => {
+		                		                	onDatasetChange(value)
+		                                        }}
+		                		        	/>
+		                		        	<DatasetSelector
+		                		                key={id}
+		                		                id={id}
+		                		                isRequired={true}
+		                		                name={id}
+		                		                datasets={datasets}
+		                		                value={secondaryDatasetValue}
+		                		                onChange={(dsselector, value) => {
+		                		                	this.handleSecondaryDatasetChange(value)
+		                                        }}
+	                		        	    />
+		                		        </div>
+		                		        Join
+	                                </List.Content>
+	                            </List.Item>
+	                            <List.Item value={UNION_TABLES} onClick={this.handleSelect}>
+                                <List.Content as='a'>
+                                    <div className='ds-selector'>
+	                		        	<DatasetSelector
+	                		                key={id}
+	                		                id={id}
+	                		                isRequired={true}
+	                		                name={id}
+	                		                datasets={datasets}
+	                		                value={datasetValue}
+	                		                onChange={(dsselector, value) => {
+	                		                	onDatasetChange(value)
+	                                        }}
+	                		        	/>
+	                		        	<DatasetSelector
+	                		                key={id}
+	                		                id={id}
+	                		                isRequired={true}
+	                		                name={id}
+	                		                datasets={datasets}
+	                		                value={secondaryDatasetValue}
+	                		                onChange={(dsselector, value) => {
+	                		                	this.handleSecondaryDatasetChange(value)
+	                                        }}
+                		        	    />
+	                		        </div>
+	                		        Union
+                                </List.Content>
+                            </List.Item>
                             </List>
                         </Grid.Column>
                         <Grid.Column width={4} key='new'>
