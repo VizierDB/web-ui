@@ -44,6 +44,7 @@ const NEW_DATASET_OBJECT = 'NEW_DATASET_OBJECT';
 const OUTPUT_ANNOTATIONS = 'OUTPUT_ANNOTATIONS';
 const OUTPUT_COLUMN_NAMES = 'OUTPUT_COLUMN_NAMES';
 const OUTPUT_CELL_VALUES = 'OUTPUT_CELL_VALUES';
+const OUTPUT_PLOT = 'OUTPUT_PLOT';
 const RENAME_DATASET = 'RENAME_DATASET';
 const UPDATE_CELL_VALUE = 'UPDATE_CELL_VALUE';
 const UPDATE_ANNOTATION = 'UPDATE_ANNOTATION';
@@ -128,6 +129,33 @@ class CodeSnippetsSelector extends React.Component {
             lines.push('# column index (0, 1, ...).');
             lines.push('for row in ds.rows:');
             lines.push('    print row.get_value(\'name-label-or-index\')');
+        } else if (value === OUTPUT_PLOT) {
+            lines.push('# Import matplotlib, generate a plot, and output it.');
+            lines.push('import matplotlib');
+            lines.push('import matplotlib.pyplot as plt');
+            lines.push('#switch to non display backend');
+            lines.push('plt.switch_backend(\'agg\')');
+            lines.push('import numpy as np');
+            lines.push('# Data for plotting');
+            lines.push('t = np.arange(0.0, 2.0, 0.01)');
+            lines.push('s = 1 + np.sin(2 * np.pi * t)');
+            lines.push('fig, ax = plt.subplots()');
+            lines.push('ax.plot(t, s)');
+            lines.push('ax.set(xlabel=\'time (s)\', ylabel=\'voltage (mV)\',');
+            lines.push('title=\'About as simple as it gets, folks\')');
+            lines.push('ax.grid()');
+            lines.push('imgfile = \'test1.png\'');
+            lines.push('#save plot');
+            lines.push('fig.savefig(imgfile)');
+            lines.push('#create data uri for output');
+            lines.push('prefix = \'data:image/png;base64,\'');
+            lines.push('fin = open(imgfile, \'rb\')');
+            lines.push('contents = fin.read()');
+            lines.push('import base64');
+            lines.push('data_url = prefix + base64.b64encode(contents)');
+            lines.push('fin.close()');
+            lines.push('#output html');
+            lines.push('print(\'<img src="\'+data_url+\'"/>\')');
         } else if (value === RENAME_DATASET) {
             lines.push('# Rename given dataset to a new (unique) name.');
             lines.push('vizierdb.rename_dataset(\'unique-ds-name\', \'new-unique-ds-name\')');
@@ -173,6 +201,9 @@ class CodeSnippetsSelector extends React.Component {
                                 <List.Item value={OUTPUT_ANNOTATIONS} onClick={this.handleSelect}>
                                     <List.Content as='a'>Print Cell Annotations</List.Content>
                                 </List.Item>
+                                <List.Item value={OUTPUT_PLOT} onClick={this.handleSelect}>
+	                                <List.Content as='a'>Output Matplotlib Plot</List.Content>
+	                            </List.Item>
                             </List>
                         </Grid.Column>
                         <Grid.Column width={4} key='new'>

@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import createReactClass from 'create-react-class';
 import { PropTypes } from 'prop-types';
 import { Dimmer, Loader } from 'semantic-ui-react';
 import AnnotationObject from '../../annotation/AnnotationObject';
@@ -139,6 +140,21 @@ class CellOutputArea extends React.Component {
                                 onNavigate={this.handleNavigateDataset}
                                 onSelectCell={this.handleSelectCell}
                             />
+                        </div>
+                    );
+                } else if (output.isHtml()) {
+                	var self = this;
+                    var Response = createReactClass({
+                        render: function(){
+                        	return (<div dangerouslySetInnerHTML={{__html: output.content.lines}}></div>)
+                        }
+                    });
+                	outputContent = (
+                        <div className='output-content'>
+                            <span className='output-content-header'>
+                                {output.content.name}
+                            </span>
+                            <Response />
                         </div>
                     );
                 }
