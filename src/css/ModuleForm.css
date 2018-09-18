@@ -155,3 +155,25 @@ div.snippet-selector {
     border-radius: .28571429rem;
     padding: 10px 10px 10px 20px;
 }
+
+div.ui.labeled.input {
+	width: 100%;
+}
+
+div.ui.labeled.input .field {
+	width: 100%;
+}
+
+div.sql-example-ds-selector {
+	display: inline-block;
+	min-width: 70px;
+}
+
+div.sql-example-list-item {
+	border: 1px dotted lightgray;
+	border-radius: .28571429rem;
+}
+
+.sql-example-a-span {
+	padding: 3px 3px 3px 3px;
+}

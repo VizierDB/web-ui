@@ -116,17 +116,19 @@ class ModuleInputForm extends React.Component {
             );
         }
         else if ((args.length === 2) && (args[0].datatype === DT_SQL_CODE)) {
-        	const arg = args[0];
+        	const srcarg = args[0];
+        	const odsarg = args[1];
             return (
                 <div className='code-form'>
                     { error }
                     <Form>
                         <SQLCell
-                            key={arg.id}
-                            id={arg.id}
-                            name={arg.id}
+                            key={srcarg.id}
+                            id={srcarg.id}
+                            name={srcarg.id}
                         	datasets={datasets}
-                            value={values[arg.id]}
+                            value={values[srcarg.id]}
+                            outputDataset={values[odsarg.id]}
                             onChange={onChange}
                         />
                     </Form>

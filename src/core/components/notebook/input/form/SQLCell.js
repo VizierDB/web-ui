@@ -25,6 +25,7 @@ import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/sql/sql';
 import '../../../../../css/App.css';
 import '../../../../../css/ModuleForm.css';
+import TextControl from './TextControl';
 
 
 /**
@@ -82,13 +83,14 @@ class SQLCodeSnippetsSelector extends React.Component {
                                 <List.Item>
                                     <List.Header><Icon name='desktop' /> Access & Output</List.Header>
                                 </List.Item>
-                                <List.Item value={SELECT_TABLE} onClick={this.handleSelect}>
+                                <List.Item className='sql-example-list-item' value={SELECT_TABLE} onClick={this.handleSelect}>
                                     <List.Content as='a'>
-	                                    <div className='ds-selector'>
+                                       <span className='sql-example-a-span'>Select from</span> 
+                                       <div className='sql-example-ds-selector'>
 		                		        	<DatasetSelector
 		                		                key={id}
 		                		                id={id}
-		                		                isRequired={true}
+		                		                isRequired={false}
 		                		                name={id}
 		                		                datasets={datasets}
 		                		                value={datasetValue}
@@ -97,16 +99,16 @@ class SQLCodeSnippetsSelector extends React.Component {
 		                                        }}
 		                		        	/>
 		                                </div>
-		                		        Select from
+		                		        <Icon name='plus' />
                                     </List.Content>
                                 </List.Item>
-                                <List.Item value={JOIN_TABLES} onClick={this.handleSelect}>
+                                <List.Item className='sql-example-list-item' value={JOIN_TABLES} onClick={this.handleSelect}>
 	                                <List.Content as='a'>
-	                                    <div className='ds-selector'>
+	                                    <div className='sql-example-ds-selector'>
 		                		        	<DatasetSelector
 		                		                key={id}
 		                		                id={id}
-		                		                isRequired={true}
+		                		                isRequired={false}
 		                		                name={id}
 		                		                datasets={datasets}
 		                		                value={datasetValue}
@@ -114,10 +116,13 @@ class SQLCodeSnippetsSelector extends React.Component {
 		                		                	onDatasetChange(value)
 		                                        }}
 		                		        	/>
-		                		        	<DatasetSelector
+		                		        </div>
+		                		        <span className='sql-example-a-span'>Join</span>
+		                		        <div className='sql-example-ds-selector'>
+	                                        <DatasetSelector
 		                		                key={id}
 		                		                id={id}
-		                		                isRequired={true}
+		                		                isRequired={false}
 		                		                name={id}
 		                		                datasets={datasets}
 		                		                value={secondaryDatasetValue}
@@ -126,16 +131,16 @@ class SQLCodeSnippetsSelector extends React.Component {
 		                                        }}
 	                		        	    />
 		                		        </div>
-		                		        Join
+	                                    <Icon name='plus' />
 	                                </List.Content>
 	                            </List.Item>
-	                            <List.Item value={UNION_TABLES} onClick={this.handleSelect}>
+	                            <List.Item className='sql-example-list-item' value={UNION_TABLES} onClick={this.handleSelect}>
                                 <List.Content as='a'>
-                                    <div className='ds-selector'>
+                                    <div className='sql-example-ds-selector'>
 	                		        	<DatasetSelector
 	                		                key={id}
 	                		                id={id}
-	                		                isRequired={true}
+	                		                isRequired={false}
 	                		                name={id}
 	                		                datasets={datasets}
 	                		                value={datasetValue}
@@ -143,10 +148,13 @@ class SQLCodeSnippetsSelector extends React.Component {
 	                		                	onDatasetChange(value)
 	                                        }}
 	                		        	/>
+	                		        </div>
+	                		        <span className='sql-example-a-span'>Union</span>
+	                		        <div className='sql-example-ds-selector'>
 	                		        	<DatasetSelector
 	                		                key={id}
 	                		                id={id}
-	                		                isRequired={true}
+	                		                isRequired={false}
 	                		                name={id}
 	                		                datasets={datasets}
 	                		                value={secondaryDatasetValue}
@@ -155,7 +163,7 @@ class SQLCodeSnippetsSelector extends React.Component {
 	                                        }}
                 		        	    />
 	                		        </div>
-	                		        Union
+	                		        <Icon name='plus' />
                                 </List.Content>
                             </List.Item>
                             </List>
@@ -165,13 +173,14 @@ class SQLCodeSnippetsSelector extends React.Component {
                                 <List.Item>
                                     <List.Header><Icon name='plus' /> Dataset</List.Header>
                                 </List.Item>
-                                <List.Item value={DATASET} onClick={this.handleSelect}>
+                                <List.Item className='sql-example-list-item' value={DATASET} onClick={this.handleSelect}>
                                     <List.Content as='a'>
-	                                    <div className='ds-selector'>
+                                        <span className='sql-example-a-span'>Dataset</span>
+	                                    <div className='sql-example-ds-selector'>
 		                		        	<DatasetSelector
 		                		                key={id}
 		                		                id={id}
-		                		                isRequired={true}
+		                		                isRequired={false}
 		                		                name={id}
 		                		                datasets={datasets}
 		                		                value={datasetValue}
@@ -180,7 +189,7 @@ class SQLCodeSnippetsSelector extends React.Component {
 		                                        }}
 		                		        	/>
 		                                </div>
-		                		        Dataset
+		                		        <Icon name='plus' />
                                     </List.Content>
                                 </List.Item>
                             </List>
@@ -192,17 +201,18 @@ class SQLCodeSnippetsSelector extends React.Component {
     }
 }
 
+
 class SQLCell extends React.Component {
     static propTypes = {
         id: PropTypes.string.isRequired,
-        dataset: PropTypes.string,
+        otputDataset: PropTypes.string,
         value: PropTypes.string,
         onChange: PropTypes.func.isRequired
     }
     constructor(props) {
         super(props);
-        const { dataset, value } = props;
-        this.state = {datasetValue: dataset, editorValue: value, snippetSelectorVisible: false};
+        const { outputDataset, value } = props;
+        this.state = {editorValue: value, snippetSelectorVisible: false, outputDataset:outputDataset };
     }
     /**
      * Append a code snippet to the current editor value. The code snippet is
@@ -271,10 +281,18 @@ class SQLCell extends React.Component {
         this.setState({datasetValue: value});
     }
     /**
+     * Handle change of output dataset
+     */
+    handleOutputDatasetChange = (value) => {
+        const { id, onChange } = this.props;
+        this.setState({outputDataset: value});
+        onChange('output_dataset', value);
+    }
+    /**
      * Show the code editor and optionally the code snippet selector.
      */
     render() {
-        const  { datasetValue, editorValue, snippetSelectorVisible } = this.state;
+        const  { datasetValue, editorValue, snippetSelectorVisible, outputDataset } = this.state;
         const {
             id,
             datasets,
@@ -313,6 +331,22 @@ class SQLCell extends React.Component {
                         }}
                     />
                 </div>
+                <div class="ui labeled input">
+	                <div class="ui label">
+	                	Output Dataset
+	                </div>
+                    <TextControl
+	                    key={id}
+	                    id={id}
+	                    name={'Output Dataset'}
+	                    placeholder={'Output Dataset (optional)'}
+	                    isRequired={false}
+	                    value={outputDataset}
+	                    onChange={(dstext, value) => {
+		                	this.handleOutputDatasetChange(value)
+	                    }}
+	                />
+	            </div>    
             </div>
         );
     }
