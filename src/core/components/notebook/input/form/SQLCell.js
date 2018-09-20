@@ -58,13 +58,13 @@ class SQLCodeSnippetsSelector extends React.Component {
     	const { secondaryDatasetValue } = this.state
     	let lines = [];
         if (value === SELECT_TABLE) {
-            lines.push('SELECT * FROM {{input_'+datasets.findIndex(ds => ds.name == datasetValue)+'}} ');
+            lines.push('SELECT * FROM '+datasetValue);
         } else if (value === JOIN_TABLES) {
-        	lines.push('SELECT * FROM {{input_'+datasets.findIndex(ds => ds.name == datasetValue)+'}} JOIN {{input_'+datasets.findIndex(ds => ds.name == secondaryDatasetValue)+'}}');
+        	lines.push('SELECT * FROM '+datasetValue+' JOIN '+secondaryDatasetValue);
         } else if (value === UNION_TABLES) {
-        	lines.push('SELECT * FROM {{input_'+datasets.findIndex(ds => ds.name == datasetValue)+'}} UNION {{input_'+datasets.findIndex(ds => ds.name == secondaryDatasetValue)+'}}');
+        	lines.push('(SELECT * FROM '+datasetValue+') UNION ALL (SELECT * FROM '+secondaryDatasetValue+')');
         } else if (value === DATASET) {
-            lines.push(' {{input_'+datasets.findIndex(ds => ds.name == datasetValue)+'}} ');
+            lines.push(' '+datasetValue+' ');
         } 
         onSelect(lines);
     }
