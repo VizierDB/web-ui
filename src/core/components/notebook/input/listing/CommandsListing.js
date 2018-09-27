@@ -47,15 +47,15 @@ class CommandsListing extends React.Component {
         const groups = Array.from(env.modules.types);
         groups.sort();
         //max number of items pre col
-        const fullCol = 9.0;
+        const fullCol = 9.5;
         // Further group modules by name
         let list_index = '';
         let curCol = 0.0;
         let listItems = [];
         for (let value of groups) {
             const typeCommands = env.modules.package[value];
-            //add 1.5 for group and 1.0 for each command
-            curCol += 1.5 + typeCommands.length;
+            //add 1.25 for group and 1.0 for each command
+            curCol += 1.25 + typeCommands.length;
             typeCommands.sort((c1, c2) => (c1.name.localeCompare(c2.name)));
             if (curCol >= fullCol) {
                 if (listItems.length > 0) {
@@ -67,7 +67,7 @@ class CommandsListing extends React.Component {
                         </Grid.Column>
                     );
                     listItems = [];
-                    curCol = 1.5 + typeCommands.length;
+                    curCol = 1.25 + typeCommands.length;
                 }
                 
             }

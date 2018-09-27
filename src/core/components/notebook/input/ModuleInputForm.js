@@ -22,8 +22,9 @@ import { Form } from 'semantic-ui-react';
 import { ErrorListMessage } from '../../Message';
 import PythonCell from './form/PythonCell';
 import SQLCell from './form/SQLCell';
+import ScalaCell from './form/ScalaCell';
 import ModuleFormControl from './form/ModuleFormControl';
-import { DT_DATASET_ID, DT_FILE_ID, DT_PYTHON_CODE, DT_SQL_CODE } from './ModuleSpec';
+import { DT_DATASET_ID, DT_FILE_ID, DT_PYTHON_CODE, DT_SQL_CODE, DT_SCALA_CODE } from './ModuleSpec';
 import '../../../../css/ModuleForm.css';
 
 
@@ -131,6 +132,23 @@ class ModuleInputForm extends React.Component {
                             outputDataset={values[odsarg.id]}
                             onChange={onChange}
                         />
+                    </Form>
+                </div>
+            );
+        }
+        else if ((args.length === 1) && (args[0].datatype === DT_SCALA_CODE)) {
+        	const arg = args[0];
+            return (
+                <div className='code-form'>
+                    { error }
+                    <Form>
+	                    <ScalaCell
+		                    key={arg.id}
+		                    id={arg.id}
+		                    name={arg.id}
+		                    value={values[arg.id]}
+		                    onChange={onChange}
+		                />
                     </Form>
                 </div>
             );
