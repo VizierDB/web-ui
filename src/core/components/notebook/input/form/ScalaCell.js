@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import { Icon, Grid, List } from 'semantic-ui-react';
 import {Controlled as CodeMirror} from 'react-codemirror2'
 import 'codemirror/lib/codemirror.css';
-import 'codemirror/mode/scala/scala';
+import 'codemirror/mode/clike/clike';
 import '../../../../../css/App.css';
 import '../../../../../css/ModuleForm.css';
 
