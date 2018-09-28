@@ -213,7 +213,7 @@ class ScalaCell extends React.Component {
                         value={editorValue}
                         options={{
                             lineNumbers: true,
-                            mode: 'scala',
+                            mode: 'text/x-scala',
                             indentUnit: 4
                         }}
                         onBeforeChange={(editor, data, value) => {

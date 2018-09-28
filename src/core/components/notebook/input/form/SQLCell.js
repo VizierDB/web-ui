@@ -321,7 +321,7 @@ class SQLCell extends React.Component {
                         value={editorValue}
                         options={{
                             lineNumbers: true,
-                            mode: 'sql',
+                            mode: 'text/x-sql',
                             indentUnit: 4
                         }}
                         onBeforeChange={(editor, data, value) => {
