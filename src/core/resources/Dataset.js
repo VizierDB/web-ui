@@ -54,7 +54,7 @@ export class DatasetDescriptor {
  * optional.
  */
 export class DatasetHandle {
-    constructor(id, name, columns, rows, offset, links, annotations, orderb_by) {
+    constructor(id, name, columns, rows, offset, links, annotations, order_by) {
         this.id = id;
         this.name = name;
         this.columns = columns;
