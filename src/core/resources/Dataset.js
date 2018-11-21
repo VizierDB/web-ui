@@ -54,7 +54,7 @@ export class DatasetDescriptor {
  * optional.
  */
 export class DatasetHandle {
-    constructor(id, name, columns, rows, offset, links, annotations) {
+    constructor(id, name, columns, rows, offset, links, annotations, orderb_by) {
         this.id = id;
         this.name = name;
         this.columns = columns;
@@ -62,6 +62,7 @@ export class DatasetHandle {
         this.offset = offset;
         this.links = links;
         this.annotatedCells = annotations;
+        this.order_by = order_by;
     }
     /**
      * Initialize the dataset handle from a Json object returned by the Web API.
@@ -78,6 +79,11 @@ export class DatasetHandle {
             this.annotatedCells = json.annotatedCells;
         } else {
             this.annotatedCells = [];
+        }
+        if (json.order_by) {
+            this.order_by = json.order_by;
+        } else {
+            this.order_by = "";
         }
         return this;
     }
