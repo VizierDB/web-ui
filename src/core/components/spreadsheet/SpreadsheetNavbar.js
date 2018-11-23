@@ -132,6 +132,7 @@ class SpreadsheetNavbar extends React.Component {
     }
     render() {
         const { dataset, disabled, onNavigate } = this.props
+        console.log("---------------------------------"+ dataset.links.pagenextanno)
         return (
             <div>
                 <Button.Group size={BUTTON_SIZE}>

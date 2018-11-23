@@ -28,7 +28,9 @@ import { Notebook } from '../../resources/Notebook';
 import { ErrorResource, SpreadsheetResource } from '../../resources/Project'
 import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource, postResourceData } from '../../util/Api';
-
+import {
+    VIZUAL, VIZUAL_OP
+} from '../../util/Vizual';
 
 // Actions to indicate that the spreadsheet is currently being updated
 export const SUBMIT_UPDATE_REQUEST = 'SUBMIT_UPDATE_REQUEST';
@@ -76,7 +78,10 @@ export const showSpreadsheet = (dataset, url) => (dispatch) => {
 
 
 export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
-    const { name, offset, order_by } = dataset;
+    const { name, offset, order_by_ds } = dataset;
+    var order_by = order_by_ds
+    if((cmd.type === VIZUAL_OP) && (cmd.id === VIZUAL.SORT))
+    	order_by = dataset.columns[cmd.arguments.columns[0].columns_column].name + " DESC";
     dispatch(submitUpdateRequest());
     return fetch(
             workflow.links.append,

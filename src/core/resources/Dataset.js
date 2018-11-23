@@ -130,7 +130,7 @@ export class DatasetHandle {
                 }
             }
         }
-        const {id, name, columns, rows, offset, links } = this;
-        return new DatasetHandle(id, name, columns, rows, offset, links, annotations);
+        const {id, name, columns, rows, offset, links, order_by } = this;
+        return new DatasetHandle(id, name, columns, rows, offset, links, annotations, order_by);
     }
 }
