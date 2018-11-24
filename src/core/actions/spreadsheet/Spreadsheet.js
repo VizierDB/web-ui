@@ -76,13 +76,13 @@ export const showSpreadsheet = (dataset, url) => (dispatch) => {
 
 
 export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
-    const { name, offset, order_by } = dataset;
+    const { name, offset } = dataset;
     dispatch(submitUpdateRequest());
     return fetch(
             workflow.links.append,
             {
                 method: 'POST',
-                body: JSON.stringify({...cmd, includeDataset: {name, offset, order_by}}),
+                body: JSON.stringify({...cmd, includeDataset: {name, offset}}),
                 headers: {
                   'Accept': 'application/json',
                   'Content-Type': 'application/json'
