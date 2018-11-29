@@ -401,6 +401,7 @@ class CellInputArea extends React.Component {
         datasets: PropTypes.array.isRequired,
         env: PropTypes.object.isRequired,
         module: PropTypes.object,
+        codeEditorProps: PropTypes.object.isRequired,
         onCreateBranch: PropTypes.func,
         onDeleteModule: PropTypes.func,
         onSubmit: PropTypes.func.isRequired
@@ -477,6 +478,7 @@ class CellInputArea extends React.Component {
             datasets,
             env,
             module,
+            codeEditorProps,
             onCreateBranch,
             onDeleteModule
         } = this.props
@@ -501,7 +503,8 @@ class CellInputArea extends React.Component {
                         hasError={hasError}
                         selectedCommand={selectedCommand}
                         values={formValues}
-                        onChange={this.setFormValue}
+                        codeEditorProps={codeEditorProps}
+                    	onChange={this.setFormValue}
                         onDismissErrors={this.dismissErrors}
                         onSubmit={this.handleFormSubmit}
                     />

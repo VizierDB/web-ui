@@ -67,6 +67,7 @@ class ModuleInputForm extends React.Component {
         hasError: PropTypes.bool.isRequired,
         selectedCommand: PropTypes.object.isRequired,
         values: PropTypes.object.isRequired,
+        codeEditorProps: PropTypes.object.isRequired,
         onChange: PropTypes.func.isRequired,
         onDismissErrors: PropTypes.func.isRequired,
         onSubmit: PropTypes.func.isRequired
@@ -79,6 +80,7 @@ class ModuleInputForm extends React.Component {
             hasError,
             selectedCommand,
             values,
+            codeEditorProps,
             onChange,
             onDismissErrors,
             onSubmit
@@ -110,7 +112,10 @@ class ModuleInputForm extends React.Component {
                             id={arg.id}
                             name={arg.id}
                             value={values[arg.id]}
-                            onChange={onChange}
+	                        editing={true}
+	                        cursorPosition={codeEditorProps.cursorPosition}
+                        	newLines={codeEditorProps.newLines}
+	                        onChange={onChange}
                         />
                     </Form>
                 </div>

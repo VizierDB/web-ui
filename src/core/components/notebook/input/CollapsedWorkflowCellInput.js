@@ -20,7 +20,11 @@ import React from 'react';
 import { PropTypes } from 'prop-types';
 import CellIndex from './CellIndex';
 import '../../../../css/Notebook.css'
-
+import { Form } from 'semantic-ui-react';
+import PythonCell from './form/PythonCell';
+import SQLCell from './form/SQLCell';
+import ScalaCell from './form/ScalaCell';
+import { DT_DATASET_ID, DT_FILE_ID, DT_PYTHON_CODE, DT_SQL_CODE, DT_SCALA_CODE } from './ModuleSpec';
 
 /**
  * Collapsed input area for an workflow notebook cell. The output is a
@@ -31,11 +35,14 @@ class CollapsedWorkflowCellInput extends React.Component {
     static propTypes = {
         errorState: PropTypes.bool.isRequired,
         module: PropTypes.object.isRequired,
+        command: PropTypes.object.isRequired, 
         sequenceIndex: PropTypes.number.isRequired,
-        onExpand: PropTypes.func.isRequired
+        codeEditorProps: PropTypes.object.isRequired,
+        onExpand: PropTypes.func.isRequired,
+        onExpandCode: PropTypes.func.isRequired
     }
     render() {
-        const { errorState, module, sequenceIndex, onExpand } = this.props;
+        const { errorState, module, command, sequenceIndex, codeEditorProps, onExpand, onExpandCode } = this.props;
         // Cell index is clickable to expand
         let cellIndex = (
             <CellIndex onClick={onExpand} sequenceIndex={sequenceIndex} />
@@ -46,11 +53,74 @@ class CollapsedWorkflowCellInput extends React.Component {
         if (errorState) {
             css += '-error';
         }
-        let cellCommand =  (
-            <pre className={css} onDoubleClick={onExpand}>
-                {module.text}
-            </pre>
-        );
+        let cellCommand =  null;
+        if(command.id == "CODE"){
+    		const args = command.arguments
+    		const srcvalue = module.command.arguments[0].value
+        	if ((args.length === 1) && (args[0].datatype === DT_PYTHON_CODE)) {
+                const arg = args[0];
+                return (
+                    <div className='code-form'>
+                        <Form>
+                            <PythonCell
+                                key={arg.id}
+                                id={arg.id}
+                                name={arg.id}
+                                value={srcvalue}
+	                            editing={false}
+	                            cursorPosition={codeEditorProps.cursorPosition}
+	                            onChange={onExpandCode}
+                            />
+                        </Form>
+                    </div>
+                );
+            }
+            else if ((args.length === 2) && (args[0].datatype === DT_SQL_CODE)) {
+            	const srcarg = args[0];
+            	const odsarg = args[1];
+            	const srcvalue = module.command.arguments[0].value
+            	const odsvalue = module.command.arguments[1].value
+                return (
+                    <div className='code-form'>
+                        <Form>
+                            <SQLCell
+                                key={srcarg.id}
+                                id={srcarg.id}
+                                name={srcarg.id}
+                            	datasets={module.datasets}
+                                value={srcvalue}
+                                outputDataset={odsvalue}
+                                onChange={onExpand}
+                            />
+                        </Form>
+                    </div>
+                );
+            }
+            else if ((args.length === 1) && (args[0].datatype === DT_SCALA_CODE)) {
+            	const arg = args[0];
+            	const srcvalue = module.command.arguments[0].value
+            	return (
+                    <div className='code-form'>
+                        <Form>
+    	                    <ScalaCell
+    		                    key={arg.id}
+    		                    id={arg.id}
+    		                    name={arg.id}
+    		                    value={srcvalue}
+    		                    onChange={onExpand}
+    		                />
+                        </Form>
+                    </div>
+                );
+            }
+    	}
+    	else {
+    		cellCommand = (
+	            <pre className={css} onDoubleClick={onExpand}>
+	                {module.text}
+	            </pre>
+	        );
+	    }
         // Return two-column layout
         return (
             <table className='cell-area'><tbody>
@@ -63,6 +133,8 @@ class CollapsedWorkflowCellInput extends React.Component {
             </tbody></table>
         );
     }
+    
+    
 }
 
 export default CollapsedWorkflowCellInput;

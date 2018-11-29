@@ -26,6 +26,7 @@ import CellInputArea from '../input/CellInputArea';
 import CollapsedEmptyCellInput from '../input/CollapsedEmptyCellInput';
 import CollapsedWorkflowCellInput from '../input/CollapsedWorkflowCellInput';
 import CellOutputArea from '../output/CellOutputArea';
+import { moduleId } from '../../../resources/Project';
 import { isNotEmptyString } from '../../../util/App';
 import '../../../../css/Notebook.css';
 
@@ -60,7 +61,7 @@ class EditableNotebookCell extends React.Component {
     }
     constructor(props) {
         super(props);
-        this.state = {expanded: false, showModal: null}
+        this.state = {expanded: false, showModal: null, codeEditorProps: { cursorPosition: { line: 0, ch: 0 }, newLines: "" } }
     }
     /**
      * Handle cell collapse event.
@@ -87,6 +88,12 @@ class EditableNotebookCell extends React.Component {
      */
     handleExpand = () => (this.setState({expanded: true}));
     /**
+     * Handle cell expand event for code editor change.
+     */
+    handleExpandCodeEditor = (id, value, newCode, cursorPosition) => {
+    	this.setState({expanded: true, codeEditorProps: { cursorPosition: cursorPosition, newLines: newCode } });
+    }
+    /**
      * Handle command submit. Call the provided onSubmit method and pass along
      * the module in the notebook (needed to get the Url for the submit
      * request).
@@ -109,6 +116,7 @@ class EditableNotebookCell extends React.Component {
             onOutputSelect,
             onShowAnnotations
         } = this.props;
+        const { codeEditorProps } = this.state
         let module = null;
         let hasError = false;
         if (cell != null) {
@@ -160,7 +168,8 @@ class EditableNotebookCell extends React.Component {
                                     datasets={datasets}
                                     env={env}
                                     module={module}
-                                    onCreateBranch={this.showCreateBranchModal}
+	                                codeEditorProps={codeEditorProps}
+	                                onCreateBranch={this.showCreateBranchModal}
                                     onDeleteModule={this.showDeleteModuleModal}
                                     onSubmit={this.handleSubmit}
                                 />
@@ -170,13 +179,17 @@ class EditableNotebookCell extends React.Component {
                 </tbody></table>
             );
         } else {
+        	let currentCommand = env.modules.module[moduleId(module.command)];
             // If collapsed the cell cannot be empty (because of earlier output)
             inputArea = (
                 <CollapsedWorkflowCellInput
                     errorState={hasError}
                     module={module}
+                    command={currentCommand}
                     sequenceIndex={sequenceIndex}
+                	codeEditorProps={codeEditorProps}
                     onExpand={this.handleExpand}
+                	onExpandCode={this.handleExpandCodeEditor}
                 />
             );
         }

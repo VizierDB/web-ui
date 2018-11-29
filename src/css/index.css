@@ -8,3 +8,7 @@ body {
 h1 {
     color: #3b4151;
 }
+
+.CodeMirror {
+	height: 100%;
+}
