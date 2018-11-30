@@ -61,7 +61,8 @@ class EditableNotebookCell extends React.Component {
     }
     constructor(props) {
         super(props);
-        this.state = {expanded: false, showModal: null, codeEditorProps: { cursorPosition: { line: 0, ch: 0 }, newLines: "" } }
+        const { sequenceIndex } = this.props;
+        this.state = {expanded: false, showModal: null, codeEditorProps: { cursorPosition: { line: 0, ch: 0 }, newLines: "", sequenceIndex:sequenceIndex } }
     }
     /**
      * Handle cell collapse event.
@@ -91,7 +92,9 @@ class EditableNotebookCell extends React.Component {
      * Handle cell expand event for code editor change.
      */
     handleExpandCodeEditor = (id, value, newCode, cursorPosition) => {
-    	this.setState({expanded: true, codeEditorProps: { cursorPosition: cursorPosition, newLines: newCode } });
+    	const { sequenceIndex } = this.props;
+    	window.activeCodeCell = sequenceIndex;
+    	this.setState({expanded: true, codeEditorProps: { cursorPosition: cursorPosition, newLines: newCode, sequenceIndex:sequenceIndex } });
     }
     /**
      * Handle command submit. Call the provided onSubmit method and pass along

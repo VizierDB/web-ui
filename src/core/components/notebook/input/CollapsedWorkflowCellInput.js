@@ -68,7 +68,8 @@ class CollapsedWorkflowCellInput extends React.Component {
                                 name={arg.id}
                                 value={srcvalue}
 	                            editing={false}
-	                            cursorPosition={codeEditorProps.cursorPosition}
+                            	sequenceIndex={codeEditorProps.sequenceIndex}
+		                        cursorPosition={codeEditorProps.cursorPosition}
 	                            onChange={onExpandCode}
                             />
                         </Form>
@@ -89,8 +90,11 @@ class CollapsedWorkflowCellInput extends React.Component {
                                 name={srcarg.id}
                             	datasets={module.datasets}
                                 value={srcvalue}
-                                outputDataset={odsvalue}
-                                onChange={onExpand}
+	                            editing={false}
+                            	sequenceIndex={codeEditorProps.sequenceIndex}
+		                        cursorPosition={codeEditorProps.cursorPosition}
+	                            outputDataset={odsvalue}
+                                onChange={onExpandCode}
                             />
                         </Form>
                     </div>
@@ -107,7 +111,10 @@ class CollapsedWorkflowCellInput extends React.Component {
     		                    id={arg.id}
     		                    name={arg.id}
     		                    value={srcvalue}
-    		                    onChange={onExpand}
+	    	                    editing={false}
+    	                    	sequenceIndex={codeEditorProps.sequenceIndex}
+		                        cursorPosition={codeEditorProps.cursorPosition}
+	                            onChange={onExpandCode}
     		                />
                         </Form>
                     </div>

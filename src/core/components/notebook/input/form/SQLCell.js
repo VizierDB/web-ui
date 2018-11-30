@@ -207,12 +207,32 @@ class SQLCell extends React.Component {
         id: PropTypes.string.isRequired,
         otputDataset: PropTypes.string,
         value: PropTypes.string,
+        editing: PropTypes.bool.isRequired,
+        sequenceIndex: PropTypes.number.isRequired,
+        cursorPosition: PropTypes.object.isRequired,
+        newLines: PropTypes.string,
         onChange: PropTypes.func.isRequired
     }
     constructor(props) {
         super(props);
-        const { outputDataset, value } = props;
-        this.state = {editorValue: value, snippetSelectorVisible: false, outputDataset:outputDataset };
+        const { id, value, editing, sequenceIndex, cursorPosition, newLines, onChange, outputDataset } = props;
+        let evalue = value
+        let addLines = false
+        let newCursorPos = cursorPosition
+        let active = sequenceIndex==window.activeCodeCell
+        if(newLines && newLines.length > 0){
+        	addLines = true
+        	let lines = value.split(/\n/)
+        	let newLinesAr = newLines.split('\n')
+        	lines[cursorPosition.line] = [lines[cursorPosition.line].slice(0, cursorPosition.ch + 1), newLines, lines[cursorPosition.line].slice(cursorPosition.ch)].join('');
+        	evalue = lines.join("\n")
+        	newCursorPos = {line:cursorPosition.line+newLinesAr.length-1, ch:(newLinesAr.length==1?cursorPosition.ch:0)+newLinesAr[newLinesAr.length-1].length}
+        }
+        else if(active && window.cursorPosition)
+        	newCursorPos = window.cursorPosition
+        this.state = {editorValue: evalue, snippetSelectorVisible: false, editing: editing, active:active, cursorPosition: newCursorPos, addLines:addLines, outputDataset:outputDataset };
+        if(newLines && newLines.length > 0)
+        	onChange(id, evalue);
     }
     /**
      * Append a code snippet to the current editor value. The code snippet is
@@ -222,44 +242,42 @@ class SQLCell extends React.Component {
      * editor value.
      */
     appendCode = (lines) => {
-        const { id, onChange } = this.props;
-        const  { datasetValue, editorValue } = this.state;
+    	const { id, onChange } = this.props;
+        const  { editorValue, cursorPosition } = this.state;
         // Get the current indent from the last line of the editor value
         let indent = '';
         let script = editorValue.split('\n');
-        if (script.length > 0) {
-            const lastLine = script[script.length - 1];
+        if (script.length > 0 && editorValue !== '') {
+            const refLine = script[cursorPosition.line];
             let i = 0;
-            while (i < lastLine.length) {
-                const c = lastLine.charAt(i);
+            while (i < refLine.length) {
+                const c = refLine.charAt(i);
                 if ((c === ' ') || (c === '\t')) {
                     i++;
                 } else {
                     break;
                 }
             }
-            indent = lastLine.substring(0, i);
+            indent = refLine.substring(0, i);
         }
         // Append the given lines to the current value of the editor (indentent
         // based on the indent of the current last line).
-        let value = editorValue;
-        // Insert an empty line for readability if the current script is not
-        // empty.
-        if (value !== '') {
-            value += '\n';
-        }
         for (let i = 0; i < lines.length; i++) {
             // If the current editor value is empty do not append a new line at
             // the start.
-            if ((i !== 0) || (value !== '')) {
-                value += '\n';
-            }
-            value += indent + lines[i];
+            script.splice(cursorPosition.line+i, 0, indent + lines[i]);
         }
+        // Insert an empty line for readability if the current script is not
+        // empty.
+        if (editorValue !== '') {
+        	script.splice(cursorPosition.line, 0, "");
+        }
+        
+        let value = script.join("\n");
         // Update the local state and propagate the change to the conrolling
         // notebook cell
         this.setState({editorValue: value});
-        onChange(id,  value);
+        onChange(id, value);
         // Hide the snippet selector
         this.toggleSnippetSelector();
     }
@@ -268,10 +286,33 @@ class SQLCell extends React.Component {
      * locally and propagate the state change to the conrolling notebook cell
      * input form..
      */
-    handleChange = (value) => {
+    handleChange = (value, data) => {
         const { id, onChange } = this.props;
-        this.setState({editorValue: value});
-        onChange(id, value);
+        let cursorp = {line:data.to.line, ch:data.to.ch}
+        this.setState({editorValue: value, cursorPosition: cursorp});
+        onChange(id, value, data.text.join("\n"), cursorp);
+    }
+    /**
+     * Handle changes in the code mirror editor. Keep track of the cursor position
+     * locally so that it sets properly on render.
+     */
+    handleChanged = (editor) => {
+    	const { addLines, active } = this.state;
+        let cursorp = editor.getCursor();
+        this.setState({cursorPosition: cursorp});
+        if(active)
+        	window.cursorPosition = cursorp;
+        if(addLines)
+        	editor.focus()
+        
+    }
+    /**
+     * after the component mounts set the focus if it is the active cell.
+     */
+    handleEditorDidMount = (editor) => {
+    	const { active } = this.state;
+        if(active)
+        	editor.focus() 
     }
     /**
      * Handle change of dataset
@@ -292,7 +333,7 @@ class SQLCell extends React.Component {
      * Show the code editor and optionally the code snippet selector.
      */
     render() {
-        const  { datasetValue, editorValue, snippetSelectorVisible, outputDataset } = this.state;
+        const  { datasetValue, editorValue, snippetSelectorVisible, outputDataset, editing, active, cursorPosition, addLines } = this.state;
         const {
             id,
             datasets,
@@ -301,22 +342,27 @@ class SQLCell extends React.Component {
         } = this.props;
         let headerCss = '';
         let selectorPanel = null;
+        let examplePanel = null;
         if (snippetSelectorVisible) {
             headerCss = ' expanded';
             selectorPanel = <SQLCodeSnippetsSelector datasets={datasets} datasetValue={datasetValue} onDatasetChange={this.handleDatasetChange} onSelect={this.appendCode}/>
         }
+        if (editing) {
+            examplePanel = 
+            	<div className='sql-examples'>
+			        <div className={'snippet-header' + headerCss}>
+			            <Icon name='help circle' color='blue' onClick={this.toggleSnippetSelector} />
+			            <span className='left-padding-sm' onClick={this.toggleSnippetSelector}>
+			                Code examples for dataset manipulation
+			            </span>
+			        </div>
+			        { selectorPanel }
+			    </div>
+        }
         return (
             <div>
-                <div className='sql-examples'>
-                    <div className={'snippet-header' + headerCss}>
-                        <Icon name='help circle' color='blue' onClick={this.toggleSnippetSelector} />
-                        <span className='left-padding-sm' onClick={this.toggleSnippetSelector}>
-                            Code examples for dataset queries
-                        </span>
-                    </div>
-                    { selectorPanel }
-                </div>
-                <div className='editor-container'>
+	            {examplePanel}
+	            <div className='editor-container'>
                     <CodeMirror
                         value={editorValue}
                         options={{
@@ -325,9 +371,13 @@ class SQLCell extends React.Component {
                             indentUnit: 4
                         }}
                         onBeforeChange={(editor, data, value) => {
-                            this.handleChange(value);
+                        	this.handleChange(value, data);
                         }}
                         onChange={(editor, data, value) => {
+                        	this.handleChanged(editor)
+                        }}
+                        editorDidMount={(editor) => {
+                        	this.handleEditorDidMount(editor)
                         }}
                     />
                 </div>

@@ -278,16 +278,18 @@ class PythonCell extends React.Component {
         id: PropTypes.string.isRequired,
         value: PropTypes.string,
         editing: PropTypes.bool.isRequired,
+        sequenceIndex: PropTypes.number.isRequired,
         cursorPosition: PropTypes.object.isRequired,
         newLines: PropTypes.string,
         onChange: PropTypes.func.isRequired
     }
     constructor(props) {
         super(props);
-        const { id, value, editing, cursorPosition, newLines, onChange } = props;
+        const { id, value, editing, sequenceIndex, cursorPosition, newLines, onChange } = props;
         let evalue = value
         let addLines = false
         let newCursorPos = cursorPosition
+        let active = sequenceIndex==window.activeCodeCell
         if(newLines && newLines.length > 0){
         	addLines = true
         	let lines = value.split(/\n/)
@@ -296,7 +298,9 @@ class PythonCell extends React.Component {
         	evalue = lines.join("\n")
         	newCursorPos = {line:cursorPosition.line+newLinesAr.length-1, ch:(newLinesAr.length==1?cursorPosition.ch:0)+newLinesAr[newLinesAr.length-1].length}
         }
-        this.state = {editorValue: evalue, snippetSelectorVisible: false, editing: editing, cursorPosition: newCursorPos, addLines:addLines};
+        else if(active && window.cursorPosition)
+        	newCursorPos = window.cursorPosition
+        this.state = {editorValue: evalue, snippetSelectorVisible: false, editing: editing, active:sequenceIndex==window.activeCodeCell, cursorPosition: newCursorPos, addLines:addLines};
         if(newLines && newLines.length > 0)
         	onChange(id, evalue);
     }
@@ -363,19 +367,28 @@ class PythonCell extends React.Component {
      * locally so that it sets properly on render.
      */
     handleChanged = (editor) => {
-    	const { id, onChange } = this.props;
-    	const { addLines } = this.state;
+    	const { addLines, active } = this.state;
         let cursorp = editor.getCursor();
         this.setState({cursorPosition: cursorp});
+        if(active)
+        	window.cursorPosition = cursorp;
         if(addLines)
-        	editor.curOp.cm.focus()
+        	editor.focus();
         
+    }
+    /**
+     * after the component mounts set the focus if it is the active cell.
+     */
+    handleEditorDidMount = (editor) => {
+    	const { active } = this.state;
+        if(active)
+        	editor.focus() 
     }
     /**
      * Show the code editor and optionally the code snippet selector.
      */
     render() {
-        const  { editorValue, snippetSelectorVisible, editing, cursorPosition, addLines } = this.state;
+        const  { editorValue, snippetSelectorVisible, editing, active, cursorPosition, addLines } = this.state;
         let headerCss = '';
         let selectorPanel = null;
         let examplePanel = null;
@@ -413,6 +426,9 @@ class PythonCell extends React.Component {
                         onChange={(editor, data, value) => {
                         	this.handleChanged(editor)
                         }}
+	                    editorDidMount={(editor) => {
+	                    	this.handleEditorDidMount(editor)
+	                    }}
                     />
                 </div>
             </div>

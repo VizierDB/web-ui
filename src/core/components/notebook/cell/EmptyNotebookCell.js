@@ -39,7 +39,7 @@ class EmptyNotebookCell extends React.Component {
     }
     constructor(props) {
         super(props);
-        this.state = {expanded: false, codeEditorProps: { cursorPosition: { line: 0, ch: 0 }, newLines: "" } }
+        this.state = {expanded: false, codeEditorProps: { cursorPosition: { line: 0, ch: 0 }, newLines: "", sequenceIndex:-1 } }
     }
     /**
      * Handle cell collapse event.

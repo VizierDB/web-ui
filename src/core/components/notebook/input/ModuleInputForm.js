@@ -113,6 +113,7 @@ class ModuleInputForm extends React.Component {
                             name={arg.id}
                             value={values[arg.id]}
 	                        editing={true}
+                        	sequenceIndex={codeEditorProps.sequenceIndex}
 	                        cursorPosition={codeEditorProps.cursorPosition}
                         	newLines={codeEditorProps.newLines}
 	                        onChange={onChange}
@@ -134,7 +135,11 @@ class ModuleInputForm extends React.Component {
                             name={srcarg.id}
                         	datasets={datasets}
                             value={values[srcarg.id]}
-                            outputDataset={values[odsarg.id]}
+	                        editing={true}
+                        	sequenceIndex={codeEditorProps.sequenceIndex}
+	                        cursorPosition={codeEditorProps.cursorPosition}
+	                    	newLines={codeEditorProps.newLines}
+	                        outputDataset={values[odsarg.id]}
                             onChange={onChange}
                         />
                     </Form>
@@ -152,7 +157,11 @@ class ModuleInputForm extends React.Component {
 		                    id={arg.id}
 		                    name={arg.id}
 		                    value={values[arg.id]}
-		                    onChange={onChange}
+		                    editing={true}
+	                        sequenceIndex={codeEditorProps.sequenceIndex}
+	                        cursorPosition={codeEditorProps.cursorPosition}
+	                    	newLines={codeEditorProps.newLines}
+	                        onChange={onChange}
 		                />
                     </Form>
                 </div>
