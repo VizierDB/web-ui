@@ -21,11 +21,12 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types'
 
 import {scaleOrdinal} from 'd3-scale';
-import { AreaChart, BarChart, LineChart, ScatterPlot } from 'react-d3-components';
+import { ScatterPlot } from 'react-d3-components';
+import {ResponsiveContainer, ComposedChart, BarChart, LineChart, AreaChart, ScatterChart, PieChart, RadarChart, Line, Area, Bar, Scatter, Treemap,
+  Pie, Cell, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, RadialBarChart, RadialBar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Brush} from 'recharts';
 import { GridList, GridTile} from 'material-ui/GridList';
 import { Checkbox, Dropdown } from 'semantic-ui-react';
 import '../../../css/Chart.css'
-
 
 class Plots extends React.Component {
 
@@ -49,14 +50,17 @@ class Plots extends React.Component {
         for (let i = 0; i < dataset.series.length; i++) {
             this.labels.push(dataset.series[i].label)
         }
+        this.listColors = [
+            "#1f77b4", "#ff7f0e", "#2ca02c",
+            "#d62728", "#c5b0d5", "#c49c94",
+            "#f7b6d2", "#c7c7c7", "#dbdb8d",
+            "#9edae5", "#aec7e8", "#ffbb78", "#d62728",
+            "#9467bd", "#8c564b", "#e377c2",
+            "#7f7f7f", "#bcbd22", "#17becf"
+        ];
         this.colorScale = scaleOrdinal()
             .domain(this.labels)
-            .range([
-                "#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c", "#d62728",
-                "#d62728", "#9467bd", "#c5b0d5", "#8c564b", "#c49c94", "#e377c2",
-                "#f7b6d2", "#7f7f7f", "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf",
-                "#9edae5"
-            ]);
+            .range(this.listColors);
     }
     /**
      * Add event handler to keep track of the container width.
@@ -133,6 +137,7 @@ class Plots extends React.Component {
         // Check if a data series for x-axis is given. If not we use 1-n as
         // x-axis labels.
         let xAxis = null;
+        console.log(dataset.xAxis);
         if (dataset.xAxis !== undefined) {
             xAxis = dataset.xAxis.data;
         } else {
@@ -163,6 +168,48 @@ class Plots extends React.Component {
         }
         return total_data;
     }
+
+    fetchData(dataset) {
+        // Check if a data series for x-axis is given. If not we use 1-n as
+        // x-axis labels.
+        let xAxisName = 'x';
+        let xAxis = null;
+        if (dataset.xAxis !== undefined) {
+            xAxis = dataset.xAxis.data;
+        } else {
+            xAxis = [];
+            for (let i = 0; i < dataset.series[0].data.length; i++) {
+                xAxis.push(i + 1);
+            }
+        }
+        let values = [];
+        let global_data = {};
+        let total_data = [];
+        let columnsNames = [];
+        columnsNames.push(xAxisName);
+        for (let j=0; j<dataset.series.length; j++) {
+          columnsNames.push(dataset.series[j].label.toString());
+        }
+        for (let i=0; i<xAxis.length; i++){
+            let data_i = {};
+            data_i[xAxisName] = xAxis[i];
+            for (let j=0; j<dataset.series.length; j++) {
+                const series = dataset.series[j];
+                let nameSerie = series.label.toString();
+                data_i[nameSerie] = series.data[i];
+            }
+            values.push(data_i);
+            //
+        }
+        let sort_values = values.sort(function(a, b){return a.x - b.x});
+        //total_data = sort_values;
+        console.log("Valuesssssssssssssssssssss");
+        console.log(values);
+        global_data['labels'] = columnsNames;
+        global_data['values'] = sort_values; //values;
+
+        return global_data;
+    }
     /**
      * Render a single chart or a GridList of charts (if grouped is true).
      */
@@ -180,9 +227,45 @@ class Plots extends React.Component {
             // Display a flex grids of individual charts for each data series.
             const charts = [];
             for (let i=0; i<data.length; i++) {
-                let data_ = [];
-                data_.push(data[i]);
-                charts.push(<GridTile key={i}>{chart(data_, 400)}</GridTile>);
+                charts.push(<GridTile key={i}>{chart(data[i], 400)}</GridTile>);
+            }
+            return <GridList
+                    cellHeight={this.props.gridList_cellHeight}
+                    cols={Math.floor(width / 400)}
+                    style={{width: {width}, height: this.props.gridList_height, overflowY: this.props.gridLis_overflowY,}}>
+                    {charts}
+                </GridList>;
+        }
+    }
+
+    /**
+     * Render a single chart or a GridList of charts (if grouped is true).
+     */
+    selectedReCharts = (nameChart, data_temp, grouped, width) => {
+        // Get function to plot chart of specified type. The result is undefined
+        // if the chartName is unknown.
+        const data = data_temp.values;
+        const labels = data_temp.labels; // array
+        const chart = this.selectedReChart(nameChart, labels, data);
+        if (chart === undefined) {
+            return null;
+        }
+        // grouped =false;
+        if (grouped) {
+            console.log("-----------------------------ENtro--------------------");
+            // If grouped we just plot one chart with the all the data series
+            return chart(data, width, grouped, '');
+        } else {
+          console.log("ENtro--------------------");
+            // Display a flex grids of individual charts for each data series.
+            const charts = [];
+            for (let i=1; i<data_temp.labels.length; i++) { //ignore xAxis
+                let yAxisName = data_temp.labels[i];
+                let data_ = data;
+                //data_.push(data[i]);
+                console.log(yAxisName);
+                console.log(data_);
+                charts.push(<GridTile key={i}>{chart(data_, 400, grouped, yAxisName)}</GridTile>);
             }
             return <GridList
                     cellHeight={this.props.gridList_cellHeight}
@@ -219,7 +302,7 @@ class Plots extends React.Component {
                 />
             );
         } else if (nameChart==='Line Chart') { // line chart
-            return (data, width, colorScale) => (
+            return (data, width,colorScale) => (
                 <LineChart
                     data={data}
                     colorScale={this.colorScale}
@@ -240,6 +323,216 @@ class Plots extends React.Component {
             );
         }
     }
+
+    /**
+     * Return a function that takes a list of data series and width as parameter
+     * and renders a chart of the type that is specified in chartName.
+     */
+    selectedReChart = (nameChart, labels, data) => {
+      console.log("--------------ooooooooooRechart----------------");
+      console.log(nameChart);
+        if (nameChart === 'Area Chart') { // area chart
+          console.log("--------------Rechart----------------");
+            console.log(labels);
+            var list = [];
+            for (var i=1; i<labels.length; i++) {
+              list.push(<Area name={labels[i]} type="monotone" dataKey={labels[i]} stackId="1" connectNulls={false} stroke={this.listColors[i-1]} fillOpacity={1} fill={this.listColors[i-1]} />);
+            }
+            return (data, width, grouped, yAxisName) => (
+              <AreaChart width={width} height={400} data={data} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
+
+                <XAxis dataKey="x" />
+                <YAxis />
+                <CartesianGrid strokeDasharray="3 3" />
+                <Tooltip />
+                <Legend verticalAlign="top" height={36} />
+                {
+                  grouped ?
+                  list
+                  : <Area type="monotone" dataKey={yAxisName} stroke={this.listColors[0]} fillOpacity={1} fill={this.listColors[0]} />
+                }
+                <Brush />
+              </AreaChart>
+            );
+        } else if (nameChart==='Bar Chart') { // bar chart
+          var list = [];
+          for (var i=1; i<labels.length; i++) {
+            list.push(<Bar name={labels[i]} dataKey={labels[i]} fill={this.listColors[i-1]} /> );
+          }
+          return (data, width, grouped, yAxisName) => (
+            <BarChart width={width} height={400} data={data} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="x" />
+              <YAxis />
+              <Tooltip />
+              <Legend verticalAlign="top" height={36} />
+              {
+                grouped ?
+                list
+                : <Bar dataKey={yAxisName} fill={this.listColors[0]} />
+              }
+              <Brush />
+            </BarChart>
+          );
+        } else if (nameChart==='Line Chart') { // line chart
+          var list = [];
+          for (var i=1; i<labels.length; i++) {
+            list.push(<Line type="monotone" name={labels[i]} dataKey={labels[i]} stroke={this.listColors[i-1]} />);
+          }
+          return (data, width, grouped, yAxisName) => (
+            <LineChart width={width} height={400} data={data} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="x" />
+              <YAxis />
+              <Tooltip />
+              <Legend verticalAlign="top" height={36} />
+              {
+                grouped ?
+                list
+                : <Line type="monotone" name={yAxisName} dataKey={yAxisName} stroke={this.listColors[0]} />
+              }
+              <Brush />
+            </LineChart>
+          );
+        } else if (nameChart==='Scatter Plot') { // scatter plot
+          var dataScatterChart = []; // Creating array of object [{'x': , 'y':}, {'x': , 'y':}, ..., {'x': , 'y':}]
+          for (var index=1; index<labels.length; index++) {
+            var dataTemp = [];
+            for (var i = 0; i < data.length; i++){
+                var instance = { 'x':data[i]["x"], 'y':data[i][labels[index]] };
+                dataTemp.push(instance);
+            }
+            dataScatterChart.push(dataTemp);
+          }
+          var list = [];
+          // Creating a scatter plot for each sub dataset
+          for (var i=1; i<labels.length; i++) {
+            list.push(<Scatter name={labels[i]} data={dataScatterChart[i-1]} fill={this.listColors[i-1]} /> );
+          }
+          return (data, width, grouped, yAxisName) => (
+            <ScatterChart width={width} height={400} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" dataKey={'x'} />
+      	      <YAxis type="number" dataKey={'y'} />
+              <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+              <Legend verticalAlign="top" height={36} />
+              {
+                grouped ?
+                list
+                : <Scatter name={yAxisName} data={dataScatterChart[labels.indexOf(yAxisName)-1]} fill={this.listColors[0]} />
+              }
+            </ScatterChart>
+          );
+        } else if (nameChart==='Pie Chart') { // Pie Chart
+          var list = [];
+          for (var i=1; i<labels.length; i++) {
+            list.push(<Pie nameKey='x' data={data} dataKey={labels[i]} cx="50%" cy="50%" innerRadius={0} fill="#8884d8" label >
+                      {
+                        data.map((entry, index) => (
+                          <Cell key={index} fill={this.listColors[index % this.listColors.length]}  />
+                        ))
+                      }
+                      </Pie>);
+          }
+          return (data, width, grouped, yAxisName) => (
+            <PieChart width={width} height={400} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
+              {
+                grouped ?
+                list
+                : <Pie nameKey='x' data={data} dataKey={yAxisName} cx="50%" cy="50%" innerRadius={0} fill="#8884d8" label >
+                    {
+                      data.map((entry, index) => (
+                        <Cell key={index} fill={this.listColors[index % this.listColors.length]}  />
+                      ))
+                    }
+                  </Pie>
+              }
+              <Tooltip />
+              <Legend verticalAlign="top" height={36} />
+            </PieChart>
+          );
+        } else if (nameChart==='Donut Chart') { // Donut Chart
+          var list = [];
+          for (var i=1; i<labels.length; i++) {
+            list.push(<Pie nameKey='x' data={data} dataKey={labels[i]} cx="50%" cy="50%" innerRadius={"20%"} outerRadius={80}  fill="#8884d8" label >
+                      {
+                        data.map((entry, index) => (
+                          <Cell key={index} fill={this.listColors[index % this.listColors.length]}  />
+                        ))
+                      }
+                      </Pie>);
+          }
+          return (data, width, grouped, yAxisName) => (
+            <PieChart width={width} height={400} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
+              {
+                grouped ?
+                list
+                : <Pie nameKey='x' data={data} dataKey={yAxisName} cx="50%" cy="50%" innerRadius={"20%"} outerRadius={80} fill="#8884d8" label >
+                    {
+                      data.map((entry, index) => (
+                        <Cell key={index} fill={this.listColors[index % this.listColors.length]}  />
+                      ))
+                    }
+                  </Pie>
+              }
+              <Tooltip />
+              <Legend verticalAlign="top" height={36} />
+            </PieChart>
+          );
+        }else if (nameChart==='Radar Chart') { // Radar Chart
+          var dataRadarChart = []; // Adding unique id for each record
+            for (var i = 0; i < data.length; i++){
+              var instance = {};
+              instance['id']='id'+i+'_'+data[i]["x"];
+              for (var index=0; index<labels.length; index++) {
+                  instance[labels[index]]=data[i][labels[index]];
+              }
+              dataRadarChart.push(instance);
+            }
+          var max=20;
+          var list = [];
+          console.log(dataRadarChart);
+          for (var i=2; i<labels.length; i++) {
+            list.push(<Radar name={labels[i]} dataKey={labels[i]} stroke={this.listColors[i-1]} fill={this.listColors[i-1]} fillOpacity={0.6} />);
+          }
+          return (data, width, grouped, yAxisName) => (
+            <RadarChart outerRadius={90} width={400} height={400} data={dataRadarChart} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
+              <PolarGrid />
+              <PolarAngleAxis dataKey="id" />
+              <PolarRadiusAxis/>
+              {
+                grouped ?
+                list
+                :
+                <Radar name={yAxisName} dataKey={yAxisName} stroke={this.listColors[0]} fill={this.listColors[0]} fillOpacity={0.6} />
+              }
+              <Tooltip/>
+              <Legend onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave} />
+            </RadarChart>
+          );
+        } else if (nameChart==='Radial Bar Chart') { // Radial Bar Chart
+          return (data, width, grouped, yAxisName) => (
+            // add a column 'name' in the data.
+            <RadialBarChart width={width} height={400} data={data} cx={150} cy={150} innerRadius={20} outerRadius={140} barSize={10}>
+              <RadialBar minAngle={15} label={{ position: 'insideStart', fill: '#fff' }} background clockWise={true} dataKey={yAxisName}/>
+              <Legend iconSize={10} width={120} height={140} layout='vertical' verticalAlign='middle' wrapperStyle={{top: 0, left: 350, lineHeight: '24px'}} />
+              <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+            </RadialBarChart>
+          );
+        } else if (nameChart==='Treemap') { // Treemap
+          return (data, width, grouped, yAxisName) => (
+            <Treemap width={width} height={400} margin={{top: 10, bottom: 50, left: 50, right: 10}}
+              data={data}
+              dataKey={yAxisName}
+              ratio={4 / 3}
+              stroke="#fff"
+              fill="#8884d8"
+            >
+            <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+            </Treemap>
+          );
+        }
+    }
     render() {
 
         const { dataset, identifier } = this.props;
@@ -248,8 +541,18 @@ class Plots extends React.Component {
             return null;
         }
         const { chartType, grouped, width } = this.state;
-        var data = this.loadData(dataset);
-        var chart = this.selectedCharts(chartType, data, grouped, width);
+
+        //var data = this.loadData(dataset);
+        console.log('Original Data: ');
+        console.log(dataset.xAxis);
+        var data = this.fetchData(dataset);
+        console.log('Data: ');
+        console.log(dataset);
+        console.log(data);
+        console.log("---------dataset.series----");
+        console.log(dataset.series);
+        //var chart = this.selectedCharts(chartType, data, grouped, width);
+        var chart = this.selectedReCharts(chartType, data, grouped, width);
         var legend =this.getLegend(dataset.series);
 
         const options = [];
@@ -313,7 +616,7 @@ Plots.defaultProps = {
     gridList_height:450,
     gridLis_overflowY:'auto',
     colorText:'black',
-    charts : ["Area Chart", "Bar Chart", "Line Chart", "Scatter Plot"],
+    charts : ["Area Chart", "Bar Chart", "Line Chart", "Scatter Plot", "Pie Chart", "Donut Chart", "Radar Chart", "Radial Bar Chart", "Treemap"],
 };
 /*<p>Got data for {this.props.rows.length} row(s) and {this.props.schema.series.length} data series</p>*/
 
