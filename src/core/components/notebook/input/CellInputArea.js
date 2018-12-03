@@ -26,7 +26,7 @@ import {
     DT_AS_ROW, DT_BOOL, DT_COLUMN_ID, DT_DATASET_ID, DT_DECIMAL, DT_FILE_ID,
     DT_GROUP, DT_INT, DT_ROW_ID, DT_STRING
 } from './ModuleSpec';
-
+import {HotKeys} from 'react-hotkeys';
 
 /**
  * The cell input area contains the two main components for editing a notebook
@@ -485,30 +485,41 @@ class CellInputArea extends React.Component {
         const { hasError, errors, formValues, selectedCommand } = this.state
         let content = null;
         if (selectedCommand !== null) {
-            content = (
-                <div>
-                    <CellMenuBar
-                        env={env}
-                        module={module}
-                        selectedCommand={selectedCommand}
-                        onCreateBranch={onCreateBranch}
-                        onDeleteModule={onDeleteModule}
-                        onSelect={this.handleModuleSelect}
-                        onSubmit={this.handleFormSubmit}
-                    />
-                    <ModuleInputForm
-                        datasets={datasets}
-                        env={env}
-                        errors={errors}
-                        hasError={hasError}
-                        selectedCommand={selectedCommand}
-                        values={formValues}
-                        codeEditorProps={codeEditorProps}
-                    	onChange={this.setFormValue}
-                        onDismissErrors={this.dismissErrors}
-                        onSubmit={this.handleFormSubmit}
-                    />
-                </div>
+        	 
+        	const keyMap = {
+        	    runCell: 'ctrl+enter',
+        	}
+        	 
+        	const handlers = {
+        	  'runCell': (event) => this.handleFormSubmit()
+        	};
+        	 
+        	content = (
+        			<HotKeys keyMap={keyMap} handlers={handlers}>
+	        			<div>
+	                    <CellMenuBar
+	                        env={env}
+	                        module={module}
+	                        selectedCommand={selectedCommand}
+	                        onCreateBranch={onCreateBranch}
+	                        onDeleteModule={onDeleteModule}
+	                        onSelect={this.handleModuleSelect}
+	                        onSubmit={this.handleFormSubmit}
+	                    />
+	                    <ModuleInputForm
+	                        datasets={datasets}
+	                        env={env}
+	                        errors={errors}
+	                        hasError={hasError}
+	                        selectedCommand={selectedCommand}
+	                        values={formValues}
+	                        codeEditorProps={codeEditorProps}
+	                    	onChange={this.setFormValue}
+	                        onDismissErrors={this.dismissErrors}
+	                        onSubmit={this.handleFormSubmit}
+	                    />
+	                </div>
+                </HotKeys>
             );
         } else {
             content = (
