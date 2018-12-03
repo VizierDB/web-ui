@@ -91,10 +91,10 @@ class EditableNotebookCell extends React.Component {
     /**
      * Handle cell expand event for code editor change.
      */
-    handleExpandCodeEditor = (id, value, newCode, cursorPosition) => {
+    handleExpandCodeEditor = (id, value, cursorPosition) => {
     	const { sequenceIndex } = this.props;
     	window.activeCodeCell = sequenceIndex;
-    	this.setState({expanded: true, codeEditorProps: { cursorPosition: cursorPosition, newLines: newCode, sequenceIndex:sequenceIndex } });
+    	this.setState({expanded: true, codeEditorProps: { cursorPosition: cursorPosition, newLines: value, sequenceIndex:sequenceIndex } });
     }
     /**
      * Handle command submit. Call the provided onSubmit method and pass along

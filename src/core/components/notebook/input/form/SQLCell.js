@@ -216,23 +216,21 @@ class SQLCell extends React.Component {
     constructor(props) {
         super(props);
         const { id, value, editing, sequenceIndex, cursorPosition, newLines, onChange, outputDataset } = props;
-        let evalue = value
-        let addLines = false
-        let newCursorPos = cursorPosition
-        let active = sequenceIndex==window.activeCodeCell
-        if(newLines && newLines.length > 0){
-        	addLines = true
-        	let lines = value.split(/\n/)
-        	let newLinesAr = newLines.split('\n')
-        	lines[cursorPosition.line] = [lines[cursorPosition.line].slice(0, cursorPosition.ch + 1), newLines, lines[cursorPosition.line].slice(cursorPosition.ch)].join('');
-        	evalue = lines.join("\n")
-        	newCursorPos = {line:cursorPosition.line+newLinesAr.length-1, ch:(newLinesAr.length==1?cursorPosition.ch:0)+newLinesAr[newLinesAr.length-1].length}
+        let evalue = value;
+        let addLines = false;
+        let newCursorPos = cursorPosition;
+        let active = (sequenceIndex==window.activeCodeCell);
+        if(newLines){
+        	addLines = true;
+        	evalue = newLines;
         }
-        else if(active && window.cursorPosition)
-        	newCursorPos = window.cursorPosition
+        else if(active && window.cursorPosition){
+        	newCursorPos = window.cursorPosition;
+        }
         this.state = {editorValue: evalue, snippetSelectorVisible: false, editing: editing, active:active, cursorPosition: newCursorPos, addLines:addLines, outputDataset:outputDataset };
-        if(newLines && newLines.length > 0)
+        if(newLines){
         	onChange(id, evalue);
+        }	
     }
     /**
      * Append a code snippet to the current editor value. The code snippet is
@@ -286,33 +284,49 @@ class SQLCell extends React.Component {
      * locally and propagate the state change to the conrolling notebook cell
      * input form..
      */
-    handleChange = (value, data) => {
-        const { id, onChange } = this.props;
-        let cursorp = {line:data.to.line, ch:data.to.ch}
+    handleChange = (editor, value, data) => {
+    	const { id, onChange } = this.props;
+        let cursorp = editor.getCursor();
         this.setState({editorValue: value, cursorPosition: cursorp});
-        onChange(id, value, data.text.join("\n"), cursorp);
+        if(data.to &&  data.from && data.origin){
+        	if(data.origin == '+input' || data.origin == 'paste'){
+        		let newLines = data.text;
+        		let newLineCount =  newLines.length -1;
+        		let lastLineLength = newLines[newLineCount].length;
+        		let newLine = data.from.line + newLineCount;
+        	    let newCh = lastLineLength;
+        	    if(newLines.length == 1){
+        	    	newCh = data.from.ch + lastLineLength;
+        	    }
+        		cursorp = {line:newLine, ch:newCh};
+        	}
+        	else if(data.origin == '+delete'){
+        		cursorp = {line:data.from.line, ch:data.from.ch};
+        	}
+        }
+        window.cursorPosition = cursorp;
+        onChange(id, value, cursorp);
     }
     /**
-     * Handle changes in the code mirror editor. Keep track of the cursor position
+     * Handle cursor changes in the code mirror editor. Keep track of the cursor position
      * locally so that it sets properly on render.
      */
-    handleChanged = (editor) => {
-    	const { addLines, active } = this.state;
+    handleCursorActivity = (editor, data) => {
+    	const { active } = this.state;
         let cursorp = editor.getCursor();
         this.setState({cursorPosition: cursorp});
-        if(active)
+        if(active){
         	window.cursorPosition = cursorp;
-        if(addLines)
-        	editor.focus()
-        
+        }
     }
     /**
      * after the component mounts set the focus if it is the active cell.
      */
     handleEditorDidMount = (editor) => {
     	const { active } = this.state;
-        if(active)
-        	editor.focus() 
+        if(active){
+        	editor.focus();
+        }
     }
     /**
      * Handle change of dataset
@@ -365,20 +379,21 @@ class SQLCell extends React.Component {
 	            <div className='editor-container'>
                     <CodeMirror
                         value={editorValue}
-                        options={{
+	                    cursor={cursorPosition}
+	                    options={{
                             lineNumbers: true,
                             mode: 'text/x-sql',
                             indentUnit: 4
                         }}
                         onBeforeChange={(editor, data, value) => {
-                        	this.handleChange(value, data);
-                        }}
-                        onChange={(editor, data, value) => {
-                        	this.handleChanged(editor)
+                        	this.handleChange(editor, value, data);
                         }}
                         editorDidMount={(editor) => {
                         	this.handleEditorDidMount(editor)
                         }}
+	                	onCursor={(editor, data) => {
+	                		this.handleCursorActivity(editor, data)
+	                	}}
                     />
                 </div>
                 <div class="ui labeled input">
