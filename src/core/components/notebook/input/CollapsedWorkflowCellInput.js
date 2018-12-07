@@ -60,20 +60,25 @@ class CollapsedWorkflowCellInput extends React.Component {
         	if ((args.length === 1) && (args[0].datatype === DT_PYTHON_CODE)) {
                 const arg = args[0];
                 return (
-                    <div className='code-form'>
-                        <Form>
-                            <PythonCell
-                                key={arg.id}
-                                id={arg.id}
-                                name={arg.id}
-                                value={srcvalue}
-	                            editing={false}
-                            	sequenceIndex={codeEditorProps.sequenceIndex}
-		                        cursorPosition={codeEditorProps.cursorPosition}
-	                            onChange={onExpandCode}
-                            />
-                        </Form>
-                    </div>
+                	<table className='cell-area'><tbody>
+                        <tr>
+                            <td className='cell-index'>{cellIndex}</td>
+                            <td className='cell-cmd'>
+                            	<Form>
+		                        	<PythonCell
+		                                key={arg.id}
+		                                id={arg.id}
+		                                name={arg.id}
+		                                value={srcvalue}
+			                            editing={false}
+		                            	sequenceIndex={codeEditorProps.sequenceIndex}
+				                        cursorPosition={codeEditorProps.cursorPosition}
+			                            onChange={onExpandCode}
+		                            />
+		                        </Form>
+			                </td>
+		                </tr>
+		            </tbody></table>
                 );
             }
             else if ((args.length === 2) && (args[0].datatype === DT_SQL_CODE)) {
@@ -82,43 +87,53 @@ class CollapsedWorkflowCellInput extends React.Component {
             	const srcvalue = module.command.arguments[0].value
             	const odsvalue = module.command.arguments[1].value
                 return (
-                    <div className='code-form'>
-                        <Form>
-                            <SQLCell
-                                key={srcarg.id}
-                                id={srcarg.id}
-                                name={srcarg.id}
-                            	datasets={module.datasets}
-                                value={srcvalue}
-	                            editing={false}
-                            	sequenceIndex={codeEditorProps.sequenceIndex}
-		                        cursorPosition={codeEditorProps.cursorPosition}
-	                            outputDataset={odsvalue}
-                                onChange={onExpandCode}
-                            />
-                        </Form>
-                    </div>
+                	<table className='cell-area'><tbody>
+                        <tr>
+                            <td className='cell-index'>{cellIndex}</td>
+                            <td className='cell-cmd'>
+	                            <Form>
+			                        <SQLCell
+		                                key={srcarg.id}
+		                                id={srcarg.id}
+		                                name={srcarg.id}
+		                            	datasets={module.datasets}
+		                                value={srcvalue}
+			                            editing={false}
+		                            	sequenceIndex={codeEditorProps.sequenceIndex}
+				                        cursorPosition={codeEditorProps.cursorPosition}
+			                            outputDataset={odsvalue}
+		                                onChange={onExpandCode}
+		                            />
+		                        </Form>
+			                </td>
+		                </tr>
+		            </tbody></table>
                 );
             }
             else if ((args.length === 1) && (args[0].datatype === DT_SCALA_CODE)) {
             	const arg = args[0];
             	const srcvalue = module.command.arguments[0].value
             	return (
-                    <div className='code-form'>
-                        <Form>
-    	                    <ScalaCell
-    		                    key={arg.id}
-    		                    id={arg.id}
-    		                    name={arg.id}
-    		                    value={srcvalue}
-	    	                    editing={false}
-    	                    	sequenceIndex={codeEditorProps.sequenceIndex}
-		                        cursorPosition={codeEditorProps.cursorPosition}
-	                            onChange={onExpandCode}
-    		                />
-                        </Form>
-                    </div>
-                );
+            		<table className='cell-area'><tbody>
+                        <tr>
+                            <td className='cell-index'>{cellIndex}</td>
+                            <td className='cell-cmd'>
+                            	<Form>
+			                        <ScalaCell
+			    		                    key={arg.id}
+					                    id={arg.id}
+					                    name={arg.id}
+					                    value={srcvalue}
+			    	                    editing={false}
+				                    	sequenceIndex={codeEditorProps.sequenceIndex}
+				                        cursorPosition={codeEditorProps.cursorPosition}
+			                            onChange={onExpandCode}
+					                />
+			                    </Form>
+			                </td>
+		                </tr>
+		            </tbody></table>
+            );
             }
     	}
     	else {
