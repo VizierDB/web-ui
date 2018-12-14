@@ -141,6 +141,10 @@ div.editor-container {
     border: solid 1px #dedede;
 }
 
+div.editor-container.collapsed{
+    max-width: calc( 100% - 40em );
+}
+
 div.snippet-header {
     cursor: pointer;
 }

@@ -289,7 +289,7 @@ class PythonCell extends React.Component {
         let evalue = value;
         let addLines = false;
         let newCursorPos = cursorPosition;
-        let active = (sequenceIndex==window.activeCodeCell);
+        let active = (sequenceIndex==window.activeCodeCell || sequenceIndex == -1);
         if(newLines){
         	addLines = true;
         	evalue = newLines;
@@ -406,6 +406,7 @@ class PythonCell extends React.Component {
         let headerCss = '';
         let selectorPanel = null;
         let examplePanel = null;
+        let editorContainerCss = active ? '' : ' collapsed'
         if (snippetSelectorVisible) {
             headerCss = ' expanded';
             selectorPanel = <CodeSnippetsSelector onSelect={this.appendCode}/>
@@ -425,7 +426,7 @@ class PythonCell extends React.Component {
         return (
             <div>
                 {examplePanel}
-                <div className='editor-container'>
+                <div className={'editor-container' + editorContainerCss }>
                     <CodeMirror
                         value={editorValue}
 	                    cursor={cursorPosition}
