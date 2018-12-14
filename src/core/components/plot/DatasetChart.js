@@ -22,8 +22,7 @@ import Plots from './Plots'
 import '../../../css/Chart.css'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import { Button, Dropdown, Grid, Icon, Input, List, Loader, Modal, Message } from 'semantic-ui-react';
-import { IconButton } from '../Button'
+import { Button, Icon } from 'semantic-ui-react';
 /*
  * Plot a dataset chart for given data.
  */

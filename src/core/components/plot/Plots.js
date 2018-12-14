@@ -19,10 +19,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types'
-
 import {scaleOrdinal} from 'd3-scale';
-import { ScatterPlot } from 'react-d3-components';
-import {ResponsiveContainer, ComposedChart, BarChart, LineChart, AreaChart, ScatterChart, PieChart, RadarChart, Line, Area, Bar, Scatter, Treemap,
+// ResponsiveContainer
+import {BarChart, LineChart, AreaChart, ScatterChart, PieChart, RadarChart, Line, Area, Bar, Scatter, Treemap,
   Pie, Cell, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, RadialBarChart, RadialBar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Brush} from 'recharts';
 import { GridList, GridTile} from 'material-ui/GridList';
 import { Checkbox, Dropdown } from 'semantic-ui-react';
@@ -40,6 +39,7 @@ class Plots extends React.Component {
         // Set grouped to true if only one data series is given (in this case
         // the grouped checkbox is hidden) and grouped layout should be
         // default.
+        console.log(identifier);
         this.state = {
             chartType: dataset.chart.type,
             grouped: (dataset.chart.grouped || (dataset.series.length === 1)),
@@ -129,7 +129,7 @@ class Plots extends React.Component {
         }
         let values = [];
         let global_data = {};
-        let total_data = [];
+        //let total_data = [];
         let columnsNames = [];
         columnsNames.push(xAxisName);
         for (let j=0; j<dataset.series.length; j++) {
@@ -192,10 +192,11 @@ class Plots extends React.Component {
      * and renders a chart of the type that is specified in chartName.
      */
     selectedReChart = (nameChart, labels, data) => {
+        var list = [];
+        var i=0;
         if (nameChart === 'Area Chart') { // area chart
-            var list = [];
-            for (var i=1; i<labels.length; i++) {
-              list.push(<Area name={labels[i]} type="monotone" dataKey={labels[i]} stackId="1" connectNulls={false} stroke={this.listColors[i-1]} fillOpacity={1} fill={this.listColors[i-1]} />);
+            for (i=1; i<labels.length; i++) {
+              list.push(<Area key={'id_'+i} name={labels[i]} type="monotone" dataKey={labels[i]} stackId="1" connectNulls={false} stroke={this.listColors[i-1]} fillOpacity={1} fill={this.listColors[i-1]} />);
             }
             return (data, width, grouped, yAxisName) => (
               <AreaChart width={width} height={400} data={data} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
@@ -213,9 +214,8 @@ class Plots extends React.Component {
               </AreaChart>
             );
         } else if (nameChart==='Bar Chart') { // bar chart
-          var list = [];
-          for (var i=1; i<labels.length; i++) {
-            list.push(<Bar name={labels[i]} dataKey={labels[i]} fill={this.listColors[i-1]} /> );
+          for (i=1; i<labels.length; i++) {
+            list.push(<Bar key={'id_'+i} name={labels[i]} dataKey={labels[i]} fill={this.listColors[i-1]} /> );
           }
           return (data, width, grouped, yAxisName) => (
             <BarChart width={width} height={400} data={data} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
@@ -227,15 +227,14 @@ class Plots extends React.Component {
               {
                 grouped ?
                 list
-                : <Bar dataKey={yAxisName} fill={this.listColors[0]} />
+                : <Bar id='id_' dataKey={yAxisName} fill={this.listColors[0]} />
               }
               <Brush />
             </BarChart>
           );
         } else if (nameChart==='Line Chart') { // line chart
-          var list = [];
-          for (var i=1; i<labels.length; i++) {
-            list.push(<Line type="monotone" name={labels[i]} dataKey={labels[i]} stroke={this.listColors[i-1]} />);
+          for (i=1; i<labels.length; i++) {
+            list.push(<Line key={'id_'+i} type="monotone" name={labels[i]} dataKey={labels[i]} stroke={this.listColors[i-1]} />);
           }
           return (data, width, grouped, yAxisName) => (
             <LineChart width={width} height={400} data={data} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
@@ -256,16 +255,15 @@ class Plots extends React.Component {
           var dataScatterChart = []; // Creating array of object [{'x': , 'y':}, {'x': , 'y':}, ..., {'x': , 'y':}]
           for (var index=1; index<labels.length; index++) {
             var dataTemp = [];
-            for (var i = 0; i < data.length; i++){
-                var instance = { 'x':data[i]["x"], 'y':data[i][labels[index]] };
-                dataTemp.push(instance);
+            for (i = 0; i < data.length; i++){
+                var instanceSP = { 'x':data[i]["x"], 'y':data[i][labels[index]] };
+                dataTemp.push(instanceSP);
             }
             dataScatterChart.push(dataTemp);
           }
-          var list = [];
           // Creating a scatter plot for each sub dataset
-          for (var i=1; i<labels.length; i++) {
-            list.push(<Scatter name={labels[i]} data={dataScatterChart[i-1]} fill={this.listColors[i-1]} /> );
+          for (i=1; i<labels.length; i++) {
+            list.push(<Scatter key={'id_'+i} name={labels[i]} data={dataScatterChart[i-1]} fill={this.listColors[i-1]} /> );
           }
           return (data, width, grouped, yAxisName) => (
             <ScatterChart width={width} height={400} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
@@ -282,9 +280,8 @@ class Plots extends React.Component {
             </ScatterChart>
           );
         } else if (nameChart==='Pie Chart') { // Pie Chart
-          var list = [];
-          for (var i=1; i<labels.length; i++) {
-            list.push(<Pie nameKey='x' data={data} dataKey={labels[i]} cx="50%" cy="50%" innerRadius={0} fill="#8884d8" label >
+          for (i=1; i<labels.length; i++) {
+            list.push(<Pie key={'id_'+i} nameKey='x' data={data} dataKey={labels[i]} cx="50%" cy="50%" innerRadius={0} fill="#8884d8" label >
                       {
                         data.map((entry, index) => (
                           <Cell key={index} fill={this.listColors[index % this.listColors.length]}  />
@@ -310,9 +307,8 @@ class Plots extends React.Component {
             </PieChart>
           );
         } else if (nameChart==='Donut Chart') { // Donut Chart
-          var list = [];
-          for (var i=1; i<labels.length; i++) {
-            list.push(<Pie nameKey='x' data={data} dataKey={labels[i]} cx="50%" cy="50%" innerRadius={"20%"} outerRadius={80}  fill="#8884d8" label >
+          for (i=1; i<labels.length; i++) {
+            list.push(<Pie key={'id_'+i} nameKey='x' data={data} dataKey={labels[i]} cx="50%" cy="50%" innerRadius={"20%"} outerRadius={80}  fill="#8884d8" label >
                       {
                         data.map((entry, index) => (
                           <Cell key={index} fill={this.listColors[index % this.listColors.length]}  />
@@ -339,18 +335,16 @@ class Plots extends React.Component {
           );
         }else if (nameChart==='Radar Chart') { // Radar Chart
           var dataRadarChart = []; // Adding unique id for each record
-            for (var i = 0; i < data.length; i++){
-              var instance = {};
-              instance['id']='id'+i+'_'+data[i]["x"];
-              for (var index=0; index<labels.length; index++) {
-                  instance[labels[index]]=data[i][labels[index]];
+            for (i = 0; i < data.length; i++){
+              var instanceRC = {};
+              instanceRC['id']='id'+i+'_'+data[i]["x"];
+              for (var indexRC=0; indexRC<labels.length; indexRC++) {
+                  instanceRC[labels[indexRC]]=data[i][labels[indexRC]];
               }
-              dataRadarChart.push(instance);
+              dataRadarChart.push(instanceRC);
             }
-          var max=20;
-          var list = [];
-          for (var i=1; i<labels.length; i++) {
-            list.push(<Radar name={labels[i]} dataKey={labels[i]} stroke={this.listColors[i-1]} fill={this.listColors[i-1]} fillOpacity={0.6} />);
+          for (i=1; i<labels.length; i++) {
+            list.push(<Radar key={'id_'+i} name={labels[i]} dataKey={labels[i]} stroke={this.listColors[i-1]} fill={this.listColors[i-1]} fillOpacity={0.6} />);
           }
           return (data, width, grouped, yAxisName) => (
             <RadarChart outerRadius={90} width={400} height={400} data={dataRadarChart} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
