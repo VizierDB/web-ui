@@ -32,7 +32,7 @@ import {
 import {
     dismissProjectActionError, fetchProject, updateProjectName
 } from '../../actions/project/ProjectPage';
-import { showSpreadsheet } from '../../actions/spreadsheet/Spreadsheet';
+import { showSpreadsheet, showDatasetError } from '../../actions/spreadsheet/Spreadsheet';
 import { ConnectionInfo } from '../../components/Api'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage, NotFoundMessage } from '../../components/Message';
@@ -149,6 +149,13 @@ class ProjectPage extends Component {
         dispatch(showSpreadsheet(dataset));
     }
     /**
+     * Switch to error view and load the selected dataset.
+     */
+    loadDatasetError = (dataset) => {
+        const { dispatch } = this.props;
+        dispatch(showDatasetError(dataset));
+    }
+    /**
      * Switch the project resource to show the notebook for the current
      * workflow.
      */
@@ -235,6 +242,17 @@ class ProjectPage extends Component {
                 } else if (resource.isDataset()) {
                     pageContent = <Spreadsheet />;
                     contentCss += ' wide';
+                } else if (resource.isDatasetError()) {
+                	const dataset = resource.content.dataset;
+                    pageContent = (
+                        <div className='ds-error-view'>
+                            <div className='dataset-errors'>
+                                <h1 >{dataset.name}</h1>
+                                {dataset.annotations}
+                            </div>
+                        </div>
+                    );
+                    contentCss += ' wide';
                 } else if (resource.isHistory()) {
                     pageContent = (
                         <div className='history-view'>
@@ -282,7 +300,8 @@ class ProjectPage extends Component {
                                 onReverse={this.handleNotebookReverse}
                                 onShowChart={this.loadChartView}
                                 onShowDataset={this.loadDataset}
-                                onShowHistory={this.loadBranchHistory}
+	                            onShowDatasetError={this.loadDatasetError}
+	                            onShowHistory={this.loadBranchHistory}
                                 onShowNotebook={this.loadNotebook}
                                 project={project}
                                 resource={resource}

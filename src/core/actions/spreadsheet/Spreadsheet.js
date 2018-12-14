@@ -25,7 +25,7 @@ import {
 } from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
 import { Notebook } from '../../resources/Notebook';
-import { ErrorResource, SpreadsheetResource } from '../../resources/Project'
+import { ErrorResource, SpreadsheetResource, DatasetErrorResource } from '../../resources/Project'
 import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource, postResourceData } from '../../util/Api';
 
@@ -74,6 +74,42 @@ export const showSpreadsheet = (dataset, url) => (dispatch) => {
     )
 }
 
+
+/**
+ * Show a dataset errors as the content of the project page. The url parameter is
+ * optional. If not given, loads the spreadsheet datat using the .self url from
+ * the given dataset descriptor.
+ *
+ * Parameters:
+ *
+ * dataset: DatasetDescriptor
+ *
+ */
+export const showDatasetError = (dataset, url) => (dispatch) => {
+    let fetchUrl = null;
+    if (url != null) {
+        fetchUrl = url;
+    } else {
+        fetchUrl = dataset.links.self;
+    }
+    dispatch(
+        fetchResource(
+            fetchUrl,
+            (json) => (dispatch) => {
+                return dispatch(receiveProjectResource(
+                    new DatasetErrorResource(
+                        new DatasetHandle(dataset.id, dataset.name)
+                            .fromJson(json)
+                    )
+                ));
+            },
+            (message) => (
+                projectActionError('Error loading dataset errors', message)
+            ),
+            requestProjectAction
+        )
+    )
+}
 
 export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
     const { name, offset } = dataset;

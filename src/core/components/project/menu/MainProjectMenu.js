@@ -93,6 +93,7 @@ class MainProjectMenu extends React.Component {
             onReverse,
             onShowChart,
             onShowDataset,
+            onShowDatasetError,
             onShowHistory,
             onShowNotebook
         } = this.props;
@@ -158,6 +159,13 @@ class MainProjectMenu extends React.Component {
                     onSelect={onShowDataset}
                     resource={resource}
                 />);
+            menuItems.push(
+                <DatasetErrorMenuDropdown
+                    key='datasets'
+                    datasets={workflow.datasets}
+                    onSelect={onShowDatasetError}
+                    resource={resource}
+                />);    
             menuItems.push(
                 <ChartMenuDropdown
                     key='charts'
