@@ -94,27 +94,7 @@ class Plots extends React.Component {
     handleToggleGrouped = (e, { checked }) => {
         this.setState({'grouped': checked});
     }
-    //Get legend
-    getLegend = (schema) => {
-        let legend = [];
-        for (let i=0; i<schema.length; i++) {
-            const label = schema[i].label;
-            legend.push(
-                <li
-                    key={i}
-                    style={{
-                        background:this.colorScale(label),
-                        width:10,
-                        marginTop:5,
-                        listStyleType: 'none',
-                        whiteSpace: 'nowrap'
-                    }}>
-                    <span style={{marginLeft:15}}>{label}</span>
-                </li>
-            );
-        }
-        return legend;
-    }
+
     /*
      * Load data on the format:
      *   data = [
@@ -133,41 +113,6 @@ class Plots extends React.Component {
      *    }
      * }
      */
-    loadData(dataset) {
-        // Check if a data series for x-axis is given. If not we use 1-n as
-        // x-axis labels.
-        let xAxis = null;
-        console.log(dataset.xAxis);
-        if (dataset.xAxis !== undefined) {
-            xAxis = dataset.xAxis.data;
-        } else {
-            xAxis = [];
-            for (let i = 0; i < dataset.series[0].data.length; i++) {
-                xAxis.push(i + 1);
-            }
-        }
-        let total_data = [];
-        for (let i=0; i<dataset.series.length; i++) {
-            const series = dataset.series[i];
-            let data_i = {};
-            data_i['label'] = series.label;
-            let values = [];
-            for (let j=0; j<series.data.length; j++){
-                let index = {};
-                let xLabel = xAxis[j];
-                if (xLabel === null) {
-                    xLabel = j;
-                }
-                index['x'] = xLabel.toString();
-                index['y'] = series.data[j];
-                values.push(index);
-            }
-            let sort_values = values.sort(function(a, b){return a.x - b.x});
-            data_i['values'] = sort_values;
-            total_data.push(data_i);
-        }
-        return total_data;
-    }
 
     fetchData(dataset) {
         // Check if a data series for x-axis is given. If not we use 1-n as
@@ -203,39 +148,9 @@ class Plots extends React.Component {
         }
         let sort_values = values.sort(function(a, b){return a.x - b.x});
         //total_data = sort_values;
-        console.log("Valuesssssssssssssssssssss");
-        console.log(values);
         global_data['labels'] = columnsNames;
         global_data['values'] = sort_values; //values;
-
         return global_data;
-    }
-    /**
-     * Render a single chart or a GridList of charts (if grouped is true).
-     */
-    selectedCharts = (nameChart, data, grouped, width) => {
-        // Get function to plot chart of specified type. The result is undefined
-        // if the chartName is unknown.
-        const chart = this.selectedChart(nameChart);
-        if (chart === undefined) {
-            return null;
-        }
-        if (grouped) {
-            // If grouped we just plot one chart with the all the data series
-            return chart(data, width);
-        } else {
-            // Display a flex grids of individual charts for each data series.
-            const charts = [];
-            for (let i=0; i<data.length; i++) {
-                charts.push(<GridTile key={i}>{chart(data[i], 400)}</GridTile>);
-            }
-            return <GridList
-                    cellHeight={this.props.gridList_cellHeight}
-                    cols={Math.floor(width / 400)}
-                    style={{width: {width}, height: this.props.gridList_height, overflowY: this.props.gridLis_overflowY,}}>
-                    {charts}
-                </GridList>;
-        }
     }
 
     /**
@@ -252,19 +167,15 @@ class Plots extends React.Component {
         }
         // grouped =false;
         if (grouped) {
-            console.log("-----------------------------ENtro--------------------");
             // If grouped we just plot one chart with the all the data series
             return chart(data, width, grouped, '');
         } else {
-          console.log("ENtro--------------------");
             // Display a flex grids of individual charts for each data series.
             const charts = [];
             for (let i=1; i<data_temp.labels.length; i++) { //ignore xAxis
                 let yAxisName = data_temp.labels[i];
                 let data_ = data;
                 //data_.push(data[i]);
-                console.log(yAxisName);
-                console.log(data_);
                 charts.push(<GridTile key={i}>{chart(data_, 400, grouped, yAxisName)}</GridTile>);
             }
             return <GridList
@@ -275,72 +186,19 @@ class Plots extends React.Component {
                 </GridList>;
         }
     }
-    /**
-     * Return a function that takes a list of data series and width as parameter
-     * and renders a chart of the type that is specified in chartName.
-     */
-    selectedChart = (nameChart) => {
-        if (nameChart === 'Area Chart') { // area chart
-            return (data, width) => (
-                <AreaChart
-                    data={data}
-                    colorScale={this.colorScale}
-                    width={width}
-                    height={400}
-                    margin={{top: 10, bottom: 50, left: 50, right: 10}}
-                />
-            );
-        } else if (nameChart==='Bar Chart') { // bar chart
-            return (data, width) => (
-                <BarChart
-                    groupedBars
-                    data={data}
-                    colorScale={this.colorScale}
-                    width={width}
-                    height={400}
-                    margin={{top: 10, bottom: 50, left: 50, right: 10}}
-                />
-            );
-        } else if (nameChart==='Line Chart') { // line chart
-            return (data, width,colorScale) => (
-                <LineChart
-                    data={data}
-                    colorScale={this.colorScale}
-                    width={width}
-                    height={400}
-                    margin={{top: 10, bottom: 50, left: 50, right: 10}}
-                />
-            );
-        } else if (nameChart==='Scatter Plot') { // scatter plot
-            return (data, width, colorScale) => (
-                <ScatterPlot
-                    data={data}
-                    colorScale={colorScale}
-                    width={width}
-                    height={400}
-                    margin={{top: 10, bottom: 50, left: 50, right: 10}}
-                />
-            );
-        }
-    }
 
     /**
      * Return a function that takes a list of data series and width as parameter
      * and renders a chart of the type that is specified in chartName.
      */
     selectedReChart = (nameChart, labels, data) => {
-      console.log("--------------ooooooooooRechart----------------");
-      console.log(nameChart);
         if (nameChart === 'Area Chart') { // area chart
-          console.log("--------------Rechart----------------");
-            console.log(labels);
             var list = [];
             for (var i=1; i<labels.length; i++) {
               list.push(<Area name={labels[i]} type="monotone" dataKey={labels[i]} stackId="1" connectNulls={false} stroke={this.listColors[i-1]} fillOpacity={1} fill={this.listColors[i-1]} />);
             }
             return (data, width, grouped, yAxisName) => (
               <AreaChart width={width} height={400} data={data} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
-
                 <XAxis dataKey="x" />
                 <YAxis />
                 <CartesianGrid strokeDasharray="3 3" />
@@ -491,8 +349,7 @@ class Plots extends React.Component {
             }
           var max=20;
           var list = [];
-          console.log(dataRadarChart);
-          for (var i=2; i<labels.length; i++) {
+          for (var i=1; i<labels.length; i++) {
             list.push(<Radar name={labels[i]} dataKey={labels[i]} stroke={this.listColors[i-1]} fill={this.listColors[i-1]} fillOpacity={0.6} />);
           }
           return (data, width, grouped, yAxisName) => (
@@ -543,17 +400,9 @@ class Plots extends React.Component {
         const { chartType, grouped, width } = this.state;
 
         //var data = this.loadData(dataset);
-        console.log('Original Data: ');
-        console.log(dataset.xAxis);
         var data = this.fetchData(dataset);
-        console.log('Data: ');
-        console.log(dataset);
-        console.log(data);
-        console.log("---------dataset.series----");
-        console.log(dataset.series);
         //var chart = this.selectedCharts(chartType, data, grouped, width);
         var chart = this.selectedReCharts(chartType, data, grouped, width);
-        var legend =this.getLegend(dataset.series);
 
         const options = [];
         for (let i = 0; i < this.props.charts.length; i++) {
@@ -596,9 +445,6 @@ class Plots extends React.Component {
                     </tr></tbody></table>
                 </div>
                   <div id={identifier} className='plot-view'>
-                  <ul className='plot-legend'>
-                      {legend}
-                  </ul>
                   <div>
                       {chart}
                   </div>
