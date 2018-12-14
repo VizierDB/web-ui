@@ -27,6 +27,7 @@
     "react-router-dom": "^4.2.2",
     "react-router-redux": "^5.0.0-alpha.9",
     "react-tap-event-plugin": "^3.0.2",
+    "recharts": "^1.2.0",
     "redux": "^3.7.2",
     "redux-devtools": "^3.4.1",
     "redux-devtools-extension": "^2.13.2",
