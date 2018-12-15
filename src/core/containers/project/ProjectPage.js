@@ -37,6 +37,7 @@ import { ConnectionInfo } from '../../components/Api'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage, NotFoundMessage } from '../../components/Message';
 import BranchHistory from '../../components/project/BranchHistory';
+import DatasetError from '../../components/project/DatasetError';
 import DatasetChart from '../../components/plot/DatasetChart';
 import ModuleError from '../../components/project/ModuleError';
 import MainProjectMenu from '../../components/project/menu/MainProjectMenu';
@@ -245,15 +246,13 @@ class ProjectPage extends Component {
                     contentCss += ' wide';
                 } else if (resource.isDatasetError()) {
                 	const dataset = resource.content;
-                	dispatch(fetchAnnotations(dataset, "", ""));
                 	pageContent = (
-                        <div className='ds-error-view'>
-                            <div className='dataset-errors'>
-                                <h1 >{dataset.name}</h1>
-                                {dataset.annotatatedCells}
+                            <div className='dataset-error-view'>
+                                <DatasetError
+                                    dataset={dataset}
+                                />
                             </div>
-                        </div>
-                    );
+                        )
                     contentCss += ' wide';
                 } else if (resource.isHistory()) {
                     pageContent = (

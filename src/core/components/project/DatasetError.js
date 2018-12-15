@@ -37,6 +37,8 @@ class DatasetError extends React.Component {
         const rows = [];
         for (let i = 0; i < dataset.annotatedCells.length; i++) {
             const errs = dataset.annotatedCells[i];
+            //dispatch(fetchAnnotations(dataset, "", ""));
+        	
             const link = dataset.links.annotations;
             let icon = 'error';
             
