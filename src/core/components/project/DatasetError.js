@@ -43,7 +43,7 @@ class DatasetError extends React.Component {
             let icon = 'error';
             
             rows.push(
-                <tr key={wf.version}>
+                <tr key={errs.row}>
                     <td><Icon name={icon} /></td>
                     <td className='error-statement'>
                         <a className={'error-link'} href={link}>
@@ -58,7 +58,7 @@ class DatasetError extends React.Component {
             <div className='dataset-errors'>
                 <h1 className='dataset-errors'>
                     {'Dataset Error'}
-                    <span className='error-highlight'>{branch.name}</span>
+                    <span className='error-highlight'>{dataset.name}</span>
                 </h1>
                 <table><tbody>{rows}</tbody></table>
             </div>
