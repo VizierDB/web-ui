@@ -32,7 +32,7 @@ import {
 import {
     dismissProjectActionError, fetchProject, updateProjectName
 } from '../../actions/project/ProjectPage';
-import { showSpreadsheet, showDatasetError } from '../../actions/spreadsheet/Spreadsheet';
+import { showSpreadsheet, showDatasetError, fetchAnnotations } from '../../actions/spreadsheet/Spreadsheet';
 import { ConnectionInfo } from '../../components/Api'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage, NotFoundMessage } from '../../components/Message';
@@ -177,7 +177,8 @@ class ProjectPage extends Component {
             isFetching,
             project,
             serviceApi,
-            workflow
+            workflow,
+            dispatch
         } = this.props
         let content = null;
         if (isFetching) {
@@ -243,12 +244,13 @@ class ProjectPage extends Component {
                     pageContent = <Spreadsheet />;
                     contentCss += ' wide';
                 } else if (resource.isDatasetError()) {
-                	const dataset = resource.content.dataset;
-                    pageContent = (
+                	const dataset = resource.content;
+                	dispatch(fetchAnnotations(dataset, "", ""));
+                	pageContent = (
                         <div className='ds-error-view'>
                             <div className='dataset-errors'>
                                 <h1 >{dataset.name}</h1>
-                                {dataset.annotations}
+                                {dataset.annotatatedCells}
                             </div>
                         </div>
                     );

@@ -103,4 +103,4 @@ class DatasetErrorMenuDropdown extends React.Component {
     }
 }
 
-export default DatasetMenuDropdown;
+export default DatasetErrorMenuDropdown;

@@ -22,6 +22,7 @@ import { Icon, Menu } from 'semantic-ui-react';
 import BranchMenuDropdown from './BranchMenuDropdown';
 import ChartMenuDropdown from './ChartMenuDropdown';
 import DatasetMenuDropdown from './DatasetMenuDropdown';
+import DatasetErrorMenuDropdown from './DatasetErrorMenuDropdown';
 import NotebookMenuDropdown from './NotebookMenuDropdown';
 import ProjectMenuDropdown from './ProjectMenuDropdown';
 import DeleteResourceModal from '../../modals/DeleteResourceModal';
