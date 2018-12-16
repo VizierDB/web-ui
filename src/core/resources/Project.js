@@ -203,7 +203,7 @@ export const ChartResource = (name, dataset) => (new ProjectResource(CONTENT_CHA
 export const ErrorResource = (title, module) => (new ProjectResource(CONTENT_ERROR, {title, module}));
 export const NotebookResource = (notebook) => (new ProjectResource(CONTENT_NOTEBOOK, notebook));
 export const SpreadsheetResource = (dataset) => (new ProjectResource(CONTENT_DATASET, dataset));
-export const DatasetErrorResource = (dataset) => (new ProjectResource(CONTENT_DATASET_ERROR, dataset));
+export const DatasetErrorResource = (dataset, annotations) => (new ProjectResource(CONTENT_DATASET_ERROR, {dataset, annotations}));
 
 
 // -----------------------------------------------------------------------------

@@ -32,7 +32,7 @@ import {
 import {
     dismissProjectActionError, fetchProject, updateProjectName
 } from '../../actions/project/ProjectPage';
-import { showSpreadsheet, showDatasetError, fetchAnnotations } from '../../actions/spreadsheet/Spreadsheet';
+import { showSpreadsheet, showDatasetError, fetchAnnotations, fetchAnnotatated } from '../../actions/spreadsheet/Spreadsheet';
 import { ConnectionInfo } from '../../components/Api'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage, NotFoundMessage } from '../../components/Message';
@@ -154,7 +154,8 @@ class ProjectPage extends Component {
      */
     loadDatasetError = (dataset) => {
         const { dispatch } = this.props;
-        dispatch(showDatasetError(dataset));
+        dispatch(showDatasetError(dataset, dataset.links.self+'/annotations'));
+        //dispatch(fetchAnnotations(dataset));
     }
     /**
      * Switch the project resource to show the notebook for the current
@@ -245,11 +246,13 @@ class ProjectPage extends Component {
                     pageContent = <Spreadsheet />;
                     contentCss += ' wide';
                 } else if (resource.isDatasetError()) {
-                	const dataset = resource.content;
+                	const dataset = resource.content.dataset;
+                	const annotations = resource.content.annotations;
                 	pageContent = (
                             <div className='dataset-error-view'>
                                 <DatasetError
                                     dataset={dataset}
+                                    annotations={annotations}
                                 />
                             </div>
                         )

@@ -27,30 +27,29 @@ import '../../../css/DatasetError.css'
  */
 class DatasetError extends React.Component {
     static propTypes = {
-        dataset: PropTypes.object.isRequired
+        dataset: PropTypes.object.isRequired,
+        annotations: PropTypes.object.isRequired
     }
     /**
      * 
      */
     render() {
-        const { dataset } = this.props;
+        const { dataset, annotations } = this.props;
         const rows = [];
-        for (let i = 0; i < dataset.annotatedCells.length; i++) {
-            const errs = dataset.annotatedCells[i];
+        for (let i = 0; i < annotations.length; i++) {
+            const errs = annotations[i];
             //dispatch(fetchAnnotations(dataset, "", ""));
         	
-            const link = dataset.links.annotations;
+            const link = dataset.links.self+'/annotations';
             let icon = 'error';
             
             rows.push(
                 <tr key={errs.row}>
                     <td><Icon name={icon} /></td>
                     <td className='error-statement'>
-                        <a className={'error-link'} href={link}>
-                            {errs.column}
-                        </a>
+                        <a className={'error-link'} href={link}>json</a>
                     </td>
-                    <td className='error-row'>{errs.row}</td>
+                    <td className='error-row'>{errs}</td>
                 </tr>
             )
         }

@@ -90,7 +90,7 @@ export const showDatasetError = (dataset, url) => (dispatch) => {
     if (url != null) {
         fetchUrl = url;
     } else {
-        fetchUrl = dataset.links.self;
+        fetchUrl = dataset.links.self +'/annotations';
     }
     dispatch(
         fetchResource(
@@ -98,8 +98,8 @@ export const showDatasetError = (dataset, url) => (dispatch) => {
             (json) => (dispatch) => {
                 return dispatch(receiveProjectResource(
                     new DatasetErrorResource(
-                        new DatasetHandle(dataset.id, dataset.name)
-                            .fromJson(json)
+                        new DatasetHandle(dataset.id, dataset.name),
+                        new AnnotationList(json['annotations'])
                     )
                 ));
             },
@@ -204,12 +204,13 @@ export const deleteAnnotations = (dataset, columnId, rowId, annoId) => (dispatch
 }
 
 export const fetchAnnotations = (dataset, columnId, rowId) => (dispatch) => {
+    let params = '?column=' + columnId + '&row=' + rowId;
     if ((columnId < 0) || (rowId < 0)) {
         return dispatch(clearAnnotations());
     } else {
         return dispatch(
             fetchResource(
-                dataset.links.annotations + '?column=' + columnId + '&row=' + rowId,
+                dataset.links.annotations + params,
                 (json) => {
                     const content = new AnnotationList(json['annotations'])
                     const annotation = new CellAnnotation(columnId, rowId, content);
@@ -225,6 +226,7 @@ export const fetchAnnotations = (dataset, columnId, rowId) => (dispatch) => {
         )
     }
 }
+
 
 const postUpdateRequest = (dispatch, url, data, dataset, columnId, rowId) => {
     return postResourceData(
