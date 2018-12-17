@@ -29,13 +29,14 @@ import '../../../css/DatasetError.css';
 class DatasetError extends React.Component {
     static propTypes = {
         dataset: PropTypes.object.isRequired,
-        annotations: PropTypes.object.isRequired
+        annotations: PropTypes.object.isRequired,
+        onGotoError: PropTypes.func.isRequired
     }
     /**
      * 
      */
     render() {
-        const { dataset, annotations } = this.props;
+        const { dataset, annotations, onGotoError } = this.props;
         const rows = [];
         for (let i = 0; i < annotations.items.length; i++) {
             const errs = annotations.items[i];
@@ -45,6 +46,7 @@ class DatasetError extends React.Component {
             rows.push(
         		<DatasetReason
             		reason={errs}
+        			onGotoError={onGotoError(dataset)}
             	/>
             )
         }

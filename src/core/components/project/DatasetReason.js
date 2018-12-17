@@ -19,6 +19,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Icon } from 'semantic-ui-react';
+import { showSpreadsheet } from '../../actions/spreadsheet/Spreadsheet';
 import '../../../css/DatasetError.css'
 
 /**
@@ -26,7 +27,8 @@ import '../../../css/DatasetError.css'
  */
 class DatasetReason extends React.Component {
     static propTypes = {
-        reason: PropTypes.object.isRequired
+        reason: PropTypes.object.isRequired,
+        onGotoError: PropTypes.func.isRequired
     }
     
     constructor(props) {
@@ -37,6 +39,11 @@ class DatasetReason extends React.Component {
     handleExpand = () => {
     	const { expanded } = this.state;
     	this.setState({expanded:!expanded})
+    }
+    
+    handleGotoError = (event) => {
+    	const { onGotoError, reason } = this.props;
+    	onGotoError(reason.value);
     }
     
     buildReasonElement = (elkey, elvalue) => {
@@ -75,9 +82,20 @@ class DatasetReason extends React.Component {
         	tableContent = (<table>{reasonElements}</table>)
         }
         
+        let gotoErrorIcon = null
+        if(value.rowidarg != -1 && value.args && Array.isArray(value.args) && value.args[value.rowidarg]){
+        	gotoErrorIcon = (<Icon name='external alternate' size='small' />)
+        }
+        
         return (
-            <div className='dataset-reason' onClick={this.handleExpand}>
-                <table><tr><td className='dataset-reason-icon'><Icon name='warning sign' size='large' color='yellow'/></td><td className='dataset-reason-english'>{value.english}</td></tr></table>
+        	<div className='dataset-reason' >
+                <table><tr>
+                	<td className='dataset-reason-icon'>
+                		<div onClick={this.handleExpand}><Icon name='warning sign' size='large' color='yellow' /></div>
+                	</td>
+                	<td className='dataset-reason-english'><div onClick={this.handleExpand}>{value.english}</div></td>
+                	<td className='dataset-reason-goto'><div onClick={this.handleGotoError}>{gotoErrorIcon}</div></td>
+                </tr></table>
                 {tableContent}
             </div>
         );

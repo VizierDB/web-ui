@@ -60,7 +60,7 @@ class DatasetErrorMenuDropdown extends React.Component {
             return (
                 <Menu.Item
                     key={ds.name}
-                    icon='error'
+                    icon='warning sign'
                     name={ds.name}
                     value={ds.name}
                     disabled={disabled}
@@ -75,7 +75,7 @@ class DatasetErrorMenuDropdown extends React.Component {
             for (let i = 0; i < datasets.length; i++) {
                 const ds = datasets[i];
                 let disabled = false;
-                if (resource.isDataset()) {
+                if (resource.isDatasetError()) {
                     disabled = resource.content.name === ds.name;
                 }
                 if (!disabled) {
@@ -84,7 +84,7 @@ class DatasetErrorMenuDropdown extends React.Component {
                 menuItems.push(
                     <Dropdown.Item
                         key={ds.name}
-                        icon='error'
+                        icon='warning sign'
                         text={ds.name}
                         value={ds.name}
                         disabled={disabled}

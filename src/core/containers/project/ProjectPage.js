@@ -158,6 +158,23 @@ class ProjectPage extends Component {
         //dispatch(fetchAnnotations(dataset));
     }
     /**
+     * Switch to spreadsheet view and load the selected to the page 
+     * that has the source of a specific error.
+     */
+    loadDatasetToError = (dataset) => (reason) => {
+    	const { dispatch, serviceApi } = this.props;
+    	const fetch_url = serviceApi.serviceUrl + '/datasets/' + dataset.id + '?rowid='+reason.args[reason.rowidarg]
+        dispatch(showSpreadsheet(dataset, fetch_url));
+    }
+    /**
+     * Repair a specific error.
+     */
+    /*loadDatasetRepair = (reason) => {
+        const { dispatch } = this.props;
+        const fetch_url = '/datasets/' + dataset.id + '?rowid='+reason.args[0]
+        dispatch(repairDatasetError(dataset, fetch_url));
+    }*/
+    /**
      * Switch the project resource to show the notebook for the current
      * workflow.
      */
@@ -253,6 +270,7 @@ class ProjectPage extends Component {
                                 <DatasetError
                                     dataset={dataset}
                                     annotations={annotations}
+                                	onGotoError={this.loadDatasetToError}
                                 />
                             </div>
                         )
