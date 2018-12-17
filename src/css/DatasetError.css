@@ -37,3 +37,28 @@ a.error-link {
 a.error-link:hover {
     color: #4286f4;
 }
+
+.dataset-reason-english {
+	padding: 10px;
+}
+
+.dataset-reason-element {
+	margin-left: 5em;
+}
+
+.dataset-reason-key {
+	pdding-left: 1em;
+}
+
+.dataset-reason-icon {
+	padding: 10px;      
+}
+     
+.dataset-reason {
+	padding: 5px;
+	border-bottom: 1px solid #e7e7e763;
+}
+
+.dataset-reason:hover {
+    background-color: #e6f7ff;
+}

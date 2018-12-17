@@ -51,7 +51,7 @@ class DatasetErrorMenuDropdown extends React.Component {
             return null;
         } else if (datasets.length === 1) {
             const ds = datasets[0];
-            const disabled = resource.isDataset();
+            const disabled = resource.isDatasetError();
             // Set onClick handler to null if disabled
             let onClickHandler = null;
             if (!disabled) {

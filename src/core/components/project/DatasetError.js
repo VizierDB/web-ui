@@ -19,8 +19,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Icon } from 'semantic-ui-react';
-import { pageUrl } from '../../util/App'
-import '../../../css/DatasetError.css'
+import { pageUrl } from '../../util/App';
+import DatasetReason from './DatasetReason';
+import '../../../css/DatasetError.css';
 
 /**
  * Display a list of dataset errors detected by mimir 
@@ -36,30 +37,24 @@ class DatasetError extends React.Component {
     render() {
         const { dataset, annotations } = this.props;
         const rows = [];
-        for (let i = 0; i < annotations.length; i++) {
-            const errs = annotations[i];
-            //dispatch(fetchAnnotations(dataset, "", ""));
-        	
-            const link = dataset.links.self+'/annotations';
+        for (let i = 0; i < annotations.items.length; i++) {
+            const errs = annotations.items[i];
+            const link = '/datasets/'+dataset.id+'/annotations';
             let icon = 'error';
             
             rows.push(
-                <tr key={errs.row}>
-                    <td><Icon name={icon} /></td>
-                    <td className='error-statement'>
-                        <a className={'error-link'} href={link}>json</a>
-                    </td>
-                    <td className='error-row'>{errs}</td>
-                </tr>
+        		<DatasetReason
+            		reason={errs}
+            	/>
             )
         }
         return (
             <div className='dataset-errors'>
-                <h1 className='dataset-errors'>
-                    {'Dataset Error'}
+                <h3 className='dataset-errors'>
+                    {'Dataset Error List: '}
                     <span className='error-highlight'>{dataset.name}</span>
-                </h1>
-                <table><tbody>{rows}</tbody></table>
+                </h3>
+                {rows}
             </div>
         );
     }
