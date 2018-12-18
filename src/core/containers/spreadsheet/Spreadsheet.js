@@ -600,7 +600,7 @@ class Spreadsheet extends React.Component {
                     cmd = updateCell(
                         dataset.name,
                         activeColumnId,
-                        activeRowIndex,
+                        activeRowId,
                         updatedCellValue
                     );
                 } else {
