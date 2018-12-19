@@ -18,6 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import DatasetRepair from './DatasetRepair';
 import { Icon } from 'semantic-ui-react';
 import { showSpreadsheet } from '../../actions/spreadsheet/Spreadsheet';
 import '../../../css/DatasetError.css'
