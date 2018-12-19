@@ -28,7 +28,8 @@ import '../../../css/DatasetError.css'
 class DatasetReason extends React.Component {
     static propTypes = {
         reason: PropTypes.object.isRequired,
-        onGotoError: PropTypes.func.isRequired
+        onGotoError: PropTypes.func.isRequired,
+        onRepairError: PropTypes.func.isRequired
     }
     
     constructor(props) {
@@ -69,17 +70,23 @@ class DatasetReason extends React.Component {
      * 
      */
     render() {
-    	const { reason } = this.props;
+    	const { reason, onRepairError } = this.props;
         const { id, key, value } = reason;
         const { expanded } = this.state;
-        const reasonElements = this.buildReasonElement('reason',value);
+        const reasonElements = [];//this.buildReasonElement('reason',value);
         reasonElements.unshift(<div className='dataset-reason-element'><td className='dataset-reason-key'><h4>id: </h4></td><td>{id}</td></div>)
         reasonElements.unshift(<div className='dataset-reason-element'><td className='dataset-reason-key'><h4>key: </h4></td><td>{key}</td></div>)
         
         let tableContent = null
         
         if(expanded){
-        	tableContent = (<table>{reasonElements}</table>)
+        	tableContent = (<div>
+        						<table>{reasonElements}</table>
+        						<DatasetRepair
+	        	                	reason={reason}
+	        	                	onRepairError={onRepairError}
+	        	                />
+        					</div> )
         }
         
         let gotoErrorIcon = null

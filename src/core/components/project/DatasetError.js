@@ -30,23 +30,25 @@ class DatasetError extends React.Component {
     static propTypes = {
         dataset: PropTypes.object.isRequired,
         annotations: PropTypes.object.isRequired,
-        onGotoError: PropTypes.func.isRequired
+        onGotoError: PropTypes.func.isRequired,
+        onRepairError: PropTypes.func.isRequired
     }
     /**
      * 
      */
     render() {
-        const { dataset, annotations, onGotoError } = this.props;
+        const { dataset, annotations, onGotoError, onRepairError } = this.props;
         const rows = [];
         for (let i = 0; i < annotations.items.length; i++) {
             const errs = annotations.items[i];
-            const link = '/datasets/'+dataset.id+'/annotations';
+            //const link = '/datasets/'+dataset.id+'/annotations';
             let icon = 'error';
             
             rows.push(
         		<DatasetReason
             		reason={errs}
         			onGotoError={onGotoError(dataset)}
+        			onRepairError={onRepairError(dataset)}
             	/>
             )
         }

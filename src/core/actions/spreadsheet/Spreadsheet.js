@@ -111,6 +111,22 @@ export const showDatasetError = (dataset, url) => (dispatch) => {
     )
 }
 
+export const repairDatasetError = (dataset, url, reason, repair, acknowledge) => (dispatch) => {
+    const data = {
+    		reason,
+            repair,
+            acknowledge
+        }
+        return postUpdateRequest(
+            dispatch,
+            url,
+            data,
+            dataset,
+            -1,
+            '-1'
+        );
+    }
+
 export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
     const { name, offset } = dataset;
     dispatch(submitUpdateRequest());

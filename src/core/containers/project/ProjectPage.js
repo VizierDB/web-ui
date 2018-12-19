@@ -32,7 +32,7 @@ import {
 import {
     dismissProjectActionError, fetchProject, updateProjectName
 } from '../../actions/project/ProjectPage';
-import { showSpreadsheet, showDatasetError, fetchAnnotations, fetchAnnotatated } from '../../actions/spreadsheet/Spreadsheet';
+import { showSpreadsheet, showDatasetError, fetchAnnotations, fetchAnnotatated, repairDatasetError } from '../../actions/spreadsheet/Spreadsheet';
 import { ConnectionInfo } from '../../components/Api'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage, NotFoundMessage } from '../../components/Message';
@@ -169,11 +169,11 @@ class ProjectPage extends Component {
     /**
      * Repair a specific error.
      */
-    /*loadDatasetRepair = (reason) => {
-        const { dispatch } = this.props;
-        const fetch_url = '/datasets/' + dataset.id + '?rowid='+reason.args[0]
-        dispatch(repairDatasetError(dataset, fetch_url));
-    }*/
+    loadDatasetRepair = (dataset) => (reason, repair, acknowledge) => {
+        const { dispatch, serviceApi } = this.props;
+        const url = serviceApi.serviceUrl + '/datasets/' + dataset.id + '/feedback'  
+        dispatch(repairDatasetError(dataset, url, reason, repair, acknowledge));
+    }
     /**
      * Switch the project resource to show the notebook for the current
      * workflow.
@@ -271,6 +271,7 @@ class ProjectPage extends Component {
                                     dataset={dataset}
                                     annotations={annotations}
                                 	onGotoError={this.loadDatasetToError}
+                                	onRepairError={this.loadDatasetRepair}
                                 />
                             </div>
                         )
