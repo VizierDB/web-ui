@@ -18,7 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Icon, Dropdown, Form } from 'semantic-ui-react';
+import { Icon, Dropdown, Form, Button } from 'semantic-ui-react';
 import { showSpreadsheet } from '../../actions/spreadsheet/Spreadsheet';
 import '../../../css/DatasetError.css'
 
@@ -52,15 +52,21 @@ class DatasetRepair extends React.Component {
     }
     
     buildRepairElement = (elkey, elvalue) => {
+    	const { repairValue } = this.state;
     	if(elkey === 'reason' && elvalue.repair.selector === 'list'){
+    		const repairValues = elvalue.repair.values
     		let elements = []
-    		if(Array.isArray(elvalue.args )){
-    			for(let i = 0; i<elvalue.args.length; i++){
-        			elements.push(''+elvalue.args[i])
+    		if(Array.isArray(repairValues )){
+    			for(let i = 0; i<repairValues.length; i++){
+        			elements.push({
+                        key: ''+repairValues[i].choice,
+                        text: ''+repairValues[i].choice,
+                        value: ''+repairValues[i].choice
+                    })
         		}
     		}
     		return ( <Dropdown
-			            value={elements[0]}
+			            value={repairValue}
 			            selection
 			            fluid
 			            scrolling
@@ -72,7 +78,7 @@ class DatasetRepair extends React.Component {
         	return ( <Form.Input
 	                    placeholder={'repair'}
 			            fluid
-			            value={''}
+			            value={repairValue}
 			            onChange={this.handleRepairChange}
 			        /> );
     	}
@@ -87,17 +93,21 @@ class DatasetRepair extends React.Component {
         const reasonElements = this.buildRepairElement('reason',value);
         
         
-        let repairErrorIcon = (<Icon name='check' size='small' color='green' />)
-        
+        let repairErrorButton = null
+        if(value.repair.selector === 'list' || value.repair.selector === 'by_type'){
+        	repairErrorButton = (<Button icon='tasks' positive onClick={this.handleRepairError(false)}>Repair</Button>)
+	    }
+	    let acknowledgeButton = (<Button icon='check' positive onClick={this.handleRepairError(true)}>Acknowledge</Button>)
         
         return (
-        	<div className='dataset-repair' >
+        	<div className='dataset-reason-element' >
                 <table><tr>
                 	<td className='dataset-reason-icon'>
-                		<div>Repair:</div>
+                		<h4>Repair:</h4>
                 	</td>
-                	<td className='dataset-reason-english'><div>{reasonElements}</div></td>
-                	<td className='dataset-reason-goto'><div onClick={this.handleRepairError(false)}>{repairErrorIcon}</div></td>
+                	<td className='dataset-reason-english'><div className='reason-repair'>{reasonElements}</div></td>
+                	<td className='dataset-reason-goto'><div>{repairErrorButton}</div></td>
+                	<td className='dataset-reason-goto'><div>{acknowledgeButton}</div></td>
                 </tr></table> 
             </div>
         );
