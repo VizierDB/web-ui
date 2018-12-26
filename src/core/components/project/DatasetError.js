@@ -38,19 +38,28 @@ class DatasetError extends React.Component {
      */
     render() {
         const { dataset, annotations, onGotoError, onRepairError } = this.props;
-        const rows = [];
+        const errors = [];
+        const ackedErrors = [];
         for (let i = 0; i < annotations.items.length; i++) {
             const errs = annotations.items[i];
-            //const link = '/datasets/'+dataset.id+'/annotations';
-            let icon = 'error';
-            
-            rows.push(
-        		<DatasetReason
-            		reason={errs}
-        			onGotoError={onGotoError(dataset)}
-        			onRepairError={onRepairError(dataset)}
-            	/>
-            )
+            if(errs.value.confirmed){
+            	ackedErrors.push(
+	        		<DatasetReason
+	            		reason={errs}
+	        			onGotoError={onGotoError(dataset)}
+	        			onRepairError={onRepairError(dataset)}
+	            	/>
+	            )
+            }
+            else{
+	            errors.push(
+	        		<DatasetReason
+	            		reason={errs}
+	        			onGotoError={onGotoError(dataset)}
+	        			onRepairError={onRepairError(dataset)}
+	            	/>
+	            )
+            }
         }
         return (
             <div className='dataset-errors'>
@@ -58,7 +67,8 @@ class DatasetError extends React.Component {
                     {'Dataset Error List: '}
                     <span className='error-highlight'>{dataset.name}</span>
                 </h3>
-                {rows}
+                {errors}
+                {ackedErrors}
             </div>
         );
     }

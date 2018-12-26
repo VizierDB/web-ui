@@ -94,12 +94,16 @@ class DatasetReason extends React.Component {
         if(value.rowidarg != -1 && value.args && Array.isArray(value.args) && value.args[value.rowidarg]){
         	gotoErrorIcon = (<Icon name='external alternate' size='small' />)
         }
+        let errorIcon = (<Icon name='warning sign' size='large' color='yellow' />)
+        if(value.confirmed){
+        	errorIcon = (<Icon name='check circle' size='large' color='green' />)
+        }
         
         return (
         	<div className='dataset-reason' >
                 <table><tr>
                 	<td className='dataset-reason-icon'>
-                		<div onClick={this.handleExpand}><Icon name='warning sign' size='large' color='yellow' /></div>
+                		<div onClick={this.handleExpand}>{errorIcon}</div>
                 	</td>
                 	<td className='dataset-reason-english'><div onClick={this.handleExpand}>{value.english}</div></td>
                 	<td className='dataset-reason-goto'><div onClick={this.handleGotoError}>{gotoErrorIcon}</div></td>
