@@ -62,3 +62,7 @@ a.error-link:hover {
 .dataset-reason:hover {
     background-color: #e6f7ff;
 }
+
+.reason-repair {
+	min-width: 100px; 
+}

@@ -117,13 +117,26 @@ export const repairDatasetError = (dataset, url, reason, repair, acknowledge) =>
             repair,
             acknowledge
         }
-        return postUpdateRequest(
+    const columnId = -1
+    const rowId = '-1'
+    return postResourceData(
             dispatch,
             url,
             data,
-            dataset,
-            -1,
-            '-1'
+            (json) => (dispatch) => {
+                return dispatch(receiveProjectResource(
+                    new DatasetErrorResource(
+                        new DatasetHandle(dataset.id, dataset.name),
+                        new AnnotationList(json['annotations'])
+                    )
+                ));
+            },
+            (message) => {
+                const err = new FetchError('Error loading annotations', message);
+                const annotation = new CellAnnotation(columnId, rowId, err);
+                return setAnnotations(annotation);
+            },
+            requestProjectAction
         );
     }
 
