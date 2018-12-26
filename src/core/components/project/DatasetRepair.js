@@ -52,6 +52,7 @@ class DatasetRepair extends React.Component {
     }
     
     buildRepairElement = (elkey, elvalue) => {
+    	const { repairValue } = this.state;
     	if(elkey === 'reason' && elvalue.repair.selector === 'list'){
     		let elements = []
     		if(Array.isArray(elvalue.args )){
@@ -60,7 +61,7 @@ class DatasetRepair extends React.Component {
         		}
     		}
     		return ( <Dropdown
-			            value={elements[0]}
+			            value={repairValue}
 			            selection
 			            fluid
 			            scrolling
@@ -72,7 +73,7 @@ class DatasetRepair extends React.Component {
         	return ( <Form.Input
 	                    placeholder={'repair'}
 			            fluid
-			            value={''}
+			            value={repairValue}
 			            onChange={this.handleRepairChange}
 			        /> );
     	}
