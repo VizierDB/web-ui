@@ -108,13 +108,17 @@ class ControlGroup extends React.Component {
         const { id, onChange } = this.props
         const { formValues, tuples } = this.state
         const modifiedTuples = []
+        let removedTuple =  null
         for (let i = 0; i < tuples.length; i++) {
             if (i !== value) {
                 modifiedTuples.push(tuples[i])
             }
+            else{
+            	removedTuple = {...tuples[i]}
+            }
         }
-        this.setState({tuples: modifiedTuples})
-        onChange(id, {values: formValues, tuples: modifiedTuples})
+        this.setState({tuples: modifiedTuples, formValues:removedTuple})
+        onChange(id, {values: removedTuple, tuples: modifiedTuples})
     }
     render() {
         const {
