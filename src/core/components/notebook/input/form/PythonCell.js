@@ -44,6 +44,7 @@ const NEW_DATASET_OBJECT = 'NEW_DATASET_OBJECT';
 const OUTPUT_ANNOTATIONS = 'OUTPUT_ANNOTATIONS';
 const OUTPUT_COLUMN_NAMES = 'OUTPUT_COLUMN_NAMES';
 const OUTPUT_CELL_VALUES = 'OUTPUT_CELL_VALUES';
+const OUTPUT_PLOT = 'OUTPUT_PLOT';
 const RENAME_DATASET = 'RENAME_DATASET';
 const UPDATE_CELL_VALUE = 'UPDATE_CELL_VALUE';
 const UPDATE_ANNOTATION = 'UPDATE_ANNOTATION';
@@ -128,6 +129,33 @@ class CodeSnippetsSelector extends React.Component {
             lines.push('# column index (0, 1, ...).');
             lines.push('for row in ds.rows:');
             lines.push('    print row.get_value(\'name-label-or-index\')');
+        } else if (value === OUTPUT_PLOT) {
+            lines.push('# Import matplotlib, generate a plot, and output it.');
+            lines.push('import matplotlib');
+            lines.push('import matplotlib.pyplot as plt');
+            lines.push('#switch to non display backend');
+            lines.push('plt.switch_backend(\'agg\')');
+            lines.push('import numpy as np');
+            lines.push('# Data for plotting');
+            lines.push('t = np.arange(0.0, 2.0, 0.01)');
+            lines.push('s = 1 + np.sin(2 * np.pi * t)');
+            lines.push('fig, ax = plt.subplots()');
+            lines.push('ax.plot(t, s)');
+            lines.push('ax.set(xlabel=\'time (s)\', ylabel=\'voltage (mV)\',');
+            lines.push('title=\'About as simple as it gets, folks\')');
+            lines.push('ax.grid()');
+            lines.push('imgfile = \'test1.png\'');
+            lines.push('#save plot');
+            lines.push('fig.savefig(imgfile)');
+            lines.push('#create data uri for output');
+            lines.push('prefix = \'data:image/png;base64,\'');
+            lines.push('fin = open(imgfile, \'rb\')');
+            lines.push('contents = fin.read()');
+            lines.push('import base64');
+            lines.push('data_url = prefix + base64.b64encode(contents)');
+            lines.push('fin.close()');
+            lines.push('#output html');
+            lines.push('print(\'<img src="\'+data_url+\'"/>\')');
         } else if (value === RENAME_DATASET) {
             lines.push('# Rename given dataset to a new (unique) name.');
             lines.push('vizierdb.rename_dataset(\'unique-ds-name\', \'new-unique-ds-name\')');
@@ -173,6 +201,9 @@ class CodeSnippetsSelector extends React.Component {
                                 <List.Item value={OUTPUT_ANNOTATIONS} onClick={this.handleSelect}>
                                     <List.Content as='a'>Print Cell Annotations</List.Content>
                                 </List.Item>
+                                <List.Item value={OUTPUT_PLOT} onClick={this.handleSelect}>
+	                                <List.Content as='a'>Output Matplotlib Plot</List.Content>
+	                            </List.Item>
                             </List>
                         </Grid.Column>
                         <Grid.Column width={4} key='new'>
@@ -246,12 +277,30 @@ class PythonCell extends React.Component {
     static propTypes = {
         id: PropTypes.string.isRequired,
         value: PropTypes.string,
+        editing: PropTypes.bool.isRequired,
+        sequenceIndex: PropTypes.number.isRequired,
+        cursorPosition: PropTypes.object.isRequired,
+        newLines: PropTypes.string,
         onChange: PropTypes.func.isRequired
     }
     constructor(props) {
         super(props);
-        const { value } = props;
-        this.state = {editorValue: value, snippetSelectorVisible: false};
+        const { id, value, editing, sequenceIndex, cursorPosition, newLines, onChange } = props;
+        let evalue = value;
+        let addLines = false;
+        let newCursorPos = cursorPosition;
+        let active = (sequenceIndex==window.activeCodeCell || sequenceIndex == -1);
+        if(newLines){
+        	addLines = true;
+        	evalue = newLines;
+        }
+        else if(active && window.cursorPosition){
+        	newCursorPos = window.cursorPosition;
+        }
+        this.state = {editorValue: evalue, snippetSelectorVisible: false, editing: editing, active:active, cursorPosition: newCursorPos, addLines:addLines};
+        if(addLines){
+        	onChange(id, evalue);
+        }
     }
     /**
      * Append a code snippet to the current editor value. The code snippet is
@@ -262,39 +311,37 @@ class PythonCell extends React.Component {
      */
     appendCode = (lines) => {
         const { id, onChange } = this.props;
-        const  { editorValue } = this.state;
+        const  { editorValue, cursorPosition } = this.state;
         // Get the current indent from the last line of the editor value
         let indent = '';
         let script = editorValue.split('\n');
-        if (script.length > 0) {
-            const lastLine = script[script.length - 1];
+        if (script.length > 0 && editorValue !== '') {
+            const refLine = script[cursorPosition.line];
             let i = 0;
-            while (i < lastLine.length) {
-                const c = lastLine.charAt(i);
+            while (i < refLine.length) {
+                const c = refLine.charAt(i);
                 if ((c === ' ') || (c === '\t')) {
                     i++;
                 } else {
                     break;
                 }
             }
-            indent = lastLine.substring(0, i);
+            indent = refLine.substring(0, i);
         }
         // Append the given lines to the current value of the editor (indentent
         // based on the indent of the current last line).
-        let value = editorValue;
-        // Insert an empty line for readability if the current script is not
-        // empty.
-        if (value !== '') {
-            value += '\n';
-        }
         for (let i = 0; i < lines.length; i++) {
             // If the current editor value is empty do not append a new line at
             // the start.
-            if ((i !== 0) || (value !== '')) {
-                value += '\n';
-            }
-            value += indent + lines[i];
+            script.splice(cursorPosition.line+i, 0, indent + lines[i]);
         }
+        // Insert an empty line for readability if the current script is not
+        // empty.
+        if (editorValue !== '') {
+        	script.splice(cursorPosition.line, 0, "");
+        }
+        
+        let value = script.join("\n");
         // Update the local state and propagate the change to the conrolling
         // notebook cell
         this.setState({editorValue: value});
@@ -307,46 +354,96 @@ class PythonCell extends React.Component {
      * locally and propagate the state change to the conrolling notebook cell
      * input form..
      */
-    handleChange = (value) => {
+    handleChange = (editor, value, data) => {
         const { id, onChange } = this.props;
-        this.setState({editorValue: value});
-        onChange(id, value);
+        let cursorp = editor.getCursor();
+        this.setState({editorValue: value, cursorPosition: cursorp});
+        if(data.to &&  data.from && data.origin){
+        	if(data.origin == '+input' || data.origin == 'paste'){
+        		let newLines = data.text;
+        		let newLineCount =  newLines.length -1;
+        		let lastLineLength = newLines[newLineCount].length;
+        		let newLine = data.from.line + newLineCount;
+        	    let newCh = lastLineLength;
+        	    if(newLines.length == 1){
+        	    	newCh = data.from.ch + lastLineLength;
+        	    }
+        		cursorp = {line:newLine, ch:newCh};
+        	}
+        	else if(data.origin == '+delete'){
+        		cursorp = {line:data.from.line, ch:data.from.ch};
+        	}
+        }
+        window.cursorPosition = cursorp;
+        onChange(id, value, cursorp);
+    }
+    /**
+     * Handle cursor changes in the code mirror editor. Keep track of the cursor position
+     * locally so that it sets properly on render.
+     */
+    handleCursorActivity = (editor, data) => {
+    	const { active } = this.state;
+        let cursorp = editor.getCursor();
+        this.setState({cursorPosition: cursorp});
+        if(active){
+        	window.cursorPosition = cursorp;
+        }
+    }
+    /**
+     * after the component mounts set the focus if it is the active cell.
+     */
+    handleEditorDidMount = (editor) => {
+    	const { active } = this.state;
+        if(active){
+        	editor.focus();
+        }
     }
     /**
      * Show the code editor and optionally the code snippet selector.
      */
     render() {
-        const  { editorValue, snippetSelectorVisible } = this.state;
+        const  { editorValue, snippetSelectorVisible, editing, active, cursorPosition, addLines } = this.state;
         let headerCss = '';
         let selectorPanel = null;
+        let examplePanel = null;
+        let editorContainerCss = active ? '' : ' collapsed'
         if (snippetSelectorVisible) {
             headerCss = ' expanded';
             selectorPanel = <CodeSnippetsSelector onSelect={this.appendCode}/>
         }
+        if (editing) {
+            examplePanel = 
+            	<div className='python-examples'>
+			        <div className={'snippet-header' + headerCss}>
+			            <Icon name='help circle' color='blue' onClick={this.toggleSnippetSelector} />
+			            <span className='left-padding-sm' onClick={this.toggleSnippetSelector}>
+			                Code examples for dataset manipulation
+			            </span>
+			        </div>
+			        { selectorPanel }
+			    </div>
+        }
         return (
             <div>
-                <div className='python-examples'>
-                    <div className={'snippet-header' + headerCss}>
-                        <Icon name='help circle' color='blue' onClick={this.toggleSnippetSelector} />
-                        <span className='left-padding-sm' onClick={this.toggleSnippetSelector}>
-                            Code examples for dataset manipulation
-                        </span>
-                    </div>
-                    { selectorPanel }
-                </div>
-                <div className='editor-container'>
+                {examplePanel}
+                <div className={'editor-container' + editorContainerCss }>
                     <CodeMirror
                         value={editorValue}
+	                    cursor={cursorPosition}
                         options={{
                             lineNumbers: true,
                             mode: 'python',
                             indentUnit: 4
                         }}
                         onBeforeChange={(editor, data, value) => {
-                            this.handleChange(value);
+                            this.handleChange(editor, value, data);
                         }}
-                        onChange={(editor, data, value) => {
-                        }}
+                        editorDidMount={(editor) => {
+	                    	this.handleEditorDidMount(editor)
+	                    }}
+                    	onCursor={(editor, data) => {
+                    		this.handleCursorActivity(editor, data)
+                    	}}
                     />
                 </div>
             </div>

@@ -39,7 +39,7 @@ class EmptyNotebookCell extends React.Component {
     }
     constructor(props) {
         super(props);
-        this.state = {expanded: false}
+        this.state = {expanded: false, codeEditorProps: { cursorPosition: { line: 0, ch: 0 }, newLines: "", sequenceIndex:-1 } }
     }
     /**
      * Handle cell collapse event.
@@ -64,7 +64,7 @@ class EmptyNotebookCell extends React.Component {
      */
     render() {
         const { datasets, env, notebook } = this.props;
-        const { expanded } = this.state;
+        const { expanded, codeEditorProps } = this.state;
         // The general output is different for collapsed empty cells. In this
         // case no cell frame is shown but simply a divider or a message button.
         if (!expanded) {
@@ -92,6 +92,7 @@ class EmptyNotebookCell extends React.Component {
                                 <CellInputArea
                                     datasets={datasets}
                                     env={env}
+                                  	codeEditorProps={codeEditorProps}
                                     onSubmit={this.handleSubmit}
                                 />
                             </div>

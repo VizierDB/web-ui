@@ -198,3 +198,11 @@ pre.plain-text {
     margin-top: 10px;
     padding-top: 0px;
 }
+
+.notebook .fa-plus-square-o {
+	font-size: 4em;
+}
+
+.notebook .fa-minus-square-o {
+	font-size: 2em;
+}

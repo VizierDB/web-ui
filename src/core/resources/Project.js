@@ -167,6 +167,7 @@ const CONTENT_DATASET = 'CONTENT_DATASET';
 const CONTENT_ERROR = 'CONTENT_ERROR';
 const CONTENT_HISTORY = 'CONTENT_HISTORY';
 const CONTENT_NOTEBOOK = 'CONTENT_NOTEBOOK';
+const CONTENT_DATASET_ERROR = 'CONTENT_DATASET_ERROR';
 
 
 /**
@@ -192,6 +193,7 @@ export class ProjectResource {
     isError = () => (this.contentType === CONTENT_ERROR);
     isHistory = () => (this.contentType === CONTENT_HISTORY);
     isNotebook = () => (this.contentType === CONTENT_NOTEBOOK);
+    isDatasetError = () => (this.contentType === CONTENT_DATASET_ERROR);
 }
 
 
@@ -201,6 +203,7 @@ export const ChartResource = (name, dataset) => (new ProjectResource(CONTENT_CHA
 export const ErrorResource = (title, module) => (new ProjectResource(CONTENT_ERROR, {title, module}));
 export const NotebookResource = (notebook) => (new ProjectResource(CONTENT_NOTEBOOK, notebook));
 export const SpreadsheetResource = (dataset) => (new ProjectResource(CONTENT_DATASET, dataset));
+export const DatasetErrorResource = (dataset, annotations) => (new ProjectResource(CONTENT_DATASET_ERROR, {dataset, annotations}));
 
 
 // -----------------------------------------------------------------------------

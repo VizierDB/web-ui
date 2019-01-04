@@ -32,11 +32,12 @@ import {
 import {
     dismissProjectActionError, fetchProject, updateProjectName
 } from '../../actions/project/ProjectPage';
-import { showSpreadsheet } from '../../actions/spreadsheet/Spreadsheet';
+import { showSpreadsheet, showDatasetError, fetchAnnotations, fetchAnnotatated, repairDatasetError } from '../../actions/spreadsheet/Spreadsheet';
 import { ConnectionInfo } from '../../components/Api'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage, NotFoundMessage } from '../../components/Message';
 import BranchHistory from '../../components/project/BranchHistory';
+import DatasetError from '../../components/project/DatasetError';
 import DatasetChart from '../../components/plot/DatasetChart';
 import ModuleError from '../../components/project/ModuleError';
 import MainProjectMenu from '../../components/project/menu/MainProjectMenu';
@@ -149,6 +150,31 @@ class ProjectPage extends Component {
         dispatch(showSpreadsheet(dataset));
     }
     /**
+     * Switch to error view and load the selected dataset.
+     */
+    loadDatasetError = (dataset) => {
+        const { dispatch } = this.props;
+        dispatch(showDatasetError(dataset, dataset.links.self+'/annotations'));
+        //dispatch(fetchAnnotations(dataset));
+    }
+    /**
+     * Switch to spreadsheet view and load the selected to the page 
+     * that has the source of a specific error.
+     */
+    loadDatasetToError = (dataset) => (reason) => {
+    	const { dispatch, serviceApi } = this.props;
+    	const fetch_url = serviceApi.serviceUrl + '/datasets/' + dataset.id + '?rowid='+reason.args[reason.rowidarg]
+        dispatch(showSpreadsheet(dataset, fetch_url));
+    }
+    /**
+     * Repair a specific error.
+     */
+    loadDatasetRepair = (dataset) => (reason, repair, acknowledge) => {
+        const { dispatch, serviceApi } = this.props;
+        const url = serviceApi.serviceUrl + '/datasets/' + dataset.id + '/feedback'  
+        dispatch(repairDatasetError(dataset, url, reason, repair, acknowledge));
+    }
+    /**
      * Switch the project resource to show the notebook for the current
      * workflow.
      */
@@ -170,7 +196,8 @@ class ProjectPage extends Component {
             isFetching,
             project,
             serviceApi,
-            workflow
+            workflow,
+            dispatch
         } = this.props
         let content = null;
         if (isFetching) {
@@ -235,6 +262,20 @@ class ProjectPage extends Component {
                 } else if (resource.isDataset()) {
                     pageContent = <Spreadsheet />;
                     contentCss += ' wide';
+                } else if (resource.isDatasetError()) {
+                	const dataset = resource.content.dataset;
+                	const annotations = resource.content.annotations;
+                	pageContent = (
+                            <div className='dataset-error-view'>
+                                <DatasetError
+                                    dataset={dataset}
+                                    annotations={annotations}
+                                	onGotoError={this.loadDatasetToError}
+                                	onRepairError={this.loadDatasetRepair}
+                                />
+                            </div>
+                        )
+                    contentCss += ' wide';
                 } else if (resource.isHistory()) {
                     pageContent = (
                         <div className='history-view'>
@@ -282,7 +323,8 @@ class ProjectPage extends Component {
                                 onReverse={this.handleNotebookReverse}
                                 onShowChart={this.loadChartView}
                                 onShowDataset={this.loadDataset}
-                                onShowHistory={this.loadBranchHistory}
+	                            onShowDatasetError={this.loadDatasetError}
+	                            onShowHistory={this.loadBranchHistory}
                                 onShowNotebook={this.loadNotebook}
                                 project={project}
                                 resource={resource}

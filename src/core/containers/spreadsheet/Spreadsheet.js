@@ -433,7 +433,7 @@ class Spreadsheet extends React.Component {
             rows.push(<tr key={row.id}>{cells}</tr>);
         }
         let showAnnoHandler = null;
-        if ((activeColumnId >= 0) && (activeRowId >= 0)) {
+        if ((activeColumnId >= 0) && (activeRowId !== -1)) {
             showAnnoHandler = this.showAnnotationModal;
         }
         // Show a notebook cell to append at the end of the current workflow.
@@ -600,7 +600,7 @@ class Spreadsheet extends React.Component {
                     cmd = updateCell(
                         dataset.name,
                         activeColumnId,
-                        activeRowIndex,
+                        activeRowId,
                         updatedCellValue
                     );
                 } else {

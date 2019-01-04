@@ -22,6 +22,7 @@ import { Icon, Menu } from 'semantic-ui-react';
 import BranchMenuDropdown from './BranchMenuDropdown';
 import ChartMenuDropdown from './ChartMenuDropdown';
 import DatasetMenuDropdown from './DatasetMenuDropdown';
+import DatasetErrorMenuDropdown from './DatasetErrorMenuDropdown';
 import NotebookMenuDropdown from './NotebookMenuDropdown';
 import ProjectMenuDropdown from './ProjectMenuDropdown';
 import DeleteResourceModal from '../../modals/DeleteResourceModal';
@@ -93,6 +94,7 @@ class MainProjectMenu extends React.Component {
             onReverse,
             onShowChart,
             onShowDataset,
+            onShowDatasetError,
             onShowHistory,
             onShowNotebook
         } = this.props;
@@ -158,6 +160,13 @@ class MainProjectMenu extends React.Component {
                     onSelect={onShowDataset}
                     resource={resource}
                 />);
+            menuItems.push(
+                <DatasetErrorMenuDropdown
+                    key='datasets'
+                    datasets={workflow.datasets}
+                    onSelect={onShowDatasetError}
+                    resource={resource}
+                />);    
             menuItems.push(
                 <ChartMenuDropdown
                     key='charts'

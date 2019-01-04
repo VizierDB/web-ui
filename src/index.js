@@ -70,10 +70,35 @@ export const store = createStore(
     composedEnhancers
 )
 
+//add analytics
+const injectOWA = () => {
+	if (typeof window == 'undefined') {
+		return;
+	}
+	window._owa = document.createElement('script');                      
+    window._owa.type = 'text/javascript';                                                                 
+    window._owa.async = true;
+    window._owa.src = window.env.ANALYTICS_URL + 'modules/base/js/owa.tracker-combined-min.js';
+    window._owa_s = document.getElementsByTagName('script')[0];
+    window._owa_s.parentNode.insertBefore(window._owa, window._owa_s);
+	
+    window.owa_baseUrl = window.env.ANALYTICS_URL;
+	window.owa_cmds = window.owa_cmds || [];
+	function owatag() {
+		window.owa_cmds.push(arguments);
+	}
+	//owatag('js', new Date());
+	owatag('setSiteId', window.env.ANALYTICS_SITE_ID);
+	owatag('trackPageView');
+	owatag('trackClicks');
+};
+
 render(
-    <Provider store={store}>
+	<Provider store={store}>
         <ConnectedRouter history={history}>
-            <App />
+            <App>
+                <script>{injectOWA()}</script>
+            </App>
         </ConnectedRouter>
     </Provider>,
     document.getElementById('root')

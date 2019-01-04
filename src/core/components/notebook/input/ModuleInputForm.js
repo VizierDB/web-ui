@@ -21,8 +21,10 @@ import PropTypes from 'prop-types';
 import { Form } from 'semantic-ui-react';
 import { ErrorListMessage } from '../../Message';
 import PythonCell from './form/PythonCell';
+import SQLCell from './form/SQLCell';
+import ScalaCell from './form/ScalaCell';
 import ModuleFormControl from './form/ModuleFormControl';
-import { DT_DATASET_ID, DT_FILE_ID, DT_PYTHON_CODE } from './ModuleSpec';
+import { DT_DATASET_ID, DT_FILE_ID, DT_PYTHON_CODE, DT_SQL_CODE, DT_SCALA_CODE } from './ModuleSpec';
 import '../../../../css/ModuleForm.css';
 
 
@@ -65,6 +67,7 @@ class ModuleInputForm extends React.Component {
         hasError: PropTypes.bool.isRequired,
         selectedCommand: PropTypes.object.isRequired,
         values: PropTypes.object.isRequired,
+        codeEditorProps: PropTypes.object.isRequired,
         onChange: PropTypes.func.isRequired,
         onDismissErrors: PropTypes.func.isRequired,
         onSubmit: PropTypes.func.isRequired
@@ -77,6 +80,7 @@ class ModuleInputForm extends React.Component {
             hasError,
             selectedCommand,
             values,
+            codeEditorProps,
             onChange,
             onDismissErrors,
             onSubmit
@@ -84,7 +88,7 @@ class ModuleInputForm extends React.Component {
         // The for is a table that contains one row per (top-level) argument.
         // Output differs, however, if the command is a Python cell.
         // In either case, if there is an error a message box will be displayed.
-        let error = null
+        let error = null;
         if (hasError) {
             if (errors != null) {
                 error = (
@@ -108,23 +112,73 @@ class ModuleInputForm extends React.Component {
                             id={arg.id}
                             name={arg.id}
                             value={values[arg.id]}
+	                        editing={true}
+                        	sequenceIndex={codeEditorProps.sequenceIndex}
+	                        cursorPosition={codeEditorProps.cursorPosition}
+                        	newLines={codeEditorProps.newLines}
+	                        onChange={onChange}
+                        />
+                    </Form>
+                </div>
+            );
+        }
+        else if ((args.length === 2) && (args[0].datatype === DT_SQL_CODE)) {
+        	const srcarg = args[0];
+        	const odsarg = args[1];
+            return (
+                <div className='code-form'>
+                    { error }
+                    <Form>
+                        <SQLCell
+                            key={srcarg.id}
+                            id={srcarg.id}
+                            name={srcarg.id}
+                        	datasets={datasets}
+                            value={values[srcarg.id]}
+	                        editing={true}
+                        	sequenceIndex={codeEditorProps.sequenceIndex}
+	                        cursorPosition={codeEditorProps.cursorPosition}
+	                    	newLines={codeEditorProps.newLines}
+	                        outputDataset={values[odsarg.id]}
                             onChange={onChange}
                         />
                     </Form>
                 </div>
             );
-        } else {
+        }
+        else if ((args.length === 1) && (args[0].datatype === DT_SCALA_CODE)) {
+        	const arg = args[0];
+            return (
+                <div className='code-form'>
+                    { error }
+                    <Form>
+	                    <ScalaCell
+		                    key={arg.id}
+		                    id={arg.id}
+		                    name={arg.id}
+		                    value={values[arg.id]}
+		                    editing={true}
+	                        sequenceIndex={codeEditorProps.sequenceIndex}
+	                        cursorPosition={codeEditorProps.cursorPosition}
+	                    	newLines={codeEditorProps.newLines}
+	                        onChange={onChange}
+		                />
+                    </Form>
+                </div>
+            );
+        }
+        else {
             // Check if the command specification contains a dataset column. If so,
             // try to find the dataset that is being selected.
             const selectedDataset = SELECTED_DATASET(selectedCommand, values, datasets);
-            args.sort((a1, a2) => (a1.index > a2.index));
+            args.sort((a, b) => (a.index - b.index));
             let cssTable = 'form-table';
             let components = [];
             for (let i = 0; i < args.length; i++) {
-                const arg = args[i]
+                const arg = args[i];
                 // Skip elements that are part of a group or hidden
                 if ((arg.parent) || (arg.hidden === true)) {
-                    continue
+                    continue;
                 }
                 components.push(
                     <tr key={arg.id}>
@@ -148,9 +202,9 @@ class ModuleInputForm extends React.Component {
                     cssTable += ' wide';
                 }
             }
-            let formCss = 'module-form'
+            let formCss = 'module-form';
             if (hasError) {
-                formCss += '-error'
+                formCss += '-error';
             }
             return (
                 <div className={formCss}>
