@@ -20,26 +20,33 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { connect } from 'react-redux'
-import { fetchService } from '../../actions/main/Service'
+import { fetchService, receiveAuth } from '../../actions/main/Service'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage } from '../../components/Message';
 import MainPage from './MainPage'
 import ProjectPage from '../project/ProjectPage'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import AuthModal from '../../components/modals/AuthModal';
 
-import { baseHref, projectHref } from '../../util/App';
+import { baseHref, projectHref, isNotEmptyString } from '../../util/App';
 
 import logo from '../../../img/logo_small.png';
 import '../../../css/App.css'
 
+import { MODAL_AUTH } from '../../actions/main/Service'
 
 class App extends Component {
     static propTypes = {
         error: PropTypes.string,
         isFetching: PropTypes.bool.isRequired,
-        serviceUrl: PropTypes.string
+        serviceUrl: PropTypes.string,
+        showModal: PropTypes.string,
+        refetch: PropTypes.bool
     }
-
+    constructor(props) {
+        super(props);
+        this.state = {showModal: null}
+    }
     /**
      * Load the service descriptor when the App starts.
      */
@@ -47,7 +54,34 @@ class App extends Component {
         const { dispatch } = this.props
         dispatch(fetchService())
     }
+    
+    /**
+     * Show modal to login.
+     */
+    showAuthModal = () => (this.setState({showModal: MODAL_AUTH}));
+   
+    /**
+     * Hide any open modal.
+     */
+    hideModal = () => (this.setState({showModal: null}));
 
+    /**
+     * Called by auth modal on submit.
+     */
+    authComplete = (user) => {
+    	const { dispatch } = this.props
+    	localStorage.setItem('user', JSON.stringify(user));
+        dispatch(receiveAuth(user.authdata))
+    }
+    
+    /**
+     * reload the service descriptor.
+     */
+    refetchService() {
+        const { dispatch } = this.props
+        dispatch(fetchService())
+    }
+    
     render() {
         // Set the window title
         if (window.env.APP_TITLE) {
@@ -55,7 +89,7 @@ class App extends Component {
         } else {
             document.title = 'Vizier DB'
         }
-        const { isFetching, error } = this.props;
+        const { isFetching, error, showModal, refetch } = this.props;
         let content = null;
         let connection = null;
         if (isFetching) {
@@ -73,6 +107,8 @@ class App extends Component {
                         />
                 </div>
             );
+        } else if(refetch){
+        	this.refetchService();
         } else {
             content = (
                 <MuiThemeProvider>
@@ -85,6 +121,19 @@ class App extends Component {
                 </MuiThemeProvider>
             );
         }
+        const modals = (
+                <div>
+                    <AuthModal
+                        isValid={isNotEmptyString}
+                        open={showModal === MODAL_AUTH}
+                        prompt='Please enter your login credentials'
+                        title='Login'
+                        onCancel={this.hideModal}
+                    	onSubmit={this.authComplete}
+                        value=''
+                     />
+                </div>
+               );
         return (
             <div className="app">
                 <div className="app-header">
@@ -97,6 +146,7 @@ class App extends Component {
                 <div className="main-content">
                     { content }
                     { connection }
+                    { modals }
                 </div>
           </div>
         );
@@ -104,11 +154,12 @@ class App extends Component {
 }
 
 const mapStateToProps = state => {
-
     return {
         error: state.serviceApi.error,
         isFetching: state.serviceApi.isFetching,
-        serviceUrl: state.serviceApi.serviceUrl
+        serviceUrl: state.serviceApi.serviceUrl,
+        showModal: state.serviceApi.showModal,
+        refetch: state.serviceApi.refetch
     }
 }
 

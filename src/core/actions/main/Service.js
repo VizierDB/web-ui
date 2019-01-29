@@ -34,7 +34,12 @@
 export const REQUEST_SERVICE = 'REQUEST_SERVICE'
 export const RECEIVE_SERVICE = 'RECEIVE_SERVICE'
 export const SERVICE_ERROR = 'SERVICE_ERROR'
+export const REQUEST_AUTH = 'REQUEST_AUTH'
+export const RECEIVE_AUTH = 'RECEIVE_AUTH'
 
+//MODAL IDENTIFIERS
+export const MODAL_AUTH = 'AUTH'
+	
 /**
  * Signal start of service descriptor fetching.
  */
@@ -62,17 +67,69 @@ const serviceError = (error) => ({
 })
 
 /**
+ * Signal start of auth request.
+ */
+export const requestAuth = () => ({
+  type: REQUEST_AUTH
+})
+
+/**
+ * Handler for successful retrieval of auth.
+ */
+export const receiveAuth = (json) => ({
+  type: RECEIVE_AUTH,
+  authdata: json
+})
+
+/**
+ * try to get the auth data saved in local storage.
+ */
+export const authHeader = (dispatch) => {
+    // return authorization header with basic auth credentials
+    let user = JSON.parse(localStorage.getItem('user'));
+    if(!user){
+    	dispatch(requestAuth())
+    }
+    if (user && user.authdata) {
+        return { 'Authorization': 'Basic ' + user.authdata };
+    } else {
+        return {};
+    }
+}
+
+/**
+ * try to get the auth data saved in local storage.
+ */
+export const fetchAuthed = (url, fetchProps) => (dispatch) => {
+    const authHead = authHeader(dispatch);
+    let newFetchProps = null
+    if(fetchProps && fetchProps.headers){
+		Object.assign(fetchProps.headers, authHead)
+	}
+	else if(fetchProps){
+		fetchProps.headers = authHead
+	}
+	else {
+		fetchProps = {
+			headers: authHead
+		}
+	}
+    newFetchProps = fetchProps
+	return fetch(url, newFetchProps)
+}
+
+/**
  * Action to retrieve API service descriptor. Expects that the Web Service Url
  * has been set during App initialization.
  *
  */
-export const fetchService = () => (dispatch, getState) => {
+export const fetchService = () => (dispatch, getState) =>  {
     // Get API Url from the current state. It is expected that the Url has been
     // set as part of the App initialization
     const url = getState().serviceApi.serviceUrl;
     // Signal start to service descriptor retrieval
     dispatch(requestService())
-    return fetch(url)
+    return fetchAuthed(url)(dispatch)
     // Check the response. Assume that eveything is all right if status
     // code below 400
     .then(function(response) {
@@ -80,6 +137,9 @@ export const fetchService = () => (dispatch, getState) => {
             // SUCCESS: Pass the JSON result to the respective callback
             // handler
             response.json().then(json => dispatch(receiveService(json)));
+        } else if(response.status === 401) {
+        	// UNAUTHORIZED: re-request auth
+        	dispatch(requestAuth())
         } else {
             // ERROR: The API is expected to return a JSON object in case
             // of an error that contains an error message

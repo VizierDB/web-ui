@@ -20,6 +20,7 @@ import {
     projectActionError, receiveProjectResource, requestProjectAction,
     updateResource, updateWorkflowResource
 } from '../project/ProjectPage';
+import { fetchAuthed, requestAuth } from '../main/Service';
 import {
     CellAnnotation, NoAnnotation, IsFetching, FetchError, AnnotationList
 } from '../../resources/Annotation';
@@ -269,13 +270,16 @@ export const showNotebook = (workflow) => (dispatch) => {
 export const deleteNotebookCell = (module) => (dispatch) => {
     // Signal start by setting the project action flag
     dispatch(requestProjectAction());
-    return fetch(
+    return fetchAuthed(
         module.links.delete,
         {method: 'DELETE'}
-    ).then(function(response) {
+    )(dispatch).then(function(response) {
         if (response.status === 200) {
             // SUCCESS: Dispatch modified workflow handle
             response.json().then(json => (dispatch(updateNotebook(json))));
+        } else if(response.status === 401) {
+        	// UNAUTHORIZED: re-request auth
+        	dispatch(requestAuth())
         } else {
             // ERROR: The API is expected to return a JSON object in case
             // of an error that contains an error message
@@ -353,7 +357,7 @@ export const updateNotebookCell = (url, action, data) => (dispatch) => {
     dispatch(requestProjectAction());
     // Independently of whether we insert or append the request is a POST
     // containing the module specification as its body.
-    return fetch(
+    return fetchAuthed(
         url,
         {
             method: action,
@@ -363,12 +367,15 @@ export const updateNotebookCell = (url, action, data) => (dispatch) => {
                 'Content-Type': 'application/json'
             }
         }
-    ).then(function(response) {
+    )(dispatch).then(function(response) {
         if (response.status === 200) {
             // SUCCESS: Dispatch modified notebook resource. The result is
             // expected to be a Json object with WorkflowHandle (.workflow)
             // and the new nootebook information (.modules and .datasets)
             response.json().then(json => (dispatch(updateNotebook(json))));
+        } else if(response.status === 401) {
+        	// UNAUTHORIZED: re-request auth
+        	dispatch(requestAuth())
         } else {
             // ERROR: The API is expected to return a JSON object in case
             // of an error that contains an error message
@@ -421,10 +428,10 @@ export const updateNotebookCellWithUpload = (modifyUrl, data, notebookModifier, 
                     'Content-Type': 'application/json'
                 }
             }
-            return fetch(
+            return fetchAuthed(
                     uploadUrl,
                     req
-                )
+                )(dispatch)
                 // Check the response. Assume that eveything is all right if status
                 // code below 400
                 .then(function(response) {
@@ -437,6 +444,9 @@ export const updateNotebookCellWithUpload = (modifyUrl, data, notebookModifier, 
                             const modData = {...data, arguments: modArgs};
                             return dispatch(notebookModifier(modifyUrl, modData));
                         });
+                    } else if(response.status === 401) {
+                    	// UNAUTHORIZED: re-request auth
+                    	dispatch(requestAuth())
                     } else {
                         // ERROR: The API is expected to return a JSON object in case
                         // of an error that contains an error message. For some response

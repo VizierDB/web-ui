@@ -17,7 +17,7 @@
  */
 
 import {
-  REQUEST_SERVICE, RECEIVE_SERVICE, SERVICE_ERROR
+	MODAL_AUTH, REQUEST_SERVICE, RECEIVE_SERVICE, SERVICE_ERROR, REQUEST_AUTH, RECEIVE_AUTH
 } from '../../actions/main/Service'
 import { HATEOASReferences } from '../../util/HATEOAS'
 
@@ -50,7 +50,8 @@ export const serviceApi = (state = {}, action) => {
               name: action.name,
               properties: action.properties,
               envs: action.envs,
-              links: new HATEOASReferences(action.links)
+              links: new HATEOASReferences(action.links),
+              refetch: false
             }
         case SERVICE_ERROR:
             return {
@@ -58,6 +59,19 @@ export const serviceApi = (state = {}, action) => {
               isFetching: false,
               error: action.error
             }
+        case REQUEST_AUTH: 
+        	return {
+        	  ...state,
+        	  showModal:MODAL_AUTH 
+        	}
+        case RECEIVE_AUTH:
+        	return {
+        	  ...state,
+        	  showModal:null,
+        	  isFetching: false,
+        	  error: null,
+        	  refetch: true
+        	}
     default:
       return state
   }

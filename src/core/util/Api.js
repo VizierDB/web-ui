@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+import { fetchAuthed, requestAuth } from '../actions/main/Service';
+
 
 /**
  * Collection of functions to interact with the Vizier DB Web service API.
@@ -52,7 +54,7 @@ export const deleteResource = (url, successHandler, errorHandler, signalStartHan
     if (signalStartHandler) {
         dispatch(signalStartHandler())
     }
-    return fetch(url, {method: 'DELETE'})
+    return fetchAuthed(url, {method: 'DELETE'})(dispatch)
         // Check the response. Assume that eveything is all right if status
         // code below 400
         .then(function(response) {
@@ -60,6 +62,9 @@ export const deleteResource = (url, successHandler, errorHandler, signalStartHan
                 // SUCCESS: Pass the JSON result to the respective callback
                 // handler
                 dispatch(successHandler());
+            } else if(response.status === 401) {
+            	// UNAUTHORIZED: re-request auth
+            	dispatch(requestAuth())
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message
@@ -82,7 +87,7 @@ export const fetchResource = (url, successHandler, errorHandler, signalStartHand
     if (signalStartHandler) {
         dispatch(signalStartHandler())
     }
-    return fetch(url)
+    return fetchAuthed(url)(dispatch)
         // Check the response. Assume that eveything is all right if status
         // code below 400
         .then(function(response) {
@@ -90,6 +95,9 @@ export const fetchResource = (url, successHandler, errorHandler, signalStartHand
                 // SUCCESS: Pass the JSON result to the respective callback
                 // handler
                 response.json().then(json => dispatch(successHandler(json)));
+            } else if(response.status === 401) {
+            	// UNAUTHORIZED: re-request auth
+            	dispatch(requestAuth())
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message
@@ -127,7 +135,7 @@ export const postResourceData = (dispatch, url, data, successHandler, errorHandl
     if (signalStartHandler) {
         dispatch(signalStartHandler())
     }
-    return fetch(
+    return fetchAuthed(
             url,
             {
                 method: 'POST',
@@ -137,7 +145,7 @@ export const postResourceData = (dispatch, url, data, successHandler, errorHandl
                   'Content-Type': 'application/json'
                 },
             }
-        )
+        )(dispatch)
         // Check the response. Assume that eveything is all right if status
         // code below 400
         .then(function(response) {
@@ -145,6 +153,9 @@ export const postResourceData = (dispatch, url, data, successHandler, errorHandl
                 // SUCCESS: Pass the JSON result to the respective callback
                 // handler
                 response.json().then(json => dispatch(successHandler(json)));
+            } else if(response.status === 401) {
+            	// UNAUTHORIZED: re-request auth
+            	dispatch(requestAuth())
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message

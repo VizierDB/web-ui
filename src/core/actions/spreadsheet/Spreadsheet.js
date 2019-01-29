@@ -28,7 +28,7 @@ import { Notebook } from '../../resources/Notebook';
 import { ErrorResource, SpreadsheetResource, DatasetErrorResource } from '../../resources/Project'
 import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource, postResourceData } from '../../util/Api';
-
+import { fetchAuthed, requestAuth } from '../main/Service';
 
 // Actions to indicate that the spreadsheet is currently being updated
 export const SUBMIT_UPDATE_REQUEST = 'SUBMIT_UPDATE_REQUEST';
@@ -143,7 +143,7 @@ export const repairDatasetError = (dataset, url, reason, repair, acknowledge) =>
 export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
     const { name, offset } = dataset;
     dispatch(submitUpdateRequest());
-    return fetch(
+    return fetchAuthed(
             workflow.links.append,
             {
                 method: 'POST',
@@ -153,7 +153,7 @@ export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
                   'Content-Type': 'application/json'
                 },
             }
-        )
+        )(dispatch)
         // Check the response. Assume that eveything is all right if status
         // code below 400
         .then(function(response) {
@@ -186,6 +186,9 @@ export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
                     }
                     return dispatch(updateWorkflowResource(wf, resource));
                 });
+            } else if(response.status === 401) {
+            	// UNAUTHORIZED: re-request auth
+            	dispatch(requestAuth())
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message

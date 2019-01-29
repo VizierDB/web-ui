@@ -17,7 +17,7 @@
  */
 
 import { createResource, deleteResource } from '../../util/Api'
-
+import { fetchAuthed, requestAuth } from '../main/Service';
 
 /**
 * Actions to update the internal state maintaining the project listing on
@@ -85,7 +85,7 @@ export const fetchProjects = () => (dispatch, getState) => {
         const url = getState().serviceApi.links.projects;
         // Signal start of fetching project listing
         dispatch(requestProjects())
-        return fetch(url)
+        return fetchAuthed(url)(dispatch)
         // Check the response. Assume that eveything is all right if status
         // code below 400
         .then(function(response) {
@@ -93,6 +93,9 @@ export const fetchProjects = () => (dispatch, getState) => {
                 // SUCCESS: Pass the JSON result to the respective callback
                 // handler
                 response.json().then(json => dispatch(receiveProjects(json)));
+            } else if(response.status === 401) {
+            	// UNAUTHORIZED: re-request auth
+            	dispatch(requestAuth())
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message

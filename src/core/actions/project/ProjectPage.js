@@ -23,7 +23,7 @@ import { WorkflowHandle } from '../../resources/Workflow';
 import { getProperty, updateResourceProperty } from '../../util/Api';
 import { valueOrDefault } from '../../util/App';
 import { ErrorObject } from '../../util/Error';
-
+import { fetchAuthed, requestAuth } from '../main/Service';
 
 // Actions for fetching project information from Web API.
 export const PROJECT_FETCH_ERROR = 'PROJECT_FETCH_ERROR';
@@ -63,7 +63,7 @@ export const fetchProject = (identifier, branch, version) => (dispatch, getState
         // Signal start of fetching project listing
         dispatch(requestProject())
         // Fetch the project.
-        return fetch(url)
+        return fetchAuthed(url)(dispatch)
         .then(function(response) {
             if (response.status >= 200 && response.status < 400) {
                 // SUCCESS: The returned json object is expected to contain
@@ -85,6 +85,9 @@ export const fetchProject = (identifier, branch, version) => (dispatch, getState
                         )
                     );
                 });
+            } else if(response.status === 401) {
+            	// UNAUTHORIZED: re-request auth
+            	dispatch(requestAuth())
             } else if (response.status === 404) {
                 // The requested project, branch, or workflow does not exist.
                 response.json().then(json => (dispatch(
