@@ -89,11 +89,13 @@ export const authHeader = (dispatch) => {
     let user = JSON.parse(localStorage.getItem('user'));
     if(!user){
     	dispatch(requestAuth())
+    	return null;
     }
     if (user && user.authdata) {
         return { 'Authorization': 'Basic ' + user.authdata };
     } else {
-        return {};
+    	localStorage.removeItem('user')
+    	return null;
     }
 }
 
@@ -102,20 +104,25 @@ export const authHeader = (dispatch) => {
  */
 export const fetchAuthed = (url, fetchProps) => (dispatch) => {
     const authHead = authHeader(dispatch);
-    let newFetchProps = null
-    if(fetchProps && fetchProps.headers){
-		Object.assign(fetchProps.headers, authHead)
-	}
-	else if(fetchProps){
-		fetchProps.headers = authHead
-	}
-	else {
-		fetchProps = {
-			headers: authHead
+    if(authHead){
+	    let newFetchProps = fetchProps;
+	    if(fetchProps && fetchProps.headers){
+	    	Object.assign(newFetchProps.headers, authHead);
 		}
-	}
-    newFetchProps = fetchProps
-	return fetch(url, newFetchProps)
+		else if(fetchProps){
+			newFetchProps.headers = authHead;
+		}
+		else {
+			newFetchProps = {
+				method : 'GET',
+				headers: authHead
+			};
+		}
+	    return fetch(url, newFetchProps)
+    }
+    else return new Promise(function(resolve, reject){
+    	 reject({message:"No saved credentials.  Please enter credentials."})
+    	})
 }
 
 /**
