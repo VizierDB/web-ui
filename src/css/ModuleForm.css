@@ -139,10 +139,7 @@ div.python-examples {
 
 div.editor-container {
     border: solid 1px #dedede;
-}
-
-div.editor-container.collapsed{
-    max-width: calc( 100% - 40em );
+    max-width: calc( var(--max-cell-width) - 4em);
 }
 
 div.snippet-header {

@@ -146,7 +146,7 @@ class CellOutputArea extends React.Component {
                 	var self = this;
                     var Response = createReactClass({
                         render: function(){
-                        	return (<div dangerouslySetInnerHTML={{__html: output.content.lines}}></div>)
+                        	return (<div className='output-content-html' dangerouslySetInnerHTML={{__html: output.content.lines}}></div>)
                         }
                     });
                 	outputContent = (
