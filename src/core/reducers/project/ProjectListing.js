@@ -21,7 +21,6 @@ import {
   SET_PROJECT_CREATE_ERROR, SET_PROJECT_DELETE_ERROR, SET_PROJECTS_FETCH_ERROR,
   TOGGLE_SHOW_PROJECT_FORM
 } from '../../actions/project/ProjectListing'
-import { RECEIVE_SERVICE } from '../../actions/main/Service'
 import { getProperty } from '../../util/Api';
 import { ErrorObject } from '../../util/Error';
 import { HATEOASReferences } from '../../util/HATEOAS';
@@ -48,7 +47,6 @@ const DEFAULT_FETCH_MESSAGE = 'Loading Projects ...';
 
 const INITIAL_STATE = {
     actionError: null,
-    envs: null,
     fetchError: null,
     fetchMessage: DEFAULT_FETCH_MESSAGE,
     isFetching: false,
@@ -101,8 +99,6 @@ export const projectListing = (state = INITIAL_STATE, action) => {
                 projects: listProjects(action.projects),
                 links: new HATEOASReferences(action.links)
             }
-        case RECEIVE_SERVICE:
-            return {...state, envs: action.envs}
         case SET_PROJECT_CREATE_ERROR:
             return {
                 ...state,

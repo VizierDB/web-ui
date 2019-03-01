@@ -106,7 +106,7 @@ class ControlGroup extends React.Component {
      */
     handleRemove = (e, { value }) => {
         const { id, onChange } = this.props
-        const { formValues, tuples } = this.state
+        const { tuples } = this.state
         const modifiedTuples = []
         let removedTuple =  null
         for (let i = 0; i < tuples.length; i++) {

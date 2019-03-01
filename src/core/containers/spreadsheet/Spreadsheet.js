@@ -583,7 +583,6 @@ class Spreadsheet extends React.Component {
         const {
             activeColumnId,
             activeRowId,
-            activeRowIndex,
             originalCellValue,
             updatedCellValue
         } = this.state;

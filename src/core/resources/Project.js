@@ -24,6 +24,22 @@ import { VIZUAL, VIZUAL_OP } from '../util/Vizual';
 
 
 /**
+ * Command declaration in a package of workflow commands.
+ */
+class PackageModule {
+    fromJson(json) {
+        this.id = json.id;
+        this.name = json.name;
+        this.commands = {};
+        for (let i = 0; i < json.commands.length; i++) {
+            const obj = json.commands[i];
+            this.commands[obj.id] = obj;
+        }
+        return this;
+    }
+}
+
+/**
  * Set of commands that are supported by the workflow engine which is associated
  * with a curation project. Each command represents a module specification that
  * can be used to define modules in a workflow (-> cells in a notebook). We
@@ -41,30 +57,12 @@ import { VIZUAL, VIZUAL_OP } from '../util/Vizual';
  * .types: List pf package identifier
  */
 class ModuleRegistry {
-    constructor(commands) {
-        this.module = []
-        this.package = []
-        this.types = new Set()
-        for (let i = 0; i < commands.length; i++) {
-            const cmd = commands[i]
-            this.module[moduleId(cmd)] = cmd;
-            // Get the class identifier for the command. By default the class is
-            // defined by the command type. However, we may want to group
-            // commands of different types in the UI (or separate them). This
-            // can be done using the optional .group attribute.
-            let cmdClass = null;
-            if (cmd.group != null) {
-                cmdClass = cmd.group;
-            } else {
-                cmdClass = cmd.type;
-            }
-            if (this.types.has(cmdClass)) {
-                this.package[cmdClass].push(cmd)
-            } else {
-                this.package[cmdClass] = [cmd]
-                this.types.add(cmdClass)
-            }
+    fromJson(json) {
+        for (let i = 0; i < json.length; i++) {
+            const obj = json[i];
+            this[obj.id] = new PackageModule().fromJson(obj);
         }
+        return this;
     }
 }
 
@@ -90,17 +88,13 @@ export class ProjectHandle {
      * Initialize the object properties from a Json object that is returned by
      * Web API calls that return a ProjectHandle.
      */
-    fromJson(json, serviceProperties) {
+    fromJson(json) {
         this.id = json.id;
         this.name = getProperty(json, 'name');
         this.links = new HATEOASReferences(json.links);
-        // The environment object contains a registry of modules that are
-        // available for workflows (i.e., in notebook cells) and a list of
-        // file handles ((id,name)-pairs) on the file server.
-        this.environment = {
-            modules: new ModuleRegistry(json.environment.modules),
-            serviceProperties
-        };
+        // The module registry contains the list of commands that are supported
+        // for the project. Commands are grouped by the package they belong to.
+        this.packages = new ModuleRegistry().fromJson(json.packages);
         // List of project branchs (sorted by name)
         this.branches = [];
         for (let i = 0; i < json.branches.length; i++) {

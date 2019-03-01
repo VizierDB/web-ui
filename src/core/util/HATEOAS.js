@@ -17,18 +17,72 @@
  */
 
 /**
- * Create a dictionary of HATEOAS references from an array of (rel,href)-pairs.
+ * Helper classes and constants for HATEOAS references returned as part of
+ * API responses for the different API resources.
+ */
+
+// General
+export const HATEOAS_SELF = 'self';
+
+// API
+export const HATEOAS_API_DOC = 'api.doc';
+export const HATEOAS_USER_AUTH = 'user.auth';
+
+// Projects
+export const HATEOAS_PROJECTS_CREATE = 'project.create';
+export const HATEOAS_PROJECTS_DELETE = 'project.delete';
+export const HATEOAS_PROJECTS_LIST = 'project.list';
+
+
+/**
+ * Maintain a list of HATEOAS references that are given as an array of
+ * (rel,href)-pairs.
+ *
+ * Provides methods to retrieve references for given relationship keys and
+ * to test for the existence of objects with particular reference keys in the
+ * array.
  */
 export class HATEOASReferences {
     /**
      * Expects an array of HATEOAS reference objects as returned by the API.
-     * Constructs an object that has one property per rel key in the reference
-     * list.
+     * Each object has a 'rel' and 'href' property.
      */
     constructor(links) {
-        for (let i = 0; i < links.length; i++) {
-            const ref = links[i]
-            this[ref.rel] = ref.href
+        this.links = links;
+    }
+    /**
+     * Get the HTTP reference that is associated with the given relationship
+     * key. The result is null if no reference with the given key exists.
+     */
+    get(key) {
+        const ref = this.links.find((ref) => (ref.rel === key));
+        if (ref != null) {
+            return ref.href;
+        } else {
+            return null;
         }
+    }
+    /**
+     * Get the Url for a project with the given identifier. The idea is to keep
+     * all resource URLs in one place. At this point we just hard-code the
+     * pattern for project URLs into the method. To be more flexible we could
+     * include URL patterns in the links object as well.
+     *
+     * This method will return null if the links list does not contain an entry
+     * for the project listing.
+     */
+    getProjectUrl(projectId) {
+        const url = this.get(HATEOAS_PROJECTS_LIST);
+        if (url != null) {
+            return url + '/' + projectId;
+        } else {
+            return null;
+        }
+    }
+    /**
+     * Test if a HATEOAS reference with the given key exists.
+     */
+    has(key) {
+        return (this.links.find((ref) => (ref.rel === key)) != null);
     }
 }

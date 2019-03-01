@@ -18,6 +18,7 @@
 
 import { createResource, deleteResource } from '../../util/Api'
 import { fetchAuthed, requestAuth } from '../main/Service';
+import { HATEOAS_PROJECTS_DELETE, HATEOAS_PROJECTS_LIST } from '../../util/HATEOAS';
 
 /**
 * Actions to update the internal state maintaining the project listing on
@@ -45,11 +46,11 @@ export const clearProjectActionError = () => ({
 /**
  * Create a new project.
  */
-export const createProject = (url, env, name) => (dispatch) =>  {
+export const createProject = (url, name) => (dispatch) =>  {
     // Signal start of create project action
     dispatch(requestProjects('Create Project ...'))
     // Set request body
-    const data = {environment: env.id, properties: []}
+    const data = {properties: []}
     if (name.trim() !== '') {
         data.properties.push({key: 'name', value: name.trim()})
     }
@@ -64,7 +65,7 @@ export const createProject = (url, env, name) => (dispatch) =>  {
 export const deleteProject = (project) => (dispatch) => {
     dispatch(
         deleteResource(
-            project.links.delete,
+            project.links.get(HATEOAS_PROJECTS_DELETE),
             fetchProjects,
             projectDeleteError,
             () => (requestProjects('Delete Project ...'))
@@ -82,7 +83,7 @@ export const fetchProjects = () => (dispatch, getState) => {
     // Get project Url from the API reference set. This set may not have been
     // initialized yet!
     if (getState().serviceApi.links) {
-        const url = getState().serviceApi.links.projects;
+        const url = getState().serviceApi.links.get(HATEOAS_PROJECTS_LIST);
         // Signal start of fetching project listing
         dispatch(requestProjects())
         return fetchAuthed(url)(dispatch)

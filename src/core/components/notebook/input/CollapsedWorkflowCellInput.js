@@ -24,7 +24,7 @@ import { Form } from 'semantic-ui-react';
 import PythonCell from './form/PythonCell';
 import SQLCell from './form/SQLCell';
 import ScalaCell from './form/ScalaCell';
-import { DT_DATASET_ID, DT_FILE_ID, DT_PYTHON_CODE, DT_SQL_CODE, DT_SCALA_CODE } from './ModuleSpec';
+import { DT_PYTHON_CODE, DT_SQL_CODE, DT_SCALA_CODE } from './ModuleSpec';
 
 /**
  * Collapsed input area for an workflow notebook cell. The output is a
@@ -35,7 +35,7 @@ class CollapsedWorkflowCellInput extends React.Component {
     static propTypes = {
         errorState: PropTypes.bool.isRequired,
         module: PropTypes.object.isRequired,
-        command: PropTypes.object.isRequired, 
+        command: PropTypes.object.isRequired,
         sequenceIndex: PropTypes.number.isRequired,
         codeEditorProps: PropTypes.object.isRequired,
         onExpand: PropTypes.func.isRequired,
@@ -54,7 +54,7 @@ class CollapsedWorkflowCellInput extends React.Component {
             css += '-error';
         }
         let cellCommand =  null;
-        if(command.id == "CODE"){
+        if(command.id === "CODE"){
     		const args = command.arguments
     		const srcvalue = module.command.arguments[0].value
         	if ((args.length === 1) && (args[0].datatype === DT_PYTHON_CODE)) {
@@ -83,7 +83,6 @@ class CollapsedWorkflowCellInput extends React.Component {
             }
             else if ((args.length === 2) && (args[0].datatype === DT_SQL_CODE)) {
             	const srcarg = args[0];
-            	const odsarg = args[1];
             	const srcvalue = module.command.arguments[0].value
             	const odsvalue = module.command.arguments[1].value
                 return (
@@ -155,8 +154,8 @@ class CollapsedWorkflowCellInput extends React.Component {
             </tbody></table>
         );
     }
-    
-    
+
+
 }
 
 export default CollapsedWorkflowCellInput;

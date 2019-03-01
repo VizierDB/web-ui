@@ -20,12 +20,12 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { connect } from 'react-redux'
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import { fetchService, receiveAuth } from '../../actions/main/Service'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage } from '../../components/Message';
 import MainPage from './MainPage'
 import ProjectPage from '../project/ProjectPage'
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import AuthModal from '../../components/modals/AuthModal';
 
 import { baseHref, projectHref, isNotEmptyString } from '../../util/App';
@@ -46,20 +46,14 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {showModal: null}
-    }
-    /**
-     * Load the service descriptor when the App starts.
-     */
-    componentDidMount() {
         const { dispatch } = this.props
-        dispatch(fetchService())
+        dispatch(fetchService());
     }
-    
     /**
      * Show modal to login.
      */
     showAuthModal = () => (this.setState({showModal: MODAL_AUTH}));
-   
+
     /**
      * Hide any open modal.
      */
@@ -73,7 +67,6 @@ class App extends Component {
     	localStorage.setItem('user', JSON.stringify(user));
         dispatch(receiveAuth(user.authdata))
     }
-    
     /**
      * reload the service descriptor.
      */
@@ -81,7 +74,9 @@ class App extends Component {
         const { dispatch } = this.props
         dispatch(fetchService())
     }
-    
+    /**
+     * Create the page header and the routing elements in the DOM.
+     */
     render() {
         // Set the window title
         if (window.env.APP_TITLE) {
@@ -163,4 +158,4 @@ const mapStateToProps = state => {
     }
 }
 
-export default connect(mapStateToProps)(App)
+export default connect(mapStateToProps)(App);

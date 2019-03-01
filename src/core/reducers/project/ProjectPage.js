@@ -84,7 +84,6 @@ export const projectPage = (state = INITIAL_STATE, action) => {
                 project: action.project,
                 resource: null,
                 workflow: action.workflow
-
             };
         case RECEIVE_PROJECT_RESOURCE:
             return {

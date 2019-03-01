@@ -18,6 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { HATEOAS_API_DOC, HATEOAS_SELF } from '../util/HATEOAS';
 
 import '../../css/Connection.css'
 
@@ -38,7 +39,7 @@ export class ConnectionInfo extends React.Component {
         if (api != null) {
             const { name, links } = api;
             if (links != null) {
-                const url = links.self;
+                const url = links.get(HATEOAS_SELF);
                 return (
                     <div className='connection-info'>
                         <pre className='connection-info'>
@@ -48,7 +49,7 @@ export class ConnectionInfo extends React.Component {
                             </a>
                             <span className="docu-icon">
                                 <a
-                                    href={links.doc}
+                                    href={links.get(HATEOAS_API_DOC)}
                                     className='docu-icon'
                                     target='_blank'
                                 >

@@ -61,7 +61,7 @@ class ScalaCodeSnippetsSelector extends React.Component {
         } else if (value === OUTPUT_CELL_VALUES) {
             lines.push('//Iterate over list of dataset rows and print cell value.')
             lines.push('ds.toList.map(row => row.tuple.mkString(",")).mkString("<br>")');
-        } 
+        }
         onSelect(lines);
     }
     render() {
@@ -85,7 +85,7 @@ class ScalaCodeSnippetsSelector extends React.Component {
                                 </List.Item>
                                 <List.Item value={OUTPUT_ANNOTATIONS} onClick={this.handleSelect}>
                                     <List.Content as='a'>Print Cell Annotations</List.Content>
-                                </List.Item>  
+                                </List.Item>
                             </List>
                         </Grid.Column>
                         <Grid.Column width={4} key='new'>
@@ -132,7 +132,7 @@ class ScalaCell extends React.Component {
         let evalue = value;
         let addLines = false;
         let newCursorPos = cursorPosition;
-        let active = (sequenceIndex==window.activeCodeCell);
+        let active = (sequenceIndex === window.activeCodeCell);
         if(newLines){
         	addLines = true;
         	evalue = newLines;
@@ -183,7 +183,7 @@ class ScalaCell extends React.Component {
         if (editorValue !== '') {
         	script.splice(cursorPosition.line, 0, "");
         }
-        
+
         let value = script.join("\n");
         // Update the local state and propagate the change to the conrolling
         // notebook cell
@@ -202,18 +202,18 @@ class ScalaCell extends React.Component {
         let cursorp = editor.getCursor();
         this.setState({editorValue: value, cursorPosition: cursorp});
         if(data.to &&  data.from && data.origin){
-        	if(data.origin == '+input' || data.origin == 'paste'){
+        	if(data.origin === '+input' || data.origin === 'paste'){
         		let newLines = data.text;
         		let newLineCount =  newLines.length -1;
         		let lastLineLength = newLines[newLineCount].length;
         		let newLine = data.from.line + newLineCount;
         	    let newCh = lastLineLength;
-        	    if(newLines.length == 1){
+        	    if(newLines.length === 1){
         	    	newCh = data.from.ch + lastLineLength;
         	    }
         		cursorp = {line:newLine, ch:newCh};
         	}
-        	else if(data.origin == '+delete'){
+        	else if(data.origin === '+delete'){
         		cursorp = {line:data.from.line, ch:data.from.ch};
         	}
         }
@@ -245,7 +245,12 @@ class ScalaCell extends React.Component {
      * Show the code editor and optionally the code snippet selector.
      */
     render() {
-        const  { editorValue, snippetSelectorVisible, editing, active, cursorPosition, addLines } = this.state;
+        const  {
+            editorValue,
+            snippetSelectorVisible,
+            editing,
+            cursorPosition
+        } = this.state;
         let headerCss = '';
         let selectorPanel = null;
         let examplePanel = null;
@@ -254,7 +259,7 @@ class ScalaCell extends React.Component {
             selectorPanel = <ScalaCodeSnippetsSelector onSelect={this.appendCode}/>
         }
         if (editing) {
-            examplePanel = 
+            examplePanel =
             	<div className='scala-examples'>
 			        <div className={'snippet-header' + headerCss}>
 			            <Icon name='help circle' color='blue' onClick={this.toggleSnippetSelector} />

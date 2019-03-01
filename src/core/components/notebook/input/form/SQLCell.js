@@ -54,7 +54,7 @@ class SQLCodeSnippetsSelector extends React.Component {
      * lines.
      */
     handleSelect = (e, { value }) => {
-    	const { datasets, datasetValue, onDatasetChange, onSelect } = this.props;
+    	const { datasetValue, onSelect } = this.props;
     	const { secondaryDatasetValue } = this.state
     	let lines = [];
         if (value === SELECT_TABLE) {
@@ -65,14 +65,14 @@ class SQLCodeSnippetsSelector extends React.Component {
         	lines.push('(SELECT * FROM '+datasetValue+') UNION ALL (SELECT * FROM '+secondaryDatasetValue+')');
         } else if (value === DATASET) {
             lines.push(' '+datasetValue+' ');
-        } 
+        }
         onSelect(lines);
     }
     handleSecondaryDatasetChange = (value) => {
         this.setState({secondaryDatasetValue: value});
     }
     render() {
-    	const { id, datasets, datasetValue, onDatasetChange, onSelect } = this.props;
+    	const { id, datasets, datasetValue, onDatasetChange } = this.props;
     	const { secondaryDatasetValue } = this.state;
     	return (
             <div className='snippet-selector'>
@@ -85,7 +85,7 @@ class SQLCodeSnippetsSelector extends React.Component {
                                 </List.Item>
                                 <List.Item className='sql-example-list-item' value={SELECT_TABLE} onClick={this.handleSelect}>
                                     <List.Content as='a'>
-                                       <span className='sql-example-a-span'>Select from</span> 
+                                       <span className='sql-example-a-span'>Select from</span>
                                        <div className='sql-example-ds-selector'>
 		                		        	<DatasetSelector
 		                		                key={id}
@@ -219,7 +219,7 @@ class SQLCell extends React.Component {
         let evalue = value;
         let addLines = false;
         let newCursorPos = cursorPosition;
-        let active = (sequenceIndex==window.activeCodeCell);
+        let active = (sequenceIndex === window.activeCodeCell);
         if(newLines){
         	addLines = true;
         	evalue = newLines;
@@ -230,7 +230,7 @@ class SQLCell extends React.Component {
         this.state = {editorValue: evalue, snippetSelectorVisible: false, editing: editing, active:active, cursorPosition: newCursorPos, addLines:addLines, outputDataset:outputDataset };
         if(newLines){
         	onChange(id, evalue);
-        }	
+        }
     }
     /**
      * Append a code snippet to the current editor value. The code snippet is
@@ -270,7 +270,7 @@ class SQLCell extends React.Component {
         if (editorValue !== '') {
         	script.splice(cursorPosition.line, 0, "");
         }
-        
+
         let value = script.join("\n");
         // Update the local state and propagate the change to the conrolling
         // notebook cell
@@ -289,18 +289,18 @@ class SQLCell extends React.Component {
         let cursorp = editor.getCursor();
         this.setState({editorValue: value, cursorPosition: cursorp});
         if(data.to &&  data.from && data.origin){
-        	if(data.origin == '+input' || data.origin == 'paste'){
+        	if(data.origin === '+input' || data.origin === 'paste'){
         		let newLines = data.text;
         		let newLineCount =  newLines.length -1;
         		let lastLineLength = newLines[newLineCount].length;
         		let newLine = data.from.line + newLineCount;
         	    let newCh = lastLineLength;
-        	    if(newLines.length == 1){
+        	    if(newLines.length === 1){
         	    	newCh = data.from.ch + lastLineLength;
         	    }
         		cursorp = {line:newLine, ch:newCh};
         	}
-        	else if(data.origin == '+delete'){
+        	else if(data.origin === '+delete'){
         		cursorp = {line:data.from.line, ch:data.from.ch};
         	}
         }
@@ -332,14 +332,13 @@ class SQLCell extends React.Component {
      * Handle change of dataset
      */
     handleDatasetChange = (value) => {
-        const { id, onChange } = this.props;
         this.setState({datasetValue: value});
     }
     /**
      * Handle change of output dataset
      */
     handleOutputDatasetChange = (value) => {
-        const { id, onChange } = this.props;
+        const { onChange } = this.props;
         this.setState({outputDataset: value});
         onChange('output_dataset', value);
     }
@@ -347,13 +346,15 @@ class SQLCell extends React.Component {
      * Show the code editor and optionally the code snippet selector.
      */
     render() {
-        const  { datasetValue, editorValue, snippetSelectorVisible, outputDataset, editing, active, cursorPosition, addLines } = this.state;
-        const {
-            id,
-            datasets,
-            value,
-            onChange,
-        } = this.props;
+        const  {
+            datasetValue,
+            editorValue,
+            snippetSelectorVisible,
+            outputDataset,
+            editing,
+            cursorPosition
+        } = this.state;
+        const { id, datasets } = this.props;
         let headerCss = '';
         let selectorPanel = null;
         let examplePanel = null;
@@ -362,7 +363,7 @@ class SQLCell extends React.Component {
             selectorPanel = <SQLCodeSnippetsSelector datasets={datasets} datasetValue={datasetValue} onDatasetChange={this.handleDatasetChange} onSelect={this.appendCode}/>
         }
         if (editing) {
-            examplePanel = 
+            examplePanel =
             	<div className='sql-examples'>
 			        <div className={'snippet-header' + headerCss}>
 			            <Icon name='help circle' color='blue' onClick={this.toggleSnippetSelector} />
@@ -411,7 +412,7 @@ class SQLCell extends React.Component {
 		                	this.handleOutputDatasetChange(value)
 	                    }}
 	                />
-	            </div>    
+	            </div>
             </div>
         );
     }

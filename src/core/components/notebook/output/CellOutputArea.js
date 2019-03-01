@@ -143,7 +143,6 @@ class CellOutputArea extends React.Component {
                         </div>
                     );
                 } else if (output.isHtml()) {
-                	var self = this;
                     var Response = createReactClass({
                         render: function(){
                         	return (<div className='output-content-html' dangerouslySetInnerHTML={{__html: output.content.lines}}></div>)

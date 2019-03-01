@@ -93,6 +93,7 @@ div.main-menu {
 
 a.home-link {
     color: #fff;
+    cursor: pointer;
     text-decoration: none;
     outline: 0;
 }
@@ -109,28 +110,28 @@ span.action {
 
 a.action-link {
     color: #21ba45;
-    font-weight: bold;
+    /*font-weight: bold;*/
     text-decoration: none;
     outline: 0;
 }
 
 a.action-link:hover {
     color: #1fb141;
-    font-weight: bold;
+    /*font-weight: bold;*/
     text-decoration: none;
     outline: 0;
 }
 
 a.external-link {
     color: #41b6e6;
-    font-weight: bold;
+    /*font-weight: bold;*/
     text-decoration: none;
     outline: 0;
 }
 
 a.external-link:hover {
     color: #4286f4;
-    font-weight: bold;
+    /*font-weight: bold;*/
     text-decoration: none;
     outline: 0;
 }
@@ -159,7 +160,7 @@ span.headline-small {
 
 p.home-text {
     color: #3b4151;
-    font-size: 1.2em;
+    font-size: 1.1em;
     margin-top: 5px;
     text-align: justify;
 }

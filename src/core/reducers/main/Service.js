@@ -19,7 +19,7 @@
 import {
 	MODAL_AUTH, REQUEST_SERVICE, RECEIVE_SERVICE, SERVICE_ERROR, REQUEST_AUTH, RECEIVE_AUTH
 } from '../../actions/main/Service'
-import { HATEOASReferences } from '../../util/HATEOAS'
+import { HATEOASReferences, HATEOAS_USER_AUTH } from '../../util/HATEOAS'
 
 /**
 * Reducer for actions that retrieve the Vizier DB Web Service API descriptor.
@@ -55,22 +55,28 @@ export const serviceApi = (state = {}, action) => {
             }
         case SERVICE_ERROR:
             return {
-              ...state,
-              isFetching: false,
-              error: action.error
+                ...state,
+                isFetching: false,
+                error: action.error
             }
-        case REQUEST_AUTH: 
-        	return {
-        	  ...state,
-        	  showModal:MODAL_AUTH 
-        	}
+        case REQUEST_AUTH:
+            // We only need to request user authentication if the API supports
+            // it. For local deployments of Vizier there is no need for the
+            // user to authenticate.
+            let modalId = null;
+            if (state.links) {
+                if (state.links.has(HATEOAS_USER_AUTH)) {
+                    modalId = MODAL_AUTH;
+                }
+            }
+        	return {...state, showModal: modalId}
         case RECEIVE_AUTH:
         	return {
-        	  ...state,
-        	  showModal:null,
-        	  isFetching: false,
-        	  error: null,
-        	  refetch: true
+                ...state,
+    	        showModal:null,
+                isFetching: false,
+                error: null,
+                refetch: true
         	}
     default:
       return state

@@ -30,6 +30,11 @@ import DeleteResourceModal from '../../components/modals/DeleteResourceModal'
 import CreateProjectForm from '../../components/project/CreateProjectForm'
 import ContentSpinner from '../../components/ContentSpinner'
 import { pageUrl } from '../../util/App.js';
+import { HATEOAS_PROJECTS_CREATE } from '../../util/HATEOAS';
+// For history to work this link was helpful. Does not seem to be required
+// for all components (?).
+// https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/withRouter.md
+import { withRouter } from 'react-router';
 
 import '../../../css/ResourceListing.css'
 
@@ -37,7 +42,6 @@ import '../../../css/ResourceListing.css'
 class ProjectListing extends Component {
     static propTypes = {
         actionError: PropTypes.object,
-        envs: PropTypes.array,
         fetchError: PropTypes.string,
         fetchMessage: PropTypes.string.isRequired,
         isFetching: PropTypes.bool.isRequired,
@@ -47,16 +51,15 @@ class ProjectListing extends Component {
     }
     constructor(props) {
         super(props);
-        // The local state keeps track of projects that the user wants to delete
-        // or edit. If either value is non-null the respective modal to confirm
-        // delete or edit the project is shown. At no point should both values
-        // be non-null.
+        // The local state keeps track of the project that the user intends to
+        // delete. If the value is non-null the delete modal for confirmation
+        // is shown.
         this.state = {deleteProject: null}
+        // Load the project listing
+        console.log(this.props.history);
+        const { dispatch } = this.props;
+        dispatch(fetchProjects());
     }
-    /**
-     * Load the project listing when the component mounts.
-     */
-    componentDidMount = () => (this.refresh());
     /**
      * Clear create or delete project error message.
      */
@@ -73,18 +76,17 @@ class ProjectListing extends Component {
         this.hideModal()
     }
     /**
+     * Show page for a selected project.
+     */
+    handleShowProjectPage = (projectId) => {
+        const { history } = this.props;
+        history.push(pageUrl(projectId));
+    }
+    /**
      * Hide all modals by setting the respective state variables to null..
      */
     hideModal = () => {
         this.setState({deleteProject: null})
-    }
-    /**
-     * Re-load project lsiting (either when component mounts or when user
-     * presses the refresh button).
-     */
-    refresh = () => {
-        const { dispatch } = this.props
-        dispatch(fetchProjects())
     }
     /**
      * Show a list of existing projects and the Create Project form. Optional, a
@@ -93,7 +95,6 @@ class ProjectListing extends Component {
     render() {
         const {
             actionError,
-            envs,
             fetchError,
             fetchMessage,
             isFetching,
@@ -112,7 +113,6 @@ class ProjectListing extends Component {
             const tabHead = (
                     <Table.Row>
                         <Table.HeaderCell className="resource">Name</Table.HeaderCell>
-                        <Table.HeaderCell className="resource">Project type</Table.HeaderCell>
                         <Table.HeaderCell className="resource">Last modified</Table.HeaderCell>
                         <Table.HeaderCell className="resource"></Table.HeaderCell>
                     </Table.Row>
@@ -120,16 +120,17 @@ class ProjectListing extends Component {
             let rows = [];
             for (let i = 0; i < projects.length; i++) {
                 const pj = projects[i];
-                const link = pageUrl(pj.id);
                 rows.push(<Table.Row key={pj.id}>
-                    <Table.Cell className={'resource'}>
-                        <a className={'resource-link'} href={link}>{pj.name}</a>
+                    <Table.Cell className='resource'>
+                        <a
+                            className='resource-link'
+                            onClick={() => (this.handleShowProjectPage(pj.id))}
+                        >
+                            {pj.name}
+                        </a>
                     </Table.Cell>
-                    <Table.Cell className={'resource-text'}>
-                        {envs.find(e => (e.id === pj.envId)).name}
-                    </Table.Cell>
-                    <Table.Cell className={'resource-text'}>{pj.lastModifiedAt}</Table.Cell>
-                    <Table.Cell className={'resource-buttons'}>
+                    <Table.Cell className='resource-text'>{pj.lastModifiedAt}</Table.Cell>
+                    <Table.Cell className='resource-buttons'>
                         <span className='button-wrapper'>
                             <IconButton name="trash" onClick={(event) => {
                                 event.preventDefault();
@@ -171,7 +172,6 @@ class ProjectListing extends Component {
             if (showForm) {
                 createProjectForm = (
                     <CreateProjectForm
-                        envs={envs}
                         onClose={this.toggleCreateProjectForm}
                         onSubmit={this.submitNewProject}
                     />
@@ -184,33 +184,20 @@ class ProjectListing extends Component {
                     <Table singleLine>
                         <Table.Header>{tabHead}</Table.Header>
                         <Table.Body>{rows}</Table.Body>
-                        <Table.Footer fullWidth>
-                            <Table.Row>
-                                <Table.HeaderCell colSpan='4'>
-                                    <Button
-                                        floated='right'
-                                        icon
-                                        labelPosition='left'
-                                        size='tiny'
-                                        onClick={this.refresh}
-                                    >
-                                      <Icon name='refresh' /> Refresh
-                                    </Button>
-                                    <Button
-                                        floated='right'
-                                        icon
-                                        labelPosition='left'
-                                        size='tiny'
-                                        positive
-                                        disabled={showForm}
-                                        onClick={this.toggleCreateProjectForm}
-                                    >
-                                      <Icon name='plus' /> New Project ...
-                                    </Button>
-                                </Table.HeaderCell>
-                            </Table.Row>
-                            </Table.Footer>
                     </Table>
+                    <div>
+                        <Button
+                            floated='left'
+                            icon
+                            labelPosition='left'
+                            size='tiny'
+                            positive
+                            disabled={showForm}
+                            onClick={this.toggleCreateProjectForm}
+                        >
+                          <Icon name='plus' /> New Project ...
+                        </Button>
+                    </div>
                     { modal }
                 </div>
             );
@@ -227,14 +214,14 @@ class ProjectListing extends Component {
      * Submit a create new project request. If the name is empty it is set to
      * 'undefined' by default.
      */
-    submitNewProject = (name, env) => {
+    submitNewProject = (name) => {
         const { dispatch, links } = this.props;
         this.toggleCreateProjectForm();
         let projectName = name.trim();
         if (projectName === '') {
             projectName = 'New Project';
         }
-        dispatch(createProject(links.create, env, projectName));
+        dispatch(createProject(links.get(HATEOAS_PROJECTS_CREATE), projectName));
     }
     /**
      * Toggle visibility of the create project form.
@@ -246,10 +233,8 @@ class ProjectListing extends Component {
 }
 
 const mapStateToProps = state => {
-
     return {
         actionError: state.projectListing.actionError,
-        envs: state.projectListing.envs,
         fetchError: state.projectListing.fetchError,
         fetchMessage: state.projectListing.fetchMessage,
         isFetching: state.projectListing.isFetching,
@@ -259,4 +244,4 @@ const mapStateToProps = state => {
     }
 }
 
-export default connect(mapStateToProps)(ProjectListing)
+export default withRouter(connect(mapStateToProps)(ProjectListing))

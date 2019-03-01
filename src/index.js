@@ -41,12 +41,37 @@ const middleware = [
     routerMiddleware(history)
 ]
 
+let owaScript = null;
 if (process.env.NODE_ENV !== 'production') {
     middleware.push(createLogger())
     const devToolsExtension = window.__REDUX_DEVTOOLS_EXTENSION__
     if (typeof devToolsExtension === 'function') {
         enhancers.push(devToolsExtension())
     }
+} else {
+    // Add Open Web Analytics if the app is running in production mode
+    const injectOWA = () => {
+    	if (typeof window === 'undefined') {
+    		return;
+    	}
+    	window._owa = document.createElement('script');
+        window._owa.type = 'text/javascript';
+        window._owa.async = true;
+        window._owa.src = window.env.ANALYTICS_URL + 'modules/base/js/owa.tracker-combined-min.js';
+        window._owa_s = document.getElementsByTagName('script')[0];
+        window._owa_s.parentNode.insertBefore(window._owa, window._owa_s);
+
+        window.owa_baseUrl = window.env.ANALYTICS_URL;
+    	window.owa_cmds = window.owa_cmds || [];
+    	function owatag() {
+    		window.owa_cmds.push(arguments);
+    	}
+    	//owatag('js', new Date());
+    	owatag('setSiteId', window.env.ANALYTICS_SITE_ID);
+    	owatag('trackPageView');
+    	owatag('trackClicks');
+    };
+    owaScript = (<script>{injectOWA()}</script>);
 }
 
 const composedEnhancers = compose(
@@ -70,34 +95,11 @@ export const store = createStore(
     composedEnhancers
 )
 
-//add analytics
-const injectOWA = () => {
-	if (typeof window == 'undefined') {
-		return;
-	}
-	window._owa = document.createElement('script');                      
-    window._owa.type = 'text/javascript';                                                                 
-    window._owa.async = true;
-    window._owa.src = window.env.ANALYTICS_URL + 'modules/base/js/owa.tracker-combined-min.js';
-    window._owa_s = document.getElementsByTagName('script')[0];
-    window._owa_s.parentNode.insertBefore(window._owa, window._owa_s);
-	
-    window.owa_baseUrl = window.env.ANALYTICS_URL;
-	window.owa_cmds = window.owa_cmds || [];
-	function owatag() {
-		window.owa_cmds.push(arguments);
-	}
-	//owatag('js', new Date());
-	owatag('setSiteId', window.env.ANALYTICS_SITE_ID);
-	owatag('trackPageView');
-	owatag('trackClicks');
-};
-
 render(
 	<Provider store={store}>
         <ConnectedRouter history={history}>
             <App>
-                <script>{injectOWA()}</script>
+                {owaScript}
             </App>
         </ConnectedRouter>
     </Provider>,

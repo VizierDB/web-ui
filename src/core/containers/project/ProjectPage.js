@@ -32,7 +32,7 @@ import {
 import {
     dismissProjectActionError, fetchProject, updateProjectName
 } from '../../actions/project/ProjectPage';
-import { showSpreadsheet, showDatasetError, fetchAnnotations, fetchAnnotatated, repairDatasetError } from '../../actions/spreadsheet/Spreadsheet';
+import { showSpreadsheet, showDatasetError, repairDatasetError } from '../../actions/spreadsheet/Spreadsheet';
 import { ConnectionInfo } from '../../components/Api'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage, NotFoundMessage } from '../../components/Message';
@@ -107,7 +107,8 @@ class ProjectPage extends Component {
     /**
      * Fetch project information when page is loaded.
      */
-    componentDidMount = () => {
+    constructor(props) {
+        super(props);
         const { dispatch, location } = this.props
         const projectId = this.props.match.params.project_id
         const { branch, version } = queryString.parse(location.search)
@@ -158,7 +159,7 @@ class ProjectPage extends Component {
         //dispatch(fetchAnnotations(dataset));
     }
     /**
-     * Switch to spreadsheet view and load the selected to the page 
+     * Switch to spreadsheet view and load the selected to the page
      * that has the source of a specific error.
      */
     loadDatasetToError = (dataset) => (reason) => {
@@ -171,7 +172,7 @@ class ProjectPage extends Component {
      */
     loadDatasetRepair = (dataset) => (reason, repair, acknowledge) => {
         const { dispatch, serviceApi } = this.props;
-        const url = serviceApi.serviceUrl + '/datasets/' + dataset.id + '/feedback'  
+        const url = serviceApi.serviceUrl + '/datasets/' + dataset.id + '/feedback'
         dispatch(repairDatasetError(dataset, url, reason, repair, acknowledge));
     }
     /**
@@ -196,8 +197,7 @@ class ProjectPage extends Component {
             isFetching,
             project,
             serviceApi,
-            workflow,
-            dispatch
+            workflow
         } = this.props
         let content = null;
         if (isFetching) {
@@ -221,7 +221,7 @@ class ProjectPage extends Component {
                 />)
             }
             content = (<div className='page-content wide'>{content}</div>);
-        } else if ((project != null) && (workflow != null)) {
+        } else if (project != null) {
             // The project has been fetched successfully.  Set window title to
             // contain project name
             document.title = 'Vizier DB - ' + valueOrDefault(project.name, 'undefined');
@@ -308,6 +308,17 @@ class ProjectPage extends Component {
                     </div>
                 )
             }
+            // The status header can only be displayed when the workflow is
+            // loaded
+            let statusHeader = null;
+            if (workflow != null) {
+                statusHeader = (
+                    <ProjectStatusHeader
+                        project={project}
+                        workflow={workflow}
+                    />
+                );
+            }
             content = (
                 <div>
                     <Grid columns={2}>
@@ -332,10 +343,7 @@ class ProjectPage extends Component {
                             />
                             </Grid.Column>
                             <Grid.Column className='project-menu-bar' width={6}>
-                            <ProjectStatusHeader
-                                project={project}
-                                workflow={workflow}
-                            />
+                            { statusHeader }
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>

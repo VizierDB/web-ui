@@ -33,7 +33,7 @@ class CommandsListing extends React.Component {
         onSelect: PropTypes.func.isRequired
     }
     /**
-     * Submit selected modulespecification to controlling component.
+     * Submit selected module specification to controlling component.
      */
     handleClick = (e, data) => {
         const { env, onSelect } = this.props;
@@ -49,7 +49,6 @@ class CommandsListing extends React.Component {
         //max number of items pre col
         const fullCol = 9.5;
         // Further group modules by name
-        let list_index = '';
         let curCol = 0.0;
         let listItems = [];
         for (let value of groups) {
@@ -69,7 +68,7 @@ class CommandsListing extends React.Component {
                     listItems = [];
                     curCol = 1.25 + typeCommands.length;
                 }
-                
+
             }
             listItems.push(
                 <List.Item key={value}>

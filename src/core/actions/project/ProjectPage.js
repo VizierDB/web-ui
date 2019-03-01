@@ -23,6 +23,7 @@ import { WorkflowHandle } from '../../resources/Workflow';
 import { getProperty, updateResourceProperty } from '../../util/Api';
 import { valueOrDefault } from '../../util/App';
 import { ErrorObject } from '../../util/Error';
+import { HATEOAS_PROJECTS_LIST } from '../../util/HATEOAS';
 import { fetchAuthed, requestAuth } from '../main/Service';
 
 // Actions for fetching project information from Web API.
@@ -49,17 +50,11 @@ export const UPDATE_WORKFLOW = 'UPDATE_WORKFLOW';
   * with a single request.
  *
  */
-export const fetchProject = (identifier, branch, version) => (dispatch, getState) => {
-    // Get notebooks url from the API reference set. This set may not have been
+export const fetchProject = (projectId, branchId, workflowId) => (dispatch, getState) => {
+    // Construct project url from the API reference set. This set may not be
     // initialized yet!
     if (getState().serviceApi.links) {
-        let url = getState().serviceApi.links.notebooks;
-        // The notebooks url takes project, branch, and workflow identifier as
-        // query arguments. Use default values for branch and workflow version
-        // in case the arguments are not given
-        url += '?project=' + encodeURI(identifier);
-        url += '&branch=' + encodeURI(valueOrDefault(branch, DEFAULT_BRANCH));
-        url += '&version=' + valueOrDefault(version, -1);
+        let url = getState().serviceApi.links.getProjectUrl(projectId);
         // Signal start of fetching project listing
         dispatch(requestProject())
         // Fetch the project.
@@ -71,19 +66,16 @@ export const fetchProject = (identifier, branch, version) => (dispatch, getState
                 //  workflow modules (.modules), and all dataset descriptors
                 // (.datasets). The last two are used to generate the notebook.
                 response.json().then(json => {
-                    dispatch({
+                    const project = new ProjectHandle().fromJson(json);
+                    return dispatch({
                         type: RECEIVE_PROJECT,
-                        project: new ProjectHandle().fromJson(
-                            json.project,
-                            getState().serviceApi.properties
-                        ),
-                        workflow: new WorkflowHandle().fromJson(json.workflow)
+                        project
                     });
-                    return dispatch(
-                        receiveProjectResource(
-                            new NotebookResource(new Notebook().fromJson(json))
-                        )
-                    );
+                    //return dispatch(
+                    //    receiveProjectResource(
+                    //        new NotebookResource(new Notebook().fromJson(json))
+                    //    )
+                    //);
                 });
             } else if(response.status === 401) {
             	// UNAUTHORIZED: re-request auth

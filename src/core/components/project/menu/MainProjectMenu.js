@@ -50,7 +50,7 @@ class MainProjectMenu extends React.Component {
         groupMode: PropTypes.number.isRequired,
         project: PropTypes.object.isRequired,
         resource: PropTypes.object,
-        workflow: PropTypes.object.isRequired,
+        workflow: PropTypes.object,
         onChangeGrouping: PropTypes.func.isRequired,
         onDeleteBranch: PropTypes.func.isRequired,
         onEditBranch: PropTypes.func.isRequired,
@@ -166,7 +166,7 @@ class MainProjectMenu extends React.Component {
                     datasets={workflow.datasets}
                     onSelect={onShowDatasetError}
                     resource={resource}
-                />);    
+                />);
             menuItems.push(
                 <ChartMenuDropdown
                     key='charts'

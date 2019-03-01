@@ -20,11 +20,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import DatasetRepair from './DatasetRepair';
 import { Icon } from 'semantic-ui-react';
-import { showSpreadsheet } from '../../actions/spreadsheet/Spreadsheet';
 import '../../../css/DatasetError.css'
 
 /**
- * Display a list of dataset errors detected by mimir 
+ * Display a list of dataset errors detected by mimir
  */
 class DatasetReason extends React.Component {
     static propTypes = {
@@ -32,22 +31,22 @@ class DatasetReason extends React.Component {
         onGotoError: PropTypes.func.isRequired,
         onRepairError: PropTypes.func.isRequired
     }
-    
+
     constructor(props) {
         super(props);
         this.state = {expanded: false }
     }
-    
+
     handleExpand = () => {
     	const { expanded } = this.state;
     	this.setState({expanded:!expanded})
     }
-    
+
     handleGotoError = (event) => {
     	const { onGotoError, reason } = this.props;
     	onGotoError(reason.value);
     }
-    
+
     buildReasonElement = (elkey, elvalue) => {
     	if(Array.isArray(elvalue)){
     		let elements = []
@@ -68,7 +67,7 @@ class DatasetReason extends React.Component {
     	}
     }
     /**
-     * 
+     *
      */
     render() {
     	const { reason, onRepairError } = this.props;
@@ -77,9 +76,9 @@ class DatasetReason extends React.Component {
         const reasonElements = [];//this.buildReasonElement('reason',value);
         reasonElements.unshift(<div className='dataset-reason-element'><td className='dataset-reason-key'><h4>id: </h4></td><td>{id}</td></div>)
         reasonElements.unshift(<div className='dataset-reason-element'><td className='dataset-reason-key'><h4>key: </h4></td><td>{key}</td></div>)
-        
+
         let tableContent = null
-        
+
         if(expanded){
         	tableContent = (<div>
         						<table>{reasonElements}</table>
@@ -89,16 +88,16 @@ class DatasetReason extends React.Component {
 	        	                />
         					</div> )
         }
-        
+
         let gotoErrorIcon = null
-        if(value.rowidarg != -1 && value.args && Array.isArray(value.args) && value.args[value.rowidarg]){
+        if(value.rowidarg !== -1 && value.args && Array.isArray(value.args) && value.args[value.rowidarg]){
         	gotoErrorIcon = (<Icon name='external alternate' size='small' />)
         }
         let errorIcon = (<Icon name='warning sign' size='large' color='yellow' />)
         if(value.confirmed){
         	errorIcon = (<Icon name='check circle' size='large' color='green' />)
         }
-        
+
         return (
         	<div className='dataset-reason' >
                 <table><tr>
@@ -115,4 +114,3 @@ class DatasetReason extends React.Component {
 }
 
 export default DatasetReason;
-

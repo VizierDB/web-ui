@@ -18,13 +18,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Icon } from 'semantic-ui-react';
-import { pageUrl } from '../../util/App';
 import DatasetReason from './DatasetReason';
 import '../../../css/DatasetError.css';
 
 /**
- * Display a list of dataset errors detected by mimir 
+ * Display a list of dataset errors detected by mimir
  */
 class DatasetError extends React.Component {
     static propTypes = {
@@ -34,7 +32,7 @@ class DatasetError extends React.Component {
         onRepairError: PropTypes.func.isRequired
     }
     /**
-     * 
+     *
      */
     render() {
         const { dataset, annotations, onGotoError, onRepairError } = this.props;

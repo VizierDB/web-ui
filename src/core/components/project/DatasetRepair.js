@@ -18,39 +18,38 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Icon, Dropdown, Form, Button } from 'semantic-ui-react';
-import { showSpreadsheet } from '../../actions/spreadsheet/Spreadsheet';
+import { Dropdown, Form, Button } from 'semantic-ui-react';
 import '../../../css/DatasetError.css'
 
 /**
- * Display a list of dataset errors detected by mimir 
+ * Display a list of dataset errors detected by mimir
  */
 class DatasetRepair extends React.Component {
     static propTypes = {
         reason: PropTypes.object.isRequired,
         onRepairError: PropTypes.func.isRequired
     }
-    
+
     constructor(props) {
         super(props);
         this.state = {expanded: false, repairValue: '' }
     }
-    
+
     handleExpand = () => {
     	const { expanded } = this.state;
     	this.setState({expanded:!expanded})
     }
-    
+
     handleRepairError = (acknowledge) => (event) => {
     	const { onRepairError, reason } = this.props;
     	const { repairValue } = this.state;
     	onRepairError(reason.value, repairValue, acknowledge);
     }
-    
+
     handleRepairChange = (e, { value }) => {
     	this.setState({repairValue:value})
     }
-    
+
     buildRepairElement = (elkey, elvalue) => {
     	const { repairValue } = this.state;
     	if(elkey === 'reason' && elvalue.repair.selector === 'list'){
@@ -84,21 +83,20 @@ class DatasetRepair extends React.Component {
     	}
     }
     /**
-     * 
+     *
      */
     render() {
     	const { reason } = this.props;
-        const { id, key, value } = reason;
-        const { expanded } = this.state;
+        const { value } = reason;
         const reasonElements = this.buildRepairElement('reason',value);
-        
-        
+
+
         let repairErrorButton = null
         if(value.repair.selector === 'list' || value.repair.selector === 'by_type'){
         	repairErrorButton = (<Button icon='tasks' positive onClick={this.handleRepairError(false)}>Repair</Button>)
 	    }
 	    let acknowledgeButton = (<Button icon='check' positive onClick={this.handleRepairError(true)}>Acknowledge</Button>)
-        
+
         return (
         	<div className='dataset-reason-element' >
                 <table><tr>
@@ -108,11 +106,10 @@ class DatasetRepair extends React.Component {
                 	<td className='dataset-reason-english'><div className='reason-repair'>{reasonElements}</div></td>
                 	<td className='dataset-reason-goto'><div>{repairErrorButton}</div></td>
                 	<td className='dataset-reason-goto'><div>{acknowledgeButton}</div></td>
-                </tr></table> 
+                </tr></table>
             </div>
         );
     }
 }
 
 export default DatasetRepair;
-

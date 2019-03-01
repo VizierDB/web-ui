@@ -34,11 +34,6 @@ export const DEFAULT_BRANCH = 'master'
  * branch (i.e., .id, .name, and .links).
  */
 export class BranchDescriptor {
-    constructor(id, name, links) {
-        this.id = id;
-        this.name = name;
-        this.links = links;
-    }
     /**
      * Initialize the descriptor from a Json object that is a BranchDescriptor
      * serialization returned by the Web API.
@@ -46,6 +41,7 @@ export class BranchDescriptor {
     fromJson(json) {
         this.id = json.id;
         this.name = getProperty(json, 'name', 'undefined');
+        this.isDefault = json.isDefault;
         this.links = new HATEOASReferences(json.links);
         return this;
     }

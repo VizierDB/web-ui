@@ -35,6 +35,17 @@ class MainPage extends Component {
         serviceApi: PropTypes.object,
         showForm: PropTypes.bool.isRequired
     }
+    constructor(props) {
+        super(props);
+        console.log("Main Page");
+    }
+    /**
+     * Show page for a selected project.
+     */
+    handleShowProjectPage = (projectId) => {
+        const { history } = this.props;
+        history.push(pageUrl(projectId));
+    }
     /**
      */
     render() {
@@ -77,17 +88,14 @@ class MainPage extends Component {
                 <Grid>
                     <Grid.Row>
                         <Grid.Column width={8}>
-                            <h3 className='home-headline'>Getting Started</h3>
-                            <p className='home-text'>
-                                <span className='sys-name'>Vizier</span>  organizes
-                                data curation workflows into projects. Start by
-                                {createProjectLink} or by selecting a project from
-                                the menu or the list below.
-                            </p>
-                            <ProjectListing />
-                        </Grid.Column>
-                        <Grid.Column width={8}>
-                            <div>
+                            <div className='home-sidebar'>
+                                <h3 className='home-headline'>Getting Started</h3>
+                                <p className='home-text'>
+                                    <span className='sys-name'>Vizier</span>  organizes
+                                    data curation workflows into projects. Start by
+                                    {createProjectLink} or by selecting a project from
+                                    the menu or the data curation projects list.
+                                </p>
                                 <h3 className='home-headline'>About Vizier</h3>
                                 <p className='home-text'>
                                     <span className='sys-name'>Vizier</span> is a new powerful tool to streamline the data
@@ -113,6 +121,10 @@ class MainPage extends Component {
                                 </p>
                             </div>
                         </Grid.Column>
+                        <Grid.Column width={8}>
+                            <h3 className='home-headline'>Data Curation Projects</h3>
+                            <ProjectListing />
+                        </Grid.Column>
                     </Grid.Row>
                 </Grid>
             </div>
@@ -122,25 +134,29 @@ class MainPage extends Component {
             const projectItems = [];
             for (let i = 0; i < projects.length; i++) {
                 const pj = projects[i];
-                const link = pageUrl(pj.id);
                 projectItems.push(
                     <Dropdown.Item
                         key={pj.id}
                         icon='database'
                         text={pj.name}
-                        href={link}
+                        onClick={() => (this.handleShowProjectPage(pj.id))}
                     />
                 );
             }
+            // Only show the project menu divider if the list of projects is
+            // not empty
+            let projectMenuDivider = null;
+            if (projects.length > 0) {
+                projectMenuDivider = (<Dropdown.Divider />);
+            }
             projectsMenu = (
                 <Dropdown
-                    disabled={projects.length === 0}
                     item
                     text='Projects'
                 >
                     <Dropdown.Menu>
                         { projectItems }
-                        <Dropdown.Divider />
+                        { projectMenuDivider }
                         <Dropdown.Item
                             key='new'
                             icon='plus'
