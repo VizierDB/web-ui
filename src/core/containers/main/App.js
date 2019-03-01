@@ -25,10 +25,11 @@ import { fetchService, receiveAuth } from '../../actions/main/Service'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage } from '../../components/Message';
 import MainPage from './MainPage'
+import BranchHistoryPage from '../project/BranchHistoryPage';
 import ProjectPage from '../project/ProjectPage'
 import AuthModal from '../../components/modals/AuthModal';
 
-import { baseHref, projectHref, isNotEmptyString } from '../../util/App';
+import { baseHref, projectHref, workflowHref, isNotEmptyString } from '../../util/App';
 
 import logo from '../../../img/logo_small.png';
 import '../../../css/App.css'
@@ -110,6 +111,8 @@ class App extends Component {
                     <Router>
                         <Switch>
                             <Route exact path={baseHref} component={MainPage} />
+                            <Route path={workflowHref} component={ProjectPage} />
+                            <Route path={projectHref + '/branches/:branch_id/history'} component={BranchHistoryPage} />
                             <Route path={projectHref} component={ProjectPage} />
                         </Switch>
                     </Router>

@@ -31,32 +31,28 @@ import { utc2LocalTime } from '../util/Timestamp';
  * by the action.
  */
 export class WorkflowDescriptor {
-    constructor(version, createdAt, action, statement) {
-        this.version = version;
-        this.createdAt = createdAt;
-        this.action = action;
-        this.statement = statement;
-    }
-    /**
-     * Initialize the workflow descriptor from a Json object that contains the
-     * serialization of a WorkflowDescriptor returned by the Web API.
-     */
-    fromJson(json) {
-        this.version = json.version;
-        this.createdAt = utc2LocalTime(json.createdAt);
-        this.action = json.action;
-        this.statement = json.statement;
-        return this;
-    }
     /**
      * Helper functions to determine the action type that created the workflow
      * version There are four possible action types: CREATE BRANCH, DELETE
      * MODULE, INSERT (or APPEND) MODULE, and REPLACE MODULE.
      */
+    actionIsAppend = () => (this.action === 'apd');
     actionIsCreate = () => (this.action === 'cre');
     actionIsDelete = () => (this.action === 'del');
     actionIsInsert = () => (this.action === 'ins');
     actionIsReplace = () => (this.action === 'upd');
+    /**
+     * Initialize the workflow descriptor from a Json object that contains the
+     * serialization of a WorkflowDescriptor returned by the Web API.
+     */
+    fromJson(json) {
+        this.id = json.id;
+        this.createdAt = utc2LocalTime(json.createdAt);
+        this.action = json.action;
+        this.packageId = json.packageId;
+        this.commandId = json.commandId;
+        return this;
+    }
 }
 
 

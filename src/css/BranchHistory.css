@@ -1,13 +1,9 @@
-div.history-view {
+div.branch-history {
     background: #fff;
     border-radius: .28571429rem;
     border: 1px solid rgba(34,36,38,.15);
     box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
-    padding: 20px 10px;
-}
-
-div.branch-history {
-    margin: 0px 20px;
+    padding: 20px 20px;
 }
 
 h1.branch-history {
@@ -15,8 +11,27 @@ h1.branch-history {
     font-size: 1.5em;
 }
 
-td.version-statement {
+td.workflow-action {
+    color: #3b4151;
     padding-left: 10px;
+}
+
+td.workflow-command {
+    font-weight: bold;
+    color: #3b4151;
+    padding-left: 0.5em;
+}
+
+td.workflow-icon {
+    padding-right: 10px;
+}
+
+td.workflow-nr {
+    color: #e87722;
+    font-family: "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;
+    padding-left: 0px;
+    padding-right: 10px;
+    text-align: right;
 }
 
 td.version-timestamp {
@@ -26,14 +41,4 @@ td.version-timestamp {
 
 span.branch-highlight {
     font-weight: bold;
-}
-
-a.version-link {
-    color: #3b4151;
-    text-decoration: none;
-    outline: 0;
-}
-
-a.version-link:hover {
-    color: #4286f4;
 }

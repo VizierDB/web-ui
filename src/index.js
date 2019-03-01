@@ -33,7 +33,7 @@ import './css/index.css';
 // https://medium.com/@notrab/getting-started-with-create-react-app-redux-react-router-redux-thunk-d6a19259f71f
 
 // History syncs browserHistory with our store
-export const history = createHistory()
+export const history = createHistory();
 
 const enhancers = []
 const middleware = [

@@ -47,6 +47,7 @@ const MODAL_EDIT_PROJECT_NAME = 'MODAL_EDIT_PROJECT_NAME';
 
 class MainProjectMenu extends React.Component {
     static propTypes = {
+        branch: PropTypes.object,
         groupMode: PropTypes.number.isRequired,
         project: PropTypes.object.isRequired,
         resource: PropTypes.object,
@@ -86,6 +87,7 @@ class MainProjectMenu extends React.Component {
      */
     render() {
         const {
+            branch,
             groupMode,
             project,
             resource,
@@ -113,23 +115,29 @@ class MainProjectMenu extends React.Component {
         menuItems.push(
             <ProjectMenuDropdown
                 key='project'
+                name={project.name}
                 onEdit={this.showEditProjectNameModal}
             />
         );
+        let isLiveEnabled = false;
+        if (workflow != null) {
+            isLiveEnabled = ((workflow.readOnly) || (resource.isHistory()));
+        }
+        menuItems.push(
+            <BranchMenuDropdown
+                key='branches'
+                branches={project.branches}
+                onDelete={this.showDeleteBranchModal}
+                onEdit={this.showEditBranchNameModal}
+                onGoLive={this.switchToBranchHead}
+                onSelect={this.switchBranch}
+                onShowHistory={onShowHistory}
+                isLive={!isLiveEnabled}
+                selectedBranch={branch}
+                showTimeMachine={workflow != null}
+            />
+        );
         if (resource != null) {
-            menuItems.push(
-                <BranchMenuDropdown
-                    key='branches'
-                    branches={project.branches}
-                    onDelete={this.showDeleteBranchModal}
-                    onEdit={this.showEditBranchNameModal}
-                    onGoLive={this.switchToBranchHead}
-                    onSelect={this.switchBranch}
-                    onShowHistory={onShowHistory}
-                    isLive={(!workflow.readOnly) && (!resource.isHistory())}
-                    selectedBranch={workflow.branch}
-                />
-            );
             // Depending on whether the resource is a notebook or not the
             // notebook menue is changed. If the resource is not a notebook the
             // menu item is a button that allows to show the notebook. If the
@@ -153,27 +161,29 @@ class MainProjectMenu extends React.Component {
                         onReverse={onReverse}
                     />);
             }
-            menuItems.push(
-                <DatasetMenuDropdown
-                    key='datasets'
-                    datasets={workflow.datasets}
-                    onSelect={onShowDataset}
-                    resource={resource}
-                />);
-            menuItems.push(
-                <DatasetErrorMenuDropdown
-                    key='datasets'
-                    datasets={workflow.datasets}
-                    onSelect={onShowDatasetError}
-                    resource={resource}
-                />);
-            menuItems.push(
-                <ChartMenuDropdown
-                    key='charts'
-                    charts={workflow.charts}
-                    onSelect={onShowChart}
-                    resource={resource}
-                />);
+            if (workflow != null) {
+                menuItems.push(
+                    <DatasetMenuDropdown
+                        key='datasets'
+                        datasets={workflow.datasets}
+                        onSelect={onShowDataset}
+                        resource={resource}
+                    />);
+                menuItems.push(
+                    <DatasetErrorMenuDropdown
+                        key='datasets'
+                        datasets={workflow.datasets}
+                        onSelect={onShowDatasetError}
+                        resource={resource}
+                    />);
+                menuItems.push(
+                    <ChartMenuDropdown
+                        key='charts'
+                        charts={workflow.charts}
+                        onSelect={onShowChart}
+                        resource={resource}
+                    />);
+            }
         }
         let menuBar = (
             <Menu secondary>
@@ -184,14 +194,14 @@ class MainProjectMenu extends React.Component {
         let optionalModalOrMessage = null;
         const { modal } = this.state;
         if (modal !== null) {
-            if ((modal === MODAL_DELETE_BRANCH) && (resource != null)) {
+            if ((modal === MODAL_DELETE_BRANCH) && (branch != null)) {
                 optionalModalOrMessage = <DeleteResourceModal
                     open={true}
                     onCancel={this.hideModal}
                     onSubmit={this.deleteCurrentBranch}
-                    prompt={'Do you really want to delete the branch ' + workflow.branch.name + '?'}
+                    prompt={'Do you really want to delete the branch ' + branch.name + '?'}
                     title={'Delete branch'}
-                    value={workflow.branch}
+                    value={branch}
                 />
             } else if (modal === MODAL_EDIT_PROJECT_NAME) {
                 optionalModalOrMessage = <EditResourceNameModal
@@ -202,14 +212,14 @@ class MainProjectMenu extends React.Component {
                     title={'Edit project name'}
                     value={project.name}
                 />
-            } else if ((modal === MODAL_EDIT_BRANCH_NAME) && (resource != null)) {
+            } else if ((modal === MODAL_EDIT_BRANCH_NAME) && (branch != null)) {
                 optionalModalOrMessage = <EditResourceNameModal
                     isValid={isNotEmptyString}
                     open={true}
                     onCancel={this.hideModal}
                     onSubmit={this.submitUpdateBranchName}
                     title={'Edit branch name'}
-                    value={workflow.branch.name}
+                    value={branch.name}
                 />
             }
         }
@@ -236,9 +246,9 @@ class MainProjectMenu extends React.Component {
      * Submit change to current branch name.
      */
     submitUpdateBranchName = (name) => {
-        const { onEditBranch, workflow } = this.props;
+        const { onEditBranch, branch } = this.props;
         this.hideModal();
-        if (name.trim() !== workflow.branch.name) {
+        if (name.trim() !== branch.name) {
             onEditBranch(name);
         }
     }
@@ -263,7 +273,7 @@ class MainProjectMenu extends React.Component {
      * Show workflow at branch head when user wants to 'Go Live'
      */
     switchToBranchHead = () => {
-        const { onRedirect, onShowNotebook, project, workflow } = this.props;
+        const { branch, onRedirect, onShowNotebook, project, workflow } = this.props;
         // If the resource workflow is read-only we need to load the branch
         // head. This is because read-only indicates that a workflow version
         // other than the branch head is currently show. If the workflow is
@@ -272,7 +282,7 @@ class MainProjectMenu extends React.Component {
         // Note that the semantics of read-only may change in the future and
         // we might need to adjust the code here.
         if (workflow.readOnly) {
-            onRedirect(pageUrl(project.id, workflow.branch.id));
+            onRedirect(pageUrl(project.id, branch.id));
         } else {
             onShowNotebook();
         }

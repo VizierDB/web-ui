@@ -167,6 +167,49 @@ export const postResourceData = (dispatch, url, data, successHandler, errorHandl
 
 
 /**
+ * Generic function to update a resource at the Web service via HTTP PUT
+ * request. Expects at least two callback functions (successHandler and
+ * errorHandler) that will be called respectively when the resource was
+ * created or updated successfully or in case of an error. The optional
+ * signalStartHandler will be called before the request is being made.
+ */
+export const putResourceData = (dispatch, url, data, successHandler, errorHandler, signalStartHandler) => {
+    // Signal start if callback handle is given
+    if (signalStartHandler) {
+        dispatch(signalStartHandler())
+    }
+    return fetchAuthed(
+            url,
+            {
+                method: 'PUT',
+                body: JSON.stringify(data),
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+            }
+        )(dispatch)
+        // Check the response. Assume that eveything is all right if status
+        // code below 400
+        .then(function(response) {
+            if (response.status >= 200 && response.status < 400) {
+                // SUCCESS: Pass the JSON result to the respective callback
+                // handler
+                response.json().then(json => dispatch(successHandler(json)));
+            } else if(response.status === 401) {
+            	// UNAUTHORIZED: re-request auth
+            	dispatch(requestAuth())
+            } else {
+                // ERROR: The API is expected to return a JSON object in case
+                // of an error that contains an error message
+                response.json().then(json => dispatch(errorHandler(json.message)));
+            }
+        })
+        .catch(err => dispatch(errorHandler(err.message)))
+}
+
+
+/**
  * Generic function to update a property of a resource at the Web service via
  * HTTP POST request. Expects at least two callback functions (successHandler
  * and errorHandler) that will be called respectively when the resource was
@@ -181,7 +224,7 @@ export const postResourceData = (dispatch, url, data, successHandler, errorHandl
     if (value !== null) {
         updStmt['value'] = value
     }
-    return postResourceData(dispatch, url, {'properties': [updStmt]}, successHandler, errorHandler, signalStartHandler)
+    return putResourceData(dispatch, url, {'properties': [updStmt]}, successHandler, errorHandler, signalStartHandler)
 }
 
 

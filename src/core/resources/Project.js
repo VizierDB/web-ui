@@ -77,11 +77,11 @@ class ModuleRegistry {
 * future.
  */
 export class ProjectHandle {
-    constructor(id, name, links, environment, branches) {
+    constructor(id, name, links, packages, branches) {
         this.id = id;
         this.name = name;
         this.links = links;
-        this.environment = environment;
+        this.packages = packages;
         this.branches = branches;
     }
     /**
@@ -106,7 +106,7 @@ export class ProjectHandle {
     /**
      * This method is used to identify cells in a notebook that are grouped.
      * The information about which cells are grouped should be encoded in the
-     * project environment.
+     * project packages.
      * Note: For now, the information is hard-coded.
      */
     isGrouped(module) {
@@ -128,7 +128,7 @@ export class ProjectHandle {
      * so that it contains the given branch instead of an outdated one.
      */
     updateBranch(branch) {
-        const { id, name, links, environment, branches } = this;
+        const { id, name, links, packages, branches } = this;
         // Create a modified branch listing
         const modBranches = [];
         for (let i = 0; i < branches.length; i++) {
@@ -139,14 +139,14 @@ export class ProjectHandle {
                 modBranches.push(br);
             }
         }
-        return new ProjectHandle(id, name, links, environment, modBranches);
+        return new ProjectHandle(id, name, links, packages, modBranches);
     }
     /**
      * Create a copy of the project handle with a modified name.
      */
     updateName(name) {
-        const { id, links, environment, branches } = this;
-        return new ProjectHandle(id, name, links, environment, branches);
+        const { id, links, packages, branches } = this;
+        return new ProjectHandle(id, name, links, packages, branches);
     }
 }
 

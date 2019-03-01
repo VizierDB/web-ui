@@ -26,6 +26,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 export const baseHref = '/' + href;
 export const projectHref = baseHref + 'projects/:project_id';
+export const workflowHref = baseHref + 'projects/:project_id/branches/:branch_id/workflows/:workflow_id';
 
 
 /**
@@ -92,18 +93,16 @@ export const isNonNegativeInt = (value) => {
 /**
  * Generate url to show a particular workflow version in the app.
  */
-export const pageUrl = (projectId, branch, version, module) => {
+export const pageUrl = (projectId, branchId, workflowId, module) => {
     let link = baseHref + 'projects/' + projectId;
-    if (branch != null) {
-        link += '?branch=' + branch;
-        if (version != null) {
-            link += '&version=' + version;
+    if (branchId != null) {
+        link += '/branches/' + branchId;
+        if (workflowId != null) {
+            link += '/workflows/' + workflowId;
             if (module) {
-                link += '&module=' + module;
+                link += '?module=' + module;
             }
         }
-    } else if (version != null) {
-        link += '?version=' + version;
     }
     return link;
 }

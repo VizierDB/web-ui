@@ -28,10 +28,14 @@ export const HATEOAS_SELF = 'self';
 export const HATEOAS_API_DOC = 'api.doc';
 export const HATEOAS_USER_AUTH = 'user.auth';
 
+// Branch
+export const HATEOAS_BRANCH_UPDATE_PROPERTY = 'branch.update';
+
 // Projects
 export const HATEOAS_PROJECTS_CREATE = 'project.create';
 export const HATEOAS_PROJECTS_DELETE = 'project.delete';
 export const HATEOAS_PROJECTS_LIST = 'project.list';
+export const HATEOAS_PROJECT_UPDATE_PROPERTY = 'project.update';
 
 
 /**

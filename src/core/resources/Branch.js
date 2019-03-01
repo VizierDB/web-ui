@@ -19,11 +19,6 @@
 import { getProperty } from '../util/Api';
 import { HATEOASReferences } from '../util/HATEOAS';
 
-/**
- * Identifier of the default branch for curation projects.
- */
-export const DEFAULT_BRANCH = 'master'
-
 
 // -----------------------------------------------------------------------------
 // Classes
@@ -34,6 +29,12 @@ export const DEFAULT_BRANCH = 'master'
  * branch (i.e., .id, .name, and .links).
  */
 export class BranchDescriptor {
+    constructor(id, name, isDefault, links) {
+        this.id = id;
+        this.name = name;
+        this.isDefault = isDefault;
+        this.links = links;
+    }
     /**
      * Initialize the descriptor from a Json object that is a BranchDescriptor
      * serialization returned by the Web API.
@@ -44,5 +45,12 @@ export class BranchDescriptor {
         this.isDefault = json.isDefault;
         this.links = new HATEOASReferences(json.links);
         return this;
+    }
+    /**
+     * Create a copy of the branch handle with a modified name.
+     */
+    updateName(name) {
+        const { id, isDefault, links } = this;
+        return new BranchDescriptor(id, name, isDefault, links);
     }
 }

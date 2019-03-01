@@ -18,16 +18,14 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 import {  Grid, Loader, Modal } from 'semantic-ui-react';
-import queryString from 'query-string';
 import { redirectTo } from '../../actions/main/App';
 import { showChartView } from '../../actions/chart/Chart';
 import {
     changeGroupMode, reverseOrder, showNotebook
 } from '../../actions/notebook/Notebook';
 import {
-    deleteBranch, showBranchHistory, updateBranchName
+    deleteBranch, fetchBranchHistory, updateBranchName
 } from '../../actions/project/Branch';
 import {
     dismissProjectActionError, fetchProject, updateProjectName
@@ -36,7 +34,6 @@ import { showSpreadsheet, showDatasetError, repairDatasetError } from '../../act
 import { ConnectionInfo } from '../../components/Api'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage, NotFoundMessage } from '../../components/Message';
-import BranchHistory from '../../components/project/BranchHistory';
 import DatasetError from '../../components/project/DatasetError';
 import DatasetChart from '../../components/plot/DatasetChart';
 import ModuleError from '../../components/project/ModuleError';
@@ -44,7 +41,8 @@ import MainProjectMenu from '../../components/project/menu/MainProjectMenu';
 import ProjectStatusHeader from '../../components/project/ProjectStatusHeader';
 import Notebook from '../notebook/Notebook';
 import Spreadsheet from '../spreadsheet/Spreadsheet';
-import { valueOrDefault } from '../../util/App';
+import { pageUrl, valueOrDefault } from '../../util/App';
+
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
 import '../../../css/BranchHistory.css';
@@ -95,6 +93,7 @@ import '../../../css/Chart.css';
 class ProjectPage extends Component {
     static propTypes = {
         actionError: PropTypes.object,
+        branch: PropTypes.object,
         fetchError: PropTypes.object,
         groupMode: PropTypes.number,
         isActive: PropTypes.bool.isRequired,
@@ -109,10 +108,12 @@ class ProjectPage extends Component {
      */
     constructor(props) {
         super(props);
-        const { dispatch, location } = this.props
-        const projectId = this.props.match.params.project_id
-        const { branch, version } = queryString.parse(location.search)
-        dispatch(fetchProject(projectId, branch, version))
+        const { dispatch } = this.props;
+        const projectId = this.props.match.params.project_id;
+        const branchId = this.props.match.params.branch_id;
+        const workflowId = this.props.match.params.workflow_id;
+        //const { branch, version } = queryString.parse(location.search)
+        dispatch(fetchProject(projectId, branchId, workflowId));
     }
     /**
      * Dismiss resource error message.
@@ -129,12 +130,17 @@ class ProjectPage extends Component {
         const { dispatch } = this.props;
         dispatch(changeGroupMode(mode));
     }
+    handleSelectWorkflow = (workflow) => {
+        const { dispatch, project, branch, history } = this.props;
+        history.push(pageUrl(project.id, branch.id, workflow.id));
+        dispatch(fetchProject(project.id, branch.id, workflow.id));
+    }
     /**
      * Show history for the branch of the current workflow.
      */
     loadBranchHistory = () => {
-        const { dispatch, workflow } = this.props;
-        dispatch(showBranchHistory(workflow.branch));
+        const { dispatch, branch } = this.props;
+        dispatch(fetchBranchHistory(branch));
     }
     /**
      * Load a chart view and dispaly it as the project page resource content.
@@ -192,6 +198,7 @@ class ProjectPage extends Component {
     }
     render() {
         const {
+            branch,
             fetchError,
             groupMode,
             isFetching,
@@ -240,11 +247,11 @@ class ProjectPage extends Component {
                     onDismiss={this.dismissResourceError}
                 />;
             }
+            let contentCss = 'page-content';
             if (resource != null) {
                 // The resource has been fetched. Depending on the resource type
                 // we either show a notebook, the branch history, a spreadsheet,
                 // or a chart view.
-                let contentCss = 'page-content';
                 if (resource.isChart()) {
                     const dataset = resource.content.dataset;
                     pageContent = (
@@ -279,11 +286,6 @@ class ProjectPage extends Component {
                 } else if (resource.isHistory()) {
                     pageContent = (
                         <div className='history-view'>
-                            <BranchHistory
-                                project={project}
-                                branch={workflow.branch}
-                                workflows={resource.content}
-                            />
                         </div>
                     )
                     contentCss += ' slim';
@@ -298,15 +300,17 @@ class ProjectPage extends Component {
                 // Show a modal with a loader that overlays the full screen if
                 // the page content is currently being fetched.
                 pageContent = (
-                    <div className={contentCss}>
+                    <div>
                         <Modal dimmer={true} open={isActive}>
                             <Loader size='large' active={true}>Loading</Loader>
                         </Modal>
                         { optionalError }
                         { pageContent }
-                        <ConnectionInfo api={serviceApi}/>
                     </div>
                 )
+            } else {
+                contentCss += ' wide';
+                pageContent = <ContentSpinner size='medium' text='Loading Notebook ...' />;
             }
             // The status header can only be displayed when the workflow is
             // loaded
@@ -325,6 +329,7 @@ class ProjectPage extends Component {
                         <Grid.Row>
                             <Grid.Column className='project-menu-bar' width={10}>
                             <MainProjectMenu
+                                branch={branch}
                                 groupMode={groupMode}
                                 onChangeGrouping={this.handleChangeGroupMode}
                                 onDeleteBranch={this.submitDeleteBranch}
@@ -347,7 +352,10 @@ class ProjectPage extends Component {
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>
-                    { pageContent }
+                    <div className={contentCss}>
+                        { pageContent }
+                        <ConnectionInfo api={serviceApi}/>
+                    </div>
                 </div>
             )
         }
@@ -364,8 +372,8 @@ class ProjectPage extends Component {
      * Submit request to update the name of the current branch.
      */
     submitEditBranch = (name) => {
-        const { dispatch, project, workflow } = this.props;
-        dispatch(updateBranchName(project, workflow, name));
+        const { dispatch, project, branch } = this.props;
+        dispatch(updateBranchName(project, branch, name));
     }
     /**
      * Submit request to update the name of the project.
@@ -377,9 +385,10 @@ class ProjectPage extends Component {
 }
 
 
-const mapStateToProps = state => {
+/*const mapStateToProps = state => {
     return {
         actionError: state.projectPage.actionError,
+        branch: state.projectPage.branch,
         fetchError: state.projectPage.fetchError,
         groupMode: state.notebook.groupMode,
         isActive: state.projectPage.isActive,
@@ -389,6 +398,6 @@ const mapStateToProps = state => {
         serviceApi: state.serviceApi,
         workflow: state.projectPage.workflow
     }
-}
+}*/
 
-export default connect(mapStateToProps)(ProjectPage)
+export default ProjectPage; //connect(mapStateToProps)(ProjectPage)

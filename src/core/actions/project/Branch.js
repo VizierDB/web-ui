@@ -18,16 +18,21 @@
 
 import { redirectTo } from '../main/App';
 import {
-    projectActionError, receiveProjectResource, requestProject,
-    replaceCurrentBranch, requestProjectAction
+    projectActionError, requestProject,
+    requestProjectAction
 } from './ProjectPage';
-import { BranchDescriptor, DEFAULT_BRANCH } from '../../resources/Branch';
-import { BranchHistoryResource } from '../../resources/Project';
 import { WorkflowDescriptor } from '../../resources/Workflow';
 import {
-    deleteResource, fetchResource, postResourceData, updateResourceProperty
+    deleteResource, fetchResource, getProperty, postResourceData,
+    updateResourceProperty
 } from '../../util/Api';
 import { pageUrl } from '../../util/App';
+import { HATEOAS_SELF, HATEOAS_BRANCH_UPDATE_PROPERTY } from '../../util/HATEOAS';
+
+
+// Actions for manipulating branches and retrieving branch information
+export const UPDATE_BRANCH = 'UPDATE_BRANCH';
+export const RECEIVE_BRANCH_HISTORY = 'RECEIVE_BRANCH_HISTORY';
 
 
 /**
@@ -85,7 +90,7 @@ export const deleteBranch = (project, branch) => (dispatch) => {
     dispatch(
         deleteResource(
             branch.links.delete,
-            () => (redirectTo(pageUrl(project.id, DEFAULT_BRANCH))),
+            () => (redirectTo(pageUrl(project.id, 'DEFAULT_BRANCH'))),
             (message) => (
                 projectActionError('Error deleting branch', message)
             ),
@@ -105,10 +110,10 @@ export const deleteBranch = (project, branch) => (dispatch) => {
  * branch: BranchDescriptor
  *
  */
-export const showBranchHistory = (branch) => (dispatch) => {
+export const fetchBranchHistory = (project, branch) => (dispatch) => {
     dispatch(
         fetchResource(
-            branch.links.self,
+            branch.links.get(HATEOAS_SELF),
             (json) => (dispatch) => {
                 // Expect a listing of workflow version descriptors.
                 const workflows = json.workflows;
@@ -117,9 +122,10 @@ export const showBranchHistory = (branch) => (dispatch) => {
                     const wf = workflows[i];
                     history.push(new WorkflowDescriptor().fromJson(wf))
                 }
-                return dispatch(
-                    receiveProjectResource(new BranchHistoryResource(history))
-                );
+                return dispatch({
+                    type: RECEIVE_BRANCH_HISTORY,
+                    workflows: history
+                });
             },
             (message) => (
                 projectActionError('Error fetching branch history', message)
@@ -138,25 +144,26 @@ export const showBranchHistory = (branch) => (dispatch) => {
  * Parameters:
  *
  * project: ProjectHandle
- * workflow: WorkflowHandle
+ * branch: BranchHandle
  * name: string
  *
  */
-export const updateBranchName = (project, workflow, name) => (dispatch) => {
+export const updateBranchName = (project, branch, name) => (dispatch) => {
     dispatch(
         updateResourceProperty(
-            workflow.branch.links.update,
+            branch.links.get(HATEOAS_BRANCH_UPDATE_PROPERTY),
             'name',
             name,
             (json) => (dispatch) => {
-                // The returned object is a branch descriptor.
-                return dispatch(
-                    replaceCurrentBranch(
-                        project,
-                        workflow,
-                        new BranchDescriptor().fromJson(json)
-                    )
-                );
+                // Create an updated branch descriptor with the new name
+                const updBranch = branch.updateName(getProperty(json, 'name'));
+                // Need to modify the project as well since it contains a
+                // reference to all the branches
+                return dispatch({
+                    type: UPDATE_BRANCH,
+                    branch: updBranch,
+                    project: project.updateBranch(updBranch)
+                });
             },
             (message) => (
                 projectActionError('Error updating branch', message)

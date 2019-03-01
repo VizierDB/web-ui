@@ -26,13 +26,15 @@ import { Dropdown } from 'semantic-ui-react';
 
 class ProjectMenuDropdown extends React.Component {
     static propTypes = {
+        name: PropTypes.string.isRequired,
         onEdit: PropTypes.func.isRequired
     }
     render() {
-        const { onEdit } = this.props;
+        const { name, onEdit } = this.props;
         return (
             <Dropdown item text='Project'>
                 <Dropdown.Menu>
+                    <Dropdown.Header key='header' icon='database' content={name} />            
                     <Dropdown.Item
                         key='edit'
                         icon='edit'

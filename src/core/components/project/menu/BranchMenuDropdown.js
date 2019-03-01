@@ -19,7 +19,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Dropdown } from 'semantic-ui-react';
-import { DEFAULT_BRANCH } from '../../../resources/Branch'
 
 /**
  * Branches Menu: Contains a list of project branches (to switch) and edit
@@ -35,12 +34,13 @@ class BranchMenuDropdown extends React.Component {
         onGoLive: PropTypes.func.isRequired,
         onSelect: PropTypes.func.isRequired,
         onShowHistory: PropTypes.func.isRequired,
-        selectedBranch: PropTypes.object.isRequired
+        selectedBranch: PropTypes.object.isRequired,
+        showTimeMachine: PropTypes.bool.irRequired
     }
     render() {
         const {
             branches, isLive, onDelete, onEdit, onGoLive, onSelect,
-            onShowHistory, selectedBranch
+            onShowHistory, selectedBranch, showTimeMachine
         } = this.props;
         // List of items in the dropdown menu
         let branchItems = null;
@@ -69,9 +69,27 @@ class BranchMenuDropdown extends React.Component {
                     />);
             }
         }
+        if (showTimeMachine) {
+            branchItems.push(<Dropdown.Divider key='divider-tm'/>);
+            branchItems.push(<Dropdown.Header content='Time Machine' key='header-tm' />);
+            branchItems.push(<Dropdown.Item
+                    key='history'
+                    icon='history'
+                    text='History'
+                    onClick={onShowHistory}
+                />);
+            branchItems.push(<Dropdown.Item
+                    key='live'
+                    icon='play'
+                    disabled={isLive}
+                    text='Go Live!'
+                    onClick={onGoLive}
+                />);
+        }
         return (
             <Dropdown item text='Branch'>
                 <Dropdown.Menu>
+                    <Dropdown.Header key='onBranch' icon='fork' content={selectedBranch.name} />
                     <Dropdown.Item
                         key='edit'
                         icon='edit'
@@ -81,24 +99,9 @@ class BranchMenuDropdown extends React.Component {
                     <Dropdown.Item
                         key='delete'
                         icon='trash'
-                        disabled={selectedBranch.id === DEFAULT_BRANCH}
+                        disabled={selectedBranch.isDefault}
                         text='Delete'
                         onClick={onDelete}
-                    />
-                    <Dropdown.Divider />
-                    <Dropdown.Header content='Time Machine' />
-                    <Dropdown.Item
-                        key='history'
-                        icon='history'
-                        text='History'
-                        onClick={onShowHistory}
-                    />
-                    <Dropdown.Item
-                        key='live'
-                        icon='play'
-                        disabled={isLive}
-                        text='Go Live!'
-                        onClick={onGoLive}
                     />
                     { branchItems }
                 </Dropdown.Menu>

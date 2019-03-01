@@ -35,10 +35,6 @@ class MainPage extends Component {
         serviceApi: PropTypes.object,
         showForm: PropTypes.bool.isRequired
     }
-    constructor(props) {
-        super(props);
-        console.log("Main Page");
-    }
     /**
      * Show page for a selected project.
      */

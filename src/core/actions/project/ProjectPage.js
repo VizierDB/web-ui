@@ -16,14 +16,15 @@
  * limitations under the License.
  */
 
-import { DEFAULT_BRANCH } from '../../resources/Branch';
 import { Notebook } from '../../resources/Notebook';
 import { NotebookResource, ProjectHandle } from '../../resources/Project';
 import { WorkflowHandle } from '../../resources/Workflow';
 import { getProperty, updateResourceProperty } from '../../util/Api';
 import { valueOrDefault } from '../../util/App';
 import { ErrorObject } from '../../util/Error';
-import { HATEOAS_PROJECTS_LIST } from '../../util/HATEOAS';
+import {
+    HATEOAS_PROJECTS_LIST, HATEOAS_PROJECT_UPDATE_PROPERTY
+} from '../../util/HATEOAS';
 import { fetchAuthed, requestAuth } from '../main/Service';
 
 // Actions for fetching project information from Web API.
@@ -35,22 +36,17 @@ export const REQUEST_PROJECT = 'REQUEST_PROJECT';
 export const PROJECT_ACTION_ERROR = 'PROJECT_ACTION_ERROR';
 export const RECEIVE_PROJECT_RESOURCE = 'RECEIVE_PROJECT_RESOURCE';
 export const REQUEST_PROJECT_ACTION = 'REQUEST_PROJECT_ACTION';
-export const UPDATE_BRANCH = 'UPDATE_BRANCH';
 export const UPDATE_PROJECT = 'UPDATE_PROJECT';
 export const UPDATE_RESOURCE = 'UPDATE_RESOURCE';
 export const UPDATE_WORKFLOW = 'UPDATE_WORKFLOW';
 
 
  /**
-  * Fetch project and workflow handles when showing the project page. By default
-  * the notebook resource for the requested project workflow is loaded.
-  *
-  * Makes use of the notebooks url pattern that the API provides. The notebooks
-  * url provides access to project handle, workflow handle and workflow modules
-  * with a single request.
+  * Fetch project and branch from API. Calls the given result function to
+  * fetch further resources on success.
  *
  */
-export const fetchProject = (projectId, branchId, workflowId) => (dispatch, getState) => {
+export const fetchProject = (projectId, branchId, resultFunc) => (dispatch, getState) => {
     // Construct project url from the API reference set. This set may not be
     // initialized yet!
     if (getState().serviceApi.links) {
@@ -67,15 +63,14 @@ export const fetchProject = (projectId, branchId, workflowId) => (dispatch, getS
                 // (.datasets). The last two are used to generate the notebook.
                 response.json().then(json => {
                     const project = new ProjectHandle().fromJson(json);
-                    return dispatch({
-                        type: RECEIVE_PROJECT,
-                        project
-                    });
-                    //return dispatch(
-                    //    receiveProjectResource(
-                    //        new NotebookResource(new Notebook().fromJson(json))
-                    //    )
-                    //);
+                    let branch = null;
+                    if (branchId != null) {
+                        branch = project.branches.find((br) => (br.id === branchId));
+                    } else {
+                        branch = project.branches.find((br) => (br.isDefault));
+                    }
+                    dispatch({type: RECEIVE_PROJECT, project, branch});
+                    dispatch(resultFunc(project, branch));
                 });
             } else if(response.status === 401) {
             	// UNAUTHORIZED: re-request auth
@@ -113,35 +108,13 @@ export const receiveProjectResource = (resource) => ({
 // -----------------------------------------------------------------------------
 
 /**
- * Replace all occurrences of a branch in the given project and workflow
- * handles. Creates copies of the handles that will contain the given branch
- * instead of an outdated handle for the same branch (branches are identified
- * based on equality of branch ids).
- *
- * Parameters:
- *
- * project: ProjectHandle
- * workflow: WorkflowHandle
- * branch: BranchDescriptor
- *
- */
-export const replaceCurrentBranch = (project, workflow, branch) => (dispatch) => {
-    dispatch({
-        type: UPDATE_BRANCH,
-        project: project.updateBranch(branch),
-        workflow: workflow.updateBranch(branch)
-    });
-}
-
-
-/**
  * .Update the name of the current project. Send a post request to the API
  * and modify the project handle in the global state.
  */
 export const updateProjectName = (project, name) => (dispatch) => {
     dispatch(
         updateResourceProperty(
-            project.links.update,
+            project.links.get(HATEOAS_PROJECT_UPDATE_PROPERTY),
             'name',
             name,
             (json) => (dispatch) => {

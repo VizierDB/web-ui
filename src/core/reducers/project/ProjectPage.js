@@ -16,11 +16,12 @@
  * limitations under the License.
  */
 
+import { UPDATE_BRANCH } from '../../actions/project/Branch';
 import {
   PROJECT_ACTION_ERROR, PROJECT_FETCH_ERROR, RECEIVE_PROJECT,
   RECEIVE_PROJECT_RESOURCE, REQUEST_PROJECT, REQUEST_PROJECT_ACTION,
-  UPDATE_BRANCH, UPDATE_PROJECT, UPDATE_RESOURCE, UPDATE_WORKFLOW
-} from '../../actions/project/ProjectPage'
+  UPDATE_PROJECT, UPDATE_RESOURCE, UPDATE_WORKFLOW
+} from '../../actions/project/ProjectPage';
 
 /**
 * Reducer for actions that retrieve the Vizier DB Web Service API descriptor.
@@ -41,6 +42,7 @@ import {
 
 const INITIAL_STATE = {
     actionError: null,
+    branch: null,
     fetchError: null,
     isActive: false,
     isFetching: false,
@@ -78,6 +80,7 @@ export const projectPage = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 actionError: null,
+                branch: action.branch,
                 fetchError: null,
                 isActive: false,
                 isFetching: false,
@@ -96,10 +99,9 @@ export const projectPage = (state = INITIAL_STATE, action) => {
         case UPDATE_BRANCH:
             return {
                 ...state,
-                actionError: null,
+                branch: action.branch,
                 isActive: false,
-                project: action.project,
-                workflow: action.workflow
+                project: action.project
             };
         case UPDATE_PROJECT:
             return {
