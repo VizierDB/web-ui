@@ -4,7 +4,7 @@
 
 This repository contains the code for the Vizier DB Web User Interface. This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
-This branch of the UI is intended to work with the [asynchronous backend](https://github.com/VizierDB/web-api-async).e.
+This branch of the UI is intended to work with the [asynchronous backend](https://github.com/VizierDB/web-api-async).
 
 ## Documentation
 
