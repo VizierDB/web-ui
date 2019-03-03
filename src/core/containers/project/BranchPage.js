@@ -20,11 +20,14 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {  Icon } from 'semantic-ui-react';
-import { fetchBranchHistory } from '../../actions/project/Branch';
-import { fetchProject, } from '../../actions/project/ProjectPage';
-import ProjectResourcePage from '../../components/project/ProjectResourcePage';
+import { fetchBranch } from '../../actions/project/Branch';
+import { fetchProject, setBranch } from '../../actions/project/Project';
 import ContentSpinner from '../../components/ContentSpinner';
 import { FetchError } from '../../components/Message';
+import ProjectResourcePage from '../../components/project/ProjectResourcePage';
+import { GRP_UNDEFINED } from '../../resources/Notebook';
+import { BranchResource } from '../../resources/Project';
+import { branchPageUrl, notebookPageUrl } from '../../util/App.js';
 
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
@@ -38,10 +41,13 @@ import '../../../css/BranchHistory.css';
  * any of the workflow versions and display them in a different page.
  *
  */
-class BranchHistoryPage extends Component {
+
+class BranchPage extends Component {
     static propTypes = {
+        actionError: PropTypes.object,
         branch: PropTypes.object,
         fetchError: PropTypes.object,
+        isActive: PropTypes.bool.isRequired,
         isFetching: PropTypes.bool.isRequired,
         project: PropTypes.object,
         serviceApi: PropTypes.object,
@@ -59,22 +65,57 @@ class BranchHistoryPage extends Component {
         // Fetch any resources that are currently missing. It is assumed that
         // the branch is set if the project is set.
         if (project == null) {
-            dispatch(fetchProject(projectId, branchId, fetchBranchHistory));
+            dispatch(fetchProject(projectId, branchId, fetchBranch));
         } else if (workflows == null) {
-            dispatch(fetchBranchHistory(project, branch));
+            dispatch(fetchBranch(project, branch));
         }
     }
-    handleShowWorkflow = (workflow) => {
-        alert(workflow.id);
+    /**
+     * Ensure proper back and forward behaviour. It appears that when the user
+     * uses the back and previous button in the browser the current state and
+     * the previous state are the same but the branch identifier in the URL
+     * is different.
+     */
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const branch = this.props.branch;
+        const prevBranch = prevProps.branch;
+        const branchId = this.props.match.params.branch_id;
+        const prevBranchId = prevProps.match.params.branch_id;
+        if ((branch != null) && (prevBranch != null)) {
+            if ((branch.id === prevBranch.id) && (branchId !== prevBranchId)) {
+                const { dispatch, project } = this.props;
+                dispatch(setBranch(project, branchId, fetchBranch));
+            }
+        }
     }
     /**
-     * The branch history is rendered as a table with five columns: (1) an
-     * icon depicting the type of action that created the workflow version
-     * (i.e., CREATE BRANCH, INSERT/APPEND MODULE, DELETE MODULE, or REPLACE
-     * MODULE), (2) an icon containing a link to show the workflow version,
-     * (3 and 4) the short form of the command specification that was used
-     * to define the module that was affected by the action, and (5) the time
-     * of creation.
+     * Push URL for notebook page onto history stack. This will render a new
+     * component.
+     */
+    handleShowWorkflow = (workflow, isHead) => {
+        const { branch, history, project } = this.props;
+        let workflowId = null;
+        if ((!isHead) && (workflow != null)) {
+            workflowId = workflow.id;
+        }
+        history.push(notebookPageUrl(project.id, branch.id, workflowId));
+    }
+    /**
+     * Dispatch actions to switch to a given branch and load the branch history.
+     */
+    handleSwitchBranch = (branch) => {
+        const { dispatch, history, project } = this.props;
+        history.push(branchPageUrl(project.id, branch.id));
+        dispatch(setBranch(project, branch.id, fetchBranch));
+    }
+    /**
+     * The branch history is rendered as a table with five columns: (1) the
+     * workflow version identifier, (2) an icon containing a link to display
+     * the workflow version in a web page, (3) an icon depicting the type of
+     * action that created the workflow version (i.e., CREATE BRANCH,
+     * INSERT/APPEND MODULE, DELETE MODULE, or REPLACE MODULE), (4) the short
+     * form of the command specification that was used to define the module
+     * that was affected by the action, and (5) the time of creation.
      */
     render() {
         const {
@@ -115,39 +156,39 @@ class BranchHistoryPage extends Component {
                 if (wf.actionIsCreate()) {
                     icon = 'fork';
                     color = 'grey';
-                    action = 'Create';
+                    action = 'Create branch';
                 } else {
                     if (wf.actionIsDelete()) {
                         icon = 'trash';
                         color = 'red';
-                        action = 'Delete';
+                        action = 'Delete cell';
                     } else if (wf.actionIsAppend()) {
                         icon = 'add square';
                         color = 'green';
-                        action = 'Append';
+                        action = 'Append cell';
                     } else if  (wf.actionIsInsert()) {
                         icon = 'add circle';
-                        color = 'green';
-                        action = 'Insert';
+                        color = 'olive';
+                        action = 'Insert cell';
                     } else if (wf.actionIsReplace()) {
                         icon = 'pencil';
                         color = 'blue';
-                        action = 'Edit';
+                        action = 'Replace cell';
                     }
                     command = project.packages[wf.packageId].commands[wf.commandId].name;
                 }
+                const isHead = (i === workflows.length - 1);
                 rows.push(
                     <tr key={wf.id}>
-                        <td className='workflow-icon'><Icon name={icon} color={color}/></td>
+                        <td className='workflow-nr'>{wf.id}</td>
                         <td className='workflow-icon'>
                             <Icon
                                 title='Show notebook'
                                 link name={'eye'}
-                                onClick={() => (this.handleShowWorkflow(wf))}
+                                onClick={() => (this.handleShowWorkflow(wf, isHead))}
                             />
                         </td>
-                        <td className='workflow-nr'>{wf.id}</td>
-                        <td className='workflow-action'>{action}</td>
+                        <td className='workflow-icon'><Icon title={action} name={icon} color={color}/></td>
                         <td className='workflow-command'>{command}</td>
                         <td className='version-timestamp'>{wf.createdAt}</td>
                     </tr>
@@ -174,8 +215,12 @@ class BranchHistoryPage extends Component {
                     content={pageContent}
                     contentCss='wide'
                     dispatch={dispatch}
+                    groupMode={GRP_UNDEFINED}
                     isActive={isActive}
+                    onShowNotebook={this.handleShowWorkflow}
+                    onSwitchBranch={this.handleSwitchBranch}
                     project={project}
+                    resource={new BranchResource()}
                     serviceApi={serviceApi}
                 />
             );
@@ -189,13 +234,14 @@ const mapStateToProps = state => {
     return {
         actionError: state.projectPage.actionError,
         branch: state.projectPage.branch,
-        fetchError: state.branchHistoryPage.fetchError,
+        fetchError: state.branchPage.fetchError,
         isActive: state.projectPage.isActive,
-        isFetching: state.branchHistoryPage.isFetching,
+        isFetching: state.branchPage.isFetching,
         project: state.projectPage.project,
         serviceApi: state.serviceApi,
-        workflows: state.branchHistoryPage.workflows
+        workflows: state.branchPage.workflows
     }
 }
 
-export default connect(mapStateToProps)(BranchHistoryPage)
+
+export default connect(mapStateToProps)(BranchPage)

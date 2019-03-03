@@ -17,9 +17,9 @@
  */
 
 import {
-    projectActionError, receiveProjectResource, requestProjectAction,
-    updateResource, updateWorkflowResource
-} from '../project/ProjectPage';
+    projectActionError, projectFetchError, receiveProjectResource,
+    requestProjectAction, updateResource, updateWorkflowResource
+} from './Project';
 import { fetchAuthed, requestAuth } from '../main/Service';
 import {
     CellAnnotation, NoAnnotation, IsFetching, FetchError, AnnotationList
@@ -34,10 +34,80 @@ import { fetchResource } from '../../util/Api';
 import { ErrorObject } from '../../util/Error';
 import { VIZUAL, VIZUAL_OP } from '../../util/Vizual';
 
+
 // Change the value of the group mode state
 export const CHANGE_GROUP_MODE = 'CHANGE_GROUP_MODE';
 // Reverse notebook cell order
 export const REVERSE_ORDER = 'REVERSE_ORDER';
+// Signale success in fetching the workflow
+export const RECEIVE_WORKFLOW = 'RECEIVE_WORKFLOW';
+export const REQUEST_WORKFLOW = 'REQUEST_WORKFLOW';
+
+
+// -----------------------------------------------------------------------------
+// Fetch
+// -----------------------------------------------------------------------------
+
+/**
+ * Fetch project and branch from API. Calls the given result function to
+ * fetch further resources on success.
+ *
+ */
+export const fetchWorkflow = (project, branch, workflowId) => (dispatch, getState) => {
+    // Construct workflow url from the API reference set. This set may not be
+    // initialized yet!
+    if (getState().serviceApi.links) {
+        let url = getState().serviceApi.links.getNotebookUrl(project.id, branch.id, workflowId);
+        // Signal start of fetching project listing
+        dispatch(requestWorkflow());
+        // Fetch the project.
+        return fetchAuthed(url)(dispatch)
+        .then(function(response) {
+            if (response.status >= 200 && response.status < 400) {
+                // SUCCESS: The returned json object is expected to contain
+                // the project handle (.project), workflow handle (.workflow),
+                //  workflow modules (.modules), and all dataset descriptors
+                // (.datasets). The last two are used to generate the notebook.
+                response.json().then(json => (
+                    dispatch(
+                        receiveWorkflow(new WorkflowHandle().fromJson(json))
+                    )
+                ));
+            } else if(response.status === 401) {
+            	// UNAUTHORIZED: re-request auth
+            	dispatch(requestAuth())
+            } else if (response.status === 404) {
+                // The requested project, branch, or workflow does not exist.
+                response.json().then(json => (dispatch(
+                    workflowFetchError(json.message, 404)
+                )));
+            } else {
+                // ERROR: The API is expected to return a JSON object in case
+                // of an error that contains an error message
+                response.json().then(json => dispatch(
+                    workflowFetchError(json.message, response.status)
+                ));
+            }
+        })
+        .catch(err => dispatch(workflowFetchError(err.message)))
+    }
+}
+
+export const receiveWorkflow = (workflow) => ({
+    type: RECEIVE_WORKFLOW,
+    workflow
+})
+
+
+export const requestWorkflow = (workflow) => ({ type: REQUEST_WORKFLOW })
+
+
+/**
+ * Siple wrapper for workflow-specific project errors.
+ */
+const workflowFetchError = (message, status) => (
+    projectFetchError(message, status, 'Error fetching notebook')
+);
 
 
 // -----------------------------------------------------------------------------

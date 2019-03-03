@@ -21,7 +21,7 @@ import {
   PROJECT_ACTION_ERROR, PROJECT_FETCH_ERROR, RECEIVE_PROJECT,
   RECEIVE_PROJECT_RESOURCE, REQUEST_PROJECT, REQUEST_PROJECT_ACTION,
   UPDATE_PROJECT, UPDATE_RESOURCE, UPDATE_WORKFLOW
-} from '../../actions/project/ProjectPage';
+} from '../../actions/project/Project';
 
 /**
 * Reducer for actions that retrieve the Vizier DB Web Service API descriptor.
@@ -47,8 +47,7 @@ const INITIAL_STATE = {
     isActive: false,
     isFetching: false,
     project: null,
-    resource: null,
-    workflow: null
+    resource: null
 }
 
 export const projectPage = (state = INITIAL_STATE, action) => {

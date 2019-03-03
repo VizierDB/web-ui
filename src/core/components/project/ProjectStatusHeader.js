@@ -20,7 +20,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Button, Icon } from 'semantic-ui-react';
 import ShareLinkModal from '../modals/ShareLinkModal'
-import { pageUrl } from '../../util/App'
+import { notebookPageUrl } from '../../util/App'
 import '../../../css/App.css'
 import '../../../css/ProjectPage.css'
 
@@ -56,7 +56,7 @@ class ProjectStatusHeader extends Component {
                     <span>{'at '}</span>
                     <span className='highlight-date'>{workflow.createdAt}</span>
                     <span className='left-padding-md'>
-                        (<a href={pageUrl(project.id, workflow.branch.id)}>Go Live!)
+                        (<a href={notebookPageUrl(project.id, workflow.branch.id)}>Go Live!)
                     </a></span>
                 </span>
             );

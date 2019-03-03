@@ -34,22 +34,20 @@ class BranchMenuDropdown extends React.Component {
         onGoLive: PropTypes.func.isRequired,
         onSelect: PropTypes.func.isRequired,
         onShowHistory: PropTypes.func.isRequired,
-        selectedBranch: PropTypes.object.isRequired,
-        showTimeMachine: PropTypes.bool.irRequired
+        resource: PropTypes.object.isRequired,
+        selectedBranch: PropTypes.object.isRequired
     }
     render() {
         const {
             branches, isLive, onDelete, onEdit, onGoLive, onSelect,
-            onShowHistory, selectedBranch, showTimeMachine
+            onShowHistory, resource, selectedBranch
         } = this.props;
         // List of items in the dropdown menu
-        let branchItems = null;
+        let branchItems = [];
         // List project branches (only if there is more than one branch)
         if (branches.length > 1) {
-            branchItems = [
-                <Dropdown.Divider key='divider'/>,
-                <Dropdown.Header key='header' content='Switch Branch' />
-            ]
+            branchItems.push(<Dropdown.Divider key='divider'/>);
+            branchItems.push(<Dropdown.Header key='header' content='Switch Branch' />);
             for (let i = 0; i < branches.length; i++) {
                 const br = branches[i];
                 let iconName;
@@ -69,23 +67,22 @@ class BranchMenuDropdown extends React.Component {
                     />);
             }
         }
-        if (showTimeMachine) {
-            branchItems.push(<Dropdown.Divider key='divider-tm'/>);
-            branchItems.push(<Dropdown.Header content='Time Machine' key='header-tm' />);
-            branchItems.push(<Dropdown.Item
-                    key='history'
-                    icon='history'
-                    text='History'
-                    onClick={onShowHistory}
-                />);
-            branchItems.push(<Dropdown.Item
-                    key='live'
-                    icon='play'
-                    disabled={isLive}
-                    text='Go Live!'
-                    onClick={onGoLive}
-                />);
-        }
+        branchItems.push(<Dropdown.Divider key='divider-tm'/>);
+        branchItems.push(<Dropdown.Header content='Time Machine' key='header-tm' />);
+        branchItems.push(<Dropdown.Item
+                key='history'
+                icon='history'
+                disabled={resource.isBranch()}
+                text='History'
+                onClick={onShowHistory}
+            />);
+        branchItems.push(<Dropdown.Item
+                key='live'
+                icon='play'
+                disabled={(!resource.isBranch()) && (isLive)}
+                text='Go Live!'
+                onClick={onGoLive}
+            />);
         return (
             <Dropdown item text='Branch'>
                 <Dropdown.Menu>

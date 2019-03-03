@@ -23,14 +23,14 @@ import { redirectTo } from '../../actions/main/App';
 import { showChartView } from '../../actions/chart/Chart';
 import {
     changeGroupMode, reverseOrder, showNotebook
-} from '../../actions/notebook/Notebook';
+} from '../../actions/project/Notebook';
 import {
     deleteBranch, fetchBranchHistory, updateBranchName
 } from '../../actions/project/Branch';
 import {
     dismissProjectActionError, fetchProject, updateProjectName
-} from '../../actions/project/ProjectPage';
-import { showSpreadsheet, showDatasetError, repairDatasetError } from '../../actions/spreadsheet/Spreadsheet';
+} from '../../actions/project/Project';
+import { showSpreadsheet, showDatasetError, repairDatasetError } from '../../actions/project/Spreadsheet';
 import { ConnectionInfo } from '../../components/Api'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage, NotFoundMessage } from '../../components/Message';
@@ -41,7 +41,7 @@ import MainProjectMenu from '../../components/project/menu/MainProjectMenu';
 import ProjectStatusHeader from '../../components/project/ProjectStatusHeader';
 import Notebook from '../notebook/Notebook';
 import Spreadsheet from '../spreadsheet/Spreadsheet';
-import { pageUrl, valueOrDefault } from '../../util/App';
+import { notebookPageUrl, valueOrDefault } from '../../util/App';
 
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
@@ -132,7 +132,7 @@ class ProjectPage extends Component {
     }
     handleSelectWorkflow = (workflow) => {
         const { dispatch, project, branch, history } = this.props;
-        history.push(pageUrl(project.id, branch.id, workflow.id));
+        history.push(notebookPageUrl(project.id, branch.id, workflow.id));
         dispatch(fetchProject(project.id, branch.id, workflow.id));
     }
     /**

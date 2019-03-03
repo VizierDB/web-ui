@@ -67,6 +67,26 @@ export class HATEOASReferences {
         }
     }
     /**
+     * Get the Url for a workflow with the given identifier.
+     *
+     * This method will return null if the links list does not contain an entry
+     * for the project listing.
+     */
+    getNotebookUrl(projectId, branchId, workflowId) {
+        let url = this.get(HATEOAS_PROJECTS_LIST);
+        if (url != null) {
+            url += '/' + projectId + '/branches/' + branchId;
+            if (workflowId != null) {
+                url += '/workflows/' + workflowId;
+            } else {
+                url += '/head';
+            }
+            return url;
+        } else {
+            return null;
+        }
+    }
+    /**
      * Get the Url for a project with the given identifier. The idea is to keep
      * all resource URLs in one place. At this point we just hard-code the
      * pattern for project URLs into the method. To be more flexible we could

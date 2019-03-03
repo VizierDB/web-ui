@@ -20,6 +20,7 @@ import { BranchDescriptor } from './Branch';
 import { getProperty } from '../util/Api';
 import { HATEOASReferences } from '../util/HATEOAS';
 import { sortByName } from '../util/Sort';
+import { utc2LocalTime } from '../util/Timestamp';
 import { VIZUAL, VIZUAL_OP } from '../util/Vizual';
 
 
@@ -62,6 +63,23 @@ class ModuleRegistry {
             const obj = json[i];
             this[obj.id] = new PackageModule().fromJson(obj);
         }
+        return this;
+    }
+}
+
+
+/**
+ * Descriptor for a project in the project listing. Contains the information
+ * that is required by the project listing component.
+ */
+export class ProjectDescriptor {
+    fromJson(json) {
+        this.id = json.id;
+        this.name = getProperty(json, 'name', 'undefined');
+        this.createdAt = utc2LocalTime(json.createdAt);
+        this.lastModifiedAt = utc2LocalTime(json.lastModifiedAt);
+        this.defaultBranch = json.defaultBranch;
+        this.links = new HATEOASReferences(json.links);
         return this;
     }
 }
@@ -163,6 +181,9 @@ const CONTENT_HISTORY = 'CONTENT_HISTORY';
 const CONTENT_NOTEBOOK = 'CONTENT_NOTEBOOK';
 const CONTENT_DATASET_ERROR = 'CONTENT_DATASET_ERROR';
 
+const RESOURCE_BRANCH = 'RESOURCE_BRANCH';
+const RESOURCE_NOTEBOOK = 'RESOURCE_NOTEBOOK';
+
 
 /**
  * Wrapper for the project resource. The resource captures one of the following
@@ -175,30 +196,26 @@ export class ProjectResource {
      * Constructor expects the content type information and a type-specific
      * content object.
      */
-    constructor(contentType, content) {
-        this.contentType = contentType;
-        this.content = content;
+    constructor(resourceType) {
+        this.resourceType = resourceType;
     }
     /**
      * Various flags to check the type of the content.
      */
-    isChart = () => (this.contentType === CONTENT_CHART);
-    isDataset = () => (this.contentType === CONTENT_DATASET);
-    isError = () => (this.contentType === CONTENT_ERROR);
-    isHistory = () => (this.contentType === CONTENT_HISTORY);
-    isNotebook = () => (this.contentType === CONTENT_NOTEBOOK);
-    isDatasetError = () => (this.contentType === CONTENT_DATASET_ERROR);
+    isBranch = () => (this.resourceType === RESOURCE_BRANCH);
+    isNotebook = () => (this.resourceType === RESOURCE_NOTEBOOK);
+
 }
 
 
 // Shortcuts for different content types
-export const BranchHistoryResource = (history) => (new ProjectResource(CONTENT_HISTORY, history));
-export const ChartResource = (name, dataset) => (new ProjectResource(CONTENT_CHART, {name, dataset}));
-export const ErrorResource = (title, module) => (new ProjectResource(CONTENT_ERROR, {title, module}));
-export const NotebookResource = (notebook) => (new ProjectResource(CONTENT_NOTEBOOK, notebook));
-export const SpreadsheetResource = (dataset) => (new ProjectResource(CONTENT_DATASET, dataset));
-export const DatasetErrorResource = (dataset, annotations) => (new ProjectResource(CONTENT_DATASET_ERROR, {dataset, annotations}));
+export const BranchResource = () => (new ProjectResource(RESOURCE_BRANCH));
+export const NotebookResource = (notebook) => (new ProjectResource(RESOURCE_NOTEBOOK));
 
+export const ChartResource = () => (new ProjectResource(-1));
+export const DatasetErrorResource = () => (new ProjectResource(-1));
+export const ErrorResource = () => (new ProjectResource(-1));
+export const SpreadsheetResource = () => (new ProjectResource(-1));
 
 // -----------------------------------------------------------------------------
 // Functions

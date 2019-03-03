@@ -80,30 +80,9 @@ export class WorkflowHandle {
      * WorkflowHandle returned by the Web API.
      */
     fromJson(json) {
-        this.version = json.version;
+        this.id = json.id;
         this.createdAt = utc2LocalTime(json.createdAt);
-        this.branch = new BranchDescriptor().fromJson(json.branch);
-        // Create an list of descriptors for datasets that are present in the
-        // workflow state. Datasets are sorted by their name.
-        this.datasets = [];
-        for (let i = 0; i < json.state.datasets.length; i++) {
-            const ds = new DatasetDescriptor().fromJson(json.state.datasets[i]);
-            this.datasets.push(ds);
-        }
-        sortByName(this.datasets);
-        // Create an list of descriptors for chart views that are present in the
-        // workflow state. Charts are sorted by their name.
-        this.charts = [];
-        for (let i = 0; i < json.state.charts.length; i++) {
-            const chart = new ChartDescriptor().fromJson(json.state.charts[i]);
-            this.charts.push(chart);
-        }
-        sortByName(this.charts);
-        // Read-only flag
         this.readOnly = json.readOnly;
-        // Is empty flag
-        this.isEmpty = (json.state.moduleCount === 0);
-        // Workflow HATEOAS references
         this.links = new HATEOASReferences(json.links);
         return this;
     }

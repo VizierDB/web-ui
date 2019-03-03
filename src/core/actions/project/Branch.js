@@ -17,22 +17,20 @@
  */
 
 import { redirectTo } from '../main/App';
-import {
-    projectActionError, requestProject,
-    requestProjectAction
-} from './ProjectPage';
+import { projectActionError, projectFetchError, requestProjectAction } from './Project';
 import { WorkflowDescriptor } from '../../resources/Workflow';
 import {
     deleteResource, fetchResource, getProperty, postResourceData,
     updateResourceProperty
 } from '../../util/Api';
-import { pageUrl } from '../../util/App';
+import { notebookPageUrl } from '../../util/App';
 import { HATEOAS_SELF, HATEOAS_BRANCH_UPDATE_PROPERTY } from '../../util/HATEOAS';
 
 
 // Actions for manipulating branches and retrieving branch information
 export const UPDATE_BRANCH = 'UPDATE_BRANCH';
 export const RECEIVE_BRANCH_HISTORY = 'RECEIVE_BRANCH_HISTORY';
+export const REQUEST_BRANCH = 'REQUEST_BRANCH'
 
 
 /**
@@ -66,11 +64,11 @@ export const createBranch = (project, workflow, module, name) =>  (dispatch) => 
         dispatch,
         workflow.links.branches,
         data,
-        (branch) => (redirectTo(pageUrl(project.id, branch.id))),
+        (branch) => (redirectTo(notebookPageUrl(project.id, branch.id))),
         (message) => (projectActionError(
             'Error creating new branch', message
         )),
-        requestProject
+        requestBranch
     )
 }
 
@@ -90,11 +88,11 @@ export const deleteBranch = (project, branch) => (dispatch) => {
     dispatch(
         deleteResource(
             branch.links.delete,
-            () => (redirectTo(pageUrl(project.id, 'DEFAULT_BRANCH'))),
+            () => (redirectTo(notebookPageUrl(project.id, 'DEFAULT_BRANCH'))),
             (message) => (
                 projectActionError('Error deleting branch', message)
             ),
-            requestProject
+            requestBranch
         )
     )
 }
@@ -110,7 +108,7 @@ export const deleteBranch = (project, branch) => (dispatch) => {
  * branch: BranchDescriptor
  *
  */
-export const fetchBranchHistory = (project, branch) => (dispatch) => {
+export const fetchBranch = (project, branch) => (dispatch) => {
     dispatch(
         fetchResource(
             branch.links.get(HATEOAS_SELF),
@@ -128,13 +126,18 @@ export const fetchBranchHistory = (project, branch) => (dispatch) => {
                 });
             },
             (message) => (
-                projectActionError('Error fetching branch history', message)
+                projectFetchError(message, 400, 'Error fetching branch history')
             ),
-            requestProjectAction
+            requestBranch,
         )
     )
 }
 
+
+/**
+ * Signal start when fething the branch history.
+ */
+export const requestBranch = () => ({ type: REQUEST_BRANCH });
 
 /**
  * Update the name of the branch in the current workflow. On success, call
@@ -148,7 +151,7 @@ export const fetchBranchHistory = (project, branch) => (dispatch) => {
  * name: string
  *
  */
-export const updateBranchName = (project, branch, name) => (dispatch) => {
+export const updateBranch = (project, branch, name) => (dispatch) => {
     dispatch(
         updateResourceProperty(
             branch.links.get(HATEOAS_BRANCH_UPDATE_PROPERTY),

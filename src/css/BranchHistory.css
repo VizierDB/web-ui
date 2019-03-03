@@ -11,15 +11,10 @@ h1.branch-history {
     font-size: 1.5em;
 }
 
-td.workflow-action {
-    color: #3b4151;
-    padding-left: 10px;
-}
-
 td.workflow-command {
     font-weight: bold;
     color: #3b4151;
-    padding-left: 0.5em;
+    padding-left: 0em;
 }
 
 td.workflow-icon {

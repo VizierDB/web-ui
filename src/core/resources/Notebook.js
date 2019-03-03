@@ -85,6 +85,7 @@ export const OutputHtml = (outputObjects) => {
 export const GRP_COLLAPSE = 1;
 export const GRP_HIDE = 2;
 export const GRP_SHOW = 0;
+export const GRP_UNDEFINED = -1;
 
 
 /**

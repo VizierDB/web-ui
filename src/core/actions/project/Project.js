@@ -41,9 +41,9 @@ export const UPDATE_RESOURCE = 'UPDATE_RESOURCE';
 export const UPDATE_WORKFLOW = 'UPDATE_WORKFLOW';
 
 
- /**
-  * Fetch project and branch from API. Calls the given result function to
-  * fetch further resources on success.
+/**
+ * Fetch project and branch from API. Calls the given result function to
+ * fetch further resources on success.
  *
  */
 export const fetchProject = (projectId, branchId, resultFunc) => (dispatch, getState) => {
@@ -69,8 +69,12 @@ export const fetchProject = (projectId, branchId, resultFunc) => (dispatch, getS
                     } else {
                         branch = project.branches.find((br) => (br.isDefault));
                     }
-                    dispatch({type: RECEIVE_PROJECT, project, branch});
-                    dispatch(resultFunc(project, branch));
+                    if (branch != null) {
+                        dispatch({type: RECEIVE_PROJECT, project, branch});
+                        dispatch(resultFunc(project, branch));
+                    } else {
+                        dispatch(projectFetchError('Unknown branch ' + branchId, 404));
+                    }
                 });
             } else if(response.status === 401) {
             	// UNAUTHORIZED: re-request auth
@@ -104,6 +108,20 @@ export const receiveProjectResource = (resource) => ({
 
 
 // -----------------------------------------------------------------------------
+// Switch Branch
+// -----------------------------------------------------------------------------
+export const setBranch = (project, branchId, resultFunc) => (dispatch) => {
+    let branch =  project.branches.find((br) => (br.id === branchId));
+    if (branch != null) {
+        dispatch({type: RECEIVE_PROJECT, project, branch});
+        dispatch(resultFunc(project, branch));
+    } else {
+        dispatch(projectFetchError('Unknown branch ' + branchId, 404));
+    }
+}
+
+
+// -----------------------------------------------------------------------------
 // Updates
 // -----------------------------------------------------------------------------
 
@@ -111,7 +129,7 @@ export const receiveProjectResource = (resource) => ({
  * .Update the name of the current project. Send a post request to the API
  * and modify the project handle in the global state.
  */
-export const updateProjectName = (project, name) => (dispatch) => {
+export const updateProject = (project, name) => (dispatch) => {
     dispatch(
         updateResourceProperty(
             project.links.get(HATEOAS_PROJECT_UPDATE_PROPERTY),
@@ -181,10 +199,15 @@ export const projectActionError = (title, message) => ({
 /**
  * Error generated while fetching a project.
  */
-export const projectFetchError = (message, status) => ({
-    type: PROJECT_FETCH_ERROR,
-    error: new ErrorObject('Error fetching project', message, status)
-})
+export const projectFetchError = (message, status, title) => {
+    if (title == null) {
+        title = 'Error fetching project';
+    }
+    return {
+        type: PROJECT_FETCH_ERROR,
+        error: new ErrorObject(title, message, status)
+    }
+}
 
 
 // -----------------------------------------------------------------------------
@@ -197,6 +220,12 @@ export const projectFetchError = (message, status) => ({
 export const requestProject = () => ({
   type: REQUEST_PROJECT
 })
+
+/**
+ * Signal start fetching a resource that is associated with a project (e.g., a
+ * project branch or workflow).
+ */
+export const requestProjectResource = () => (requestProject());
 
 /**
  * Signal start of an action that fetces or manipulates a project property or

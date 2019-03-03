@@ -19,7 +19,7 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import { Button, Modal } from 'semantic-ui-react'
-import { pageUrl } from '../../util/App'
+import { notebookPageUrl } from '../../util/App'
 import '../../../css/Modals.css'
 
 
@@ -42,7 +42,7 @@ class ShareLinkModal extends React.Component {
     render() {
         const { onClose, open, project, workflow } = this.props;
         let url = window.location.protocol + '//' + window.location.host
-        url += pageUrl(project.id, workflow.branch.id, workflow.version);
+        url += notebookPageUrl(project.id, workflow.branch.id, workflow.version);
         return (
             <Modal open={open} dimmer={'inverted'} size={'small'}>
                 <Modal.Header>Share Link</Modal.Header>

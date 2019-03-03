@@ -18,10 +18,10 @@
 
 import {
     PROJECT_ACTION_ERROR, RECEIVE_PROJECT_RESOURCE, UPDATE_WORKFLOW
-} from '../../actions/project/ProjectPage';
+} from '../../actions/project/Project';
 import {
     SET_ANNOTATIONS, SUBMIT_UPDATE_REQUEST, UPDATE_DATASET_ANNOTATIONS
-} from '../../actions/spreadsheet/Spreadsheet';
+} from '../../actions/project/Spreadsheet';
 import { NoAnnotation } from '../../resources/Annotation';
 
 /**

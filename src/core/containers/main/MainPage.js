@@ -23,7 +23,7 @@ import { Dropdown, Grid, Icon, Menu } from 'semantic-ui-react'
 import { toggleShowProjectForm } from '../../actions/project/ProjectListing'
 import { ConnectionInfo } from '../../components/Api'
 import ProjectListing from '../project/ProjectListing'
-import { pageUrl } from '../../util/App.js';
+import { notebookPageUrl } from '../../util/App.js';
 import '../../../css/App.css'
 
 
@@ -38,9 +38,9 @@ class MainPage extends Component {
     /**
      * Show page for a selected project.
      */
-    handleShowProjectPage = (projectId) => {
+    handleShowProjectPage = (project) => {
         const { history } = this.props;
-        history.push(pageUrl(projectId));
+        history.push(notebookPageUrl(project.id, project.defaultBranch));
     }
     /**
      */
@@ -135,7 +135,7 @@ class MainPage extends Component {
                         key={pj.id}
                         icon='database'
                         text={pj.name}
-                        onClick={() => (this.handleShowProjectPage(pj.id))}
+                        onClick={() => (this.handleShowProjectPage(pj))}
                     />
                 );
             }

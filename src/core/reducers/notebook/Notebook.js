@@ -19,7 +19,7 @@
 import { CHANGE_GROUP_MODE, REVERSE_ORDER } from '../../actions/notebook/Notebook';
 import {
     RECEIVE_PROJECT_RESOURCE, UPDATE_RESOURCE, UPDATE_WORKFLOW
-} from '../../actions/project/ProjectPage';
+} from '../../actions/project/Project';
 import { GRP_HIDE } from '../../resources/Notebook';
 
 /**

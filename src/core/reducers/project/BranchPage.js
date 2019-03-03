@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-import { RECEIVE_BRANCH_HISTORY } from '../../actions/project/Branch';
-import { PROJECT_FETCH_ERROR, REQUEST_PROJECT } from '../../actions/project/ProjectPage';
+import { RECEIVE_BRANCH_HISTORY, REQUEST_BRANCH } from '../../actions/project/Branch';
+import { PROJECT_FETCH_ERROR, RECEIVE_PROJECT, REQUEST_PROJECT } from '../../actions/project/Project';
 
 /**
 * Reducer for actions that affect the branch history page.
@@ -38,7 +38,7 @@ const INITIAL_STATE = {
     workflows: null
 }
 
-export const branchHistoryPage = (state = INITIAL_STATE, action) => {
+export const branchPage = (state = INITIAL_STATE, action) => {
     switch (action.type) {
         case PROJECT_FETCH_ERROR:
             return {
@@ -53,7 +53,10 @@ export const branchHistoryPage = (state = INITIAL_STATE, action) => {
                 isFetching: false,
                 fetchError: null
             };
+        case RECEIVE_PROJECT:
+            return {...state, workflows: null};
         case REQUEST_PROJECT:
+        case REQUEST_BRANCH:
             return {
                 ...state,
                 isFetching: true,

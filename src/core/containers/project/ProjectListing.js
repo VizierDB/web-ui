@@ -29,7 +29,7 @@ import { ErrorMessage } from '../../components/Message';
 import DeleteResourceModal from '../../components/modals/DeleteResourceModal'
 import CreateProjectForm from '../../components/project/CreateProjectForm'
 import ContentSpinner from '../../components/ContentSpinner'
-import { pageUrl } from '../../util/App.js';
+import { notebookPageUrl } from '../../util/App.js';
 import { HATEOAS_PROJECTS_CREATE } from '../../util/HATEOAS';
 // For history to work this link was helpful. Does not seem to be required
 // for all components (?).
@@ -56,7 +56,6 @@ class ProjectListing extends Component {
         // is shown.
         this.state = {deleteProject: null}
         // Load the project listing
-        console.log(this.props.history);
         const { dispatch } = this.props;
         dispatch(fetchProjects());
     }
@@ -78,9 +77,9 @@ class ProjectListing extends Component {
     /**
      * Show page for a selected project.
      */
-    handleShowProjectPage = (projectId) => {
+    handleShowProjectPage = (project) => {
         const { history } = this.props;
-        history.push(pageUrl(projectId));
+        history.push(notebookPageUrl(project.id, project.defaultBranch));
     }
     /**
      * Hide all modals by setting the respective state variables to null..
@@ -113,6 +112,7 @@ class ProjectListing extends Component {
             const tabHead = (
                     <Table.Row>
                         <Table.HeaderCell className="resource">Name</Table.HeaderCell>
+                        <Table.HeaderCell className="resource">Created</Table.HeaderCell>
                         <Table.HeaderCell className="resource">Last modified</Table.HeaderCell>
                         <Table.HeaderCell className="resource"></Table.HeaderCell>
                     </Table.Row>
@@ -124,11 +124,12 @@ class ProjectListing extends Component {
                     <Table.Cell className='resource'>
                         <a
                             className='resource-link'
-                            onClick={() => (this.handleShowProjectPage(pj.id))}
+                            onClick={() => (this.handleShowProjectPage(pj))}
                         >
                             {pj.name}
                         </a>
                     </Table.Cell>
+                    <Table.Cell className='resource-text'>{pj.createdAt}</Table.Cell>
                     <Table.Cell className='resource-text'>{pj.lastModifiedAt}</Table.Cell>
                     <Table.Cell className='resource-buttons'>
                         <span className='button-wrapper'>

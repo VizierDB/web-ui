@@ -18,7 +18,9 @@
 
 import { createResource, deleteResource } from '../../util/Api'
 import { fetchAuthed, requestAuth } from '../main/Service';
-import { HATEOAS_PROJECTS_DELETE, HATEOAS_PROJECTS_LIST } from '../../util/HATEOAS';
+import { ProjectDescriptor } from '../../resources/Project';
+import { HATEOASReferences, HATEOAS_PROJECTS_DELETE, HATEOAS_PROJECTS_LIST } from '../../util/HATEOAS';
+import { sortByName } from '../../util/Sort';
 
 /**
 * Actions to update the internal state maintaining the project listing on
@@ -96,7 +98,7 @@ export const fetchProjects = () => (dispatch, getState) => {
                 response.json().then(json => dispatch(receiveProjects(json)));
             } else if(response.status === 401) {
             	// UNAUTHORIZED: re-request auth
-            	dispatch(requestAuth())
+            	dispatch(requestAuth());
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message
@@ -155,11 +157,18 @@ const requestProjects = (message) => ({
 /**
  * Handler for successful retrieval of project listing.
  */
-const receiveProjects = (json) => ({
-  type: RECEIVE_PROJECTS,
-  projects: json.projects,
-  links: json.links
-})
+const receiveProjects = (json) => {
+    const projects = [];
+    for (let i = 0; i < json.projects.length; i++) {
+        projects.push(new ProjectDescriptor().fromJson(json.projects[i]));
+    }
+    sortByName(projects);
+    return {
+        type: RECEIVE_PROJECTS,
+        projects: projects,
+        links: new HATEOASReferences(json.links)
+    }
+}
 
 
 /**

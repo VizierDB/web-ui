@@ -19,7 +19,7 @@
 import {
     projectActionError, receiveProjectResource, requestProjectAction,
     updateWorkflowResource
-} from '../project/ProjectPage';
+} from './Project';
 import {
     CellAnnotation, NoAnnotation, IsFetching, FetchError, AnnotationList
 } from '../../resources/Annotation';

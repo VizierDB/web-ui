@@ -21,10 +21,8 @@ import {
   SET_PROJECT_CREATE_ERROR, SET_PROJECT_DELETE_ERROR, SET_PROJECTS_FETCH_ERROR,
   TOGGLE_SHOW_PROJECT_FORM
 } from '../../actions/project/ProjectListing'
-import { getProperty } from '../../util/Api';
 import { ErrorObject } from '../../util/Error';
-import { HATEOASReferences } from '../../util/HATEOAS';
-import { utc2LocalTime } from '../../util/Timestamp';
+
 
 /**
 * Reducer for actions that retrieve the Vizier DB Web Service API descriptor.
@@ -55,26 +53,6 @@ const INITIAL_STATE = {
     showForm: false
 }
 
-/**
- * Convert the list of projects returned by the API into a list of objects that
- * contain id, name, createdAt, lastModifiedAt, and a HATEOASReferences object.
- */
-const listProjects = (projects) => {
-    let result = [];
-    for (let i = 0; i < projects.length; i++) {
-        const prj = projects[i]
-        result.push({
-            id: prj.id,
-            name: getProperty(prj, 'name', 'undefined'),
-            envId: prj.environment,
-            createdAt: utc2LocalTime(prj.createdAt),
-            lastModifiedAt: utc2LocalTime(prj.lastModifiedAt),
-            links: new HATEOASReferences(prj.links)
-        })
-    }
-    result.sort(function(p1, p2) {return p1.name.localeCompare(p2.name)});
-    return result;
-}
 
 export const projectListing = (state = INITIAL_STATE, action) => {
     switch (action.type) {
@@ -96,8 +74,8 @@ export const projectListing = (state = INITIAL_STATE, action) => {
                 actionError: null,
                 fetchError: null,
                 isFetching: false,
-                projects: listProjects(action.projects),
-                links: new HATEOASReferences(action.links)
+                projects: action.projects,
+                links: action.links
             }
         case SET_PROJECT_CREATE_ERROR:
             return {

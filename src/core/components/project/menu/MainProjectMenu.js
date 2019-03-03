@@ -27,7 +27,7 @@ import NotebookMenuDropdown from './NotebookMenuDropdown';
 import ProjectMenuDropdown from './ProjectMenuDropdown';
 import DeleteResourceModal from '../../modals/DeleteResourceModal';
 import EditResourceNameModal from '../../modals/EditResourceNameModal';
-import { isNotEmptyString, pageUrl } from '../../../util/App';
+import { isNotEmptyString, notebookPageUrl } from '../../../util/App';
 import '../../../../css/ResourceListing.css';
 import '../../../../css/ProjectPage.css';
 
@@ -49,19 +49,19 @@ class MainProjectMenu extends React.Component {
     static propTypes = {
         branch: PropTypes.object,
         groupMode: PropTypes.number.isRequired,
-        project: PropTypes.object.isRequired,
-        resource: PropTypes.object,
-        workflow: PropTypes.object,
         onChangeGrouping: PropTypes.func.isRequired,
         onDeleteBranch: PropTypes.func.isRequired,
         onEditBranch: PropTypes.func.isRequired,
         onEditProject: PropTypes.func.isRequired,
-        onRedirect: PropTypes.func.isRequired,
         onReverse: PropTypes.func.isRequired,
         onShowChart: PropTypes.func.isRequired,
         onShowDataset: PropTypes.func.isRequired,
         onShowHistory: PropTypes.func.isRequired,
         onShowNotebook: PropTypes.func.isRequired,
+        onSwitchBranch: PropTypes.func.isRequired,
+        project: PropTypes.object.isRequired,
+        resource: PropTypes.object.isRequired,
+        workflow: PropTypes.object
     }
     /**
      * Initialize internal state to keep track of any modal that may be shown.
@@ -89,16 +89,17 @@ class MainProjectMenu extends React.Component {
         const {
             branch,
             groupMode,
-            project,
-            resource,
-            workflow,
             onChangeGrouping,
             onReverse,
             onShowChart,
             onShowDataset,
             onShowDatasetError,
             onShowHistory,
-            onShowNotebook
+            onShowNotebook,
+            onSwitchBranch,
+            project,
+            resource,
+            workflow
         } = this.props;
         // The basic layout contains a menu bar and an optional modal or error
         // message.
@@ -121,20 +122,20 @@ class MainProjectMenu extends React.Component {
         );
         let isLiveEnabled = false;
         if (workflow != null) {
-            isLiveEnabled = ((workflow.readOnly) || (resource.isHistory()));
+            isLiveEnabled = workflow.readOnly;
         }
         menuItems.push(
             <BranchMenuDropdown
                 key='branches'
                 branches={project.branches}
+                isLive={!isLiveEnabled}
                 onDelete={this.showDeleteBranchModal}
                 onEdit={this.showEditBranchNameModal}
                 onGoLive={this.switchToBranchHead}
-                onSelect={this.switchBranch}
+                onSelect={onSwitchBranch}
                 onShowHistory={onShowHistory}
-                isLive={!isLiveEnabled}
+                resource={resource}
                 selectedBranch={branch}
-                showTimeMachine={workflow != null}
             />
         );
         if (resource != null) {
@@ -143,16 +144,16 @@ class MainProjectMenu extends React.Component {
             // menu item is a button that allows to show the notebook. If the
             // resource is a notebook the menu is a dropdown that allows th user
             // to select properties of how the notebook is displayed.
-            if (!resource.isNotebook()) {
-                menuItems.push(
-                    <Menu.Item
-                        key='notebook'
-                        icon='file alternate outline'
-                        name='Notebook'
-                        onClick={onShowNotebook}
-                    />
-                );
-            } else {
+            menuItems.push(
+                <Menu.Item
+                    key='notebook'
+                    icon='file alternate outline'
+                    name='Notebook'
+                    disabled={resource.isNotebook()}
+                    onClick={onShowNotebook}
+                />
+            );
+            /*} else {
                 menuItems.push(
                     <NotebookMenuDropdown
                         key='notebook'
@@ -183,7 +184,7 @@ class MainProjectMenu extends React.Component {
                         onSelect={onShowChart}
                         resource={resource}
                     />);
-            }
+            }*/
         }
         let menuBar = (
             <Menu secondary>
@@ -266,26 +267,14 @@ class MainProjectMenu extends React.Component {
      * Submit redirect request when switching branches.
      */
     switchBranch = (branch) => {
-        const { onRedirect, project } = this.props;
-        onRedirect(pageUrl(project.id, branch.id));
+
     }
     /**
      * Show workflow at branch head when user wants to 'Go Live'
      */
     switchToBranchHead = () => {
-        const { branch, onRedirect, onShowNotebook, project, workflow } = this.props;
-        // If the resource workflow is read-only we need to load the branch
-        // head. This is because read-only indicates that a workflow version
-        // other than the branch head is currently show. If the workflow is
-        // not read-only we are at the correct workflow version already. In
-        // this case we simply switch to the notebook view.
-        // Note that the semantics of read-only may change in the future and
-        // we might need to adjust the code here.
-        if (workflow.readOnly) {
-            onRedirect(pageUrl(project.id, branch.id));
-        } else {
-            onShowNotebook();
-        }
+        const { onShowNotebook } = this.props;
+        onShowNotebook();
     }
 }
 

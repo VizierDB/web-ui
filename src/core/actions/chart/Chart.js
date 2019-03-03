@@ -18,7 +18,7 @@
 
 import {
     projectActionError, requestProjectAction, updateResource
-} from '../project/ProjectPage';
+} from '../project/Project';
 import { ChartResource } from '../../resources/Project';
 import { fetchResource } from '../../util/Api';
 
