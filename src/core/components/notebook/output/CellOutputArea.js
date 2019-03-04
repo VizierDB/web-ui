@@ -167,8 +167,7 @@ class CellOutputArea extends React.Component {
                             </span>
                             <ReactMarkdown
                                 source={output.content.lines}
-                                escapeHtml={false}
-                            >
+                                escapeHtml={false} />
                         </div>
                     );
                 }
