@@ -34,6 +34,7 @@ export const CONTENT_DATASET = 'CONTENT_DATASET'
 export const CONTENT_ERROR = 'CONTENT_ERROR'
 export const CONTENT_TEXT = 'CONTENT_TEXT'
 export const CONTENT_HTML = 'CONTENT_HTML'
+export const CONTENT_MARKDOWN = 'CONTENT_MARKDOWN'
 
 /**
  * Output resource content. Contains functionality to determine content type.
@@ -49,6 +50,7 @@ class OutputResource {
     isError = () => (this.type === CONTENT_ERROR);
     isText = () => (this.type === CONTENT_TEXT);
     isHtml = () => (this.type === CONTENT_HTML);
+    isMarkdown = () => (this.type === CONTENT_MARKDOWN);
 }
 
 export const OutputChart = (name, dataset) => (new OutputResource(CONTENT_CHART, {name, dataset}, false));
@@ -74,6 +76,16 @@ export const OutputHtml = (outputObjects) => {
         }
     }
     return new OutputResource(CONTENT_HTML, {lines}, false);
+};
+export const OutputMarkdown = (outputObjects) => {
+    const lines  = [];
+    for (let j = 0; j < outputObjects.length; j++) {
+        const out = outputObjects[j];
+        if (out.type === 'text/markdown') {
+            lines.push(out.data);
+        }
+    }
+    return new OutputResource(CONTENT_MARKDOWN, {lines}, false);
 };
 
 
@@ -165,6 +177,8 @@ export class Notebook {
                     outputResource = OutputChart(out.data.name, out.result);
                 } else if (out.type === 'text/html') {
                     outputResource = OutputHtml(stdout);
+                } else if (out.type === 'text/markdown') {
+                    outputResource = OutputMarkdown(stdout);
                 } else  {
                     outputResource = OutputText(stdout);
                 }

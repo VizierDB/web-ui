@@ -35,5 +35,6 @@ export const DT_INT = 'int';
 export const DT_PYTHON_CODE = 'pyCode';
 export const DT_SQL_CODE = 'sqlCode';
 export const DT_SCALA_CODE = 'scalaCode';
+export const DT_MARKDOWN_CODE = 'markdownCode';
 export const DT_ROW_ID = 'rowidx';
 export const DT_STRING = 'string'

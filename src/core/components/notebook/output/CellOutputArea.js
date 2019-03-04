@@ -20,6 +20,7 @@ import React from 'react';
 import createReactClass from 'create-react-class';
 import { PropTypes } from 'prop-types';
 import { Dimmer, Loader } from 'semantic-ui-react';
+import { ReactMarkdown } from 'react-markdown'
 import AnnotationObject from '../../annotation/AnnotationObject';
 import { ErrorMessage } from '../../Message';
 import DatasetChart from '../../plot/DatasetChart';
@@ -155,6 +156,19 @@ class CellOutputArea extends React.Component {
                                 {output.content.name}
                             </span>
                             <Response />
+                        </div>
+                    );
+                }
+                else if (output.isMarkdown()) {
+                	outputContent = (
+                        <div className='output-content'>
+                            <span className='output-content-header'>
+                                {output.content.name}
+                            </span>
+                            <ReactMarkdown
+                                source={output.content.lines}
+                                escapeHtml={false}
+                            >
                         </div>
                     );
                 }

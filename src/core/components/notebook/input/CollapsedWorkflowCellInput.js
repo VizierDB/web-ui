@@ -24,7 +24,7 @@ import { Form } from 'semantic-ui-react';
 import PythonCell from './form/PythonCell';
 import SQLCell from './form/SQLCell';
 import ScalaCell from './form/ScalaCell';
-import { DT_DATASET_ID, DT_FILE_ID, DT_PYTHON_CODE, DT_SQL_CODE, DT_SCALA_CODE } from './ModuleSpec';
+import { DT_DATASET_ID, DT_FILE_ID, DT_PYTHON_CODE, DT_SQL_CODE, DT_SCALA_CODE, DT_MARKDOWN_CODE } from './ModuleSpec';
 
 /**
  * Collapsed input area for an workflow notebook cell. The output is a
