@@ -19,6 +19,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { deleteBranch } from '../../actions/project/Branch';
 import { fetchWorkflow } from '../../actions/project/Notebook';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import ContentSpinner from '../../components/ContentSpinner';
@@ -94,7 +95,7 @@ class NotebookPage extends Component {
             } else {
                 const branchId = this.props.match.params.branch_id;
                 const prevBranchId = prevProps.match.params.branch_id;
-                if (branchId != prevBranchId) {
+                if (branchId !== prevBranchId) {
                     const { dispatch, project } = this.props;
                     dispatch(
                         setBranch(
@@ -106,6 +107,23 @@ class NotebookPage extends Component {
                 }
             }
         }
+    }
+    /**
+     * Delete the given branch. Switch to the project default branch on success.
+     */
+    handleDeleteBranch = (branch) => {
+        const { dispatch, history, project } = this.props;
+        const defaultBranchId = project.getDefaultBranch().id;
+        const redirectUrl = notebookPageUrl(project.id, defaultBranchId);
+        dispatch(deleteBranch(project, branch, () => {
+            const modifiedProject = project.deleteBranch(branch.id);
+            history.push(redirectUrl);
+            return setBranch(
+                modifiedProject,
+                defaultBranchId,
+                (project, branch) => (fetchWorkflow(project, branch))
+            );
+        }));
     }
     /**
      * Dispatch action to load the workflow at the head of the current branch.
@@ -171,6 +189,7 @@ class NotebookPage extends Component {
                     dispatch={dispatch}
                     groupMode={groupMode}
                     isActive={isActive}
+                    onDeleteBranch={this.handleDeleteBranch}
                     onShowNotebook={this.handleShowBranchHead}
                     onSwitchBranch={this.handleSwitchBranch}
                     project={project}

@@ -22,7 +22,7 @@ import { withRouter } from 'react-router';
 import {  Grid, Loader, Modal } from 'semantic-ui-react';
 import { showChartView } from '../../actions/chart/Chart';
 import { changeGroupMode, reverseOrder } from '../../actions/project/Notebook';
-import { deleteBranch, updateBranch } from '../../actions/project/Branch';
+import { updateBranch } from '../../actions/project/Branch';
 import { dismissProjectActionError, updateProject } from '../../actions/project/Project';
 import { showSpreadsheet, showDatasetError, repairDatasetError } from '../../actions/project/Spreadsheet';
 import { ConnectionInfo } from '../Api'
@@ -45,6 +45,7 @@ class ProjectResourcePage extends Component {
         dispatch: PropTypes.func.isRequired,
         groupMode: PropTypes.number.isRequired,
         isActive: PropTypes.bool.isRequired,
+        onDeleteBranch: PropTypes.func.isRequired,
         onShowNotebook: PropTypes.func.isRequired,
         onSwitchBranch: PropTypes.func.isRequired,
         project: PropTypes.object.isRequired,
@@ -121,6 +122,7 @@ class ProjectResourcePage extends Component {
             contentCss,
             groupMode,
             isActive,
+            onDeleteBranch,
             onShowNotebook,
             onSwitchBranch,
             project,
@@ -162,7 +164,7 @@ class ProjectResourcePage extends Component {
                             branch={branch}
                             groupMode={groupMode}
                             onChangeGrouping={this.handleChangeGroupMode}
-                            onDeleteBranch={this.submitDeleteBranch}
+                            onDeleteBranch={onDeleteBranch}
                             onEditBranch={this.submitEditBranch}
                             onEditProject={this.submitEditProject}
                             onReverse={this.handleNotebookReverse}
@@ -185,13 +187,6 @@ class ProjectResourcePage extends Component {
                 </div>
             </div>
         );
-    }
-    /**
-     * Submit request to delete the given branch from the current project.
-     */
-    submitDeleteBranch = (branch) => {
-        const { dispatch, project } = this.props;
-        dispatch(deleteBranch(project, branch));
     }
     /**
      * Submit request to update the name of the current branch.

@@ -103,6 +103,26 @@ export class ProjectHandle {
         this.branches = branches;
     }
     /**
+     * Delete the branch with the given identifier. Returns a modified project
+     * handle.
+     */
+    deleteBranch(branchId) {
+        const modifiedBranchList = [];
+        for (let i = 0; i < this.branches.length; i++) {
+            const br = this.branches[i];
+            if (br.id !== branchId) {
+                modifiedBranchList.push(br);
+            }
+        }
+        return new ProjectHandle(
+            this.id,
+            this.name,
+            this.links,
+            this.packages,
+            modifiedBranchList
+        );
+    }
+    /**
      * Initialize the object properties from a Json object that is returned by
      * Web API calls that return a ProjectHandle.
      */
@@ -120,6 +140,12 @@ export class ProjectHandle {
         }
         sortByName(this.branches);
         return this;
+    }
+    /**
+     * Returns the default branch for this project.
+     */
+    getDefaultBranch() {
+        return this.branches.find((br) => (br.isDefault));
     }
     /**
      * This method is used to identify cells in a notebook that are grouped.

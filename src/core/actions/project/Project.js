@@ -114,7 +114,9 @@ export const setBranch = (project, branchId, resultFunc) => (dispatch) => {
     let branch =  project.branches.find((br) => (br.id === branchId));
     if (branch != null) {
         dispatch({type: RECEIVE_PROJECT, project, branch});
-        dispatch(resultFunc(project, branch));
+        if (resultFunc) {
+            dispatch(resultFunc(project, branch));
+        }
     } else {
         dispatch(projectFetchError('Unknown branch ' + branchId, 404));
     }
@@ -135,12 +137,10 @@ export const updateProject = (project, name) => (dispatch) => {
             project.links.get(HATEOAS_PROJECT_UPDATE_PROPERTY),
             'name',
             name,
-            (json) => (dispatch) => {
-                return dispatch({
-                    type: UPDATE_PROJECT,
-                    project: project.updateName(getProperty(json, 'name'))
-                });
-            },
+            (json) => (dispatch) => (dispatch({
+                type: UPDATE_PROJECT,
+                project: project.updateName(getProperty(json, 'name'))
+            })),
             (message) => (projectActionError(
                 'Error updating project', message
             )),

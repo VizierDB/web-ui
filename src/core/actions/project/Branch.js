@@ -19,10 +19,7 @@
 import { redirectTo } from '../main/App';
 import { projectActionError, projectFetchError, requestProjectAction } from './Project';
 import { WorkflowDescriptor } from '../../resources/Workflow';
-import {
-    deleteResource, fetchResource, getProperty, postResourceData,
-    updateResourceProperty
-} from '../../util/Api';
+import { deleteResource, fetchResource, getProperty, postResourceData, updateResourceProperty } from '../../util/Api';
 import { notebookPageUrl } from '../../util/App';
 import { HATEOAS_SELF, HATEOAS_BRANCH_UPDATE_PROPERTY } from '../../util/HATEOAS';
 
@@ -82,13 +79,14 @@ export const createBranch = (project, workflow, module, name) =>  (dispatch) => 
  *
  * project: ProjectHandle
  * branch: BranchDescriptor
- *
+ * redirectAction: Dispatch action to redirect to the default brnach in case of
+ *                 successful delete
  */
-export const deleteBranch = (project, branch) => (dispatch) => {
+export const deleteBranch = (project, branch, redirectAction) => (dispatch) => {
     dispatch(
         deleteResource(
-            branch.links.delete,
-            () => (redirectTo(notebookPageUrl(project.id, 'DEFAULT_BRANCH'))),
+            branch.links.get('branch.delete'),
+            redirectAction,
             (message) => (
                 projectActionError('Error deleting branch', message)
             ),
@@ -120,7 +118,7 @@ export const fetchBranch = (project, branch) => (dispatch) => {
                     const wf = workflows[i];
                     history.push(new WorkflowDescriptor().fromJson(wf))
                 }
-                return dispatch({
+                dispatch({
                     type: RECEIVE_BRANCH_HISTORY,
                     workflows: history
                 });

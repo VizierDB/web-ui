@@ -20,7 +20,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {  Icon } from 'semantic-ui-react';
-import { fetchBranch } from '../../actions/project/Branch';
+import { deleteBranch, fetchBranch } from '../../actions/project/Branch';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import ContentSpinner from '../../components/ContentSpinner';
 import { FetchError } from '../../components/Message';
@@ -87,6 +87,22 @@ class BranchPage extends Component {
                 dispatch(setBranch(project, branchId, fetchBranch));
             }
         }
+    }
+    /**
+     * Delete the given branch. Switch to the project default branch on success.
+     */
+    handleDeleteBranch = (branch) => {
+        const { dispatch, history, project } = this.props;
+        const defaultBranchId = project.getDefaultBranch().id;
+        const redirectUrl = branchPageUrl(project.id, defaultBranchId);
+        dispatch(deleteBranch(project, branch, () => {
+            const modifiedProject = project.deleteBranch(branch.id);
+            console.log(redirectUrl);
+            history.push(redirectUrl);
+            return setBranch(modifiedProject, defaultBranchId, fetchBranch);
+        }));
+        //history.push(branchPageUrl(project.id, defaultBranchId));
+        //dispatch(setBranch(project, defaultBranchId, fetchBranch));
     }
     /**
      * Push URL for notebook page onto history stack. This will render a new
@@ -217,6 +233,7 @@ class BranchPage extends Component {
                     dispatch={dispatch}
                     groupMode={GRP_UNDEFINED}
                     isActive={isActive}
+                    onDeleteBranch={this.handleDeleteBranch}
                     onShowNotebook={this.handleShowWorkflow}
                     onSwitchBranch={this.handleSwitchBranch}
                     project={project}
