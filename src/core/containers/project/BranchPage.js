@@ -97,12 +97,9 @@ class BranchPage extends Component {
         const redirectUrl = branchPageUrl(project.id, defaultBranchId);
         dispatch(deleteBranch(project, branch, () => {
             const modifiedProject = project.deleteBranch(branch.id);
-            console.log(redirectUrl);
             history.push(redirectUrl);
             return setBranch(modifiedProject, defaultBranchId, fetchBranch);
         }));
-        //history.push(branchPageUrl(project.id, defaultBranchId));
-        //dispatch(setBranch(project, defaultBranchId, fetchBranch));
     }
     /**
      * Push URL for notebook page onto history stack. This will render a new
