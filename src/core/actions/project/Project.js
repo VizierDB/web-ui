@@ -40,7 +40,6 @@ export const UPDATE_PROJECT = 'UPDATE_PROJECT';
 export const UPDATE_RESOURCE = 'UPDATE_RESOURCE';
 export const UPDATE_WORKFLOW = 'UPDATE_WORKFLOW';
 
-
 /**
  * Fetch project and branch from API. Calls the given result function to
  * fetch further resources on success.
@@ -106,6 +105,10 @@ export const receiveProjectResource = (resource) => ({
     resource: resource
 })
 
+export const setProject = (project) => ({
+    type: UPDATE_PROJECT,
+    project
+});
 
 // -----------------------------------------------------------------------------
 // Switch Branch

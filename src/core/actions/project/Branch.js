@@ -17,9 +17,9 @@
  */
 
 import { redirectTo } from '../main/App';
-import { projectActionError, projectFetchError, requestProjectAction } from './Project';
+import { projectActionError, projectFetchError, requestProjectAction, setProject } from './Project';
 import { WorkflowDescriptor } from '../../resources/Workflow';
-import { deleteResource, fetchResource, getProperty, postResourceData, updateResourceProperty } from '../../util/Api';
+import { createResource, deleteResource, fetchResource, getProperty, updateResourceProperty } from '../../util/Api';
 import { notebookPageUrl } from '../../util/App';
 import { HATEOAS_SELF, HATEOAS_BRANCH_UPDATE_PROPERTY } from '../../util/HATEOAS';
 
@@ -40,15 +40,17 @@ export const REQUEST_BRANCH = 'REQUEST_BRANCH'
  * workflow: WorkflowHandle
  * module: ModuleHandle
  * name: string
+ * redirectAction: Action that is dispatched on success with the JSON object
+ *                 containing the API response
  *
  */
-export const createBranch = (project, workflow, module, name) =>  (dispatch) => {
+export const createBranch = (project, branch, workflowId, moduleId, name, redirectAction) =>  (dispatch) => {
     // Generate request body containing source information and branch properties
     const data = {
         source: {
-            branch: workflow.branch.id,
-            version: workflow.version,
-            moduleId: module.id
+            branchId: branch.id,
+            workflowId: workflowId,
+            moduleId: moduleId
         },
         properties: [{
             key: 'name',
@@ -57,15 +59,16 @@ export const createBranch = (project, workflow, module, name) =>  (dispatch) => 
     }
     // POST request to branches url contained in the project handle's links. On
     // success, redirect to the page for the new branch.
-    return postResourceData(
-        dispatch,
-        workflow.links.branches,
-        data,
-        (branch) => (redirectTo(notebookPageUrl(project.id, branch.id))),
-        (message) => (projectActionError(
-            'Error creating new branch', message
-        )),
-        requestBranch
+    dispatch(
+        createResource(
+            project.links.get('branch.create'),
+            data,
+            redirectAction,
+            (message) => (
+                projectActionError('Error creating new branch', message)
+            ),
+            requestBranch
+        )
     )
 }
 
@@ -82,11 +85,16 @@ export const createBranch = (project, workflow, module, name) =>  (dispatch) => 
  * redirectAction: Dispatch action to redirect to the default brnach in case of
  *                 successful delete
  */
-export const deleteBranch = (project, branch, redirectAction) => (dispatch) => {
+export const deleteBranch = (project, branch, history) => (dispatch) => {
     dispatch(
         deleteResource(
             branch.links.get('branch.delete'),
-            redirectAction,
+            () => (() => {
+                dispatch(setProject(project.deleteBranch(branch.id)));
+                const defaultBranchId = project.getDefaultBranch().id;
+                const redirectUrl = notebookPageUrl(project.id, defaultBranchId);
+                history.push(redirectUrl);
+            }),
             (message) => (
                 projectActionError('Error deleting branch', message)
             ),

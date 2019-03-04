@@ -83,9 +83,8 @@ class CellOutputArea extends React.Component {
         // Only show an output selector if there are datasets or views, no
         // errors, and fetching is not in progress.
         let outputSelector = null;
-        const hasError = (module.stderr.length > 0);
         const hasOutputObjects = ((module.datasets.length > 0) || (module.views.length > 0));
-        if ((!hasError) && (output.isFetching !== true) && (hasOutputObjects)) {
+        if ((!module.isError()) && (output.isFetching !== true) && (hasOutputObjects)) {
             outputSelector = (
                 <OutputSelector
                     module={module}
@@ -98,8 +97,8 @@ class CellOutputArea extends React.Component {
         // handle. First, we distinguish between successful output or error
         // messages
         let outputContent = null;
-        if (module.stderr.length > 0) {
-            const lines = OutputText(module.stdout.concat(module.stderr)).content.lines;
+        if (module.outputs.stderr.length > 0) {
+            const lines = OutputText(module.outputs.stdout.concat(module.outputs.stderr)).content.lines;
             outputContent = <TextOutput isError={true} lines={lines} />;
         } else {
             if (output.isError()) {

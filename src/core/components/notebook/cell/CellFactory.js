@@ -27,10 +27,10 @@ import ReadOnlyNotebookCell from './ReadOnlyNotebookCell';
  */
 
 /**
- * Generate unique key for notebook cell from workflow version and cell index
+ * Generate unique key for notebook cell from notebook identifier and cell index
  * position.
  */
- const cellKey = (workflow, cellType, cellIndex) => (workflow.version + cellType + cellIndex)
+ const cellKey = (notebook, cellType, cellIndex) => (notebook.id + cellType + cellIndex)
 
 
  /**
@@ -40,10 +40,9 @@ import ReadOnlyNotebookCell from './ReadOnlyNotebookCell';
      const {
          notebook,
          project,
-         workflow,
          onInsertModule,
      } = props;
-     // Get the next module in the workflow (if not at end of workflow).
+     // Get the next module in the notebook (if not at end of notebook).
      let nextModule = null;
      if (index < notebook.cells.length - 1) {
          nextModule = notebook.cells[index + 1].module;
@@ -51,7 +50,7 @@ import ReadOnlyNotebookCell from './ReadOnlyNotebookCell';
      // Return an empty cell.
      return (
          <EmptyNotebookCell
-             key={cellKey(workflow, 'EMP', index)}
+             key={cellKey(notebook, 'EMP', index)}
              datasets={datasets}
              env={project.environment}
              nextModule={nextModule}
@@ -68,8 +67,8 @@ import ReadOnlyNotebookCell from './ReadOnlyNotebookCell';
  export const GroupCell = (props, cells, errorState, index) => {
      const {
          groupMode,
+         notebook,
          reversed,
-         workflow,
          onChangeGrouping,
      } = props;
      if (reversed) {
@@ -77,7 +76,7 @@ import ReadOnlyNotebookCell from './ReadOnlyNotebookCell';
      }
      return (
          <NotebookCellGroup
-             key={cellKey(workflow, 'GRP', index)}
+             key={cellKey(notebook, 'GRP', index)}
              cells={cells}
              startIndex={(index - cells.length) + 1}
              endIndex={index}
@@ -94,8 +93,8 @@ import ReadOnlyNotebookCell from './ReadOnlyNotebookCell';
   */
  export const ModuleCell = (props, cell, datasets, index) => {
      const {
+         notebook,
          project,
-         workflow,
          onCreateBranch,
          onDeleteModule,
          onNavigateDataset,
@@ -105,7 +104,7 @@ import ReadOnlyNotebookCell from './ReadOnlyNotebookCell';
      } = props;
      return (
          <EditableNotebookCell
-             key={cellKey(workflow, 'MOD', index)}
+             key={cellKey(notebook, 'MOD', index)}
              datasets={datasets}
              env={project.environment}
              cell={cell}
@@ -126,14 +125,14 @@ import ReadOnlyNotebookCell from './ReadOnlyNotebookCell';
  */
  export const ReadOnlyCell = (props, cell, errorState, index) => {
      const {
-         workflow,
+         notebook,
          onNavigateDataset,
          onOutputSelect,
          onShowAnnotations
      } = props;
      return (
          <ReadOnlyNotebookCell
-             key={cellKey(workflow, 'ERR', index)}
+             key={cellKey(notebook, 'ERR', index)}
              cell={cell}
              errorState={errorState}
              sequenceIndex={index + 1}

@@ -49,6 +49,7 @@ class MainProjectMenu extends React.Component {
     static propTypes = {
         branch: PropTypes.object,
         groupMode: PropTypes.number.isRequired,
+        notebook: PropTypes.object,
         onChangeGrouping: PropTypes.func.isRequired,
         onDeleteBranch: PropTypes.func.isRequired,
         onEditBranch: PropTypes.func.isRequired,
@@ -60,8 +61,7 @@ class MainProjectMenu extends React.Component {
         onShowNotebook: PropTypes.func.isRequired,
         onSwitchBranch: PropTypes.func.isRequired,
         project: PropTypes.object.isRequired,
-        resource: PropTypes.object.isRequired,
-        workflow: PropTypes.object
+        resource: PropTypes.object.isRequired
     }
     /**
      * Initialize internal state to keep track of any modal that may be shown.
@@ -89,6 +89,7 @@ class MainProjectMenu extends React.Component {
         const {
             branch,
             groupMode,
+            notebook,
             onChangeGrouping,
             onReverse,
             onShowChart,
@@ -98,8 +99,7 @@ class MainProjectMenu extends React.Component {
             onShowNotebook,
             onSwitchBranch,
             project,
-            resource,
-            workflow
+            resource
         } = this.props;
         // The basic layout contains a menu bar and an optional modal or error
         // message.
@@ -121,8 +121,8 @@ class MainProjectMenu extends React.Component {
             />
         );
         let isLiveEnabled = false;
-        if (workflow != null) {
-            isLiveEnabled = workflow.readOnly;
+        if (notebook != null) {
+            isLiveEnabled = notebook.readOnly;
         }
         menuItems.push(
             <BranchMenuDropdown

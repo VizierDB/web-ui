@@ -32,7 +32,7 @@ import { fetchAuthed, requestAuth } from '../actions/main/Service';
  * signalStartHandler will be called before the request is being made.
  */
 export const createResource = (url, data, successHandler, errorHandler, signalStartHandler) => (dispatch) => {
-    return postResourceData(dispatch, url, data, successHandler, errorHandler, signalStartHandler)
+    dispatch(postResourceData(url, data, successHandler, errorHandler, signalStartHandler))
 }
 
 
@@ -130,7 +130,7 @@ export const getProperty = (object, key, defaultValue) => {
  * created or updated successfully or in case of an error. The optional
  * signalStartHandler will be called before the request is being made.
  */
-export const postResourceData = (dispatch, url, data, successHandler, errorHandler, signalStartHandler) => {
+export const postResourceData = (url, data, successHandler, errorHandler, signalStartHandler) => (dispatch) => {
     // Signal start if callback handle is given
     if (signalStartHandler) {
         dispatch(signalStartHandler())

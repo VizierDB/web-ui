@@ -103,6 +103,25 @@ export class ProjectHandle {
         this.branches = branches;
     }
     /**
+     * Add a new branch to the list of project branches. Returns a new project
+     * handle for the modified project.
+     */
+    addBranch(branch) {
+        const modifiedBranchList = [branch];
+        for (let i = 0; i < this.branches.length; i++) {
+            const br = this.branches[i];
+            modifiedBranchList.push(this.branches[i]);
+        }
+        sortByName(modifiedBranchList);
+        return new ProjectHandle(
+            this.id,
+            this.name,
+            this.links,
+            this.packages,
+            modifiedBranchList
+        );
+    }
+    /**
      * Delete the branch with the given identifier. Returns a modified project
      * handle.
      */

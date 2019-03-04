@@ -16,13 +16,32 @@
  * limitations under the License.
  */
 
-import { BranchDescriptor } from './Branch';
-import { ChartDescriptor } from './Chart';
 import { DatasetDescriptor } from './Dataset';
 import { HATEOASReferences } from '../util/HATEOAS';
-import { sortByName } from '../util/Sort';
 import { utc2LocalTime } from '../util/Timestamp';
 
+
+// -----------------------------------------------------------------------------
+// Workflow and module states
+// -----------------------------------------------------------------------------
+
+const STATE_PENDING = 0;
+const STATE_RUNNING = 1
+const STATE_CANCELED = 2
+const STATE_ERROR = 3
+const STATE_SUCCESS = 4
+
+export const isCanceled = (state) => (state === STATE_CANCELED);
+export const isError = (state) => (state === STATE_ERROR);
+export const isErrorOrCanceled = (state) => (isCanceled(state) || isError(state));
+export const isPending = (state) => (state === STATE_PENDING);
+export const isRunning = (state) => (state === STATE_RUNNING);
+export const isSuccess = (state) => (state === STATE_SUCCESS);
+export const isActive = (state) => (isPending(state) || isRunning(state));
+
+// -----------------------------------------------------------------------------
+// Workflow objects
+// -----------------------------------------------------------------------------
 
 /**
  * Descriptor for a workflow version in a branch history. Contains the version
@@ -66,15 +85,6 @@ export class WorkflowDescriptor {
  * implemented.
  */
 export class WorkflowHandle {
-    constructor(version, createdAt, branch, datasets, charts, readOnly, links) {
-        this.version = version;
-        this.createdAt = createdAt;
-        this.branch = branch;
-        this.datasets = datasets;
-        this.charts = charts;
-        this.readOnly = readOnly;
-        this.links = links;
-    }
     /**
      * Initialize the workflow handle from a Json object containing a
      * WorkflowHandle returned by the Web API.
@@ -82,24 +92,22 @@ export class WorkflowHandle {
     fromJson(json) {
         this.id = json.id;
         this.createdAt = utc2LocalTime(json.createdAt);
+        this.state = json.state;
         this.readOnly = json.readOnly;
+        // Get a dictionary of dataset descriptors for all datasets that occur
+        // in the workflow. Datasets are keyed by their unique identifier. Note
+        // that the dictionary will contain all datasets that were created by
+        // any module in the workflow and not just the datasets in the current
+        // workflow state.
+        this.datasets = {};
+        for (let i = 0; i < json.datasets.length; i++) {
+            const dataset = new DatasetDescriptor().fromJson(json.datasets[i]);
+            this.datasets[dataset.id] = dataset;
+        }
+        // Keep list of modules as they are. The notebook will convert them into
+        // a list of notebook cells when needed.
+        this.modules = json.modules;
         this.links = new HATEOASReferences(json.links);
         return this;
-    }
-    /**
-     * Create a copy of the workflow handle where the branch is replaced with
-     * the given value.
-     */
-    updateBranch(branch) {
-        const { version, createdAt, datasets, charts, readOnly, links } = this;
-        return new WorkflowHandle(
-            version,
-            createdAt,
-            branch,
-            datasets,
-            charts,
-            readOnly,
-            links
-        );
     }
 }

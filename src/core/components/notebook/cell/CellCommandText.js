@@ -17,33 +17,30 @@
  */
 
 import React from 'react';
-import { PropTypes } from 'prop-types'
+import { PropTypes } from 'prop-types';
+import { isErrorOrCanceled }  from '../../../resources/Workflow';
 import '../../../../css/Notebook.css';
 
 
 /**
- * Display a clickable cell index for a notebook cell that contains a workflow
- * module.
+ * Display the text representation of a workflow module command.
  */
-class CellIndex extends React.Component {
+class CellCommandText extends React.Component {
     static propTypes = {
-        sequenceIndex: PropTypes.oneOfType([
-             PropTypes.string,
-             PropTypes.number
-         ]),
-         title: PropTypes.string,
-        onClick: PropTypes.func.isRequired
+        moduleState: PropTypes.number.isRequired,
+        onDoubleClick: PropTypes.func,
+        text: PropTypes.string.isRequired
     }
     render() {
-        const { sequenceIndex, title, onClick } = this.props;
-        return (
-            <span>[
-                <a className='cell-index' title={title} onClick={onClick}>
-                    {sequenceIndex}
-                </a>
-            ]</span>
-        );
+        const { moduleState, onDoubleClick, text } = this.props;
+        // The stylesheet class name depends on the state of the module. Append
+        // error-state in case of an error or if the module was canceled.
+        let css = 'cell-cmd-text';
+        if (isErrorOrCanceled(moduleState)) {
+            css += ' error-state';
+        }
+        return  (<pre className={css} onDoubleClick={onDoubleClick}>{text}</pre>);
     }
 }
 
-export default CellIndex;
+export default CellCommandText;

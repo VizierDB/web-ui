@@ -22,25 +22,25 @@
 
 import { RECEIVE_WORKFLOW, REQUEST_WORKFLOW } from '../../actions/project/Notebook';
 import { PROJECT_FETCH_ERROR, RECEIVE_PROJECT, REQUEST_PROJECT } from '../../actions/project/Project';
-import { GRP_HIDE } from '../../resources/Notebook';
+import { GRP_HIDE, Notebook } from '../../resources/Notebook';
 
 
 /**
  * STATE:
  *
- * fetchError: Error while loading the project handle or workflow listing
+ * fetchError: Error while loading the project handle or workflow handle
  * groupMode: Mode for grouping Vizual commands
- * isFetching: Load of project handle or workflow listing in progress
+ * isFetching: Load of project handle or workflow handle in progress
+ * notebook: Notebook for the current workflow handle
  * reversed: Order of cells in a notebook
- * workflow: The workflow handle
  */
 
 const INITIAL_STATE = {
     fetchError: null,
     groupMode: GRP_HIDE,
     isFetching: false,
+    notebook: null,
     reversed: false,
-    workflow: null
 }
 
 export const notebookPage = (state = INITIAL_STATE, action) => {
@@ -56,10 +56,10 @@ export const notebookPage = (state = INITIAL_STATE, action) => {
                 ...state,
                 isFetching: false,
                 fetchError: null,
-                workflow: action.workflow
+                notebook: new Notebook(action.workflow)
             };
         case RECEIVE_PROJECT:
-            return {...state, workflow: null};
+            return {...state, notebook: null};
         case REQUEST_PROJECT:
         case REQUEST_WORKFLOW:
             return {

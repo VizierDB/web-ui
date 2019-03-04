@@ -19,14 +19,19 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { deleteBranch } from '../../actions/project/Branch';
+import { createBranch, deleteBranch } from '../../actions/project/Branch';
 import { fetchWorkflow } from '../../actions/project/Notebook';
 import { fetchProject, setBranch } from '../../actions/project/Project';
+import { LargeMessageButton } from '../../components/Button';
 import ContentSpinner from '../../components/ContentSpinner';
 import { FetchError } from '../../components/Message';
+import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
+import EditableNotebook from '../../components/notebook/EditableNotebook';
+import ReadOnlyNotebook from '../../components/notebook/ReadOnlyNotebook';
 import ProjectResourcePage from '../../components/project/ProjectResourcePage';
+import { BranchDescriptor } from '../../resources/Branch';
 import { NotebookResource } from '../../resources/Project';
-import { notebookPageUrl } from '../../util/App.js';
+import { isNotEmptyString, notebookPageUrl } from '../../util/App.js';
 
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
@@ -44,22 +49,27 @@ class NotebookPage extends Component {
         groupMode: PropTypes.number,
         isActive: PropTypes.bool.isRequired,
         isFetching: PropTypes.bool.isRequired,
+        notebook: PropTypes.object,
         project: PropTypes.object,
-        serviceApi: PropTypes.object,
-        workflow: PropTypes.object
+        reversed: PropTypes.bool.isRequired,
+        serviceApi: PropTypes.object
     }
     /**
      * Fetch project information when page is loaded.
      */
     constructor(props) {
         super(props);
-        const { dispatch, project, branch, workflow } = this.props;
+        // Set the branch modal state
+        console.log('CONSTRUCTOR');
+        this.state = {modalOpen: false, modalTitle: 'New branch', moduleId: null};
+        // Fetch any resources that are currently null or out of sync with the
+        // browser URL. It is assumed that the branch is set if the project is
+        // set (i.e., either both are null or neither of them).
+        const { dispatch, project, branch, notebook } = this.props;
         const projectId = this.props.match.params.project_id;
         const branchId = this.props.match.params.branch_id;
         const workflowId = this.props.match.params.workflow_id;
-        // Fetch any resources that are currently missing. It is assumed that
-        // the branch is set if the project is set.
-        if (project == null) {
+        if ((project == null) || (project.id !== projectId)) {
             dispatch(
                 fetchProject(
                     projectId,
@@ -68,62 +78,89 @@ class NotebookPage extends Component {
                         project,
                         branch,
                         workflowId
-                    ))
-                )
-            );
-        } else if (workflow == null) {
+            ))));
+        } else if (notebook == null) {
             dispatch(fetchWorkflow(project, branch, workflowId));
-        } else if (workflow.id !== workflowId) {
+        } else if (notebook.id !== workflowId) {
             dispatch(fetchWorkflow(project, branch, workflowId));
         }
     }
     /**
-     * Ensure proper back and forward behaviour. It appears that when the user
-     * uses the back and previous button in the browser the current state and
-     * the previous state are the same but the workflow identifier in the URL
-     * is different.
+     * Ensure proper back and forward behaviour. If there is a change in the
+     * pathname we need to ensure that the resources that are referenced in
+     * the path match those that are in the current state.
      */
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const workflow = this.props.workflow;
-        const prevWorkflow = prevProps.workflow;
-        if ((workflow != null) && (prevWorkflow != null)) {
+        // Take no action if the current project, branch or notebook are null
+        const { project, branch, notebook } = this.props;
+        if ((project == null) && (branch == null) && (notebook == null)) {
+            console.log('No action');
+            return;
+        }
+        // Check if the location path has changed. The change may either be
+        // the result from an update operation (create branch, delete branch),
+        // a switch between notebook versions or the result of the user using
+        // the back and forward buttons in their browser.
+        if (prevProps.location.pathname !== this.props.location.pathname) {
+            console.log('Change in path name');
+            const { dispatch, project, branch, notebook } = this.props;
+            const projectId = this.props.match.params.project_id;
+            const branchId = this.props.match.params.branch_id;
             const workflowId = this.props.match.params.workflow_id;
-            const prevWorkflowId = prevProps.match.params.workflow_id;
-            if ((workflow.id === prevWorkflow.id) && (workflowId !== prevWorkflowId)) {
-                const { branch, dispatch, project } = this.props;
-                dispatch(fetchWorkflow(project, branch, workflowId));
-            } else {
-                const branchId = this.props.match.params.branch_id;
-                const prevBranchId = prevProps.match.params.branch_id;
-                if (branchId !== prevBranchId) {
-                    const { dispatch, project } = this.props;
-                    dispatch(
-                        setBranch(
+            if (project.id !== projectId) {
+                console.log('Change in project');
+                dispatch(
+                    fetchProject(
+                        projectId,
+                        branchId,
+                        (project, branch) => (fetchWorkflow(
                             project,
-                            branchId,
-                            (project, branch) => (fetchWorkflow(project, branch))
-                        )
-                    );
-                }
+                            branch,
+                            workflowId
+                ))));
+            } else if (branch.id !== branchId) {
+                console.log('Change in branch');
+                dispatch(setBranch(project, branchId, (project, branch) => (fetchWorkflow(project, branch, workflowId))));
+            } else if (notebook.id !== workflowId) {
+                console.log('Change in workflow');
+                dispatch(fetchWorkflow(project, branch, workflowId));
             }
         }
+    }
+    handleCreateBranch = (name) => {
+        const { branch, dispatch, history, notebook, project } = this.props;
+        const { moduleId } = this.state;
+        // Need to add the returned branch handle to the current project
+        // before switching to the new branch.
+        dispatch(
+            createBranch(
+                project,
+                branch,
+                notebook.id,
+                moduleId,
+                name,
+                (json) => {
+                    console.log('GO')
+                    const resultBranch = new BranchDescriptor().fromJson(json)
+                    const modifiedProject = project.addBranch(resultBranch);
+                    console.log('PUSH');
+                    history.push(notebookPageUrl(project.id, resultBranch.id));
+                    console.log('SET BRANCH')
+                    return setBranch(
+                        modifiedProject,
+                        resultBranch.id,
+                        (project, branch) => (fetchWorkflow(project, branch))
+                    );
+                }
+        ));
+        this.hideCreateBranchModal();
     }
     /**
      * Delete the given branch. Switch to the project default branch on success.
      */
     handleDeleteBranch = (branch) => {
         const { dispatch, history, project } = this.props;
-        const defaultBranchId = project.getDefaultBranch().id;
-        const redirectUrl = notebookPageUrl(project.id, defaultBranchId);
-        dispatch(deleteBranch(project, branch, () => {
-            const modifiedProject = project.deleteBranch(branch.id);
-            history.push(redirectUrl);
-            return setBranch(
-                modifiedProject,
-                defaultBranchId,
-                (project, branch) => (fetchWorkflow(project, branch))
-            );
-        }));
+        dispatch(deleteBranch(project, branch, history));
     }
     /**
      * Dispatch action to load the workflow at the head of the current branch.
@@ -137,15 +174,14 @@ class NotebookPage extends Component {
      * the head of the branch.
      */
     handleSwitchBranch = (branch) => {
-        const { dispatch, history, project } = this.props;
+        const { history, project } = this.props;
         history.push(notebookPageUrl(project.id, branch.id));
-        dispatch(
-            setBranch(
-                project,
-                branch.id,
-                (project, branch) => (fetchWorkflow(project, branch))
-            )
-        );
+    }
+    /**
+     * Hide the create new branch modal.
+     */
+    hideCreateBranchModal = () => {
+        this.setState({modalOpen: false, moduleId: null});
     }
     /**
      * The content of the notebook page depends on the type of resource that
@@ -160,9 +196,10 @@ class NotebookPage extends Component {
             groupMode,
             isActive,
             isFetching,
+            notebook,
             project,
-            serviceApi,
-            workflow
+            reversed,
+            serviceApi
         } = this.props;
         // The main content of the page depends on the error and fetching state.
         let content = null;
@@ -174,12 +211,78 @@ class NotebookPage extends Component {
                     <FetchError error={fetchError} />
                 </div>
             );
-        } else if ((project == null) || (branch == null) || (workflow == null) || (isFetching)) {
+        } else if ((project == null) || (branch == null) || (notebook == null) || (isFetching)) {
             // Show a spinner while the project information is being fetched.
             // There is nothing else to show yet.
             content = <ContentSpinner text='Loading Notebook ...' />;
-        } else if (workflow != null) {
-            let pageContent = (<div><p>{workflow.id}</p></div>);
+        } else if (notebook != null) {
+            const { modalOpen, modalTitle } = this.state;
+            // List of notebook cells
+            let notebookCells = [];
+            //if (notebook.readOnly) {
+                notebookCells = (
+                    <ReadOnlyNotebook
+                        groupMode={groupMode}
+                        notebook={notebook}
+                        project={project}
+                        reversed={reversed}
+                        onChangeGrouping={this.handleChangeGrouping}
+                        onCreateBranch={this.showCreateBranchModal}
+                        onNavigateDataset={this.navigateDataset}
+                        onOutputSelect={this.selectOutput}
+                        onShowAnnotations={this.handleShowAnnotations}
+                    />
+                );
+            /*} else {
+                notebookCells = (
+                    <EditableNotebook
+                        isEmptyNotebook={(notebook.cells.length === 0)}
+                        groupMode={groupMode}
+                        notebook={notebook}
+                        project={project}
+                        reversed={reversed}
+                        onChangeGrouping={this.handleChangeGrouping}
+                        onCreateBranch={this.createBranch}
+                        onDeleteModule={this.deleteModule}
+                        onInsertModule={this.insertModule}
+                        onNavigateDataset={this.navigateDataset}
+                        onOutputSelect={this.selectOutput}
+                        onReplaceModule={this.replaceModule}
+                        onShowAnnotations={this.handleShowAnnotations}
+                    />
+                );
+            }*/
+            // Add modal form for user to enter branch name when creating a new
+            // branch.
+            let notebookFooter = (
+                <EditResourceNameModal
+                    isValid={isNotEmptyString}
+                    open={modalOpen}
+                    prompt='Enter a name for the new branch'
+                    title={modalTitle}
+                    onCancel={this.hideCreateBranchModal}
+                    onSubmit={this.handleCreateBranch}
+                />
+            );
+            if (notebook.readOnly) {
+                notebookFooter = (
+                    <div className='notebook-footer'>
+                        <LargeMessageButton
+                            message='This is a read-only notebook. Create a new branch to start editing.'
+                            icon='code-fork'
+                            onClick={() => (this.showCreateBranchModal(notebook.lastCell.module))}
+                        />
+                        { notebookFooter }
+                    </div>
+                );
+            }
+            // Layout has reverse button at top followed by list of notebook cells
+            const pageContent = (
+                <div className="notebook">
+                    { notebookCells }
+                    { notebookFooter }
+                </div>
+            );
             content = (
                 <ProjectResourcePage
                     actionError={actionError}
@@ -189,17 +292,36 @@ class NotebookPage extends Component {
                     dispatch={dispatch}
                     groupMode={groupMode}
                     isActive={isActive}
+                    notebook={notebook}
                     onDeleteBranch={this.handleDeleteBranch}
                     onShowNotebook={this.handleShowBranchHead}
                     onSwitchBranch={this.handleSwitchBranch}
                     project={project}
                     resource={new NotebookResource()}
                     serviceApi={serviceApi}
-                    workflow={workflow}
                 />
             );
         }
         return content;
+    }
+    /**
+     * Show the create new branch modal. Set the modal title to indicate the
+     * cell index at which the new branch is created.
+     */
+    showCreateBranchModal = (module) => {
+        const { notebook } = this.props;
+        let modalTitle = 'Create branch';
+        for (let i = 0; i < notebook.cells.length; i++) {
+            if (module.id === notebook.cells[i].id) {
+                if (i === 0) {
+                    modalTitle = 'New branch for cell [1]';
+                } else {
+                    modalTitle = 'New branch for cells [1-' + (i+1) + ']';
+                }
+                break;
+            }
+        }
+        this.setState({modalOpen: true, modalTitle, moduleId: module.id});
     }
 }
 
@@ -211,9 +333,10 @@ const mapStateToProps = state => {
         groupMode: state.notebookPage.groupMode,
         isActive: state.projectPage.isActive,
         isFetching: state.notebookPage.isFetching,
+        notebook: state.notebookPage.notebook,
         project: state.projectPage.project,
-        serviceApi: state.serviceApi,
-        workflow: state.notebookPage.workflow
+        reversed: state.notebookPage.reversed,
+        serviceApi: state.serviceApi
     }
 }
 

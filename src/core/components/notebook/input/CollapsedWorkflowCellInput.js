@@ -18,7 +18,7 @@
 
 import React from 'react';
 import { PropTypes } from 'prop-types';
-import CellIndex from './CellIndex';
+import CellIndex from '../cell/CellIndex';
 import '../../../../css/Notebook.css'
 import { Form } from 'semantic-ui-react';
 import PythonCell from './form/PythonCell';

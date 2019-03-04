@@ -21,7 +21,7 @@ import { PropTypes } from 'prop-types';
 import { CloseButton } from '../../Button'
 import EditResourceNameModal from '../../modals/EditResourceNameModal';
 import DeleteResourceModal from '../../modals/DeleteResourceModal';
-import CellIndex from '../input/CellIndex';
+import CellIndex from '../cell/CellIndex';
 import CellInputArea from '../input/CellInputArea';
 import CollapsedEmptyCellInput from '../input/CollapsedEmptyCellInput';
 import CollapsedWorkflowCellInput from '../input/CollapsedWorkflowCellInput';

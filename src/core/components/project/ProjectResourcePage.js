@@ -51,7 +51,7 @@ class ProjectResourcePage extends Component {
         project: PropTypes.object.isRequired,
         resource: PropTypes.object.isRequired,
         serviceApi: PropTypes.object.isRequired,
-        workflow: PropTypes.object
+        notebook: PropTypes.object
     }
     /**
      * Dismiss resource error message.
@@ -122,13 +122,13 @@ class ProjectResourcePage extends Component {
             contentCss,
             groupMode,
             isActive,
+            notebook,
             onDeleteBranch,
             onShowNotebook,
             onSwitchBranch,
             project,
             resource,
-            serviceApi,
-            workflow
+            serviceApi
         } = this.props
 
         // Set window title to contain project name
@@ -176,7 +176,7 @@ class ProjectResourcePage extends Component {
                             onSwitchBranch={onSwitchBranch}
                             project={project}
                             resource={resource}
-                            workflow={workflow}
+                            notebook={notebook}
                         />
                         </Grid.Column>
                     </Grid.Row>

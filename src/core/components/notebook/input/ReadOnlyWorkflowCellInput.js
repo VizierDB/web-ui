@@ -18,7 +18,7 @@
 
 import React from 'react';
 import { PropTypes } from 'prop-types';
-import CellIndex from './CellIndex';
+import CellIndex from '../cell/CellIndex';
 import EditResourceNameModal from '../../modals/EditResourceNameModal';
 import { isNotEmptyString} from '../../../util/App';
 import '../../../../css/Notebook.css';
@@ -76,8 +76,8 @@ class ReadOnlyWorkflowCellInput extends React.Component {
             cellIndex = (
                 <CellIndex
                     onClick={this.handleShowModal}
-                    sequenceIndex={sequenceIndex}
-                    title='Create new branch unitl here'
+                    cellIndex={sequenceIndex}
+                    title='Create new branch at this cell'
                 />
             );
         }

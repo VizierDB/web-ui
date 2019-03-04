@@ -129,7 +129,7 @@ a.cell-index:hover {
 
 /* Command text */
 
-pre.cell-cmd {
+pre.cell-cmd-text {
     background: #fcfaf8;
     border-radius: 2px;
     border: solid 1px #f2f0ed;

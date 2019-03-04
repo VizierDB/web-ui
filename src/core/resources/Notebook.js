@@ -19,9 +19,10 @@
 import { NoAnnotation } from './Annotation';
 import { ChartDescriptor } from './Chart';
 import { DatasetDescriptor } from './Dataset';
+import { isError } from './Workflow';
 import { HATEOASReferences } from '../util/HATEOAS';
 import { sortByName } from '../util/Sort';
-
+import { utc2LocalTime } from '../util/Timestamp';
 
 
 // -----------------------------------------------------------------------------
@@ -89,74 +90,48 @@ export const GRP_UNDEFINED = -1;
 
 
 /**
+ * Workflow module handle.
+ */
+class ModuleHandle {
+    fromJson(json) {
+        this.id = json.id;
+        this.state = json.state;
+        this.command = json.command;
+        this.outputs = json.outputs;
+        this.datasets = json.datasets;
+        this.views = [];
+        this.text = json.text;
+        this.links = new HATEOASReferences(json.links);
+        // Convert timestamps to local time
+        this.timestamps = {}
+        for (var ts in json.timestamps) {
+            this.timestamps[ts] = utc2LocalTime(json.timestamps[ts]);
+        }
+        return this;
+    }
+    isError() {
+        return isError(this.state);
+    }
+}
+
+
+/**
  * A notebook resource is a list of cells. Each cell corresponds to a module
  * in an underlying workflow. In addition to the workflow module each cell in
  * the notebook has an output resource. This resource is shown in the output
  * area when the notebook cell is rendered.
  */
 export class Notebook {
-    constructor(cells) {
-        this.cells = cells;
-    }
-    /**
-     * Initialize the notebook from a Json object returned by the API. Expects
-     * the object to contain the workflow modules (.modules) and dataset
-     * descriptors (.dataset).
-     */
-    fromJson(json) {
-        // Index of all datasets in the workflow modules. Datasets are indexed
-        // by their id.
-        const datasets = []
-        for (let i = 0; i < json.datasets.length; i++) {
-            const ds = json.datasets[i]
-            datasets[ds.id] = ds;
-        }
+    constructor(workflow) {
+        this.id = workflow.id;
+        this.readOnly = workflow.readOnly;
         // Create notebook cells from list of of workflow modules returned by
         // the API
         this.cells = [];
-        for (let i = 0; i < json.modules.length; i++) {
-            const module = json.modules[i];
-            // Transform arguments from an array of (name,value)-pairs into
-            // an object.
-            let moduleArgs = {}
-            for (let i = 0; i < module.command.arguments.length; i++) {
-                const arg = module.command.arguments[i];
-                moduleArgs[arg.name] = arg.value;
-            }
-            module.arguments = moduleArgs;
-            // Replace the datasets in the module with a list of dataset
-            // descriptors
-            const moduleDatasets = [];
-            for (let i = 0; i < module.datasets.length; i++) {
-                // The dataset information in the module only contains the
-                //identifier and the name that is used to reference the dataset.
-                const ds = module.datasets[i]
-                // Retrieve additional dataset metadata from the dataset
-                // index.
-                const desc = datasets[ds.id]
-                moduleDatasets.push(
-                    new DatasetDescriptor(
-                        ds.id,
-                        ds.name,
-                        desc.columns,
-                        new HATEOASReferences(desc.links)
-                    )
-                )
-            }
-            sortByName(moduleDatasets);
-            module.datasets = moduleDatasets;
-            // Wrap view objects in the result with a simpler object that
-            // contains .name and .url properties only
-            const simple_views = []
-            for (let i = 0; i < module.views.length; i++) {
-                const chart = module.views[i];
-                simple_views.push(new ChartDescriptor().fromJson(chart));
-            }
-            sortByName(simple_views);
-            module.views = simple_views;
-            module.links = new HATEOASReferences(module.links);
+        for (let i = 0; i < workflow.modules.length; i++) {
+            const module = new ModuleHandle().fromJson(workflow.modules[i]);
             // Get cell output resource
-            const stdout = module.stdout;
+            const stdout = module.outputs.stdout;
             let outputResource = null;
             if (stdout.length === 1) {
                 // If the output is a chart view it is expected to be the only
@@ -178,7 +153,18 @@ export class Notebook {
             }
             this.cells.push(new NotebookCell(module, outputResource));
         }
-        return this;
+        // Set shortcut to access the last cell in the notebook
+        if (this.cells.length > 0) {
+            this.lastCell = this.cells[this.cells.length - 1];
+        } else {
+            this.lastCell = null;
+        }
+    }
+    /**
+     * Test if a notebook is empty.
+     */
+    isEmpty() {
+        return this.cells.length === 0;
     }
     /**
      * Replace the output in the cell that represents the workflow module with
@@ -242,6 +228,7 @@ export class Notebook {
  */
 class NotebookCell {
     constructor(module, output, annotationObject) {
+        this.id = module.id;
         this.module = module;
         this.output = output;
         if (annotationObject != null) {
@@ -253,7 +240,7 @@ class NotebookCell {
     }
     hasError() {
         if (this.module != null) {
-            return this.module.stderr.length > 0;
+            return this.module.outputs.stderr.length > 0;
         }
     }
 }

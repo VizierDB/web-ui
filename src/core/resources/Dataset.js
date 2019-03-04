@@ -20,8 +20,8 @@ import { HATEOASReferences } from '../util/HATEOAS';
 
 
 /**
- * Dataset descriptor containing dataset identifier, name, and links. The list
- * of columns is optional.
+ * Dataset descriptor containing dataset identifier, columns, rowCount and
+ * references.
  */
 export class DatasetDescriptor {
     constructor(id, name, columns, links) {
@@ -31,18 +31,14 @@ export class DatasetDescriptor {
         this.links = links;
     }
     /**
-     * Initialize from a Json object that contains a WorkflowResource returned
+     * Initialize from a Json object that contains a dataset descriptor returned
      * by the Web API. Note that the name and column information are optional.
      */
-    fromJson(json, name) {
+    fromJson(json) {
         this.id = json.id;
+        this.columns = json.columns;
+        this.rowCount = json.rowCount;
         this.links = new HATEOASReferences(json.links);
-        if (json.name) {
-            this.name = json.name;
-        }
-        if (json.columns) {
-            this.columns = json.columns;
-        }
         return this;
     }
 }
