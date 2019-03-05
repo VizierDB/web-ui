@@ -110,11 +110,13 @@ export const setProject = (project) => ({
     project
 });
 
+
 // -----------------------------------------------------------------------------
 // Switch Branch
 // -----------------------------------------------------------------------------
+
 export const setBranch = (project, branchId, resultFunc) => (dispatch) => {
-    let branch =  project.branches.find((br) => (br.id === branchId));
+    let branch = project.findBranch(branchId);
     if (branch != null) {
         dispatch({type: RECEIVE_PROJECT, project, branch});
         if (resultFunc) {

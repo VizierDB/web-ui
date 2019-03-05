@@ -56,15 +56,17 @@ export const deleteResource = (url, successHandler, errorHandler, signalStartHan
     }
     return fetchAuthed(url, {method: 'DELETE'})(dispatch)
         // Check the response. Assume that eveything is all right if status
-        // code below 400
+        // code is 204
         .then(function(response) {
-            if (response.status === 204 || response.status === 404) {
+            if (response.status === 204) {
                 // SUCCESS: Pass the JSON result to the respective callback
                 // handler
                 dispatch(successHandler());
             } else if(response.status === 401) {
             	// UNAUTHORIZED: re-request auth
-            	dispatch(requestAuth())
+            	dispatch(requestAuth());
+            } else if (response.status === 404) {
+                dispatch(errorHandler('Resource not found'));
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message

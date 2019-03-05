@@ -64,10 +64,12 @@ class BranchPage extends Component {
         const branchId = this.props.match.params.branch_id;
         // Fetch any resources that are currently missing. It is assumed that
         // the branch is set if the project is set.
-        if (project == null) {
+        if ((project == null) || (project.id !== projectId)) {
             dispatch(fetchProject(projectId, branchId, fetchBranch));
+        } else if ((branch == null) || (branch.id !== branchId)) {
+            dispatch(fetchBranch(project, project.findBranch(branchId)));
         } else if (workflows == null) {
-            dispatch(fetchBranch(project, branch));
+            dispatch(fetchBranch(project, project.findBranch(branchId)));
         }
     }
     /**
@@ -77,14 +79,17 @@ class BranchPage extends Component {
      * is different.
      */
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const branch = this.props.branch;
-        const prevBranch = prevProps.branch;
-        const branchId = this.props.match.params.branch_id;
-        const prevBranchId = prevProps.match.params.branch_id;
-        if ((branch != null) && (prevBranch != null)) {
-            if ((branch.id === prevBranch.id) && (branchId !== prevBranchId)) {
-                const { dispatch, project } = this.props;
-                dispatch(setBranch(project, branchId, fetchBranch));
+        // Check if the location path has changed. The change may either be
+        // the result from a delete branch operation or the result of the user
+        // usingthe back and forward buttons in their browser.
+        if (prevProps.location.pathname !== this.props.location.pathname) {
+            const { dispatch, project, branch } = this.props;
+            const projectId = this.props.match.params.project_id;
+            const branchId = this.props.match.params.branch_id;
+            if ((project == null) || (project.id !== projectId)) {
+                dispatch(fetchProject(projectId, branchId, fetchBranch));
+            } else if ((branch == null) || (branch.id !== branchId)) {
+                dispatch(fetchBranch(project, project.findBranch(branchId)));
             }
         }
     }
@@ -93,13 +98,10 @@ class BranchPage extends Component {
      */
     handleDeleteBranch = (branch) => {
         const { dispatch, history, project } = this.props;
-        const defaultBranchId = project.getDefaultBranch().id;
-        const redirectUrl = branchPageUrl(project.id, defaultBranchId);
-        dispatch(deleteBranch(project, branch, () => {
-            const modifiedProject = project.deleteBranch(branch.id);
-            history.push(redirectUrl);
-            return setBranch(modifiedProject, defaultBranchId, fetchBranch);
-        }));
+        // The delete branch method will delete the branch on the server, update
+        // the project and push the URL of the default branch onto the history
+        // stack. This should trigger the component to render that branch.
+        dispatch(deleteBranch(project, branch, branchPageUrl, history));
     }
     /**
      * Push URL for notebook page onto history stack. This will render a new

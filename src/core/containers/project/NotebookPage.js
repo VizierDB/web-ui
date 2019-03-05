@@ -29,7 +29,6 @@ import EditResourceNameModal from '../../components/modals/EditResourceNameModal
 import EditableNotebook from '../../components/notebook/EditableNotebook';
 import ReadOnlyNotebook from '../../components/notebook/ReadOnlyNotebook';
 import ProjectResourcePage from '../../components/project/ProjectResourcePage';
-import { BranchDescriptor } from '../../resources/Branch';
 import { NotebookResource } from '../../resources/Project';
 import { isNotEmptyString, notebookPageUrl } from '../../util/App.js';
 
@@ -60,7 +59,6 @@ class NotebookPage extends Component {
     constructor(props) {
         super(props);
         // Set the branch modal state
-        console.log('CONSTRUCTOR');
         this.state = {modalOpen: false, modalTitle: 'New branch', moduleId: null};
         // Fetch any resources that are currently null or out of sync with the
         // browser URL. It is assumed that the branch is set if the project is
@@ -79,6 +77,8 @@ class NotebookPage extends Component {
                         branch,
                         workflowId
             ))));
+        } else if ((branch == null) || (branch.id !== branchId)) {
+            dispatch(fetchWorkflow(project, project.findBranch(branchId), workflowId));
         } else if (notebook == null) {
             dispatch(fetchWorkflow(project, branch, workflowId));
         } else if (notebook.id !== workflowId) {
@@ -91,24 +91,16 @@ class NotebookPage extends Component {
      * the path match those that are in the current state.
      */
     componentDidUpdate(prevProps, prevState, snapshot) {
-        // Take no action if the current project, branch or notebook are null
-        const { project, branch, notebook } = this.props;
-        if ((project == null) && (branch == null) && (notebook == null)) {
-            console.log('No action');
-            return;
-        }
         // Check if the location path has changed. The change may either be
         // the result from an update operation (create branch, delete branch),
         // a switch between notebook versions or the result of the user using
         // the back and forward buttons in their browser.
         if (prevProps.location.pathname !== this.props.location.pathname) {
-            console.log('Change in path name');
             const { dispatch, project, branch, notebook } = this.props;
             const projectId = this.props.match.params.project_id;
             const branchId = this.props.match.params.branch_id;
             const workflowId = this.props.match.params.workflow_id;
-            if (project.id !== projectId) {
-                console.log('Change in project');
+            if ((project == null) || (project.id !== projectId)) {
                 dispatch(
                     fetchProject(
                         projectId,
@@ -118,41 +110,26 @@ class NotebookPage extends Component {
                             branch,
                             workflowId
                 ))));
-            } else if (branch.id !== branchId) {
-                console.log('Change in branch');
+            } else if ((branch == null) || (branch.id !== branchId)) {
                 dispatch(setBranch(project, branchId, (project, branch) => (fetchWorkflow(project, branch, workflowId))));
-            } else if (notebook.id !== workflowId) {
-                console.log('Change in workflow');
+            } else if ((notebook == null) || (notebook.id !== workflowId)) {
                 dispatch(fetchWorkflow(project, branch, workflowId));
             }
         }
     }
+    /**
+     * Create a new branch and switch to that branch on success.
+     */
     handleCreateBranch = (name) => {
         const { branch, dispatch, history, notebook, project } = this.props;
         const { moduleId } = this.state;
-        // Need to add the returned branch handle to the current project
-        // before switching to the new branch.
+        // The create branch method creates a new branch on the server, updates
+        // the project and push the URL for the new branch onto the history
+        // stack. This should trigger the component to render the head of
+        // the new branch.
         dispatch(
-            createBranch(
-                project,
-                branch,
-                notebook.id,
-                moduleId,
-                name,
-                (json) => {
-                    console.log('GO')
-                    const resultBranch = new BranchDescriptor().fromJson(json)
-                    const modifiedProject = project.addBranch(resultBranch);
-                    console.log('PUSH');
-                    history.push(notebookPageUrl(project.id, resultBranch.id));
-                    console.log('SET BRANCH')
-                    return setBranch(
-                        modifiedProject,
-                        resultBranch.id,
-                        (project, branch) => (fetchWorkflow(project, branch))
-                    );
-                }
-        ));
+            createBranch(project, branch, notebook.id, moduleId, name, history)
+        );
         this.hideCreateBranchModal();
     }
     /**
@@ -160,7 +137,10 @@ class NotebookPage extends Component {
      */
     handleDeleteBranch = (branch) => {
         const { dispatch, history, project } = this.props;
-        dispatch(deleteBranch(project, branch, history));
+        // The delete branch method will delete the branch on the server, update
+        // the project and push the URL of the default branch onto the history
+        // stack. This should trigger the component to render that branch.
+        dispatch(deleteBranch(project, branch, notebookPageUrl, history));
     }
     /**
      * Dispatch action to load the workflow at the head of the current branch.

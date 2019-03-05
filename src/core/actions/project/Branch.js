@@ -17,7 +17,8 @@
  */
 
 import { redirectTo } from '../main/App';
-import { projectActionError, projectFetchError, requestProjectAction, setProject } from './Project';
+import { projectActionError, projectFetchError, requestProjectAction, setBranch, setProject } from './Project';
+import { BranchDescriptor } from '../../resources/Branch';
 import { WorkflowDescriptor } from '../../resources/Workflow';
 import { createResource, deleteResource, fetchResource, getProperty, updateResourceProperty } from '../../util/Api';
 import { notebookPageUrl } from '../../util/App';
@@ -40,11 +41,10 @@ export const REQUEST_BRANCH = 'REQUEST_BRANCH'
  * workflow: WorkflowHandle
  * module: ModuleHandle
  * name: string
- * redirectAction: Action that is dispatched on success with the JSON object
- *                 containing the API response
+ * history: Browser history stack
  *
  */
-export const createBranch = (project, branch, workflowId, moduleId, name, redirectAction) =>  (dispatch) => {
+export const createBranch = (project, branch, workflowId, moduleId, name, history) =>  (dispatch) => {
     // Generate request body containing source information and branch properties
     const data = {
         source: {
@@ -63,7 +63,11 @@ export const createBranch = (project, branch, workflowId, moduleId, name, redire
         createResource(
             project.links.get('branch.create'),
             data,
-            redirectAction,
+            (json) => {
+                const resultBranch = new BranchDescriptor().fromJson(json);
+                dispatch(setProject(project.addBranch(resultBranch)));
+                history.push(notebookPageUrl(project.id, resultBranch.id));
+            },
             (message) => (
                 projectActionError('Error creating new branch', message)
             ),
@@ -85,15 +89,14 @@ export const createBranch = (project, branch, workflowId, moduleId, name, redire
  * redirectAction: Dispatch action to redirect to the default brnach in case of
  *                 successful delete
  */
-export const deleteBranch = (project, branch, history) => (dispatch) => {
+export const deleteBranch = (project, branch, urlFactory, history) => (dispatch) => {
     dispatch(
         deleteResource(
             branch.links.get('branch.delete'),
             () => (() => {
                 dispatch(setProject(project.deleteBranch(branch.id)));
                 const defaultBranchId = project.getDefaultBranch().id;
-                const redirectUrl = notebookPageUrl(project.id, defaultBranchId);
-                history.push(redirectUrl);
+                history.push(urlFactory(project.id, defaultBranchId));
             }),
             (message) => (
                 projectActionError('Error deleting branch', message)
@@ -115,28 +118,33 @@ export const deleteBranch = (project, branch, history) => (dispatch) => {
  *
  */
 export const fetchBranch = (project, branch) => (dispatch) => {
-    dispatch(
-        fetchResource(
-            branch.links.get(HATEOAS_SELF),
-            (json) => (dispatch) => {
-                // Expect a listing of workflow version descriptors.
-                const workflows = json.workflows;
-                const history = [];
-                for (let i = 0; i < workflows.length; i++) {
-                    const wf = workflows[i];
-                    history.push(new WorkflowDescriptor().fromJson(wf))
-                }
-                dispatch({
-                    type: RECEIVE_BRANCH_HISTORY,
-                    workflows: history
-                });
-            },
-            (message) => (
-                projectFetchError(message, 400, 'Error fetching branch history')
-            ),
-            requestBranch,
+    if (branch == null) {
+        dispatch(setBranch(project));
+    } else {
+        dispatch(
+            fetchResource(
+                branch.links.get(HATEOAS_SELF),
+                (json) => (dispatch) => {
+                    // Expect a listing of workflow version descriptors.
+                    const workflows = json.workflows;
+                    const history = [];
+                    for (let i = 0; i < workflows.length; i++) {
+                        const wf = workflows[i];
+                        history.push(new WorkflowDescriptor().fromJson(wf))
+                    }
+                    dispatch(setBranch(project, branch.id));
+                    dispatch({
+                        type: RECEIVE_BRANCH_HISTORY,
+                        workflows: history
+                    });
+                },
+                (message) => (
+                    projectFetchError(message, 400, 'Error fetching branch history')
+                ),
+                requestBranch,
+            )
         )
-    )
+    }
 }
 
 

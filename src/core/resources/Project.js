@@ -142,6 +142,14 @@ export class ProjectHandle {
         );
     }
     /**
+     * Shortcut to retrieve branch with the given identifier.
+     */
+    findBranch(branchId) {
+        if (branchId != null) {
+            return this.branches.find((br) => (br.id === branchId));
+        }
+    }
+    /**
      * Initialize the object properties from a Json object that is returned by
      * Web API calls that return a ProjectHandle.
      */

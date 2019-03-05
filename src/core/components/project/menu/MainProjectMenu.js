@@ -77,6 +77,7 @@ class MainProjectMenu extends React.Component {
     deleteCurrentBranch = (branch) => {
         const { onDeleteBranch } = this.props;
         onDeleteBranch(branch);
+        this.hideModal();
     }
     /**
      * Hide any open modal.

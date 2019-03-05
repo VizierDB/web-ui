@@ -65,8 +65,10 @@ export const projectPage = (state = INITIAL_STATE, action) => {
         case PROJECT_FETCH_ERROR:
             return {
                 ...state,
+                branch: null,
+                fetchError: action.error,
                 isFetching: false,
-                fetchError: action.error
+                project: null
             };
         case PROJECT_ACTION_ERROR:
             return {
