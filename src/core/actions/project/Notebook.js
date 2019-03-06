@@ -26,12 +26,13 @@ import {
 } from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
 import {
-    Notebook, OutputChart, OutputDataset, OutputError, OutputText
+    Notebook, OutputChart, OutputDataset, OutputError, OutputText, StandardOutput
 } from '../../resources/Notebook';
 import { NotebookResource } from '../../resources/Project';
 import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource } from '../../util/Api';
 import { ErrorObject } from '../../util/Error';
+import { HATEOASReferences, HATEOAS_SELF } from '../../util/HATEOAS';
 import { VIZUAL, VIZUAL_OP } from '../../util/Vizual';
 
 
@@ -39,9 +40,11 @@ import { VIZUAL, VIZUAL_OP } from '../../util/Vizual';
 export const CHANGE_GROUP_MODE = 'CHANGE_GROUP_MODE';
 // Reverse notebook cell order
 export const REVERSE_ORDER = 'REVERSE_ORDER';
-// Signale success in fetching the workflow
+// Signal success in fetching the workflow
 export const RECEIVE_WORKFLOW = 'RECEIVE_WORKFLOW';
 export const REQUEST_WORKFLOW = 'REQUEST_WORKFLOW';
+// Update the notebook object in the global state
+export const UPDATE_NOTEBOOK = 'UPDATE_NOTEBOOK'
 
 
 // -----------------------------------------------------------------------------
@@ -70,7 +73,7 @@ export const fetchWorkflow = (project, branch, workflowId) => (dispatch, getStat
                 // (.datasets). The last two are used to generate the notebook.
                 response.json().then(json => (
                     dispatch(
-                        receiveWorkflow(new WorkflowHandle().fromJson(json))
+                        receiveWorkflow(new WorkflowHandle(project).fromJson(json))
                     )
                 ));
             } else if(response.status === 401) {
@@ -136,8 +139,7 @@ export const reverseOrder = () => ({
  * the output content is being loaded.
  */
 const setNotebookCellBusy = (notebook, module) => (dispatch) => {
-    const nb = notebook.setFetching(module.id);
-    return dispatch(updateResource(new NotebookResource(nb)));
+    return dispatch(updateNotebook(notebook.setFetching(module.id)));
 }
 
 
@@ -148,7 +150,7 @@ const setNotebookCellBusy = (notebook, module) => (dispatch) => {
 const setNotebookCellError = (notebook, module, resourceType, message) => (dispatch) => {
     const err = new ErrorObject('Error loading ' + resourceType, message);
     const nb = notebook.replaceOutput(module.id, new OutputError(err));
-    return dispatch(updateResource(new NotebookResource(nb)));
+    return dispatch(updateNotebook(nb));
 }
 
 
@@ -156,40 +158,41 @@ export const showCellChart = (notebook, module, name) => (dispatch) => {
     // If the chart was in the module output we can directly dispatch it.
     // Otherwise we need to fetch the resource from the server first.
     let isInOutput = false;
-    if (module.stdout.length === 1) {
-        if (module.stdout[0].type === 'chart/view') {
-            isInOutput = (module.stdout[0].name === name);
+    if (module.outputs.stdout.length === 1) {
+        if (module.outputs.stdout[0].type === 'chart/view') {
+            isInOutput = (module.outputs.stdout[0].value.data.name === name);
         }
     }
     if (isInOutput) {
-        const output = new OutputChart(name, module.stdout[0].result);
-        const nb = notebook.replaceOutput(module.id, output);
-        return dispatch(updateResource(new NotebookResource(nb)));
+        const val = module.outputs.stdout[0].value;
+        const out = OutputChart(val.data.name, val.result)
+        dispatch(updateNotebook(notebook.replaceOutput(module.id, out)));
     } else {
         // Find the chart descriptor in the module
         let chart = null;
-        for (let i = 0; i < module.views.length; i++) {
-            if (module.views[i].name === name) {
-                chart = module.views[i];
+        for (let i = 0; i < module.charts.length; i++) {
+            if (module.charts[i].name === name) {
+                chart = module.charts[i];
                 break;
             }
         }
         if (chart !== null) {
             // Use the chart's self reference to fetch the data frm the Web API.
-            return dispatch(
+            const url = new HATEOASReferences(chart.links).get(HATEOAS_SELF)
+
+            dispatch(
                 fetchResource(
-                    chart.links.self,
+                    url,
                     (json) => {
-                        const output = new OutputChart(name, json);
+                        const output = new OutputChart(name, json.data);
                         const nb = notebook.replaceOutput(module.id, output);
-                        return dispatch(updateResource(new NotebookResource(nb)));
+                        return updateNotebook(nb);
                     },
                     (message) => (
                         setNotebookCellError(notebook, module, 'chart', message)
                     ),
                     () => (setNotebookCellBusy(notebook, module))
-                )
-            )
+            ))
         }
     }
 }
@@ -251,13 +254,13 @@ export const showCellDataset = (notebook, module, name, url) => (dispatch) => {
     for (let i = 0; i < module.datasets.length; i++) {
         const ds = module.datasets[i];
         if (ds.name === name) {
-            dataset = ds;
+            dataset = notebook.datasets[ds.id];
             break;
         }
     }
     if (dataset !== null) {
         // Use dataset self reference if url is undefined.
-        let fetchUrl = (url != null) ? url : dataset.links.self;
+        let fetchUrl = (url != null) ? url : dataset.links.get(HATEOAS_SELF);
         return dispatch(
             fetchResource(
                 fetchUrl,
@@ -265,7 +268,7 @@ export const showCellDataset = (notebook, module, name, url) => (dispatch) => {
                     const ds = new DatasetHandle(json.id, name).fromJson(json);
                     const output = OutputDataset(name, ds);
                     const nb = notebook.replaceOutput(module.id, output);
-                    return dispatch(updateResource(new NotebookResource(nb)));
+                    return updateNotebook(nb);
                 },
                 (message) => (
                     setNotebookCellError(notebook, module, 'dataset', message)
@@ -282,15 +285,11 @@ export const showCellDataset = (notebook, module, name, url) => (dispatch) => {
  * standard output during execution of the workflow module that is associated
  * with the cell.
  */
-export const showCellStdout = (notebook, module) => (dispatch) => (
-    dispatch(
-        updateResource(
-            new NotebookResource(
-                notebook.replaceOutput(module.id, OutputText(module.stdout))
-            )
-        )
-    )
-);
+export const showCellStdout = (notebook, module) => (dispatch) => {
+    console.log(module);
+    const out = StandardOutput(module);
+    dispatch(updateNotebook(notebook.replaceOutput(module.id, out)))
+};
 
 
 /**
@@ -320,6 +319,17 @@ export const showNotebook = (workflow) => (dispatch) => {
         )
     )
 }
+
+/**
+ * Set notebook resource in the global state. This action is for example the
+ * result of a change in the output resource that is displyed for a notebook
+ * cell. The notebook update does not reflect a change of state in the web
+ * server.
+ */
+const updateNotebook = (notebook) => ({
+    type: UPDATE_NOTEBOOK,
+    notebook
+});
 
 
 
@@ -391,23 +401,6 @@ export const insertNotebookCell = (url, data) => (dispatch) => {
  */
 export const replaceNotebookCell = (url, data) => (dispatch) => {
     return dispatch(updateNotebookCell(url, 'PUT', data));
-}
-
-
-/**
- * Set notebook resource and workflow handle after the notebook was updated.
- * Expects a Josn object that contains a WorkflowUpdateResult returned by
- * the Web API.
- */
-const updateNotebook = (json) => (dispatch) => {
-    // Expects the Json object to have properties .workflow, .modules, and
-    // .datasets.
-    return dispatch(
-        updateWorkflowResource(
-            new WorkflowHandle().fromJson(json.workflow),
-            new NotebookResource(new Notebook().fromJson(json))
-        )
-    );
 }
 
 

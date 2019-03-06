@@ -18,8 +18,10 @@
 
 import React from 'react';
 import { PropTypes } from 'prop-types';
+import { Button, Dropdown, Icon, Menu } from 'semantic-ui-react';
 import CellCommandText from './CellCommandText';
-import CellIndex from './CellIndex';
+import CellMenu from './CellMenu';
+import CellOutputArea from './output/CellOutputArea';
 import '../../../../css/Notebook.css';
 
 
@@ -31,50 +33,75 @@ import '../../../../css/Notebook.css';
 class WorkflowModuleCell extends React.Component {
     static propTypes = {
         cell: PropTypes.object.isRequired,
-        cellIndex: PropTypes.number.isRequired,
+        cellNumber: PropTypes.number.isRequired,
         notebook: PropTypes.object.isRequired,
-        onCreateBranch: PropTypes.func.isRequired
+        onCreateBranch: PropTypes.func.isRequired,
+        onOutputSelect: PropTypes.func.isRequired
+    }
+    /**
+     * Event handler when the user clicks the menu item to create a new branch
+     * up until the module in this cell.
+     */
+    handleCreateBranch = () => {
+        const { cell, onCreateBranch, onOutputSelect } = this.props;
+        onCreateBranch(cell.module);
+    }
+    handleEditCell = () => {
+        alert('Edit')
     }
     render() {
-        const { cell, cellIndex, notebook, onCreateBranch } = this.props;
-        const { state, text } = cell.module;
-        // Cell index widget
-        let indexWidget = null;
-        let onClick = null;
+        const { cell, cellNumber, notebook, onOutputSelect } = this.props;
+        const outputArea = (
+                <CellOutputArea
+                    cell={cell}
+                    onNavigateDataset={() => (alert('Navigate'))}
+                    onOutputSelect={onOutputSelect}
+                    onShowAnnotations={() => (alert('Annotations'))}
+
+                />
+            );
+        // The default action when the user double clicks on the cell command
+        // depends on whether the notebook is read-only or not. For read-only
+        // notebooks 'Create branch' is the default option. Otherwise it is
+        // 'Edit cell'.
+        let onDefaultAction = null;
         if (notebook.readOnly) {
-            onClick = () => (onCreateBranch(cell.module));
-            indexWidget = (
-                <CellIndex
-                    cell={cell}
-                    cellIndex={cellIndex}
-                    onClick={onClick}
-                    title='Create new branch at this cell'
-                />
-            );
+            onDefaultAction = this.handleCreateBranch;
         } else {
-            onClick = () => (alert('Click'));
-            indexWidget = (
-                <CellIndex
-                    cell={cell}
-                    cellIndex={cellIndex}
-                    onClick={onClick}
-                    title='Create new branch at this cell'
-                />
-            );
+            onDefaultAction = this.handleEditCell;
         }
-        // Cell command widget
-        let cellCommand = (<CellCommandText moduleState={state} text={text} onDoubleClick={onClick} />);
         return (
-            <div>
-                <table className='cell-area'><tbody>
-                    <tr>
-                        <td className='cell-index'>{indexWidget}</td>
-                        <td className='cell-cmd'>
-                            {cellCommand}
-                        </td>
-                    </tr>
-                </tbody></table>
-            </div>
+            <table className='cell'><tbody>
+                <tr>
+                    <td className='cell-index'>
+                        <span className='cell-index'>[{cellNumber}]</span>
+                    </td>
+                    <td>
+                        <div className='cell-area'>
+                            <table className='cell-area'><tbody>
+                                <tr>
+                                    <td className='cell-menu'>
+                                        <CellMenu
+                                            cell={cell}
+                                            cellNumber={cellNumber}
+                                            notebook={notebook}
+                                            onCreateBranch={this.handleCreateBranch}
+                                            onOutputSelect={onOutputSelect}
+                                        />
+                                    </td>
+                                    <td className='cell-cmd'>
+                                        <CellCommandText
+                                            cell={cell}
+                                            onDoubleClick={onDefaultAction}
+                                        />
+                                    </td>
+                                </tr>
+                            </tbody></table>
+                            { outputArea }
+                        </div>
+                    </td>
+                </tr>
+            </tbody></table>
         );
     }
 }

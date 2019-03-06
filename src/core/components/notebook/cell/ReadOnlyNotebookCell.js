@@ -63,7 +63,7 @@ class ReadOnlyNotebookCell extends React.Component {
             outputArea = (
                 <CellOutputArea
                     activeDatasetCell={cell.activeDatasetCell}
-                    module={module}
+                    cell={cell}
                     output={output}
                     onOutputSelect={onOutputSelect}
                     onNavigateDataset={onNavigateDataset}

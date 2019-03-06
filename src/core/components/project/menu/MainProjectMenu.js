@@ -109,6 +109,7 @@ class MainProjectMenu extends React.Component {
             <Menu.Item
                 header
                 key='title'
+                onClick={this.showEditProjectNameModal}
             >
                 <Icon name='database' />
                 <span className='project-name'>{project.name}</span>

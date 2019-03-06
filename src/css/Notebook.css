@@ -73,10 +73,27 @@ div.horizontal-divider {
 
 /* Cell layout table */
 
+table.cell {
+    border-spacing: 0px;
+    width: 100%
+}
+
+div.cell-area {
+    border-radius: .28571429rem;
+    border: 1px solid rgba(34,36,38,.15);
+    padding: 10px 10px 0px 10px;
+    margin-bottom: 10px;
+}
+
 table.cell-area {
     border-spacing: 0px;
+    border-bottom: 1px solid rgba(34,36,38,.15);
     width: 100%;
-    line-height: 1em;
+    padding-bottom: 10px;
+}
+
+div.output-area {
+    padding-bottom: 10px;
 }
 
 td.cell-index {
@@ -88,6 +105,12 @@ td.cell-index {
     width: 50px;
 }
 
+td.cell-menu {
+    text-align: center;
+    vertical-align: top;
+    width: 30px;
+}
+
 td.cell-index-error {
     color: #843534;
     font-family: monospace,monospace;
@@ -96,18 +119,6 @@ td.cell-index-error {
     vertical-align: top;
     width: 50px;
 }
-
-td.cell-cmd {
-    padding: 5px 0px;
-}
-
-td.output-selector {
-    padding-top: 10px;
-    text-align: center;
-    vertical-align: top;
-    width: 50px;
-}
-
 
 /* Cell Index Link Formating */
 
@@ -130,11 +141,10 @@ a.cell-index:hover {
 /* Command text */
 
 pre.cell-cmd-text {
-    background: #fcfaf8;
-    border-radius: 2px;
-    border: solid 1px #f2f0ed;
+    background: #fff;
+    /*border-radius: 2px;
+    border: solid 1px #d0d0d0;*/
     color: #000;
-    padding: 5px 10px;
     margin: 0px;
 }
 
@@ -203,8 +213,8 @@ div.dataset {
 }
 
 pre.plain-text {
-    margin-top: 10px;
-    padding-top: 0px;
+    padding: 10px 10px 0px 10px;
+    margin: 0px;
 }
 
 .notebook .fa-plus-square-o {

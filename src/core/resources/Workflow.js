@@ -85,6 +85,9 @@ export class WorkflowDescriptor {
  * implemented.
  */
 export class WorkflowHandle {
+    constructor(project) {
+        this.project = project;
+    }
     /**
      * Initialize the workflow handle from a Json object containing a
      * WorkflowHandle returned by the Web API.
@@ -109,5 +112,11 @@ export class WorkflowHandle {
         this.modules = json.modules;
         this.links = new HATEOASReferences(json.links);
         return this;
+    }
+    /**
+     * Get the specification for a given module command.
+     */
+    getCommandSpec(cmd) {
+        return this.project.getCommandSpec(cmd.packageId, cmd.commandId);
     }
 }

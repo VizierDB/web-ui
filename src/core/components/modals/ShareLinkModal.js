@@ -19,7 +19,6 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import { Button, Modal } from 'semantic-ui-react'
-import { notebookPageUrl } from '../../util/App'
 import '../../../css/Modals.css'
 
 
@@ -30,8 +29,7 @@ class ShareLinkModal extends React.Component {
     static propTypes = {
         onClose: PropTypes.func.isRequired,
         open: PropTypes.bool.isRequired,
-        project: PropTypes.object.isRequired,
-        workflow: PropTypes.object.isRequired
+        url: PropTypes.string.isRequired
     }
     /**
      * Show notebook cell content. There are four different layouts depending on
@@ -40,9 +38,7 @@ class ShareLinkModal extends React.Component {
      * column the cell module.
      */
     render() {
-        const { onClose, open, project, workflow } = this.props;
-        let url = window.location.protocol + '//' + window.location.host
-        url += notebookPageUrl(project.id, workflow.branch.id, workflow.version);
+        const { onClose, open, url } = this.props;
         return (
             <Modal open={open} dimmer={'inverted'} size={'small'}>
                 <Modal.Header>Share Link</Modal.Header>

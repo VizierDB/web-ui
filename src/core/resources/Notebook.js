@@ -19,7 +19,7 @@
 import { NoAnnotation } from './Annotation';
 import { ChartDescriptor } from './Chart';
 import { DatasetDescriptor } from './Dataset';
-import { isError } from './Workflow';
+import { isError, isErrorOrCanceled } from './Workflow';
 import { HATEOASReferences } from '../util/HATEOAS';
 import { sortByName } from '../util/Sort';
 import { utc2LocalTime } from '../util/Timestamp';
@@ -37,7 +37,8 @@ export const CONTENT_TEXT = 'CONTENT_TEXT'
 export const CONTENT_HTML = 'CONTENT_HTML'
 
 /**
- * Output resource content. Contains functionality to determine content type.
+ * Output resource content. Contains functionality to determine content type
+ * and whether the content is currently being fetched from the server.
  */
 class OutputResource {
     constructor(type, content, isFetching) {
@@ -52,30 +53,60 @@ class OutputResource {
     isHtml = () => (this.type === CONTENT_HTML);
 }
 
+/**
+ * Extended output resources for the different types of output.
+ */
 export const OutputChart = (name, dataset) => (new OutputResource(CONTENT_CHART, {name, dataset}, false));
+
 export const OutputDataset = (name, dataset) => (new OutputResource(CONTENT_DATASET, {name, dataset}, false));
+
 export const OutputError = (error) => (new OutputResource(CONTENT_ERROR, error, false));
+
 export const OutputFetching = (output) => (new OutputResource(output.type, output.content, true));
+
 export const OutputText = (outputObjects) => {
     const lines  = [];
     for (let j = 0; j < outputObjects.length; j++) {
         const out = outputObjects[j];
         if (out.type === 'text/plain') {
-            lines.push(out.data);
+            lines.push(out.value);
         }
     }
     return new OutputResource(CONTENT_TEXT, {lines}, false);
 };
+
 export const OutputHtml = (outputObjects) => {
     const lines  = [];
     for (let j = 0; j < outputObjects.length; j++) {
         const out = outputObjects[j];
         if (out.type === 'text/html') {
-            lines.push(out.data);
+            lines.push(out.value);
         }
     }
     return new OutputResource(CONTENT_HTML, {lines}, false);
 };
+
+export const StandardOutput = (module) => {
+    const stdout = module.outputs.stdout;
+    let outputResource = null;
+    if (stdout.length === 1) {
+        // If the output is a chart view it is expected to be the only
+        // output element
+        const out = stdout[0];
+        if (out.type === 'text/html') {
+            outputResource = OutputHtml(stdout);
+        } else  {
+            outputResource = OutputText(stdout);
+        }
+    } else {
+        outputResource = OutputText(stdout);
+    }
+    // Make sure that there is some output
+    if (outputResource === null) {
+        outputResource = OutputText([]);
+    }
+    return outputResource;
+}
 
 
 // -----------------------------------------------------------------------------
@@ -99,7 +130,7 @@ class ModuleHandle {
         this.command = json.command;
         this.outputs = json.outputs;
         this.datasets = json.datasets;
-        this.views = [];
+        this.charts = json.charts;
         this.text = json.text;
         this.links = new HATEOASReferences(json.links);
         // Convert timestamps to local time
@@ -108,9 +139,6 @@ class ModuleHandle {
             this.timestamps[ts] = utc2LocalTime(json.timestamps[ts]);
         }
         return this;
-    }
-    isError() {
-        return isError(this.state);
     }
 }
 
@@ -122,14 +150,25 @@ class ModuleHandle {
  * area when the notebook cell is rendered.
  */
 export class Notebook {
-    constructor(workflow) {
+    constructor(workflow, cells) {
+        this.workflow = workflow;
+        this.cells = cells;
+        // Set a few shortcuts
         this.id = workflow.id;
+        this.createdAt = workflow.createdAt;
         this.readOnly = workflow.readOnly;
+        this.datasets = workflow.datasets;
+    }
+    /**
+     * Create a notebook resource from a given workflow handle.
+     */
+    fromWorkflow(workflow) {
         // Create notebook cells from list of of workflow modules returned by
         // the API
         this.cells = [];
         for (let i = 0; i < workflow.modules.length; i++) {
             const module = new ModuleHandle().fromJson(workflow.modules[i]);
+            const commandSpec = workflow.getCommandSpec(module.command);
             // Get cell output resource
             const stdout = module.outputs.stdout;
             let outputResource = null;
@@ -138,7 +177,7 @@ export class Notebook {
                 // output element
                 const out = stdout[0];
                 if (out.type === 'chart/view') {
-                    outputResource = OutputChart(out.data.name, out.result);
+                    outputResource = OutputChart(out.value.data.name, out.value.result);
                 } else if (out.type === 'text/html') {
                     outputResource = OutputHtml(stdout);
                 } else  {
@@ -151,14 +190,9 @@ export class Notebook {
             if (outputResource === null) {
                 outputResource = OutputText([]);
             }
-            this.cells.push(new NotebookCell(module, outputResource));
+            this.cells.push(new NotebookCell(module, commandSpec, outputResource));
         }
-        // Set shortcut to access the last cell in the notebook
-        if (this.cells.length > 0) {
-            this.lastCell = this.cells[this.cells.length - 1];
-        } else {
-            this.lastCell = null;
-        }
+        return this;
     }
     /**
      * Test if a notebook is empty.
@@ -167,21 +201,38 @@ export class Notebook {
         return this.cells.length === 0;
     }
     /**
+     * Shortcut to access the last cell in the notebook.
+     */
+    lastCell() {
+        if (this.cells.length > 0) {
+            return this.cells[this.cells.length - 1];
+        } else {
+            return null;
+        }
+
+    }
+    /**
      * Replace the output in the cell that represents the workflow module with
      * the given identifier. Returns a modified copy of this notebook.
      */
     replaceOutput(moduleId, outputResource) {
         // Modified list of notebook cells
-        const modCells = [];
+        const modifiedCells = [];
         for (let i = 0; i < this.cells.length; i++) {
             const cell = this.cells[i];
             if (cell.module.id === moduleId) {
-                modCells.push(new NotebookCell(cell.module, outputResource));
+                modifiedCells.push(
+                    new NotebookCell(
+                        cell.module,
+                        cell.commandSpec,
+                        outputResource,
+                        cell.annotationObject
+                ));
             } else {
-                modCells.push(cell);
+                modifiedCells.push(cell);
             }
         }
-        return new Notebook(modCells);
+        return new Notebook(this.workflow, modifiedCells);
     }
     showAnnotations(moduleId, annotation) {
         // Modified list of notebook cells
@@ -202,21 +253,23 @@ export class Notebook {
      */
     setFetching(moduleId) {
         // Modified list of notebook cells
-        const modCells = [];
+        const modifiedCells = [];
         for (let i = 0; i < this.cells.length; i++) {
             const cell = this.cells[i];
             if (cell.module.id === moduleId) {
-                modCells.push(
+                modifiedCells.push(
                     new NotebookCell(
                         cell.module,
-                        new OutputFetching(cell.output)
+                        cell.commandSpec,
+                        OutputFetching(cell.output),
+                        cell.annotationObject
                     )
                 );
             } else {
-                modCells.push(cell);
+                modifiedCells.push(cell);
             }
         }
-        return new Notebook(modCells);
+        return new Notebook(this.workflow, modifiedCells);
     }
 }
 
@@ -227,9 +280,10 @@ export class Notebook {
  * output area.
  */
 class NotebookCell {
-    constructor(module, output, annotationObject) {
+    constructor(module, commandSpec, output, annotationObject) {
         this.id = module.id;
         this.module = module;
+        this.commandSpec = commandSpec;
         this.output = output;
         if (annotationObject != null) {
             this.activeDatasetCell = annotationObject
@@ -238,9 +292,33 @@ class NotebookCell {
         }
 
     }
-    hasError() {
-        if (this.module != null) {
-            return this.module.outputs.stderr.length > 0;
+    /**
+     * Get the value of the language property for ccode cells.
+     */
+    getCodeLanguage() {
+        return this.commandSpec.parameters[0].language;
+    }
+    /**
+     * Test if the command that is associated with the module contains script
+     * code (e.g., Python code, SQL, Scala code). The code language can be
+     * retrieved using the .getCodeLanguage() method.
+     */
+    isCode() {
+        if (this.commandSpec.parameters.length === 1) {
+            return this.commandSpec.parameters[0].datatype === 'code';
         }
+        return false;
+    }
+    /**
+     * Test if the module is in error state.
+     */
+    isError() {
+        return isError(this.module.state);
+    }
+    /**
+     * Test if the module is in error or canceled state.
+     */
+    isErrorOrCanceled() {
+        return isErrorOrCanceled(this.module.state);
     }
 }

@@ -40,7 +40,7 @@ import '../../../../css/Notebook.css';
 class CellOutputArea extends React.Component {
     static propTypes = {
         activeDatasetCell: PropTypes.object.isRequired,
-        module: PropTypes.object.isRequired,
+        cell: PropTypes.object.isRequired,
         output: PropTypes.object.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
         onNavigateDataset: PropTypes.func.isRequired,
@@ -79,12 +79,13 @@ class CellOutputArea extends React.Component {
         }
     }
     render() {
-        const { activeDatasetCell, module, output, onOutputSelect } = this.props;
+        const { activeDatasetCell, cell, output, onOutputSelect } = this.props;
+        const { module } = cell;
         // Only show an output selector if there are datasets or views, no
         // errors, and fetching is not in progress.
         let outputSelector = null;
         const hasOutputObjects = ((module.datasets.length > 0) || (module.views.length > 0));
-        if ((!module.isError()) && (output.isFetching !== true) && (hasOutputObjects)) {
+        if ((!cell.isError()) && (output.isFetching !== true) && (hasOutputObjects)) {
             outputSelector = (
                 <OutputSelector
                     module={module}
@@ -97,8 +98,8 @@ class CellOutputArea extends React.Component {
         // handle. First, we distinguish between successful output or error
         // messages
         let outputContent = null;
-        if (module.outputs.stderr.length > 0) {
-            const lines = OutputText(module.outputs.stdout.concat(module.outputs.stderr)).content.lines;
+        if (cell.outputs.stderr.length > 0) {
+            const lines = OutputText(cell.outputs.stdout.concat(cell.outputs.stderr)).content.lines;
             outputContent = <TextOutput isError={true} lines={lines} />;
         } else {
             if (output.isError()) {

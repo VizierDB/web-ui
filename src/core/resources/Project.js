@@ -169,6 +169,12 @@ export class ProjectHandle {
         return this;
     }
     /**
+     * Get the specification for a given command.
+     */
+    getCommandSpec(packageId, commandId) {
+        return this.packages[packageId].commands[commandId];
+    }
+    /**
      * Returns the default branch for this project.
      */
     getDefaultBranch() {

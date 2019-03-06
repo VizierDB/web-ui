@@ -9,31 +9,12 @@ div.project-menu-bar {
     padding: 2px 0px;
 }
 
-div.project-menu {
-    margin-left: 5px;
-}
-
 div.project-status {
     color: #3b4151;
-    font-size: 1em;
+    font-size: 0.8em;
     min-height: 2.85714286em;
     padding-top: 0.5em;
     text-align: right;
-}
-
-p.project-status {
-    font-size: 1em;
-    padding-top: 0.5em;
-}
-
-span.highlight-branch {
-    margin-left: 0.5em;
-    margin-right: 0.5em;
-    font-weight: 700;
-}
-
-span.highlight-date {
-    font-family: "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;
 }
 
 span.project-name {

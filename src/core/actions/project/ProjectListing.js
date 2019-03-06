@@ -20,6 +20,7 @@ import { createResource, deleteResource } from '../../util/Api'
 import { fetchAuthed, requestAuth } from '../main/Service';
 import { ProjectDescriptor } from '../../resources/Project';
 import { HATEOASReferences, HATEOAS_PROJECTS_DELETE, HATEOAS_PROJECTS_LIST } from '../../util/HATEOAS';
+import { notebookPageUrl } from '../../util/App';
 import { sortByName } from '../../util/Sort';
 
 /**
@@ -48,7 +49,7 @@ export const clearProjectActionError = () => ({
 /**
  * Create a new project.
  */
-export const createProject = (url, name) => (dispatch) =>  {
+export const createProject = (url, name, history) => (dispatch) =>  {
     // Signal start of create project action
     dispatch(requestProjects('Create Project ...'))
     // Set request body
@@ -57,7 +58,16 @@ export const createProject = (url, name) => (dispatch) =>  {
         data.properties.push({key: 'name', value: name.trim()})
     }
     // Dispatch create resource request
-    dispatch(createResource(url, data, projectCreateSuccess, projectCreateError))
+    dispatch(
+        createResource(
+            url,
+            data,
+            (json) => {
+                dispatch(fetchProjects());
+                history.push(notebookPageUrl(json.id, json.defaultBranch));
+            },
+            projectCreateError
+    ))
 }
 
 
@@ -126,14 +136,6 @@ const projectDeleteError = (error) => ({
     type: SET_PROJECT_DELETE_ERROR,
     error
 })
-
-
-/**
- * Handle errors when retrieving the project listing.
- */
-const projectCreateSuccess = () => (dispatch) => {
-    dispatch(fetchProjects())
-}
 
 
 /**

@@ -109,28 +109,28 @@ span.action {
 }
 
 a.action-link {
-    color: #21ba45;
+    color: #1fb041;
     /*font-weight: bold;*/
     text-decoration: none;
     outline: 0;
 }
 
 a.action-link:hover {
-    color: #1fb141;
+    color: #1b9c39;
     /*font-weight: bold;*/
     text-decoration: none;
     outline: 0;
 }
 
 a.external-link {
-    color: #41b6e6;
+    color: #42a9c7;
     /*font-weight: bold;*/
     text-decoration: none;
     outline: 0;
 }
 
 a.external-link:hover {
-    color: #4286f4;
+    color: #3b98b3;
     /*font-weight: bold;*/
     text-decoration: none;
     outline: 0;
@@ -174,10 +174,18 @@ p.info-text.md-top {
     margin-top: 10px;
 }
 
+span.clickable-icon {
+    cursor: pointer;
+}
 span.info-bold {
     color: #000;
     padding-left: 0.25em;
     font-weight: bold;
+}
+
+span.info-date {
+    color: #3b4151;
+    font-family: "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;
 }
 
 span.info-highlight {
@@ -185,20 +193,32 @@ span.info-highlight {
     color: #000;
 }
 
+span.padding-sm {
+    padding: 0px 5px;
+}
+
 span.left-padding-sm {
     padding-left: 5px;
+}
+
+span.right-padding-sm {
+    padding-right: 5px;
+}
+
+span.padding-md {
+    padding: 0px 10px;
 }
 
 span.left-padding-md {
     padding-left: 10px;
 }
 
-span.left-padding-lg {
-    padding-left: 20px;
-}
-
 span.right-padding-md {
     padding-right: 10px;
+}
+
+span.left-padding-lg {
+    padding-left: 20px;
 }
 
 span.sys-name {

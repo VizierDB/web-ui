@@ -24,13 +24,15 @@ import {scaleOrdinal} from 'd3-scale';
 import {BarChart, LineChart, AreaChart, ScatterChart, PieChart, RadarChart, Line, Area, Bar, Scatter, Treemap,
   Pie, Cell, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, RadialBarChart, RadialBar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Brush} from 'recharts';
 import { GridList, GridTile} from 'material-ui/GridList';
-import { Checkbox, Dropdown } from 'semantic-ui-react';
+import { Button, Checkbox, Dropdown, Icon } from 'semantic-ui-react';
 import '../../../css/Chart.css'
 
 class Plots extends React.Component {
 
     static propTypes = {
-        dataset: PropTypes.object.isRequired
+        dataset: PropTypes.object.isRequired,
+        identifier: PropTypes.string.isRequired,
+        onDownload: PropTypes.func.isRequired
     }
 
     constructor(props){
@@ -39,7 +41,6 @@ class Plots extends React.Component {
         // Set grouped to true if only one data series is given (in this case
         // the grouped checkbox is hidden) and grouped layout should be
         // default.
-        console.log(identifier);
         this.state = {
             chartType: dataset.chart.type,
             grouped: (dataset.chart.grouped || (dataset.series.length === 1)),
@@ -386,7 +387,7 @@ class Plots extends React.Component {
     }
     render() {
 
-        const { dataset, identifier } = this.props;
+        const { dataset, identifier, onDownload } = this.props;
         // Return null if the dataset is empty
         if (dataset.series.length === 0) {
             return null;
@@ -436,6 +437,12 @@ class Plots extends React.Component {
                             />
                         </td>
                         { groupedCheckbox }
+                        <td className='chart-download'>
+                            <Button size='small' color='green' onClick={onDownload}>
+                                <Icon name='download' />
+                                Download Chart
+                            </Button>
+                        </td>
                     </tr></tbody></table>
                 </div>
                   <div id={identifier} className='plot-view'>
@@ -456,7 +463,17 @@ Plots.defaultProps = {
     gridList_height:450,
     gridLis_overflowY:'auto',
     colorText:'black',
-    charts : ["Area Chart", "Bar Chart", "Line Chart", "Scatter Plot", "Pie Chart", "Donut Chart", "Radar Chart", "Radial Bar Chart", "Treemap"],
+    charts : [
+        "Area Chart",
+        "Bar Chart",
+        "Line Chart",
+        "Scatter Plot",
+        "Pie Chart",
+        "Donut Chart",
+        "Radar Chart",
+        "Radial Bar Chart",
+        "Treemap"
+    ],
 };
 /*<p>Got data for {this.props.rows.length} row(s) and {this.props.schema.series.length} data series</p>*/
 

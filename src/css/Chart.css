@@ -40,10 +40,11 @@ ul.plot-legend {
 }
 
 table.plot-form-table {
-
+    width: 100%;
 }
 
 td.plot-form-label {
+    width: 70px;
     padding-right: 10px;
 }
 
@@ -54,4 +55,8 @@ td.plot-form-dropdown {
 
 td.plot-form-check {
     vertical-align: middle;
+}
+
+td.chart-download {
+    text-align: right;
 }

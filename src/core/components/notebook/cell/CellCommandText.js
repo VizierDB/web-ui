@@ -18,7 +18,7 @@
 
 import React from 'react';
 import { PropTypes } from 'prop-types';
-import { isErrorOrCanceled }  from '../../../resources/Workflow';
+import {Controlled as CodeMirror} from 'react-codemirror2'
 import '../../../../css/Notebook.css';
 
 
@@ -27,19 +27,35 @@ import '../../../../css/Notebook.css';
  */
 class CellCommandText extends React.Component {
     static propTypes = {
-        moduleState: PropTypes.number.isRequired,
-        onDoubleClick: PropTypes.func,
-        text: PropTypes.string.isRequired
+        cell: PropTypes.object.isRequired,
+        onDoubleClick: PropTypes.func
     }
     render() {
-        const { moduleState, onDoubleClick, text } = this.props;
+        const { cell, onDoubleClick } = this.props;
+        const { command, text } = cell.module;
         // The stylesheet class name depends on the state of the module. Append
         // error-state in case of an error or if the module was canceled.
         let css = 'cell-cmd-text';
-        if (isErrorOrCanceled(moduleState)) {
+        if (cell.isErrorOrCanceled()) {
             css += ' error-state';
         }
-        return  (<pre className={css} onDoubleClick={onDoubleClick}>{text}</pre>);
+        let content = null;
+        if (cell.isCode()) {
+            content = (
+                <CodeMirror
+                    value={text.trim()}
+                    options={{
+                        lineNumbers: false,
+                        mode: cell.getCodeLanguage(),
+                        indentUnit: 4
+                    }}
+                    readOnly={true}
+                />
+            );
+        } else {
+            content = text;
+        }
+        return (<pre className={css} onDoubleClick={onDoubleClick}>{content}</pre>);
     }
 }
 

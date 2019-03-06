@@ -20,15 +20,17 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createBranch, deleteBranch } from '../../actions/project/Branch';
-import { fetchWorkflow } from '../../actions/project/Notebook';
+import { fetchWorkflow, showCellChart, showCellDataset, showCellStdout } from '../../actions/project/Notebook';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import { LargeMessageButton } from '../../components/Button';
 import ContentSpinner from '../../components/ContentSpinner';
 import { FetchError } from '../../components/Message';
 import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
 import EditableNotebook from '../../components/notebook/EditableNotebook';
-import ReadOnlyNotebook from '../../components/notebook/ReadOnlyNotebook';
+import NotebookStatusHeader from '../../components/notebook/NotebookStatusHeader';
+import TestReadOnlyNotebook from '../../components/notebook/TestReadOnlyNotebook';
 import ProjectResourcePage from '../../components/project/ProjectResourcePage';
+import { CONTENT_CHART, CONTENT_DATASET, CONTENT_TEXT } from '../../resources/Notebook';
 import { NotebookResource } from '../../resources/Project';
 import { isNotEmptyString, notebookPageUrl } from '../../util/App.js';
 
@@ -143,6 +145,20 @@ class NotebookPage extends Component {
         dispatch(deleteBranch(project, branch, notebookPageUrl, history));
     }
     /**
+     * Dispatch an action to load the resource that is being shown as output
+     * for the notebook cell that displays the given workflow module.
+     */
+    handleSelectOutput = (module, resourceType, resourceName) => {
+        const { dispatch, notebook } = this.props;
+        if (resourceType === CONTENT_CHART) {
+            dispatch(showCellChart(notebook, module, resourceName));
+        } else if (resourceType === CONTENT_DATASET) {
+            dispatch(showCellDataset(notebook, module, resourceName));
+        } else if (resourceType === CONTENT_TEXT) {
+            dispatch(showCellStdout(notebook, module));
+        }
+    }
+    /**
      * Dispatch action to load the workflow at the head of the current branch.
      */
     handleShowBranchHead = () => {
@@ -201,7 +217,7 @@ class NotebookPage extends Component {
             let notebookCells = [];
             //if (notebook.readOnly) {
                 notebookCells = (
-                    <ReadOnlyNotebook
+                    <TestReadOnlyNotebook
                         groupMode={groupMode}
                         notebook={notebook}
                         project={project}
@@ -209,7 +225,7 @@ class NotebookPage extends Component {
                         onChangeGrouping={this.handleChangeGrouping}
                         onCreateBranch={this.showCreateBranchModal}
                         onNavigateDataset={this.navigateDataset}
-                        onOutputSelect={this.selectOutput}
+                        onOutputSelect={this.handleSelectOutput}
                         onShowAnnotations={this.handleShowAnnotations}
                     />
                 );
@@ -259,6 +275,12 @@ class NotebookPage extends Component {
             // Layout has reverse button at top followed by list of notebook cells
             const pageContent = (
                 <div className="notebook">
+                    <NotebookStatusHeader
+                        branch={branch}
+                        notebook={notebook}
+                        onSwitchBranch={this.handleSwitchBranch}
+                        project={project}
+                    />
                     { notebookCells }
                     { notebookFooter }
                 </div>

@@ -82,6 +82,25 @@ class ProjectListing extends Component {
         history.push(notebookPageUrl(project.id, project.defaultBranch));
     }
     /**
+     * Submit a create new project request. If the name is empty it is set to
+     * 'undefined' by default.
+     */
+    handleSubmitNewProject = (name) => {
+        const { dispatch, history, links } = this.props;
+        this.toggleCreateProjectForm();
+        let projectName = name.trim();
+        if (projectName === '') {
+            projectName = 'New Project';
+        }
+        dispatch(
+            createProject(
+                links.get(HATEOAS_PROJECTS_CREATE),
+                projectName,
+                history
+            )
+        );
+    }
+    /**
      * Hide all modals by setting the respective state variables to null..
      */
     hideModal = () => {
@@ -174,7 +193,7 @@ class ProjectListing extends Component {
                 createProjectForm = (
                     <CreateProjectForm
                         onClose={this.toggleCreateProjectForm}
-                        onSubmit={this.submitNewProject}
+                        onSubmit={this.handleSubmitNewProject}
                     />
                 );
             }
@@ -210,19 +229,6 @@ class ProjectListing extends Component {
      */
     showDeleteProjectModal = (project) => {
         this.setState({deleteProject: project})
-    }
-    /**
-     * Submit a create new project request. If the name is empty it is set to
-     * 'undefined' by default.
-     */
-    submitNewProject = (name) => {
-        const { dispatch, links } = this.props;
-        this.toggleCreateProjectForm();
-        let projectName = name.trim();
-        if (projectName === '') {
-            projectName = 'New Project';
-        }
-        dispatch(createProject(links.get(HATEOAS_PROJECTS_CREATE), projectName));
     }
     /**
      * Toggle visibility of the create project form.

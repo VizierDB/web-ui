@@ -20,7 +20,7 @@
  * Reducer for actions that affect the notebook page.
  */
 
-import { RECEIVE_WORKFLOW, REQUEST_WORKFLOW } from '../../actions/project/Notebook';
+import { RECEIVE_WORKFLOW, REQUEST_WORKFLOW, UPDATE_NOTEBOOK } from '../../actions/project/Notebook';
 import { PROJECT_FETCH_ERROR, RECEIVE_PROJECT, REQUEST_PROJECT } from '../../actions/project/Project';
 import { GRP_HIDE, Notebook } from '../../resources/Notebook';
 
@@ -56,7 +56,7 @@ export const notebookPage = (state = INITIAL_STATE, action) => {
                 ...state,
                 isFetching: false,
                 fetchError: null,
-                notebook: new Notebook(action.workflow)
+                notebook: new Notebook(action.workflow).fromWorkflow(action.workflow)
             };
         case RECEIVE_PROJECT:
             return {...state, notebook: null};
@@ -66,6 +66,8 @@ export const notebookPage = (state = INITIAL_STATE, action) => {
                 ...state,
                 isFetching: true,
             };
+        case UPDATE_NOTEBOOK:
+            return {...state, notebook: action.notebook};
         default:
             return state
     }

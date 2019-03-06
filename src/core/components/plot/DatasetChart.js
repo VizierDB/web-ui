@@ -53,7 +53,9 @@ class DatasetChart extends React.Component {
     /**
      * Export chart as a PDF. Generating a PDF file from react component which contains the chart.
      */
-    generatePDF = (plotName) => {
+    generatePDF = () => {
+        const { identifier } = this.props
+        const plotName = 'plot_' + identifier
         const input = document.getElementById(plotName);
         html2canvas(input)
           .then((canvas) => {
@@ -70,18 +72,17 @@ class DatasetChart extends React.Component {
 
     render() {
         const { dataset, identifier } = this.props
-        var plotName = 'plot_' + identifier
+        const plotName = 'plot_' + identifier
         if (dataset !== undefined) {
             return (
               <div>
                 <div className='plot'>
-                    <Plots key={identifier} identifier={plotName} dataset={dataset} />
-                </div>
-                <div className='header-button'>
-                <Button size='small' color='green' onClick={this.generatePDF.bind(this, plotName)}>
-                  <Icon name='download' />
-                  Download Chart
-                </Button>
+                    <Plots
+                        key={identifier}
+                        identifier={plotName}
+                        dataset={dataset}
+                        onDownload={this.generatePDF}
+                    />
                 </div>
               </div>
             );
