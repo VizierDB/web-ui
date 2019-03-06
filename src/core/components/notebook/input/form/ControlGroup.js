@@ -68,45 +68,41 @@ class ControlGroup extends React.Component {
         super(props);
         const { value } = this.props;
         this.defaultValues = {...value.values};
-        this.state = ({formValues: value.values, tuples: value.tuples});
+        this.state = ({tuples: value.tuples});
     }
     /**
      * Update internal state if any column id children have been reset.
      */
     componentWillReceiveProps(newProps) {
         const { value } = newProps;
-        this.setState({formValues: value.values, tuples: value.tuples});
+        this.setState({tuples: value.tuples});
     }
     /**
      * Handle change in any of the group's input controls.
      */
-    handleChange = (name, value) => {
+    handleChange = (index) => (name, value) => {
         const { id, onChange } = this.props;
-        const { formValues, tuples } = this.state;
-        const values = {...formValues};
+        const { tuples } = this.state;
+        let values = {...this.defaultValues};
+        if(index >= 0 && index < tuples.length ){
+        	values = tuples[index];
+        }
         values[name] = value;
-        this.setState({formValues: values});
+        if(index === -1){
+        	tuples.push(values);
+        }
+        else{
+        	tuples[index] = values;
+        }
         onChange(id, {values, tuples})
     }
-    /**
-     * Add the current values in the form controls as a tuple to the list of
-     * argument values.
-     */
-    handleAdd = () => {
-        const { id, onChange } = this.props;
-        const { formValues, tuples } = this.state;
-        tuples.push({...formValues});
-        // Clear the form values
-        const values = {...this.defaultValues};
-        this.setState({formValues: values, tuples});
-        onChange(id, {values, tuples});
-    }
+    
     /**
      * Remove an existing tuple from the list of argument values.
      */
     handleRemove = (e, { value }) => {
         const { id, onChange } = this.props
-        const { formValues, tuples } = this.state
+        const { tuples } = this.state
         const modifiedTuples = []
         let removedTuple =  null
         for (let i = 0; i < tuples.length; i++) {
@@ -117,14 +113,14 @@ class ControlGroup extends React.Component {
             	removedTuple = {...tuples[i]}
             }
         }
-        this.setState({tuples: modifiedTuples, formValues:removedTuple})
+        this.setState({tuples: modifiedTuples})
         onChange(id, {values: removedTuple, tuples: modifiedTuples})
     }
     render() {
         const {
             children, commandArgs, datasets, env, selectedDataset
         } = this.props;
-        const { tuples, formValues } = this.state;
+        const { tuples } = this.state;
         // The layout is a table with three main components: The input control
         // names, existing group tuples, and the form controls.
         const rows = [];
@@ -147,8 +143,8 @@ class ControlGroup extends React.Component {
                         datasets={datasets}
                         env={env}
                         selectedDataset={selectedDataset}
-                        value={formValues[child.id]}
-                        onChange={this.handleChange}
+                        value={this.defaultValues[child.id]}
+                        onChange={this.handleChange(-1)}
                     />
                 </td>
             );
@@ -161,9 +157,7 @@ class ControlGroup extends React.Component {
         // Add button to control row to add the current control values as a new
         // tuple.
         formControls.push(
-            <td key={formControls.length} className='inner-form-button'>
-                <Button icon='plus' positive onClick={this.handleAdd}/>
-            </td>
+        	<td key={formLabels.length}  className='inner-form-button' />
         )
         // Add labels as first row of output table.
         rows.push(<tr key='header'>{formLabels}</tr>);
@@ -184,8 +178,17 @@ class ControlGroup extends React.Component {
                     tval = 'file';
                 }
                 row.push(
-                    <td key={i + '#' + j} className='form-constant'>
-                        {tval}
+                	<td key={formControls.length} className='inner-form-control'>
+                        <ModuleFormControl
+                            key={children[j].id}
+                            commandArgs={commandArgs}
+                            controlSpec={child}
+                            datasets={datasets}
+                            env={env}
+                            selectedDataset={selectedDataset}
+                            value={tuples[i][children[j].id]}
+                            onChange={this.handleChange(i)}
+                        />
                     </td>
                 )
             }

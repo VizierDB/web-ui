@@ -151,7 +151,7 @@ const DEFAULT_VALUE = (argument, command, datasets, argValue) => {
         // not undefined
         return argValue;
     } else if (dt === DT_BOOL) {
-        return false;
+        return ('value' in argument) ? argument.value : false;
     } else if (dt === DT_DATASET_ID) {
         return datasets.length > 0 ? datasets[0].name : '';
     } else if (dt === DT_FILE_ID) {

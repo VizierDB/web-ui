@@ -20,7 +20,7 @@ import React from 'react';
 import createReactClass from 'create-react-class';
 import { PropTypes } from 'prop-types';
 import { Dimmer, Loader } from 'semantic-ui-react';
-import { ReactMarkdown } from 'react-markdown'
+import ReactMarkdown from 'react-markdown'
 import AnnotationObject from '../../annotation/AnnotationObject';
 import { ErrorMessage } from '../../Message';
 import DatasetChart from '../../plot/DatasetChart';
@@ -79,6 +79,7 @@ class CellOutputArea extends React.Component {
             onShowAnnotations(module, dataset, -1, -1);
         }
     }
+   
     render() {
         const { activeDatasetCell, module, output, onOutputSelect } = this.props;
         // Only show an output selector if there are datasets or views, no
@@ -166,8 +167,7 @@ class CellOutputArea extends React.Component {
                                 {output.content.name}
                             </span>
                             <ReactMarkdown
-                                source={output.content.lines}
-                                escapeHtml={false} />
+                                source={output.content.lines.join('\n')} />
                         </div>
                     );
                 }
