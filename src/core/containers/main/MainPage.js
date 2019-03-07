@@ -19,7 +19,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { Dropdown, Grid, Icon, Menu } from 'semantic-ui-react'
+import { Dropdown, Grid, Icon, Menu, Accordion } from 'semantic-ui-react'
 import { toggleShowProjectForm } from '../../actions/project/ProjectListing'
 import { ConnectionInfo } from '../../components/Api'
 import ProjectListing from '../project/ProjectListing'
@@ -35,6 +35,17 @@ class MainPage extends Component {
         serviceApi: PropTypes.object,
         showForm: PropTypes.bool.isRequired
     }
+    state = { activeIndex: 0 }
+    /**
+     * handle the click events for the accordion
+     */
+    handleClick = (e, titleProps) => {
+        const { index } = titleProps
+        const { activeIndex } = this.state
+        const newIndex = activeIndex === index ? -1 : index
+
+        this.setState({ activeIndex: newIndex })
+      }
     /**
      */
     render() {
@@ -45,6 +56,7 @@ class MainPage extends Component {
             serviceApi,
             showForm
         } = this.props;
+        const { activeIndex } = this.state
         let headline = null;
         let description = null;
         if (homePageContent != null) {
@@ -76,42 +88,54 @@ class MainPage extends Component {
                 { description }
                 <Grid>
                     <Grid.Row>
-                        <Grid.Column width={8}>
-                            <h3 className='home-headline'>Getting Started</h3>
-                            <p className='home-text'>
-                                <span className='sys-name'>Vizier</span>  organizes
-                                data curation workflows into projects. Start by
-                                {createProjectLink} or by selecting a project from
-                                the menu or the list below.
-                            </p>
-                            <ProjectListing />
-                        </Grid.Column>
-                        <Grid.Column width={8}>
-                            <div>
-                                <h3 className='home-headline'>About Vizier</h3>
-                                <p className='home-text'>
-                                    <span className='sys-name'>Vizier</span> is a new powerful tool to streamline the data
-                                    curation process. Data curation (also known as data preparation,
-                                    wrangling, or cleaning) is a critical stage in data science
-                                    in which raw data is structured, validated, and repaired.
-                                    Data validation and repair establish trust in analytical
-                                    results, while appropriate structuring streamlines
-                                    analytics.
-                                </p>
-                                <p className='home-text'>
-                                    <span className='sys-name'>Vizier</span>  makes it easier and faster to explore and
-                                    analyze raw data by combining a simple notebook interface
-                                    with spreadsheet views of your data. Powerful back-end
-                                    tools that track changes, edits, and the effects of
-                                    automation. These forms of <span className='text-highlight'>provenance</span> capture
-                                    both parts of the exploratory curation process - how the
-                                    cleaning workflows evolve, and how the data changes over time.
-                                </p>
-                                <p className='home-text'>
-                                    <span className='sys-name'>Vizier</span> is
-                                    a collaboration between the <a href='http://www.buffalo.edu/' className='external-link'>University at Buffalo</a>, <a href='http://www.nyu.edu/' className='external-link'>New York University</a>, and the <a href='https://web.iit.edu/' className='external-link'>Illinois Institute of Technology</a>.
-                                </p>
-                            </div>
+                        <Grid.Column width={16}>
+	                        <Accordion fluid styled>
+		                        <Accordion.Title active={activeIndex === 0} index={0} onClick={this.handleClick}>
+		                          <Icon name='dropdown' />
+		                        	  Getting Started
+		                        </Accordion.Title>
+		                        <Accordion.Content active={activeIndex === 0}>
+		                          <p>
+			                          <span className='sys-name'>Vizier</span>  organizes
+		                                data curation workflows into projects. Start by
+		                                {createProjectLink} or by selecting a project from
+		                                the menu or the list below.
+		                          </p>
+		                        </Accordion.Content>
+		
+		                        <Accordion.Title active={activeIndex === 1} index={1} onClick={this.handleClick}>
+		                          <Icon name='dropdown' />
+		                        	  About Vizier
+		                        </Accordion.Title>
+		                        <Accordion.Content active={activeIndex === 1}>
+		                        	<p className='home-text'>
+		                                <span className='sys-name'>Vizier</span> is a new powerful tool to streamline the data
+		                                curation process. Data curation (also known as data preparation,
+		                                wrangling, or cleaning) is a critical stage in data science
+		                                in which raw data is structured, validated, and repaired.
+		                                Data validation and repair establish trust in analytical
+		                                results, while appropriate structuring streamlines
+		                                analytics.
+		                            </p>
+		                            <p className='home-text'>
+		                                <span className='sys-name'>Vizier</span>  makes it easier and faster to explore and
+		                                analyze raw data by combining a simple notebook interface
+		                                with spreadsheet views of your data. Powerful back-end
+		                                tools that track changes, edits, and the effects of
+		                                automation. These forms of <span className='text-highlight'>provenance</span> capture
+		                                both parts of the exploratory curation process - how the
+		                                cleaning workflows evolve, and how the data changes over time.
+		                            </p>
+		                            <p className='home-text'>
+		                                <span className='sys-name'>Vizier</span> is
+		                                a collaboration between the <a href='http://www.buffalo.edu/' className='external-link'>University at Buffalo</a>, <a href='http://www.nyu.edu/' className='external-link'>New York University</a>, and the <a href='https://web.iit.edu/' className='external-link'>Illinois Institute of Technology</a>.
+		                            </p>
+		                        </Accordion.Content>
+		                        <Accordion.Title active={activeIndex === 2} index={2} onClick={this.handleClick}>
+		                          Projects
+		                        </Accordion.Title>
+		                      </Accordion>
+	                          <ProjectListing />
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>
