@@ -1,4 +1,4 @@
-div.spreadsheet-container {
+div.spreadsheet-main-container {
     background: #fff;
     border-radius: .28571429rem;
     border: 1px solid rgba(34,36,38,.15);
@@ -7,7 +7,7 @@ div.spreadsheet-container {
     padding: 20px 20px;
 }
 
-div.spreadsheet-container .dimmable {
+div.spreadsheet-main-container .dimmable {
     overflow-x: scroll;
 }
 
@@ -19,22 +19,36 @@ h1.dataset-name {
     background: #f8f8f8;
 }
 
+div.spreadsheet-container {
+    position: relative;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+div.spreadsheet-table-container {
+    background: #ff0000;
+    overflow-x: hidden;
+}
+
 table.spreadsheet {
-    background: #dadada; /*dadada; c0c0c0; dddddd*/
-    border: 0px;
+    background: #cecece;
     border-spacing: 1px;
     color: #3b4151;
     font-size: 12px;
+    table-layout: fixed;
     width: 100%;
-    table-layout: auto;
+    max-width: 1025px;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
 }
 
 td.grid-row-index {
-    background: #f3f3f3;
+    background: #dedede;
     border: 2px solid transparent;
     padding-right: 5px;
     text-align: right;
-    max-width: 100%;
+    width: 50px;
     white-space: nowrap;
 }
 
@@ -68,10 +82,11 @@ td.grid-cell.updating {
 
 th.grid-header {
     height: 20px;
-    background: #f3f3f3;
+    background: #dedede;
     border: 2px solid transparent;
     max-width: 100%;
     white-space: nowrap;
+    overflow: hidden;
 }
 
 th.grid-header.active {

@@ -19,7 +19,6 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
 import { EmptyCell, GroupCell, ModuleCell, ReadOnlyCell } from './cell/CellFactory';
-import { GRP_SHOW } from '../../resources/Notebook';
 import '../../../css/Notebook.css';
 
 
@@ -68,7 +67,7 @@ class EditableNotebook extends React.Component {
             errorState = cell.hasError() ? true : errorState;
             // If the cell belongs to the type of cells that are grouped we
             // simply add it to the array.
-            const isGrouped = (groupMode !== GRP_SHOW) && (project.isGrouped(cell.module));
+            const isGrouped = (groupMode !== 'GRP_SHOW') && (project.isGrouped(cell.module));
             if (isGrouped) {
                 groupedCells.push(cell);
             } else {

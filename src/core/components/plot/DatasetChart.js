@@ -16,13 +16,18 @@
  * limitations under the License.
  */
 
-import React from 'react'
-import PropTypes from 'prop-types'
-import Plots from './Plots'
-import '../../../css/Chart.css'
-import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
-import { Button, Icon } from 'semantic-ui-react';
+import React from 'react';
+import PropTypes from 'prop-types';
+import Plots from './Plots';
+import '../../../css/Chart.css';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { Button, Dropdown, Icon } from 'semantic-ui-react';
+import '../../../css/App.css';
+import '../../../css/Chart.css';
+import '../../../css/Notebook.css';
+
+
 /*
  * Plot a dataset chart for given data.
  */
@@ -69,22 +74,47 @@ class DatasetChart extends React.Component {
           })
         ;
     }
-
     render() {
         const { dataset, identifier } = this.props
         const plotName = 'plot_' + identifier
         if (dataset !== undefined) {
             return (
-              <div>
-                <div className='plot'>
-                    <Plots
-                        key={identifier}
-                        identifier={plotName}
-                        dataset={dataset}
-                        onDownload={this.generatePDF}
-                    />
+                <div>
+                    <table className='output-header'><tbody>
+                        <tr>
+                            <td className='header-dropdown'>
+                                <Dropdown icon='bar chart' title='Download chart'>
+                                    <Dropdown.Menu>
+                                        <Dropdown.Item
+                                            key={'download'}
+                                            icon='download'
+                                            text='Download'
+                                            title='Download chart as PDF file'
+                                            onClick={this.generatePDF}
+                                        />
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                            </td>
+                            <td className='header-title'>
+                                <span className='header-name'>{identifier}</span>
+                            </td>
+                        </tr>
+                    </tbody></table>
+                    <div className='plot'>
+                        <Plots
+                            key={identifier}
+                            identifier={plotName}
+                            dataset={dataset}
+                            onDownload={this.generatePDF}
+                        />
+                    </div>
+                    <div className='chart-download-btn'>
+                        <Button size='small' color='green' onClick={this.generatePDF}>
+                            <Icon name='download' />
+                            Download Chart
+                        </Button>
+                    </div>
                 </div>
-              </div>
             );
         } else {
             return null

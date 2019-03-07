@@ -20,14 +20,16 @@
  * Reducer for actions that affect the notebook page.
  */
 
-import { RECEIVE_WORKFLOW, REQUEST_WORKFLOW, UPDATE_NOTEBOOK } from '../../actions/project/Notebook';
+import { RECEIVE_WORKFLOW, REQUEST_WORKFLOW, SET_ACTIVE_NOTEBOOK_CELL,
+    UPDATE_NOTEBOOK } from '../../actions/project/Notebook';
 import { PROJECT_FETCH_ERROR, RECEIVE_PROJECT, REQUEST_PROJECT } from '../../actions/project/Project';
-import { GRP_HIDE, Notebook } from '../../resources/Notebook';
+import { Notebook } from '../../resources/Notebook';
 
 
 /**
  * STATE:
  *
+ * activeCell: Identifier of the active cell
  * fetchError: Error while loading the project handle or workflow handle
  * groupMode: Mode for grouping Vizual commands
  * isFetching: Load of project handle or workflow handle in progress
@@ -36,8 +38,8 @@ import { GRP_HIDE, Notebook } from '../../resources/Notebook';
  */
 
 const INITIAL_STATE = {
+    activeCell: null,
     fetchError: null,
-    groupMode: GRP_HIDE,
     isFetching: false,
     notebook: null,
     reversed: false,
@@ -54,18 +56,21 @@ export const notebookPage = (state = INITIAL_STATE, action) => {
         case RECEIVE_WORKFLOW:
             return {
                 ...state,
+                activeCell: null,
                 isFetching: false,
                 fetchError: null,
                 notebook: new Notebook(action.workflow).fromWorkflow(action.workflow)
             };
         case RECEIVE_PROJECT:
-            return {...state, notebook: null};
+            return {...state, activeCell: null, notebook: null};
         case REQUEST_PROJECT:
         case REQUEST_WORKFLOW:
             return {
                 ...state,
                 isFetching: true,
             };
+        case SET_ACTIVE_NOTEBOOK_CELL:
+            return {...state, activeCell: action.cellId};
         case UPDATE_NOTEBOOK:
             return {...state, notebook: action.notebook};
         default:

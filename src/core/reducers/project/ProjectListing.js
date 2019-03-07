@@ -48,7 +48,7 @@ const INITIAL_STATE = {
     fetchError: null,
     fetchMessage: DEFAULT_FETCH_MESSAGE,
     isFetching: false,
-    projects: [],
+    projects: null,
     links: null,
     showForm: false
 }

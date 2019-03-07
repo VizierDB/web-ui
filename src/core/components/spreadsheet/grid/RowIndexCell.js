@@ -19,6 +19,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import RowDropDown from '../menu/RowDropDown';
+import '../../../../css/Spreadsheet.css';
+
 
 /**
  * Left-hand column in the grid that contains the row index and context menu.
@@ -52,7 +54,7 @@ class RowIndexCell extends React.Component {
         }
         return (
             <td className='grid-row-index' onClick={onClick}>
-                {value}
+                { value }
                 { dropdown }
             </td>
         );

@@ -108,6 +108,12 @@ span.action {
     cursor: pointer
 }
 
+.status-header {
+    color: #3b4151;
+    font-size: 0.8em;
+    text-align: right;
+}
+
 a.action-link {
     color: #1fb041;
     /*font-weight: bold;*/
@@ -165,6 +171,21 @@ p.home-text {
     text-align: justify;
 }
 
+span.info-bold {
+    color: #000;
+    font-weight: bold;
+}
+
+span.info-date {
+    color: #3b4151;
+    font-family: "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;
+}
+
+span.number-highlight {
+    font-family: "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;
+    font-weight: bold;
+}
+
 p.info-text {
     color: #3b4151;
     font-size: 0.9em;
@@ -176,16 +197,6 @@ p.info-text.md-top {
 
 span.clickable-icon {
     cursor: pointer;
-}
-span.info-bold {
-    color: #000;
-    padding-left: 0.25em;
-    font-weight: bold;
-}
-
-span.info-date {
-    color: #3b4151;
-    font-family: "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;
 }
 
 span.info-highlight {

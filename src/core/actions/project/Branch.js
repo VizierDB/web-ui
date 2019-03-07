@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-import { redirectTo } from '../main/App';
 import { projectActionError, projectFetchError, requestProjectAction, setBranch, setProject } from './Project';
 import { BranchDescriptor } from '../../resources/Branch';
 import { WorkflowDescriptor } from '../../resources/Workflow';

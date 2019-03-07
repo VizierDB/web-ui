@@ -22,10 +22,10 @@ import { connect } from 'react-redux';
 import {  Icon } from 'semantic-ui-react';
 import { deleteBranch, fetchBranch } from '../../actions/project/Branch';
 import { fetchProject, setBranch } from '../../actions/project/Project';
+import { fetchProjects } from '../../actions/project/ProjectListing';
 import ContentSpinner from '../../components/ContentSpinner';
 import { FetchError } from '../../components/Message';
 import ProjectResourcePage from '../../components/project/ProjectResourcePage';
-import { GRP_UNDEFINED } from '../../resources/Notebook';
 import { BranchResource } from '../../resources/Project';
 import { branchPageUrl, notebookPageUrl } from '../../util/App.js';
 
@@ -50,7 +50,9 @@ class BranchPage extends Component {
         isActive: PropTypes.bool.isRequired,
         isFetching: PropTypes.bool.isRequired,
         project: PropTypes.object,
+        projectList: PropTypes.array,
         serviceApi: PropTypes.object,
+        userSettings: PropTypes.object.isRequired,
         workflows: PropTypes.array
     }
     /**
@@ -58,7 +60,7 @@ class BranchPage extends Component {
      */
     constructor(props) {
         super(props);
-        const { dispatch, project, branch, workflows } = this.props;
+        const { branch, dispatch, project, projectList, workflows } = this.props;
         // Get project and branch identifier from the URL
         const projectId = this.props.match.params.project_id;
         const branchId = this.props.match.params.branch_id;
@@ -70,6 +72,10 @@ class BranchPage extends Component {
             dispatch(fetchBranch(project, project.findBranch(branchId)));
         } else if (workflows == null) {
             dispatch(fetchBranch(project, project.findBranch(branchId)));
+        }
+        // Get project listing if not set
+        if (projectList == null) {
+            dispatch(fetchProjects());
         }
     }
     /**
@@ -141,7 +147,9 @@ class BranchPage extends Component {
             isActive,
             isFetching,
             project,
+            projectList,
             serviceApi,
+            userSettings,
             workflows
         } = this.props;
         // The main content of the page depends on the error and fetching state.
@@ -190,7 +198,7 @@ class BranchPage extends Component {
                         color = 'blue';
                         action = 'Replace cell';
                     }
-                    command = project.packages[wf.packageId].commands[wf.commandId].name;
+                    command = serviceApi.engine.packages[wf.packageId].commands[wf.commandId].name;
                 }
                 const isHead = (i === workflows.length - 1);
                 rows.push(
@@ -230,14 +238,15 @@ class BranchPage extends Component {
                     content={pageContent}
                     contentCss='wide'
                     dispatch={dispatch}
-                    groupMode={GRP_UNDEFINED}
                     isActive={isActive}
                     onDeleteBranch={this.handleDeleteBranch}
                     onShowNotebook={this.handleShowWorkflow}
                     onSwitchBranch={this.handleSwitchBranch}
                     project={project}
+                    projectList={projectList}
                     resource={new BranchResource()}
                     serviceApi={serviceApi}
+                    userSettings={userSettings}
                 />
             );
         }
@@ -254,7 +263,9 @@ const mapStateToProps = state => {
         isActive: state.projectPage.isActive,
         isFetching: state.branchPage.isFetching,
         project: state.projectPage.project,
+        projectList: state.projectListing.projects,
         serviceApi: state.serviceApi,
+        userSettings: state.app.userSettings,
         workflows: state.branchPage.workflows
     }
 }

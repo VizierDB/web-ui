@@ -19,9 +19,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { addFilteredCommand, removeFilteredCommand } from '../../actions/main/App';
 import { createBranch, deleteBranch } from '../../actions/project/Branch';
-import { fetchWorkflow, showCellChart, showCellDataset, showCellStdout } from '../../actions/project/Notebook';
+import { fetchWorkflow, hideCellOutput, showCellChart, fetchAnnotations,
+    selectNotebookCell, showCellDataset, showCellStdout,
+    showCellTimestamps } from '../../actions/project/Notebook';
 import { fetchProject, setBranch } from '../../actions/project/Project';
+import { fetchProjects } from '../../actions/project/ProjectListing';
 import { LargeMessageButton } from '../../components/Button';
 import ContentSpinner from '../../components/ContentSpinner';
 import { FetchError } from '../../components/Message';
@@ -30,7 +34,8 @@ import EditableNotebook from '../../components/notebook/EditableNotebook';
 import NotebookStatusHeader from '../../components/notebook/NotebookStatusHeader';
 import TestReadOnlyNotebook from '../../components/notebook/TestReadOnlyNotebook';
 import ProjectResourcePage from '../../components/project/ProjectResourcePage';
-import { CONTENT_CHART, CONTENT_DATASET, CONTENT_TEXT } from '../../resources/Notebook';
+import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
+    CONTENT_TIMESTAMPS } from '../../resources/Notebook';
 import { NotebookResource } from '../../resources/Project';
 import { isNotEmptyString, notebookPageUrl } from '../../util/App.js';
 
@@ -45,15 +50,17 @@ import '../../../css/Chart.css';
 class NotebookPage extends Component {
     static propTypes = {
         actionError: PropTypes.object,
+        activeCell: PropTypes.string,
         branch: PropTypes.object,
         fetchError: PropTypes.object,
-        groupMode: PropTypes.number,
         isActive: PropTypes.bool.isRequired,
         isFetching: PropTypes.bool.isRequired,
         notebook: PropTypes.object,
         project: PropTypes.object,
+        projectList: PropTypes.array,
         reversed: PropTypes.bool.isRequired,
-        serviceApi: PropTypes.object
+        serviceApi: PropTypes.object,
+        userSettings: PropTypes.object.isRequired
     }
     /**
      * Fetch project information when page is loaded.
@@ -65,7 +72,7 @@ class NotebookPage extends Component {
         // Fetch any resources that are currently null or out of sync with the
         // browser URL. It is assumed that the branch is set if the project is
         // set (i.e., either both are null or neither of them).
-        const { dispatch, project, branch, notebook } = this.props;
+        const { branch, dispatch, notebook, project, projectList } = this.props;
         const projectId = this.props.match.params.project_id;
         const branchId = this.props.match.params.branch_id;
         const workflowId = this.props.match.params.workflow_id;
@@ -85,6 +92,10 @@ class NotebookPage extends Component {
             dispatch(fetchWorkflow(project, branch, workflowId));
         } else if (notebook.id !== workflowId) {
             dispatch(fetchWorkflow(project, branch, workflowId));
+        }
+        // Get project listing if not set yet
+        if (projectList == null) {
+            dispatch(fetchProjects());
         }
     }
     /**
@@ -113,11 +124,23 @@ class NotebookPage extends Component {
                             workflowId
                 ))));
             } else if ((branch == null) || (branch.id !== branchId)) {
-                dispatch(setBranch(project, branchId, (project, branch) => (fetchWorkflow(project, branch, workflowId))));
+                dispatch(
+                    setBranch(
+                        project,
+                        branchId,
+                        (project, branch) => (fetchWorkflow(project, branch, workflowId))
+                ));
             } else if ((notebook == null) || (notebook.id !== workflowId)) {
                 dispatch(fetchWorkflow(project, branch, workflowId));
             }
         }
+    }
+    /**
+     * Dispatch a command specification object for a command that the user
+     * wants to add to the list of hidden commands.
+     */
+    handleAddFilteredCommand = (command) => {
+        this.props.dispatch(addFilteredCommand(command));
     }
     /**
      * Create a new branch and switch to that branch on success.
@@ -145,18 +168,54 @@ class NotebookPage extends Component {
         dispatch(deleteBranch(project, branch, notebookPageUrl, history));
     }
     /**
+     * Scroll to the given positions in the given dataset that is being
+     * displayed in the output area of the cell.
+     */
+    handleDatasetNavigate = (module, dataset, offset, limit) => {
+        const { dispatch, notebook } = this.props;
+        dispatch(showCellDataset(notebook, module, dataset, offset, limit));
+    }
+    handleFetchDatasetCellAnnotations = (module, dataset, columnId, rowId) => {
+        const { dispatch, notebook } = this.props;
+        dispatch(fetchAnnotations(notebook, module, dataset, columnId, rowId));
+    }
+    /**
      * Dispatch an action to load the resource that is being shown as output
      * for the notebook cell that displays the given workflow module.
      */
     handleSelectOutput = (module, resourceType, resourceName) => {
-        const { dispatch, notebook } = this.props;
+        const { dispatch, notebook, userSettings } = this.props;
         if (resourceType === CONTENT_CHART) {
             dispatch(showCellChart(notebook, module, resourceName));
         } else if (resourceType === CONTENT_DATASET) {
-            dispatch(showCellDataset(notebook, module, resourceName));
+            dispatch(showCellDataset(
+                notebook,
+                module,
+                notebook.getDatasetForModule(module, resourceName),
+                0,
+                userSettings.cellRowLimit())
+            );
+        } else if (resourceType === CONTENT_HIDE) {
+            dispatch(hideCellOutput(notebook, module));
         } else if (resourceType === CONTENT_TEXT) {
             dispatch(showCellStdout(notebook, module));
+        } else if (resourceType === CONTENT_TIMESTAMPS) {
+            dispatch(showCellTimestamps(notebook, module));
         }
+    }
+    /**
+     * Dispatch a command specification object for a command that the user
+     * wants to remove from the list of hidden commands.
+     */
+    handleRemoveFilteredCommand = (command) => {
+        this.props.dispatch(removeFilteredCommand(command));
+    }
+    /**
+     * Dispatch action to set the given cell as the new active cell of the
+     * notebook.
+     */
+    handleSelectActiveCell = (cell) => {
+        this.props.dispatch(selectNotebookCell(cell));
     }
     /**
      * Dispatch action to load the workflow at the head of the current branch.
@@ -186,16 +245,18 @@ class NotebookPage extends Component {
     render() {
         const {
             actionError,
+            activeCell,
             branch,
             dispatch,
             fetchError,
-            groupMode,
             isActive,
             isFetching,
             notebook,
             project,
+            projectList,
             reversed,
-            serviceApi
+            serviceApi,
+            userSettings
         } = this.props;
         // The main content of the page depends on the error and fetching state.
         let content = null;
@@ -218,15 +279,19 @@ class NotebookPage extends Component {
             //if (notebook.readOnly) {
                 notebookCells = (
                     <TestReadOnlyNotebook
-                        groupMode={groupMode}
+                        activeNotebookCell={activeCell}
                         notebook={notebook}
                         project={project}
                         reversed={reversed}
+                        onAddFilteredCommand={this.handleAddFilteredCommand}
                         onChangeGrouping={this.handleChangeGrouping}
                         onCreateBranch={this.showCreateBranchModal}
-                        onNavigateDataset={this.navigateDataset}
+                        onDatasetNavigate={this.handleDatasetNavigate}
+                        onFetchAnnotations={this.handleFetchDatasetCellAnnotations}
                         onOutputSelect={this.handleSelectOutput}
-                        onShowAnnotations={this.handleShowAnnotations}
+                        onRemoveFilteredCommand={this.handleRemoveFilteredCommand}
+                        onSelectNotebookCell={this.handleSelectActiveCell}
+                        userSettings={userSettings}
                     />
                 );
             /*} else {
@@ -244,7 +309,7 @@ class NotebookPage extends Component {
                         onNavigateDataset={this.navigateDataset}
                         onOutputSelect={this.selectOutput}
                         onReplaceModule={this.replaceModule}
-                        onShowAnnotations={this.handleShowAnnotations}
+                        onSelectDatasetCell={this.handleSelectDatasetCell}
                     />
                 );
             }*/
@@ -292,15 +357,16 @@ class NotebookPage extends Component {
                     content={pageContent}
                     contentCss='slim'
                     dispatch={dispatch}
-                    groupMode={groupMode}
                     isActive={isActive}
                     notebook={notebook}
                     onDeleteBranch={this.handleDeleteBranch}
                     onShowNotebook={this.handleShowBranchHead}
                     onSwitchBranch={this.handleSwitchBranch}
                     project={project}
+                    projectList={projectList}
                     resource={new NotebookResource()}
                     serviceApi={serviceApi}
+                    userSettings={userSettings}
                 />
             );
         }
@@ -327,19 +393,23 @@ class NotebookPage extends Component {
     }
 }
 
+
 const mapStateToProps = state => {
     return {
         actionError: state.projectPage.actionError,
+        activeCell: state.notebookPage.activeCell,
         branch: state.projectPage.branch,
         fetchError: state.notebookPage.fetchError,
-        groupMode: state.notebookPage.groupMode,
         isActive: state.projectPage.isActive,
         isFetching: state.notebookPage.isFetching,
         notebook: state.notebookPage.notebook,
         project: state.projectPage.project,
+        projectList: state.projectListing.projects,
         reversed: state.notebookPage.reversed,
-        serviceApi: state.serviceApi
+        serviceApi: state.serviceApi,
+        userSettings: state.app.userSettings
     }
 }
+
 
 export default connect(mapStateToProps)(NotebookPage);

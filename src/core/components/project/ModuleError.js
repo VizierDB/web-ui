@@ -32,7 +32,7 @@ class ModuleError extends React.Component {
     }
     render() {
         const { title, module } = this.props;
-        const lines = new OutputText(module.stderr).content.lines;
+        const lines = new OutputText(module.stderr).lines;
         return (
             <div className='notebook-cell-error'>
                 <h3>{title}</h3>

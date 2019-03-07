@@ -20,7 +20,6 @@ import React from 'react';
 import { PropTypes } from 'prop-types';
 import { Icon } from 'semantic-ui-react'
 import { TextButton } from '../../../components/Button'
-import { GRP_HIDE } from '../../../resources/Notebook';
 import '../../../../css/Notebook.css';
 
 
@@ -51,7 +50,7 @@ class NotebookCellGroup extends React.Component {
             startIndex,
             onChangeGrouping
         } = this.props;
-        if (groupMode === GRP_HIDE) {
+        if (groupMode === 'GRP_HIDE') {
             let text = null;
             if (startIndex < endIndex) {
                 text = '[HIDDEN CELLS ' + startIndex + '-' + endIndex + ']';

@@ -16,17 +16,34 @@
  * limitations under the License.
  */
 
-import { REDIRECT_TO } from '../../actions/main/App'
+import { UserSettings } from '../../util/Settings';
+import { ADD_FILTERED_COMMAND, HIDE_CELLS, REMOVE_FILTERED_COMMAND, REVERSE_ORDER } from '../../actions/main/App';
 
 /**
-* This is a temporary hack until the router redirect is working
+* This application state contains the user preferences object.
 */
 
-export const app = (state = {}, action) => {
+const INITIAL_STATE = {
+    userSettings: new UserSettings()
+}
+
+
+export const app = (state = INITIAL_STATE, action) => {
     switch (action.type) {
-        case REDIRECT_TO:
-            window.location.href = action.url;
-            return state;
+        case ADD_FILTERED_COMMAND:
+            return {
+                ...state,
+                userSettings: state.userSettings.addCommandToHiddenList(action.command)
+            };
+        case HIDE_CELLS:
+            return {...state, userSettings: state.userSettings.toggleHideCells()};
+        case REMOVE_FILTERED_COMMAND:
+            return {
+                ...state,
+                userSettings: state.userSettings.removeCommandFromHiddenList(action.command)
+            };
+        case REVERSE_ORDER:
+            return {...state, userSettings: state.userSettings.reverseOrder()};
         default:
             return state
     }

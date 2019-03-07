@@ -21,23 +21,24 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types'
 import {scaleOrdinal} from 'd3-scale';
 // ResponsiveContainer
-import {BarChart, LineChart, AreaChart, ScatterChart, PieChart, RadarChart, Line, Area, Bar, Scatter, Treemap,
-  Pie, Cell, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, RadialBarChart, RadialBar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Brush} from 'recharts';
+import {BarChart, LineChart, AreaChart, ScatterChart, PieChart, RadarChart,
+    Line, Area, Bar, Scatter, Treemap, Pie, Cell, Radar, PolarGrid,
+    PolarAngleAxis, PolarRadiusAxis, RadialBarChart, RadialBar, XAxis, YAxis,
+    CartesianGrid, Tooltip, Legend, Brush} from 'recharts';
 import { GridList, GridTile} from 'material-ui/GridList';
-import { Button, Checkbox, Dropdown, Icon } from 'semantic-ui-react';
+import { Checkbox, Dropdown } from 'semantic-ui-react';
 import '../../../css/Chart.css'
 
 class Plots extends React.Component {
 
     static propTypes = {
         dataset: PropTypes.object.isRequired,
-        identifier: PropTypes.string.isRequired,
-        onDownload: PropTypes.func.isRequired
+        identifier: PropTypes.string.isRequired
     }
 
     constructor(props){
         super(props);
-        const { dataset, identifier} = props;
+        const dataset = props.dataset;
         // Set grouped to true if only one data series is given (in this case
         // the grouped checkbox is hidden) and grouped layout should be
         // default.
@@ -387,7 +388,7 @@ class Plots extends React.Component {
     }
     render() {
 
-        const { dataset, identifier, onDownload } = this.props;
+        const { dataset, identifier } = this.props;
         // Return null if the dataset is empty
         if (dataset.series.length === 0) {
             return null;
@@ -437,12 +438,6 @@ class Plots extends React.Component {
                             />
                         </td>
                         { groupedCheckbox }
-                        <td className='chart-download'>
-                            <Button size='small' color='green' onClick={onDownload}>
-                                <Icon name='download' />
-                                Download Chart
-                            </Button>
-                        </td>
                     </tr></tbody></table>
                 </div>
                   <div id={identifier} className='plot-view'>

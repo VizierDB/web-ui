@@ -18,7 +18,7 @@
 
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Button, Icon } from 'semantic-ui-react';
+import { Icon } from 'semantic-ui-react';
 import ShareLinkModal from '../modals/ShareLinkModal'
 import { notebookPageUrl } from '../../util/App'
 import '../../../css/App.css'
@@ -74,7 +74,7 @@ class NotebookStatusHeader extends Component {
         url += notebookPageUrl(project.id, branch.id, notebook.id);
 
         return (
-            <div className='project-status'>
+            <div className='notebook-header status-header'>
                 <span>{<Icon name='fork' />}</span>
                 <span>{'On branch '}</span>
                 <span className='right-padding-sm'>

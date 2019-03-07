@@ -1,0 +1,30 @@
+div.vertical-scroll {
+    background: #dadada;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    overflow: hidden;
+    width: 12px;
+}
+
+div.vertical-scroll-top {
+    background: #cecece;
+}
+
+div.vertical-scroll-down {
+    background: #cecece;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin-bottom: 13px;
+}
+
+div.scroll-icon {
+    padding: 0px;
+    margin: 0px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+div.scroll-icon:hover { background-color: #c0c0c0; }

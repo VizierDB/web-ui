@@ -21,14 +21,14 @@ import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
 import {  Grid, Loader, Modal } from 'semantic-ui-react';
 import { showChartView } from '../../actions/chart/Chart';
-import { changeGroupMode, reverseOrder } from '../../actions/project/Notebook';
+import { reverseOrder, toggleHideCells } from '../../actions/main/App';
 import { updateBranch } from '../../actions/project/Branch';
 import { dismissProjectActionError, updateProject } from '../../actions/project/Project';
 import { showSpreadsheet, showDatasetError, repairDatasetError } from '../../actions/project/Spreadsheet';
 import { ConnectionInfo } from '../Api'
 import { ErrorMessage } from '../Message';
-import MainProjectMenu from './menu/MainProjectMenu';
-import { branchPageUrl, valueOrDefault } from '../../util/App';
+import MainProjectMenu from '../menu/MainProjectMenu';
+import { branchPageUrl, notebookPageUrl, valueOrDefault } from '../../util/App';
 
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
@@ -43,15 +43,16 @@ class ProjectResourcePage extends Component {
         content: PropTypes.object.isRequired,
         contentCss: PropTypes.string.isRequired,
         dispatch: PropTypes.func.isRequired,
-        groupMode: PropTypes.number.isRequired,
+        notebook: PropTypes.object,
         isActive: PropTypes.bool.isRequired,
         onDeleteBranch: PropTypes.func.isRequired,
         onShowNotebook: PropTypes.func.isRequired,
         onSwitchBranch: PropTypes.func.isRequired,
         project: PropTypes.object.isRequired,
+        projectList: PropTypes.array,
         resource: PropTypes.object.isRequired,
         serviceApi: PropTypes.object.isRequired,
-        notebook: PropTypes.object
+        userSettings: PropTypes.object.isRequired
     }
     /**
      * Dismiss resource error message.
@@ -60,20 +61,35 @@ class ProjectResourcePage extends Component {
         const { dispatch } = this.props;
         dispatch(dismissProjectActionError(null));
     }
-    handleNotebookReverse = () => {
-        const { dispatch } = this.props;
-        dispatch(reverseOrder());
-    }
-    handleChangeGroupMode = (mode) => {
-        const { dispatch } = this.props;
-        dispatch(changeGroupMode(mode));
-    }
     /**
      * Show branch history page.
      */
     handleShowBranch = () => {
         const { branch, history, project } = this.props;
         history.push(branchPageUrl(project.id, branch.id));
+    }
+    /**
+     * Show given project.
+     */
+    handleShowProject = (project) => {
+        const { history } = this.props;
+        history.push(notebookPageUrl(project.id, project.defaultBranch));
+    }
+    /**
+     * Dispatch action to toggle the value of the reversed property in the
+     * user settings.
+     */
+    handleToggleHideCells = () => {
+        const { dispatch } = this.props;
+        dispatch(toggleHideCells());
+    }
+    /**
+     * Dispatch action to toggle the value of the reversed property in the
+     * user settings.
+     */
+    handleToggleNotebookReverse = () => {
+        const { dispatch } = this.props;
+        dispatch(reverseOrder());
     }
     /**
      * Load a chart view and dispaly it as the project page resource content.
@@ -120,15 +136,16 @@ class ProjectResourcePage extends Component {
             branch,
             content,
             contentCss,
-            groupMode,
             isActive,
             notebook,
             onDeleteBranch,
             onShowNotebook,
             onSwitchBranch,
             project,
+            projectList,
             resource,
-            serviceApi
+            serviceApi,
+            userSettings
         } = this.props
 
         // Set window title to contain project name
@@ -162,21 +179,23 @@ class ProjectResourcePage extends Component {
                         <Grid.Column className='project-menu-bar'>
                         <MainProjectMenu
                             branch={branch}
-                            groupMode={groupMode}
-                            onChangeGrouping={this.handleChangeGroupMode}
+                            notebook={notebook}
                             onDeleteBranch={onDeleteBranch}
                             onEditBranch={this.submitEditBranch}
                             onEditProject={this.submitEditProject}
-                            onReverse={this.handleNotebookReverse}
+                            onHideCells={this.handleToggleHideCells}
+                            onReverse={this.handleToggleNotebookReverse}
                             onShowChart={this.loadChartView}
                             onShowDataset={this.loadDataset}
                             onShowDatasetError={this.loadDatasetError}
                             onShowHistory={this.handleShowBranch}
                             onShowNotebook={onShowNotebook}
+                            onShowProject={this.handleShowProject}
                             onSwitchBranch={onSwitchBranch}
                             project={project}
+                            projectList={projectList}
                             resource={resource}
-                            notebook={notebook}
+                            userSettings={userSettings}
                         />
                         </Grid.Column>
                     </Grid.Row>

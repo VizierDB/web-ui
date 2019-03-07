@@ -66,7 +66,7 @@ div.horizontal-divider {
     height: auto;
     line-height: 1;
     margin: 1rem auto;
-    text-align: center;
+    text-align: left;
     white-space: nowrap;
     -moz-user-select: none;
 }
@@ -75,49 +75,39 @@ div.horizontal-divider {
 
 table.cell {
     border-spacing: 0px;
+    margin-bottom: 20px;
     width: 100%
 }
 
-div.cell-area {
-    border-radius: .28571429rem;
-    border: 1px solid rgba(34,36,38,.15);
-    padding: 10px 10px 0px 10px;
-    margin-bottom: 10px;
+.active-cell {
+    border-left: solid 3px #303f9f;
 }
 
-table.cell-area {
-    border-spacing: 0px;
-    border-bottom: 1px solid rgba(34,36,38,.15);
-    width: 100%;
-    padding-bottom: 10px;
-}
-
-div.output-area {
-    padding-bottom: 10px;
+.inactive-cell {
+    border-left: solid 3px transparent;
 }
 
 td.cell-index {
+    text-align: center;
+    vertical-align: top;
+    width: 50px;
+}
+
+p.cell-index {
     color: #303f9f;
     font-family: monospace,monospace;
-    padding: 10px 0px;
-    text-align: center;
-    vertical-align: top;
-    width: 50px;
+    padding: 0px;
+    margin: 0px;
 }
 
-td.cell-menu {
-    text-align: center;
-    vertical-align: top;
-    width: 30px;
+div.cell-menu {
+    color: #888;
+    margin-top: 10px;
 }
 
-td.cell-index-error {
-    color: #843534;
-    font-family: monospace,monospace;
-    padding: 10px 0px;
-    text-align: center;
+td.cell-area {
+    padding-left: 10px;
     vertical-align: top;
-    width: 50px;
 }
 
 /* Cell Index Link Formating */
@@ -130,10 +120,6 @@ a.cell-index {
 a.cell-index:hover {
     color: #4183c4;
     outline: 0;
-    cursor: pointer;
-}
-
-.expand-button {
     cursor: pointer;
 }
 
@@ -178,6 +164,22 @@ pre.cell-vizual-error {
 }
 
 
+/* Outout Header */
+table.output-header {
+    border-spacing: 0px;
+    padding: 0px;
+    margin-bottom: 10px;
+}
+
+td.header-title {
+    color: #3b4151;
+    font-size: 1em;
+}
+
+span.header-name {
+    letter-spacing: 2px;
+}
+
 /* Outputs */
 
 div.collapsed-output {
@@ -196,24 +198,30 @@ div.output-content {
     margin-top: 10px;
 }
 
-span.output-content-header {
-    color: #888;
-    font-size: 1em;
-    letter-spacing: 2px;
-    padding: 0px 10px 0px 5px;
-    margin: 0px;
-}
-
 div.output-content-html {
 	text-align: center;
 }
 
+p.output-info-headline {
+    color: #3b4151;
+    padding: 10px 10px 0px 0px;
+    margin-bottom: 5px;
+}
+
+div.output-toolbar {
+    margin-bottom: 10px;
+}
+
 div.dataset {
-    margin-top: 10px;
+    background: #00ff00;
+    position: 'relative';
+    overflow: 'hidden';
+    width: '100%';
+    height: '100%';
 }
 
 pre.plain-text {
-    padding: 10px 10px 0px 10px;
+    padding: 10px 10px 0px 0px;
     margin: 0px;
 }
 

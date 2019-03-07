@@ -39,7 +39,7 @@ export const RECEIVE_AUTH = 'RECEIVE_AUTH'
 
 //MODAL IDENTIFIERS
 export const MODAL_AUTH = 'AUTH'
-	
+
 /**
  * Signal start of service descriptor fetching.
  */
@@ -51,11 +51,11 @@ const requestService = () => ({
  * Handler for successful retrieval of service descriptor.
  */
 const receiveService = (json) => ({
-  type: RECEIVE_SERVICE,
-  name: json.name,
-  properties: json.properties,
-  envs: json.envs,
-  links: json.links
+    type: RECEIVE_SERVICE,
+    name: json.name,
+    properties: json.properties,
+    environment: json.environment,
+    links: json.links
 })
 
 /**

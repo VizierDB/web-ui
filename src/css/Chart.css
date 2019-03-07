@@ -25,9 +25,9 @@ div.plot-view {
 }
 
 div.plot-menu {
-    background: #f6f6f6;
-    border-top: 1px solid #f2f0ed;
-    border-bottom: 1px solid #f2f0ed;
+    background: #dedede;
+    border-top: 1px solid #d0d0d0;
+    border-bottom: 1px solid #d0d0d0;
     font-family: monospace,monospace;
     font-size: 14px;
     margin: 10px 0px;
@@ -57,6 +57,7 @@ td.plot-form-check {
     vertical-align: middle;
 }
 
-td.chart-download {
+div.chart-download-btn {
     text-align: right;
+    margin-right: 50px;
 }

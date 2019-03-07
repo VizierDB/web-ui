@@ -29,7 +29,6 @@ import { CloseButton } from '../../components/Button'
 import AnnotationObject from '../../components/annotation/AnnotationObject';
 import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
 import CellInputArea  from '../../components/notebook/input/CellInputArea';
-import SpreadsheetNavbar from '../../components/spreadsheet/SpreadsheetNavbar';
 import GridCell from '../../components/spreadsheet/grid/GridCell';
 import HeaderCell from '../../components/spreadsheet/grid/HeaderCell';
 import RowIndexCell from '../../components/spreadsheet/grid/RowIndexCell';
@@ -514,13 +513,6 @@ class Spreadsheet extends React.Component {
                         <tbody>{rows}</tbody>
                     </table>
                 </Dimmer.Dimmable>
-                <div className='navbar-container'>
-                    <SpreadsheetNavbar
-                        dataset={dataset}
-                        disabled={isUpdating}
-                        onNavigate={this.handleNavigate}
-                    />
-                </div>
                 {this.showModal()}
             </div>
         );

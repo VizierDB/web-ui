@@ -19,7 +19,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Dropdown } from 'semantic-ui-react';
-import { CONTENT_CHART, CONTENT_DATASET, CONTENT_TEXT } from '../../../resources/Notebook';
+import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
+    CONTENT_TIMESTAMPS } from '../../../resources/Notebook';
 import '../../../../css/Notebook.css'
 
 
@@ -32,29 +33,39 @@ class CellMenu extends React.Component {
         cell: PropTypes.object.isRequired,
         cellNumber: PropTypes.number.isRequired,
         notebook: PropTypes.object.isRequired,
+        onAddFilteredCommand: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired
     }
     render() {
-        const { cell, cellNumber, notebook, onCreateBranch, onOutputSelect } = this.props;
+        const {
+            cell,
+            cellNumber,
+            notebook,
+            onAddFilteredCommand,
+            onCreateBranch,
+            onOutputSelect
+        } = this.props;
         const { module, output } = cell;
         // Determine the key of the selected output to disable the respective
         // menu entry.
         let selectedKey = null;
         if (output.isText()) {
             selectedKey = 'console';
+        } else if (output.isTimestamps()) {
+            selectedKey = 'timestamps';
         } else if (output.isDataset()) {
-            selectedKey = 'ds-' + output.content.name;
+            selectedKey = 'ds-' + output.dataset.name;
         } else if (output.isChart()) {
-            selectedKey = 'vw-' + output.content.name;
+            selectedKey = 'vw-' + output.name;
         }
         // Create list of dropdon menu items. The first section contains the
-        // cell actions edit, delete, insert cell (above/below) and create new
-        // branch at this cell. If the notebook is read-only only the first item
-        // is shown
+        // cell actions edit, delete, insert cell (above/below) create new
+        // branch at this cell, and hide commands like this. If the notebook is
+        // read-only only the last teo items are shown
         const dropdownItems = [];
-        dropdownItems.push(<Dropdown.Header key='cell' content={'Cell (#' + cellNumber + ')'} />);
-        dropdownItems.push(<Dropdown.Divider key='div1'/>);
+        //dropdownItems.push(<Dropdown.Header key='cell' content={'Cell (#' + cellNumber + ')'} />);
+        //dropdownItems.push(<Dropdown.Divider key='div1'/>);
         if (!notebook.readOnly) {
             dropdownItems.push(
                 <Dropdown.Item
@@ -74,7 +85,7 @@ class CellMenu extends React.Component {
                     onClick={() => (alert('Delete'))}
                 />
             );
-            dropdownItems.push(<Dropdown.Divider key='div2'/>);
+            dropdownItems.push(<Dropdown.Divider key='div1'/>);
             dropdownItems.push(
                 <Dropdown.Item
                     key='insert-above'
@@ -93,6 +104,7 @@ class CellMenu extends React.Component {
                     onClick={() => (alert('Insert below'))}
                 />
             );
+            dropdownItems.push(<Dropdown.Divider key='div2'/>);
         }
         // Have a descriptive title that shows the user which cells will be
         // included in the new branch
@@ -109,8 +121,18 @@ class CellMenu extends React.Component {
                 onClick={onCreateBranch}
             />
         );
+        dropdownItems.push(
+            <Dropdown.Item
+                key='hide-cmd'
+                icon='filter'
+                text={'Hide ' + cell.commandSpec.name}
+                title={'Hide all cells with command of type ' + cell.commandSpec.name + ' in the notebook'}
+                onClick={onAddFilteredCommand}
+            />
+        );
         // The second section of the menu contains the available outputs. The
-        // console output is always available. Datasets and views are optional.
+        // console output and the module timestamps are always available.
+        // Datasets and views are optional.
         dropdownItems.push(<Dropdown.Divider key='div3'/>);
         dropdownItems.push(<Dropdown.Header key='output' content='Output' />);
         dropdownItems.push(<Dropdown.Divider key='div4'/>);
@@ -119,12 +141,34 @@ class CellMenu extends React.Component {
                 key='console'
                 icon='desktop'
                 text='Console'
+                title='Show standard output'
                 disabled={selectedKey === 'console'}
                 onClick={() => (onOutputSelect(module, CONTENT_TEXT))}
             />
         );
+        dropdownItems.push(
+            <Dropdown.Item
+                key='hide'
+                icon='hide'
+                text='Hide'
+                title='Hide output for this cell'
+                disabled={selectedKey === null}
+                onClick={() => (onOutputSelect(module, CONTENT_HIDE))}
+            />
+        );
+        dropdownItems.push(
+            <Dropdown.Item
+                key='timestamps'
+                icon='clock outline'
+                text='Timing'
+                title='Show module execution times'
+                disabled={selectedKey === 'timestamps'}
+                onClick={() => (onOutputSelect(module, CONTENT_TIMESTAMPS))}
+            />
+        );
         // Show dataset options if datasets are present in output
         if (module.datasets.length > 0) {
+            dropdownItems.push(<Dropdown.Divider key='div5'/>);
             for (let i = 0; i < module.datasets.length; i++) {
                 const ds = module.datasets[i];
                 dropdownItems.push(
@@ -132,7 +176,8 @@ class CellMenu extends React.Component {
                         key={'ds-' + ds.name}
                         icon='table'
                         text={ds.name}
-                        value={ds.name}
+                        title={'Show dataset ' + ds.name}
+                        disabled={selectedKey === 'ds-' + ds.name}
                         onClick={() => (onOutputSelect(module, CONTENT_DATASET, ds.name))}
                     />
                 );
@@ -140,6 +185,7 @@ class CellMenu extends React.Component {
         }
         // Show chart options if chart views are present in output
         if (module.charts.length > 0) {
+            dropdownItems.push(<Dropdown.Divider key='div6'/>);
             for (let i = 0; i < module.charts.length; i++) {
                 const chart = module.charts[i];
                 dropdownItems.push(
@@ -147,7 +193,7 @@ class CellMenu extends React.Component {
                         key={'vw-' + chart.name}
                         icon='bar chart'
                         text={chart.name}
-                        value={chart.name}
+                        title={'Show chart ' + chart.name}
                         disabled={selectedKey === 'vw-' + chart.name}
                         onClick={() => (onOutputSelect(module, CONTENT_CHART, chart.name))}
                     />
@@ -155,9 +201,11 @@ class CellMenu extends React.Component {
             }
         }
         return (
-            <Dropdown icon='bars' title='Select output'>
-                <Dropdown.Menu>{dropdownItems}</Dropdown.Menu>
-            </Dropdown>
+            <div className='cell-menu'>
+                <Dropdown icon='bars' title='Cell actions and output'>
+                    <Dropdown.Menu>{dropdownItems}</Dropdown.Menu>
+                </Dropdown>
+            </div>
         );
     }
 }

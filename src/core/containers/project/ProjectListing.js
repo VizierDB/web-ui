@@ -45,7 +45,7 @@ class ProjectListing extends Component {
         fetchError: PropTypes.string,
         fetchMessage: PropTypes.string.isRequired,
         isFetching: PropTypes.bool.isRequired,
-        projects: PropTypes.array.isRequired,
+        projects: PropTypes.array,
         links: PropTypes.object,
         showForm: PropTypes.bool.isRequired
     }
@@ -127,7 +127,7 @@ class ProjectListing extends Component {
                 title="Error while loading project list"
                 message={fetchError}
             />)
-        } else {
+        } else if (projects != null) {
             const tabHead = (
                     <Table.Row>
                         <Table.HeaderCell className="resource">Name</Table.HeaderCell>

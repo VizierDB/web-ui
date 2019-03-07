@@ -19,15 +19,15 @@
 import React from 'react';
 import createReactClass from 'create-react-class';
 import { PropTypes } from 'prop-types';
-import { Dimmer, Loader } from 'semantic-ui-react';
-import AnnotationObject from '../../../annotation/AnnotationObject';
+import { Dimmer, Icon, Loader } from 'semantic-ui-react';
 import DatasetChart from '../../../plot/DatasetChart';
-import DatasetOutput from './DatasetOutput';
+import DatasetView from '../../../spreadsheet/DatasetView';
 import { ErrorMessage } from '../../../Message';
-import { CellAnnotation } from '../../../../resources/Annotation';
-import { CONTENT_TEXT, OutputText } from '../../../../resources/Notebook';
+import TimestampOutput from './TimestampOutput';
+import { CONTENT_TEXT } from '../../../../resources/Notebook';
 import '../../../../../css/App.css';
 import '../../../../../css/Notebook.css';
+
 
 
 /**
@@ -38,98 +38,81 @@ class CellOutputArea extends React.Component {
     static propTypes = {
         cell: PropTypes.object.isRequired,
         onNavigateDataset: PropTypes.func.isRequired,
-        onShowAnnotations: PropTypes.func.isRequired
+        onOutputSelect: PropTypes.func.isRequired,
+        onFetchAnnotations: PropTypes.func.isRequired,
+        onTextOutputClick: PropTypes.func.isRequired,
+        userSettings: PropTypes.object.isRequired
     };
     /**
-     * Discard a displayed annotation.
+     * Discard a displayed annotation (by clearing the selected cell
+     * annotations).
      */
     handleDiscardAnnotation = () => {
-        const { module, output, onShowAnnotations } = this.props;
-        onShowAnnotations(module, output.content.dataset, -1, -1);
+        this.handleSelectCell(-1, -1);
     }
     /**
-     * Simulate user selecting console output when dismissing an error message
-     * or an ouput resource.
+     * Show console output when user dismisses an error message.
      */
     handleOutputDismiss = () => {
-        const { module, onOutputSelect } = this.props;
-        onOutputSelect(module, CONTENT_TEXT);
+        const { cell, onOutputSelect } = this.props;
+        onOutputSelect(cell.module, CONTENT_TEXT);
     }
     /**
-     * Submit navigate dataset request (should only happen when displaying a
-     * dataset in the output area).
+     * Show spreadsteeh cell annotations when the user clicks on a table cell.
      */
-    handleNavigateDataset = (url) => {
-        const { module, output, onNavigateDataset} = this.props;
-        onNavigateDataset(url, module, output.content.name);
-    }
-    handleSelectCell = (columnId, rowId) => {
-        const { module, output, onShowAnnotations } = this.props;
-        const dataset = output.content.dataset;
-        if (dataset.hasAnnotations(columnId, rowId)) {
-            onShowAnnotations(module, dataset, columnId, rowId);
-        } else {
-            onShowAnnotations(module, dataset, -1, -1);
-        }
+    handleFetchAnnotations = (columnId, rowId) => {
+        const { cell, onFetchAnnotations } = this.props;
+        const { output, module } = cell;
+        const dataset = output.dataset;
+        onFetchAnnotations(module, dataset, columnId, rowId);
     }
     render() {
-        const { cell, onOutputSelect } = this.props;
+        const {
+            cell,
+            onNavigateDataset,
+            onTextOutputClick,
+            userSettings
+        } = this.props;
         const { output } = cell;
         // The output content depends on the state of the output resource
         // handle. First, we distinguish between successful output or error
         // messages
         let outputContent = null;
-        if (output.isError()) {
-            const fetchError = output.content;
+        if (output.isChart()) {
+            outputContent = (
+                <div className='output-content'>
+                    <DatasetChart
+                        identifier={output.name}
+                        dataset={output.dataset}
+                    />
+                </div>
+            );
+        } else if (output.isDataset()) {
+            const dataset = output.dataset;
+            outputContent = (
+                <div className='output-content'>
+                    <DatasetView
+                        dataset={dataset}
+                        onNavigate={onNavigateDataset}
+                        onFetchAnnotations={this.handleFetchAnnotations}
+                        userSettings={userSettings}
+                    />
+                </div>
+            );
+        } else if (output.isError()) {
+            const fetchError = output.error;
             outputContent = <ErrorMessage
                 title={fetchError.title}
                 message={fetchError.message}
                 onDismiss={this.handleOutputDismiss}
             />;
-        } else if (output.isText()) {
-            outputContent = (
-                <pre className='plain-text'>
-                    {output.content.lines.join('\n')}
-                </pre>
-            );
-        } else if (output.isChart()) {
-            outputContent = (
-                <div className='output-content'>
-                    <span className='output-content-header'>
-                        {output.content.name}
-                    </span>
-                    <DatasetChart
-                        identifier={output.content.name}
-                        dataset={output.content.dataset}
-                    />
-                </div>
-            );
-        } else if (output.isDataset()) {
-            const activeDatasetCell = new CellAnnotation(-1, -1);
-            outputContent = (
-                <div className='output-content'>
-                    <span className='output-content-header'>
-                        {output.content.name}
-                    </span>
-                    <AnnotationObject
-                        annotation={activeDatasetCell}
-                        onDiscard={this.handleDiscardAnnotation}
-                    />
-                    <DatasetOutput
-                        activeCell={activeDatasetCell}
-                        dataset={output.content.dataset}
-                        onNavigate={() => (alert('Navigate'))}
-                        onSelectCell={() => (alert("Select"))}
-                    />
-                </div>
-            );
         } else if (output.isHtml()) {
             const Response = createReactClass({
                 render: function() {
                 	return (
                         <div
                             className='output-content-html'
-                            dangerouslySetInnerHTML={{__html: output.content.lines}}
+                            dangerouslySetInnerHTML={{__html: output.lines}}
                         />
                     )
                 }
@@ -137,9 +120,24 @@ class CellOutputArea extends React.Component {
         	outputContent = (
                 <div className='output-content'>
                     <span className='output-content-header'>
-                        {output.content.name}
+                        {output.name}
                     </span>
                     <Response />
+                </div>
+            );
+        } else if (output.isText()) {
+            outputContent = (
+                <pre className='plain-text' onClick={onTextOutputClick}>
+                    {output.lines.join('\n')}
+                </pre>
+            );
+        } else if (output.isTimestamps()) {
+            outputContent = (
+                <div>
+                    <p className='output-info-headline'><Icon color='blue' name='info circle' />Module execution times</p>
+                    <TimestampOutput label='Created at' time={output.createdAt} />
+                    <TimestampOutput label='Started at' time={output.startedAt} />
+                    <TimestampOutput label='Finished at' time={output.finishedAt} />
                 </div>
             );
         }

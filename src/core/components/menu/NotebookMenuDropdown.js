@@ -19,7 +19,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Dropdown } from 'semantic-ui-react';
-import { GRP_COLLAPSE, GRP_HIDE, GRP_SHOW } from '../../../resources/Notebook';
 
 /**
  * Dropdown menu for a notebook. The menu allow the user to reverse the order
@@ -57,24 +56,24 @@ class NotebookMenuDropdown extends React.Component {
                         key='show'
                         icon='eye'
                         text='Show'
-                        disabled={groupMode === GRP_SHOW}
-                        value={GRP_SHOW}
+                        disabled={groupMode === 'GRP_SHOW'}
+                        value={'GRP_SHOW'}
                         onClick={this.handleChangeGrouping}
                     />
                     <Dropdown.Item
                         key='collapse'
                         icon='compress'
                         text='Collapse'
-                        disabled={groupMode === GRP_COLLAPSE}
-                        value={GRP_COLLAPSE}
+                        disabled={groupMode === 'GRP_COLLAPSE'}
+                        value={'GRP_COLLAPSE'}
                         onClick={this.handleChangeGrouping}
                     />
                     <Dropdown.Item
                         key='hide'
                         icon='hide'
                         text='Hide'
-                        disabled={groupMode === GRP_HIDE}
-                        value={GRP_HIDE}
+                        disabled={groupMode === 'GRP_HIDE'}
+                        value={'GRP_HIDE'}
                         onClick={this.handleChangeGrouping}
                     />
                 </Dropdown.Menu>

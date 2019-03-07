@@ -19,7 +19,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {  Grid, Loader, Modal } from 'semantic-ui-react';
-import { redirectTo } from '../../actions/main/App';
 import { showChartView } from '../../actions/chart/Chart';
 import {
     changeGroupMode, reverseOrder, showNotebook
@@ -37,7 +36,7 @@ import { ErrorMessage, NotFoundMessage } from '../../components/Message';
 import DatasetError from '../../components/project/DatasetError';
 import DatasetChart from '../../components/plot/DatasetChart';
 import ModuleError from '../../components/project/ModuleError';
-import MainProjectMenu from '../../components/project/menu/MainProjectMenu';
+import MainProjectMenu from '../../components/menu/MainProjectMenu';
 import ProjectStatusHeader from '../../components/project/ProjectStatusHeader';
 import Notebook from '../notebook/Notebook';
 import Spreadsheet from '../spreadsheet/Spreadsheet';
@@ -188,13 +187,6 @@ class ProjectPage extends Component {
     loadNotebook = () => {
         const { dispatch, workflow } = this.props;
         dispatch(showNotebook(workflow));
-    }
-    /**
-     * Dispatch redirect request.
-     */
-    onRedirect = (url) => {
-        const { dispatch } = this.props;
-        dispatch(redirectTo(url));
     }
     render() {
         const {

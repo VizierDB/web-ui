@@ -19,6 +19,7 @@
 import {
 	MODAL_AUTH, REQUEST_SERVICE, RECEIVE_SERVICE, SERVICE_ERROR, REQUEST_AUTH, RECEIVE_AUTH
 } from '../../actions/main/Service'
+import { ModuleRegistry } from '../../resources/Engine';
 import { HATEOASReferences } from '../../util/HATEOAS'
 
 /**
@@ -44,12 +45,17 @@ export const serviceApi = (state = {}, action) => {
 	          isFetching: true
 	        }
 	    case RECEIVE_SERVICE:
+            console.log(action);
 	        return {
 	          ...state,
 	          isFetching: false,
 	          name: action.name,
 	          properties: action.properties,
-	          envs: action.envs,
+	          engine: {
+                  backend: action.environment.backend,
+                  name: action.environment.name,
+                  packages: new ModuleRegistry().fromJson(action.environment.packages)
+              },
 	          links: new HATEOASReferences(action.links),
 	          refetch: false
 	        }

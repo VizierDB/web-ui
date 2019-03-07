@@ -26,13 +26,30 @@ import WorkflowModuleCell from './cell/WorkflowModuleCell';
  */
 class TestReadOnlyNotebook extends React.Component {
     static propTypes = {
+        activeNotebookCell: PropTypes.string,
         notebook: PropTypes.object.isRequired,
+        onAddFilteredCommand: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
+        onDatasetNavigate: PropTypes.func.isRequired,
+        onFetchAnnotations: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
-        reversed: PropTypes.bool.isRequired
+        onRemoveFilteredCommand: PropTypes.func.isRequired,
+        onSelectNotebookCell: PropTypes.func.isRequired,
+        userSettings: PropTypes.object.isRequired
     }
     render() {
-        const { notebook, onCreateBranch, onOutputSelect, reversed } = this.props;
+        const {
+            activeNotebookCell,
+            notebook,
+            onAddFilteredCommand,
+            onCreateBranch,
+            onDatasetNavigate,
+            onOutputSelect,
+            onFetchAnnotations,
+            onSelectNotebookCell,
+            onRemoveFilteredCommand,
+            userSettings
+        } = this.props;
         // Create a notebook cell for each workflow module
         const notebookCells = [];
         for (let i = 0; i < notebook.cells.length; i++) {
@@ -42,14 +59,21 @@ class TestReadOnlyNotebook extends React.Component {
                     key={cell.id}
                     cell={cell}
                     cellNumber={i+1}
+                    isActiveCell={cell.id === activeNotebookCell}
                     notebook={notebook}
+                    onAddFilteredCommand={onAddFilteredCommand}
                     onCreateBranch={onCreateBranch}
+                    onDatasetNavigate={onDatasetNavigate}
                     onOutputSelect={onOutputSelect}
+                    onFetchAnnotations={onFetchAnnotations}
+                    onRemoveFilteredCommand={onRemoveFilteredCommand}
+                    onSelect={onSelectNotebookCell}
+                    userSettings={userSettings}
                 />
             );
         }
         // Reverse the notebook cells if flag is true
-        if (reversed) {
+        if (userSettings.showNotebookReversed()) {
             notebookCells.reverse();
         }
         return (

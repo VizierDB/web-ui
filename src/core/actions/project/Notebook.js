@@ -16,19 +16,12 @@
  * limitations under the License.
  */
 
-import {
-    projectActionError, projectFetchError, receiveProjectResource,
-    requestProjectAction, updateResource, updateWorkflowResource
-} from './Project';
+import { projectActionError, projectFetchError, requestProjectAction } from './Project';
 import { fetchAuthed, requestAuth } from '../main/Service';
-import {
-    CellAnnotation, NoAnnotation, IsFetching, FetchError, AnnotationList
-} from '../../resources/Annotation';
+import { AnnotationList } from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
-import {
-    Notebook, OutputChart, OutputDataset, OutputError, OutputText, StandardOutput
-} from '../../resources/Notebook';
-import { NotebookResource } from '../../resources/Project';
+import { OutputChart, OutputDataset, OutputError, OutputHidden,
+    OutputTimestamps, StandardOutput } from '../../resources/Notebook';
 import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource } from '../../util/Api';
 import { ErrorObject } from '../../util/Error';
@@ -36,19 +29,22 @@ import { HATEOASReferences, HATEOAS_SELF } from '../../util/HATEOAS';
 import { VIZUAL, VIZUAL_OP } from '../../util/Vizual';
 
 
+/**
+ * Identifier for the supported notebook actions
+ */
 // Change the value of the group mode state
 export const CHANGE_GROUP_MODE = 'CHANGE_GROUP_MODE';
-// Reverse notebook cell order
-export const REVERSE_ORDER = 'REVERSE_ORDER';
-// Signal success in fetching the workflow
+// Signals for fetching workflow modules
 export const RECEIVE_WORKFLOW = 'RECEIVE_WORKFLOW';
 export const REQUEST_WORKFLOW = 'REQUEST_WORKFLOW';
+// set the active notebook cell
+export const SET_ACTIVE_NOTEBOOK_CELL = 'SET_ACTIVE_NOTEBOOK_CELL';
 // Update the notebook object in the global state
-export const UPDATE_NOTEBOOK = 'UPDATE_NOTEBOOK'
+export const UPDATE_NOTEBOOK = 'UPDATE_NOTEBOOK';
 
 
 // -----------------------------------------------------------------------------
-// Fetch
+// Workflows
 // -----------------------------------------------------------------------------
 
 /**
@@ -59,10 +55,11 @@ export const UPDATE_NOTEBOOK = 'UPDATE_NOTEBOOK'
 export const fetchWorkflow = (project, branch, workflowId) => (dispatch, getState) => {
     // Construct workflow url from the API reference set. This set may not be
     // initialized yet!
-    if (getState().serviceApi.links) {
+    const api = getState().serviceApi;
+    if (api.links) {
         let url = getState().serviceApi.links.getNotebookUrl(project.id, branch.id, workflowId);
         // Signal start of fetching project listing
-        dispatch(requestWorkflow());
+        dispatch({ type: REQUEST_WORKFLOW });
         // Fetch the project.
         return fetchAuthed(url)(dispatch)
         .then(function(response) {
@@ -72,9 +69,10 @@ export const fetchWorkflow = (project, branch, workflowId) => (dispatch, getStat
                 //  workflow modules (.modules), and all dataset descriptors
                 // (.datasets). The last two are used to generate the notebook.
                 response.json().then(json => (
-                    dispatch(
-                        receiveWorkflow(new WorkflowHandle(project).fromJson(json))
-                    )
+                    dispatch({
+                        type: RECEIVE_WORKFLOW,
+                        workflow: new WorkflowHandle(api.engine).fromJson(json)
+                    })
                 ));
             } else if(response.status === 401) {
             	// UNAUTHORIZED: re-request auth
@@ -96,14 +94,6 @@ export const fetchWorkflow = (project, branch, workflowId) => (dispatch, getStat
     }
 }
 
-export const receiveWorkflow = (workflow) => ({
-    type: RECEIVE_WORKFLOW,
-    workflow
-})
-
-
-export const requestWorkflow = (workflow) => ({ type: REQUEST_WORKFLOW })
-
 
 /**
  * Siple wrapper for workflow-specific project errors.
@@ -114,25 +104,63 @@ const workflowFetchError = (message, status) => (
 
 
 // -----------------------------------------------------------------------------
-// Display
+// Notebooks
 // -----------------------------------------------------------------------------
 
 /**
- * Change the value of group mode.
+ * Set the identifier of the notebook cell that is active. The cell might be
+ * null if the active cell selection is being cleared.
  */
-export const changeGroupMode = (mode) => ({
-    type: CHANGE_GROUP_MODE,
-    mode
-})
+export const selectNotebookCell = (cell) => {
+    let cellId = null;
+    if (cell != null) {
+        cellId = cell.id;
+    }
+    return {
+        type: SET_ACTIVE_NOTEBOOK_CELL,
+        cellId
+    }
+}
 
 
 /**
- * Reverse ordering of notebook cells.
+ * Set notebook resource in the global state. This action is for example the
+ * result of a change in the output resource that is displyed for a notebook
+ * cell. The notebook update does not reflect a change of state in the web
+ * server.
  */
-export const reverseOrder = () => ({
-    type: REVERSE_ORDER
-})
+const updateNotebook = (notebook) => ({
+    type: UPDATE_NOTEBOOK,
+    notebook
+});
 
+
+// -----------------------------------------------------------------------------
+// Update notebook cells
+// -----------------------------------------------------------------------------
+
+/**
+ * Load annotations for a given dataset cell to be displayed in a notebook cell.
+ * If columnId or rowId are negative a shown annotation is discarded instead.
+ */
+export const fetchAnnotations = (notebook, module, dataset, columnId, rowId) => (dispatch) => {
+    return dispatch(
+        fetchResource(
+            dataset.links.getAnnotations(columnId, rowId),
+            (json) => {
+                const annotations = new AnnotationList(json['annotations'])
+                return setActiveDatasetCell(
+                    notebook,
+                    module
+                );
+            },
+            (message) => {
+                setNotebookCellError(notebook, module, 'annotations fo dataset ' + dataset.name, message)
+            },
+            () => (setActiveDatasetCell(notebook, module))
+        )
+    )
+}
 
 /**
  * Update the cell containing the given module in the notebook to indicate that
@@ -154,6 +182,31 @@ const setNotebookCellError = (notebook, module, resourceType, message) => (dispa
 }
 
 
+/**
+ * Set the annotation object for a given notebook module.
+ */
+const setActiveDatasetCell = (notebook, module, cell) => (dispatch) => {
+    const nb = notebook.setActiveDatasetCell(module.id, cell);
+    return dispatch(updateNotebook(nb));
+}
+
+
+// -----------------------------------------------------------------------------
+// Show notebook cell output
+// -----------------------------------------------------------------------------
+
+/**
+ * Hide output by setting it to an empty text output.
+ */
+export const hideCellOutput = (notebook, module) => (dispatch) => {
+    const out = new OutputHidden();
+    dispatch(updateNotebook(notebook.replaceOutput(module.id, out)))
+};
+
+
+/**
+ * Show the chart with the given name in the notebook cell.
+ */
 export const showCellChart = (notebook, module, name) => (dispatch) => {
     // If the chart was in the module output we can directly dispatch it.
     // Otherwise we need to fetch the resource from the server first.
@@ -165,7 +218,7 @@ export const showCellChart = (notebook, module, name) => (dispatch) => {
     }
     if (isInOutput) {
         const val = module.outputs.stdout[0].value;
-        const out = OutputChart(val.data.name, val.result)
+        const out = new OutputChart(val.data.name, val.result)
         dispatch(updateNotebook(notebook.replaceOutput(module.id, out)));
     } else {
         // Find the chart descriptor in the module
@@ -199,84 +252,31 @@ export const showCellChart = (notebook, module, name) => (dispatch) => {
 
 
 /**
- * Load annotations for a given dataset cell to be displayed in a notebook cell.
- * If columnId or rowId are negative a shown annotation is discarded instead.
+ * Show (a subset of rows for) a given dataset in the output area of a notebook
+ * cell. The data is fetched from the Web API. The url to fetch the dataset is
+ * constructed using the  given offset and limit values.
  */
-export const showCellAnnotations = (notebook, module, dataset, columnId, rowId) => (dispatch) => {
-    if ((columnId < 0) || (rowId < 0)) {
-        return dispatch(setCellAnnotations(notebook, module, new NoAnnotation()));
-    } else {
-        return dispatch(
-            fetchResource(
-                dataset.links.annotations + '?column=' + columnId + '&row=' + rowId,
-                (json) => {
-                    const content = new AnnotationList(json['annotations'])
-                    const annotation = new CellAnnotation(columnId, rowId, content);
-                    return setCellAnnotations(notebook, module, annotation);
-                },
-                (message) => {
-                    const err = new FetchError('Error loading annotations', message);
-                    const annotation = new CellAnnotation(columnId, rowId, err);
-                    return setCellAnnotations(notebook, module, annotation);
-                },
-                () => (setCellAnnotations(notebook, module, new CellAnnotation(columnId, rowId, new IsFetching())))
+export const showCellDataset = (notebook, module, dataset, offset, limit) => (dispatch) => {
+    // Use dataset self reference to create fect URL
+    let url = dataset.links.getDatasetUrl(offset, limit);
+    return dispatch(
+        fetchResource(
+            url,
+            (json) => (updateNotebook(
+                notebook.replaceOutput(
+                    module.id,
+                    new OutputDataset(
+                        new DatasetHandle(
+                            json.id,
+                            dataset.name,
+                            dataset.activeCell
+                        ).fromJson(json)
+            )))),
+            (message) => (
+                setNotebookCellError(notebook, module, 'dataset ' + dataset.name, message)
             )
         )
-    }
-}
-
-
-/**
- * Set the annotation object for a given notebook module.
- */
-const setCellAnnotations = (notebook, module, annotation) => (dispatch) => {
-    dispatch(updateResource(
-            new NotebookResource(
-                notebook.showAnnotations(module.id, annotation)
-            )
-        )
-    );
-}
-
-
-/**
- * Show a dataset in the output area of a notebook cell. The dataset is
- * identified by the name and fetched from the Web API.
- *
- * The url to fetch the dataset is optional. If the user is navigating a dataset
- * that is already being displayed in the output area then the url will be
- * given. Otherwise, we use the self reference in the link collection of the
- * dataset descriptor.
- */
-export const showCellDataset = (notebook, module, name, url) => (dispatch) => {
-    // Find the dataset handle in the module's dataset list
-    let dataset = null;
-    for (let i = 0; i < module.datasets.length; i++) {
-        const ds = module.datasets[i];
-        if (ds.name === name) {
-            dataset = notebook.datasets[ds.id];
-            break;
-        }
-    }
-    if (dataset !== null) {
-        // Use dataset self reference if url is undefined.
-        let fetchUrl = (url != null) ? url : dataset.links.get(HATEOAS_SELF);
-        return dispatch(
-            fetchResource(
-                fetchUrl,
-                (json) => {
-                    const ds = new DatasetHandle(json.id, name).fromJson(json);
-                    const output = OutputDataset(name, ds);
-                    const nb = notebook.replaceOutput(module.id, output);
-                    return updateNotebook(nb);
-                },
-                (message) => (
-                    setNotebookCellError(notebook, module, 'dataset', message)
-                ),
-                () => (setNotebookCellBusy(notebook, module))
-            )
-        )
-    }
+    )
 }
 
 
@@ -286,51 +286,20 @@ export const showCellDataset = (notebook, module, name, url) => (dispatch) => {
  * with the cell.
  */
 export const showCellStdout = (notebook, module) => (dispatch) => {
-    console.log(module);
     const out = StandardOutput(module);
     dispatch(updateNotebook(notebook.replaceOutput(module.id, out)))
 };
 
 
 /**
- * Load notebook information for the given workflow. Set the result as the
- * content of the project page.
- *
- * Parameters:
- *
- * workflow: WorkflowHandle
- *
+ * Change the output of a notebook cell to show the timestamps for the different
+ * stages of cell execution.
  */
-export const showNotebook = (workflow) => (dispatch) => {
-    dispatch(
-        fetchResource(
-            workflow.links.modules,
-            (json) => (dispatch) => {
-                return dispatch(
-                    receiveProjectResource(
-                        new NotebookResource(new Notebook().fromJson(json))
-                    )
-                );
-            },
-            (message) => (
-                projectActionError('Error loading notebook', message)
-            ),
-            requestProjectAction
-        )
-    )
-}
-
-/**
- * Set notebook resource in the global state. This action is for example the
- * result of a change in the output resource that is displyed for a notebook
- * cell. The notebook update does not reflect a change of state in the web
- * server.
- */
-const updateNotebook = (notebook) => ({
-    type: UPDATE_NOTEBOOK,
-    notebook
-});
-
+export const showCellTimestamps = (notebook, module) => (dispatch) => {
+    const { createdAt, startedAt, finishedAt } = module.timestamps;
+    const out = new OutputTimestamps(createdAt, startedAt, finishedAt);
+    dispatch(updateNotebook(notebook.replaceOutput(module.id, out)))
+};
 
 
 // -----------------------------------------------------------------------------

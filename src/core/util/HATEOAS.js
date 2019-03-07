@@ -31,6 +31,10 @@ export const HATEOAS_USER_AUTH = 'user.auth';
 // Branch
 export const HATEOAS_BRANCH_UPDATE_PROPERTY = 'branch.update';
 
+// Dataset
+export const HATEOAS_DATASET_DOWNLOAD = 'dataset.download';
+export const HATEOAS_DATASET_GET_ANNOTATIONS = 'annotations.get';
+
 // Projects
 export const HATEOAS_PROJECTS_CREATE = 'project.create';
 export const HATEOAS_PROJECTS_DELETE = 'project.delete';
@@ -65,6 +69,24 @@ export class HATEOASReferences {
         } else {
             return null;
         }
+    }
+    /**
+     * Get annotations for a dataset cell identified by the column and row
+     * identifier.
+     */
+    getAnnotations(columnId, rowId) {
+        let url = this.get(HATEOAS_DATASET_GET_ANNOTATIONS);
+        url += '?column=' + columnId + '&row=' + rowId;
+        return url;
+    }
+    /**
+     * Get the dataset fetch URL for a given range of rows. This method
+     * it is called on the set of URL's returned for a dataset descriptor
+     */
+    getDatasetUrl(offset, limit) {
+        let url = this.get(HATEOAS_SELF);
+        url += '?offset=' + offset + '&limit=' + limit;
+        return url;
     }
     /**
      * Get the Url for a workflow with the given identifier.

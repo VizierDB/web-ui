@@ -79,14 +79,14 @@ export class WorkflowDescriptor {
  * Handle for curation workflow. Contains information about the workflow itself
  * and the resources (i.e., datasets and charts) in the workflow state.
  *
- * For now the workflow handle also contains a read)nly flag to indicate whether
+ * For now the workflow handle also contains a read only flag to indicate whether
  * the workflow can be modified by the user via the web app. This shold be
  * replaced in the future when proper authentication and access control is
  * implemented.
  */
 export class WorkflowHandle {
-    constructor(project) {
-        this.project = project;
+    constructor(engine) {
+        this.engine = engine;
     }
     /**
      * Initialize the workflow handle from a Json object containing a
@@ -117,6 +117,6 @@ export class WorkflowHandle {
      * Get the specification for a given module command.
      */
     getCommandSpec(cmd) {
-        return this.project.getCommandSpec(cmd.packageId, cmd.commandId);
+        return this.engine.packages.getCommandSpec(cmd.packageId, cmd.commandId);
     }
 }

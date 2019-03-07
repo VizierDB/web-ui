@@ -21,7 +21,7 @@ import PropTypes from 'prop-types'
 import GridCell from '../../spreadsheet/grid/GridCell';
 import HeaderCell from '../../spreadsheet/grid/HeaderCell';
 import RowIndexCell from '../../spreadsheet/grid/RowIndexCell';
-import SpreadsheetNavbar from '../../spreadsheet/SpreadsheetNavbar'
+import SpreadsheetScrollbar from '../../spreadsheet/SpreadsheetScrollbar'
 import '../../../../css/Notebook.css'
 import '../../../../css/Spreadsheet.css'
 
@@ -84,9 +84,8 @@ class DatasetOutput extends React.Component {
                     <tbody>{rows}</tbody>
                 </table>
                 <div className='navbar-container'>
-                    <SpreadsheetNavbar
+                    <SpreadsheetScrollbar
                         dataset={dataset}
-                        disabled={false}
                         onNavigate={onNavigate}
                     />
                 </div>

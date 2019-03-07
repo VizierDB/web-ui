@@ -18,10 +18,10 @@
 
 import React from 'react';
 import { PropTypes } from 'prop-types';
-import { Button, Dropdown, Icon, Menu } from 'semantic-ui-react';
 import CellCommandText from './CellCommandText';
 import CellMenu from './CellMenu';
 import CellOutputArea from './output/CellOutputArea';
+import { TextButton } from '../../../components/Button'
 import '../../../../css/Notebook.css';
 
 
@@ -34,32 +34,93 @@ class WorkflowModuleCell extends React.Component {
     static propTypes = {
         cell: PropTypes.object.isRequired,
         cellNumber: PropTypes.number.isRequired,
+        isActiveCell: PropTypes.bool.isRequired,
         notebook: PropTypes.object.isRequired,
+        onAddFilteredCommand: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
-        onOutputSelect: PropTypes.func.isRequired
+        onDatasetNavigate: PropTypes.func.isRequired,
+        onOutputSelect: PropTypes.func.isRequired,
+        onFetchAnnotations: PropTypes.func.isRequired,
+        onRemoveFilteredCommand: PropTypes.func.isRequired,
+        onSelect: PropTypes.func.isRequired,
+        userSettings: PropTypes.object.isRequired
+    }
+    /**
+     * Add the command that is associated with this notebook cell module
+     * to the list of hidden commands.
+     */
+    handleAddFilteredCommand = () => {
+        const { cell, onAddFilteredCommand } = this.props;
+        onAddFilteredCommand(cell.commandSpec);
     }
     /**
      * Event handler when the user clicks the menu item to create a new branch
      * up until the module in this cell.
      */
     handleCreateBranch = () => {
-        const { cell, onCreateBranch, onOutputSelect } = this.props;
+        const { cell, onCreateBranch } = this.props;
         onCreateBranch(cell.module);
     }
     handleEditCell = () => {
         alert('Edit')
     }
+    /**
+     * Scroll to the given positions in the given dataset that is being
+     * displayed in the output area of the cell.
+     */
+    handleDatasetNavigate = (dataset, offset, limit) => {
+        const { cell, onDatasetNavigate } = this.props;
+        onDatasetNavigate(cell.module, dataset, offset, limit);
+    }
+    /**
+     * Remove the command that is associated with this notebook cell module
+     * from the list of hidden commands.
+     */
+    handleRemoveFilteredCommand = () => {
+        const { cell, onRemoveFilteredCommand } = this.props;
+        onRemoveFilteredCommand(cell.commandSpec);
+    }
+    /**
+     * Set this cell as the active notebook cell. Only if the cell is inactive
+     * at the moment.
+     */
+    handleSelect = () => {
+        const { cell, isActiveCell, onSelect } = this.props;
+        if (!isActiveCell) {
+            onSelect(cell);
+        }
+    }
     render() {
-        const { cell, cellNumber, notebook, onOutputSelect } = this.props;
-        const outputArea = (
-                <CellOutputArea
-                    cell={cell}
-                    onNavigateDataset={() => (alert('Navigate'))}
-                    onOutputSelect={onOutputSelect}
-                    onShowAnnotations={() => (alert('Annotations'))}
-
-                />
-            );
+        const {
+            cell,
+            cellNumber,
+            isActiveCell,
+            notebook,
+            onOutputSelect,
+            onFetchAnnotations,
+            userSettings
+        } = this.props;
+        // Check if the command that is associated with the cell is filtered
+        // by the user settings. If the command is filtered we either return
+        // a collapsed cell or null depending on the hide filtered cells
+        // property.
+        const cmdSpec = cell.commandSpec;
+        if (userSettings.isFiltered(cmdSpec)) {
+            if (!userSettings.hideFilteredCommands()) {
+                return (
+                    <div className='horizontal-divider'>
+                        <TextButton
+                            css='code-text'
+                            text={cmdSpec.name}
+                            title='Show cells of this type'
+                            onClick={this.handleRemoveFilteredCommand}
+                        />
+                    </div>
+                );
+            } else {
+                return null;
+            }
+        }
         // The default action when the user double clicks on the cell command
         // depends on whether the notebook is read-only or not. For read-only
         // notebooks 'Create branch' is the default option. Otherwise it is
@@ -70,35 +131,46 @@ class WorkflowModuleCell extends React.Component {
         } else {
             onDefaultAction = this.handleEditCell;
         }
+        // If this is the active cell the cell menu is shown and the CSS style
+        // is changed.
+        let css = 'cell';
+        let cellMenu = null;
+        if (isActiveCell) {
+            css += ' active-cell';
+            cellMenu = (
+                <CellMenu
+                    cell={cell}
+                    cellNumber={cellNumber}
+                    notebook={notebook}
+                    onAddFilteredCommand={this.handleAddFilteredCommand}
+                    onCreateBranch={this.handleCreateBranch}
+                    onOutputSelect={onOutputSelect}
+                />
+            );
+        } else {
+            css += ' inactive-cell';
+        }
         return (
-            <table className='cell'><tbody>
+            <table className={css}><tbody>
                 <tr>
-                    <td className='cell-index'>
-                        <span className='cell-index'>[{cellNumber}]</span>
+                    <td className='cell-index' onClick={this.handleSelect}>
+                        <p className='cell-index'>[{cellNumber}]</p>
+                        { cellMenu }
                     </td>
-                    <td>
-                        <div className='cell-area'>
-                            <table className='cell-area'><tbody>
-                                <tr>
-                                    <td className='cell-menu'>
-                                        <CellMenu
-                                            cell={cell}
-                                            cellNumber={cellNumber}
-                                            notebook={notebook}
-                                            onCreateBranch={this.handleCreateBranch}
-                                            onOutputSelect={onOutputSelect}
-                                        />
-                                    </td>
-                                    <td className='cell-cmd'>
-                                        <CellCommandText
-                                            cell={cell}
-                                            onDoubleClick={onDefaultAction}
-                                        />
-                                    </td>
-                                </tr>
-                            </tbody></table>
-                            { outputArea }
-                        </div>
+                    <td className='cell-area'>
+                        <CellCommandText
+                            cell={cell}
+                            onClick={this.handleSelect}
+                            onDoubleClick={onDefaultAction}
+                        />
+                        <CellOutputArea
+                            cell={cell}
+                            onNavigateDataset={this.handleDatasetNavigate}
+                            onOutputSelect={onOutputSelect}
+                            onFetchAnnotations={onFetchAnnotations}
+                            onTextOutputClick={this.handleSelect}
+                            userSettings={userSettings}
+                        />
                     </td>
                 </tr>
             </tbody></table>

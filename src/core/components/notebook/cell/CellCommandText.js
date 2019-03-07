@@ -28,11 +28,12 @@ import '../../../../css/Notebook.css';
 class CellCommandText extends React.Component {
     static propTypes = {
         cell: PropTypes.object.isRequired,
-        onDoubleClick: PropTypes.func
+        onDoubleClick: PropTypes.func,
+        onClick: PropTypes.func
     }
     render() {
-        const { cell, onDoubleClick } = this.props;
-        const { command, text } = cell.module;
+        const { cell, onClick, onDoubleClick } = this.props;
+        const text = cell.module.text;
         // The stylesheet class name depends on the state of the module. Append
         // error-state in case of an error or if the module was canceled.
         let css = 'cell-cmd-text';
@@ -55,7 +56,7 @@ class CellCommandText extends React.Component {
         } else {
             content = text;
         }
-        return (<pre className={css} onDoubleClick={onDoubleClick}>{content}</pre>);
+        return (<pre className={css} onClick={onClick} onDoubleClick={onDoubleClick}>{content}</pre>);
     }
 }
 

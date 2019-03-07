@@ -50,14 +50,14 @@ export class DatasetDescriptor {
  * optional.
  */
 export class DatasetHandle {
-    constructor(id, name, columns, rows, offset, links, annotations) {
+    constructor(id, name, columns, rows, rowCount, offset, links) {
         this.id = id;
         this.name = name;
         this.columns = columns;
         this.rows = rows;
+        this.rowCount = rowCount;
         this.offset = offset;
         this.links = links;
-        this.annotatedCells = annotations;
     }
     /**
      * Initialize the dataset handle from a Json object returned by the Web API.
@@ -68,23 +68,13 @@ export class DatasetHandle {
         this.id = json.id;
         this.columns = json.columns;
         this.rows = json.rows;
+        this.rowCount = json.rowCount;
         this.offset = json.offset;
         this.links = new HATEOASReferences(json.links);
-        if (json.annotatedCells) {
-            this.annotatedCells = json.annotatedCells;
-        } else {
-            this.annotatedCells = [];
-        }
         return this;
     }
-    /**
-     * Test if there exist annotations for a given dataset cell
-     */
     hasAnnotations(columnId, rowId) {
-        const cell = this.annotatedCells.find(
-            (anno) => ((anno.column === columnId) && (anno.row === rowId))
-        );
-        return (cell != null);
+        return false;
     }
     /**
      * Get the dataset row at with the given index position. Note that the

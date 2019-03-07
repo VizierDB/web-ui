@@ -16,15 +16,10 @@
  * limitations under the License.
  */
 
-import { Notebook } from '../../resources/Notebook';
-import { NotebookResource, ProjectHandle } from '../../resources/Project';
-import { WorkflowHandle } from '../../resources/Workflow';
+import { ProjectHandle } from '../../resources/Project';
 import { getProperty, updateResourceProperty } from '../../util/Api';
-import { valueOrDefault } from '../../util/App';
 import { ErrorObject } from '../../util/Error';
-import {
-    HATEOAS_PROJECTS_LIST, HATEOAS_PROJECT_UPDATE_PROPERTY
-} from '../../util/HATEOAS';
+import { HATEOAS_PROJECT_UPDATE_PROPERTY } from '../../util/HATEOAS';
 import { fetchAuthed, requestAuth } from '../main/Service';
 
 // Actions for fetching project information from Web API.

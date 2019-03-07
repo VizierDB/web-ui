@@ -99,7 +99,10 @@ class CellOutputArea extends React.Component {
         // messages
         let outputContent = null;
         if (cell.outputs.stderr.length > 0) {
-            const lines = OutputText(cell.outputs.stdout.concat(cell.outputs.stderr)).content.lines;
+            // In case of error all the text output that has been written to
+            // either standarc ouput or standard error is being shown.
+            const allOutput = cell.outputs.stdout.concat(cell.outputs.stderr);
+            const lines = new OutputText(allOutput).lines;
             outputContent = <TextOutput isError={true} lines={lines} />;
         } else {
             if (output.isError()) {

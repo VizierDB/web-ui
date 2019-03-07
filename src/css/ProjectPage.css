@@ -9,23 +9,6 @@ div.project-menu-bar {
     padding: 2px 0px;
 }
 
-div.project-status {
-    color: #3b4151;
-    font-size: 0.8em;
-    min-height: 2.85714286em;
-    padding-top: 0.5em;
-    text-align: right;
-}
-
-span.project-name {
-    font-weight:bold;
-}
-
-span.project-status-dropdown {
-    padding-left: 10px;
-    padding-right: 10px;
-}
-
 div.not-found {
     margin: 50px 100px;
 }

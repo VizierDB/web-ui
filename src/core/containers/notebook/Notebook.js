@@ -20,19 +20,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {
-    changeGroupMode, deleteNotebookCell, insertNotebookCell,
-    replaceNotebookCell, showCellChart, showCellAnnotations, showCellDataset,
-    showCellStdout, updateNotebookCellWithUpload
-} from '../../actions/notebook/Notebook';
+    deleteNotebookCell, insertNotebookCell, replaceNotebookCell, showCellChart,
+    showCellAnnotations, showCellDataset, showCellStdout,
+    updateNotebookCellWithUpload } from '../../actions/notebook/Notebook';
 import { createBranch } from '../../actions/project/Branch';
 import EditableNotebook from '../../components/notebook/EditableNotebook';
 import ReadOnlyNotebook from '../../components/notebook/ReadOnlyNotebook';
 import { LargeMessageButton } from '../../components/Button';
 import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
-import {
-    CONTENT_CHART, CONTENT_DATASET, CONTENT_TEXT,
-    GRP_COLLAPSE, GRP_HIDE, GRP_SHOW
-} from '../../resources/Notebook';
+import { CONTENT_CHART, CONTENT_DATASET, CONTENT_TEXT } from '../../resources/Notebook';
 import { isNotEmptyString } from '../../util/App';
 import '../../../css/Notebook.css';
 
@@ -103,17 +99,6 @@ class Notebook extends React.Component {
     handleShowAnnotations = (module, dataset, columnId, rowId) => {
         const { dispatch, notebook } = this.props;
         dispatch(showCellAnnotations(notebook, module, dataset, columnId, rowId));
-    }
-    /**
-    * Change the state of group VizUAL commands mode.
-    */
-    handleChangeGrouping = () => {
-        const { dispatch, groupMode } = this.props;
-        if (groupMode === GRP_HIDE) {
-            dispatch(changeGroupMode(GRP_COLLAPSE));
-        } else {
-            dispatch(changeGroupMode(GRP_SHOW));
-        }
     }
     /**
      * Insert a module into the current workflow before the given module. If

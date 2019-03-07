@@ -25,11 +25,12 @@ import DatasetMenuDropdown from './DatasetMenuDropdown';
 import DatasetErrorMenuDropdown from './DatasetErrorMenuDropdown';
 import NotebookMenuDropdown from './NotebookMenuDropdown';
 import ProjectMenuDropdown from './ProjectMenuDropdown';
-import DeleteResourceModal from '../../modals/DeleteResourceModal';
-import EditResourceNameModal from '../../modals/EditResourceNameModal';
-import { isNotEmptyString, notebookPageUrl } from '../../../util/App';
-import '../../../../css/ResourceListing.css';
-import '../../../../css/ProjectPage.css';
+import DeleteResourceModal from '../modals/DeleteResourceModal';
+import EditResourceNameModal from '../modals/EditResourceNameModal';
+import SettingsMenuDropdown from './SettingsMenuDropdown';
+import { isNotEmptyString, notebookPageUrl } from '../../util/App';
+import '../../../css/ResourceListing.css';
+import '../../../css/ProjectPage.css';
 
 /**
  * Component that allows to select the current branch. In addition to switching
@@ -48,20 +49,22 @@ const MODAL_EDIT_PROJECT_NAME = 'MODAL_EDIT_PROJECT_NAME';
 class MainProjectMenu extends React.Component {
     static propTypes = {
         branch: PropTypes.object,
-        groupMode: PropTypes.number.isRequired,
         notebook: PropTypes.object,
-        onChangeGrouping: PropTypes.func.isRequired,
         onDeleteBranch: PropTypes.func.isRequired,
         onEditBranch: PropTypes.func.isRequired,
         onEditProject: PropTypes.func.isRequired,
+        onHideCells: PropTypes.func.isRequired,
         onReverse: PropTypes.func.isRequired,
         onShowChart: PropTypes.func.isRequired,
         onShowDataset: PropTypes.func.isRequired,
         onShowHistory: PropTypes.func.isRequired,
         onShowNotebook: PropTypes.func.isRequired,
+        onShowProject: PropTypes.func.isRequired,
         onSwitchBranch: PropTypes.func.isRequired,
         project: PropTypes.object.isRequired,
-        resource: PropTypes.object.isRequired
+        projectList: PropTypes.array,
+        resource: PropTypes.object.isRequired,
+        userSettings: PropTypes.object.isRequired
     }
     /**
      * Initialize internal state to keep track of any modal that may be shown.
@@ -89,18 +92,20 @@ class MainProjectMenu extends React.Component {
     render() {
         const {
             branch,
-            groupMode,
             notebook,
-            onChangeGrouping,
+            onHideCells,
             onReverse,
             onShowChart,
             onShowDataset,
             onShowDatasetError,
             onShowHistory,
             onShowNotebook,
+            onShowProject,
             onSwitchBranch,
             project,
-            resource
+            projectList,
+            resource,
+            userSettings
         } = this.props;
         // The basic layout contains a menu bar and an optional modal or error
         // message.
@@ -118,8 +123,10 @@ class MainProjectMenu extends React.Component {
         menuItems.push(
             <ProjectMenuDropdown
                 key='project'
-                name={project.name}
                 onEdit={this.showEditProjectNameModal}
+                onSelect={onShowProject}
+                project={project}
+                projectList={projectList}
             />
         );
         let isLiveEnabled = false;
@@ -188,6 +195,14 @@ class MainProjectMenu extends React.Component {
                     />);
             }*/
         }
+        // Menu options to modify global user settings
+        menuItems.push(
+            <SettingsMenuDropdown
+                key='settings'
+                onHideCells={onHideCells}
+                onReverse={onReverse}
+                userSettings={userSettings}
+            />);
         let menuBar = (
             <Menu secondary>
                 { menuItems }

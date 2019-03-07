@@ -16,12 +16,46 @@
  * limitations under the License.
  */
 
-export const REDIRECT_TO = 'REDIRECT_TO'
+// Add a command to the list of hidden commands
+export const ADD_FILTERED_COMMAND = 'ADD_FILTERED_COMMAND';
+// Toggle the value of the hide cells property
+export const HIDE_CELLS= 'HIDE_CELLS';
+// Remove a command from list of filtered commands
+export const REMOVE_FILTERED_COMMAND = 'REMOVE_FILTERED_COMMAND';
+// Reverse notebook cell order
+export const REVERSE_ORDER = 'REVERSE_ORDER';
+
 
 /**
- * Redirect to a given internal resource
+ * Add the given command to the list of filtered commands in the user
+ * settings.
  */
-export const redirectTo = (url) => ({
-  type: REDIRECT_TO,
-  url
+export const addFilteredCommand = (command) => ({
+    type: ADD_FILTERED_COMMAND,
+    command
 })
+
+
+/**
+ * Toggle the value of the hide filtered cells property in the user settings.
+ */
+export const toggleHideCells = () => ({
+    type: HIDE_CELLS
+});
+
+
+/**
+ * Remove the given command from the list of filtered commands in the user
+ * settings.
+ */
+export const removeFilteredCommand = (command) => ({
+    type: REMOVE_FILTERED_COMMAND,
+    command
+})
+
+/**
+ * Reverse ordering of notebook cells.
+ */
+export const reverseOrder = () => ({
+    type: REVERSE_ORDER
+});
