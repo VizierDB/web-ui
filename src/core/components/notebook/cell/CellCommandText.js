@@ -18,7 +18,9 @@
 
 import React from 'react';
 import { PropTypes } from 'prop-types';
-import {Controlled as CodeMirror} from 'react-codemirror2'
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { githubGist } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+
 import '../../../../css/Notebook.css';
 
 
@@ -42,16 +44,20 @@ class CellCommandText extends React.Component {
         }
         let content = null;
         if (cell.isCode()) {
-            content = (
-                <CodeMirror
-                    value={text.trim()}
-                    options={{
-                        lineNumbers: false,
-                        mode: cell.getCodeLanguage(),
-                        indentUnit: 4
-                    }}
-                    readOnly={true}
-                />
+            // Use Syntax highlighter:
+            // https://github.com/conorhastings/react-syntax-highlighter
+            // CodeMirror did not work here for some reason.
+            const style = {marginTop: '-5px'};
+            return (
+                <SyntaxHighlighter
+                    customStyle={style}
+                    language={cell.getCodeLanguage()}
+                    onClick={onClick}
+                    onDoubleClick={onDoubleClick}
+                    style={githubGist}
+                >
+                    {text}
+                </SyntaxHighlighter>
             );
         } else {
             content = text;

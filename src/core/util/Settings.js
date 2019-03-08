@@ -21,7 +21,7 @@
 // notebook cell output area.
 const DEFAULT_CELL_DATASET_ROW_LIMIT = 10;
 // By now the commands that are filtered by default are hard-coded.
-const DEFAULT_FILTERED_COMMANDS = {
+export const DEFAULT_FILTERED_COMMANDS = {
     vizual: [
         'deleteColumn',
         'deleteRow',
@@ -147,6 +147,21 @@ export class UserSettings {
         }
         return new UserSettings(
             commandList,
+            this.cellRowLimitValue,
+            this.reversedOrder,
+            this.hideCommands
+        );
+    }
+    /**
+     * Set the object that contains the filtered module identifier. Expects an
+     * object where the properties are package identifier and the values are
+     * lists of command identifier. Returns a modified user settings object.
+     */
+    setFilter(filter) {
+        // Eesure that the filter is not null
+        const filteredCommands = (filter != null) ? filter : {};
+        return new UserSettings(
+            filteredCommands,
             this.cellRowLimitValue,
             this.reversedOrder,
             this.hideCommands

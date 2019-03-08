@@ -32,36 +32,30 @@ import '../../css/Connection.css'
  */
 export class ConnectionInfo extends React.Component {
     static propTypes = {
-        api: PropTypes.object
+        links: PropTypes.object.isRequired,
+        name: PropTypes.string.isRequired
     }
     render() {
-        const { api } = this.props;
-        if (api != null) {
-            const { name, links } = api;
-            if (links != null) {
-                const url = links.get(HATEOAS_SELF);
-                return (
-                    <div className='connection-info'>
-                        <pre className='connection-info'>
-                            {'[ Connected to '}{name}{' : '}
-                            <a className="connection-link" href={url}>
-                                {url}
-                            </a>
-                            <span className="docu-icon">
-                                <a
-                                    href={links.get(HATEOAS_API_DOC)}
-                                    className='docu-icon'
-                                    target='_blank'
-                                >
-                                    <i className='fa fa-book'/>
-                                </a>
-                            </span>
-                            {' ]'}
-                        </pre>
-                    </div>
-                );
-            }
-        }
-        return null;
+        const { name, links } = this.props;
+        const url = links.get(HATEOAS_SELF);
+        return (
+            <div className='connection-info'>
+                <pre className='connection-info'>
+                    {'Connected to '}{name}{' @ '}
+                    <a className="connection-link" target='_blank' href={url}>
+                        {url}
+                    </a>
+                    <span className="docu-icon">
+                        <a
+                            href={links.get(HATEOAS_API_DOC)}
+                            className='docu-icon'
+                            target='_blank'
+                        >
+                            <i className='fa fa-book'/>
+                        </a>
+                    </span>
+                </pre>
+            </div>
+        );
     }
 }

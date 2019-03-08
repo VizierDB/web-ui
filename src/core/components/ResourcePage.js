@@ -20,35 +20,32 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
 import {  Grid, Loader, Modal } from 'semantic-ui-react';
-import { showChartView } from '../../actions/chart/Chart';
-import { reverseOrder, toggleHideCells } from '../../actions/main/App';
-import { updateBranch } from '../../actions/project/Branch';
-import { dismissProjectActionError, updateProject } from '../../actions/project/Project';
-import { showSpreadsheet, showDatasetError, repairDatasetError } from '../../actions/project/Spreadsheet';
-import { ConnectionInfo } from '../Api'
-import { ErrorMessage } from '../Message';
-import MainProjectMenu from '../menu/MainProjectMenu';
-import { branchPageUrl, notebookPageUrl, valueOrDefault } from '../../util/App';
-
-import '../../../css/App.css';
-import '../../../css/ProjectPage.css';
-import '../../../css/BranchHistory.css';
-import '../../../css/Chart.css';
+import { showChartView } from '../actions/chart/Chart';
+import { reverseOrder, setModuleFilter, toggleHideCells } from '../actions/main/App';
+import { updateBranch } from '../actions/project/Branch';
+import { dismissProjectActionError, updateProject } from '../actions/project/Project';
+import { createProject, deleteProject } from '../actions/project/ProjectListing';
+import { showSpreadsheet, showDatasetError, repairDatasetError } from '../actions/project/Spreadsheet';
+import AppMenu from './menu/AppMenu';
+import { ErrorMessage } from './Message';
+import { baseHref, branchPageUrl, notebookPageUrl, valueOrDefault } from '../util/App';
+import { HATEOAS_PROJECTS_CREATE }  from '../util/HATEOAS';
 
 
-class ProjectResourcePage extends Component {
+class ResourcePage extends Component {
     static propTypes = {
         actionError: PropTypes.object,
-        branch: PropTypes.object.isRequired,
+        branch: PropTypes.object,
         content: PropTypes.object.isRequired,
         contentCss: PropTypes.string.isRequired,
         dispatch: PropTypes.func.isRequired,
-        notebook: PropTypes.object,
+        history: PropTypes.object.isRequired,
         isActive: PropTypes.bool.isRequired,
-        onDeleteBranch: PropTypes.func.isRequired,
-        onShowNotebook: PropTypes.func.isRequired,
-        onSwitchBranch: PropTypes.func.isRequired,
-        project: PropTypes.object.isRequired,
+        notebook: PropTypes.object,
+        onDeleteBranch: PropTypes.func,
+        onShowNotebook: PropTypes.func,
+        onSwitchBranch: PropTypes.func,
+        project: PropTypes.object,
         projectList: PropTypes.array,
         resource: PropTypes.object.isRequired,
         serviceApi: PropTypes.object.isRequired,
@@ -60,6 +57,34 @@ class ProjectResourcePage extends Component {
     dismissResourceError = () => {
         const { dispatch } = this.props;
         dispatch(dismissProjectActionError(null));
+    }
+    handleCreateProject = (name) => {
+        const { dispatch, history, serviceApi } = this.props;
+        const url = serviceApi.links.get(HATEOAS_PROJECTS_CREATE);
+        dispatch(createProject(url, name, history));
+    }
+    /**
+     * Handle the deletion of the given project and switch to the home page.
+     */
+    handleDeleteProject = (project) => {
+        const { dispatch, history } = this.props;
+        dispatch(deleteProject(project))
+        history.push(baseHref)
+    }
+    /**
+     * Switch to the main page when the user presses the home button in the
+     * application menu.
+     */
+    handleGoHome = () => {
+        this.props.history.push(baseHref);
+    }
+    /**
+     * Set the object that contains the filtered module identifier. Expects an
+     * object where the properties are package identifier and the values are
+     * lists of command identifier.
+     */
+    handleSetFilter = (filter) => {
+        this.props.dispatch(setModuleFilter(filter));
     }
     /**
      * Show branch history page.
@@ -144,12 +169,15 @@ class ProjectResourcePage extends Component {
             project,
             projectList,
             resource,
-            serviceApi,
             userSettings
         } = this.props
 
         // Set window title to contain project name
-        document.title = 'Vizier DB - ' + valueOrDefault(project.name, 'undefined');
+        if (project != null) {
+            document.title = 'Vizier DB - ' + valueOrDefault(project.name, 'undefined');
+        } else {
+            document.title = 'Vizier DB - Projects';
+        }
         // A resource error may be present independently of the project
         // resource, i.e., due to resource fetch error (-> no resource) or
         // resource update error (-> we have a resource)
@@ -177,14 +205,18 @@ class ProjectResourcePage extends Component {
                 <Grid>
                     <Grid.Row>
                         <Grid.Column className='project-menu-bar'>
-                        <MainProjectMenu
+                        <AppMenu
                             branch={branch}
                             notebook={notebook}
+                            onCreateProject={this.handleCreateProject}
                             onDeleteBranch={onDeleteBranch}
+                            onDeleteProject={this.handleDeleteProject}
                             onEditBranch={this.submitEditBranch}
                             onEditProject={this.submitEditProject}
+                            onGoHome={this.handleGoHome}
                             onHideCells={this.handleToggleHideCells}
                             onReverse={this.handleToggleNotebookReverse}
+                            onSetFilter={this.handleSetFilter}
                             onShowChart={this.loadChartView}
                             onShowDataset={this.loadDataset}
                             onShowDatasetError={this.loadDatasetError}
@@ -202,7 +234,6 @@ class ProjectResourcePage extends Component {
                 </Grid>
                 <div className={'page-content ' + contentCss}>
                     { pageContent }
-                    <ConnectionInfo api={serviceApi}/>
                 </div>
             </div>
         );
@@ -223,4 +254,4 @@ class ProjectResourcePage extends Component {
     }
 }
 
-export default withRouter(ProjectResourcePage);
+export default withRouter(ResourcePage);

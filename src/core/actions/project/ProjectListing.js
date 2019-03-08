@@ -16,10 +16,11 @@
  * limitations under the License.
  */
 
-import { createResource, deleteResource } from '../../util/Api'
+import { NO_OP } from '../main/App';
 import { fetchAuthed, requestAuth } from '../main/Service';
 import { ProjectDescriptor } from '../../resources/Project';
 import { HATEOASReferences, HATEOAS_PROJECTS_DELETE, HATEOAS_PROJECTS_LIST } from '../../util/HATEOAS';
+import { createResource, deleteResource } from '../../util/Api'
 import { notebookPageUrl } from '../../util/App';
 import { sortByName } from '../../util/Sort';
 
@@ -33,7 +34,6 @@ export const RECEIVE_PROJECTS = 'RECEIVE_PROJECTS'
 export const SET_PROJECT_CREATE_ERROR = 'SET_PROJECT_CREATE_ERROR'
 export const SET_PROJECT_DELETE_ERROR = 'SET_PROJECT_DELETE_ERROR'
 export const SET_PROJECTS_FETCH_ERROR = 'SET_PROJECTS_FETCH_ERROR'
-export const TOGGLE_SHOW_PROJECT_FORM = 'TOGGLE_SHOW_PROJECT_FORM'
 
 
 
@@ -50,12 +50,17 @@ export const clearProjectActionError = () => ({
  * Create a new project.
  */
 export const createProject = (url, name, history) => (dispatch) =>  {
+    // Trim project name. If empty set to default value.
+    let projectName = name.trim();
+    if (projectName === '') {
+        projectName = 'New Project';
+    }
     // Signal start of create project action
     dispatch(requestProjects('Create Project ...'))
     // Set request body
     const data = {properties: []}
     if (name.trim() !== '') {
-        data.properties.push({key: 'name', value: name.trim()})
+        data.properties.push({key: 'name', value: projectName})
     }
     // Dispatch create resource request
     dispatch(
@@ -65,9 +70,11 @@ export const createProject = (url, name, history) => (dispatch) =>  {
             (json) => {
                 dispatch(fetchProjects());
                 history.push(notebookPageUrl(json.id, json.defaultBranch));
+                // Avoid action undefined error
+                return ({type: NO_OP});
             },
             projectCreateError
-    ))
+    ));
 }
 
 
@@ -169,15 +176,5 @@ const receiveProjects = (json) => {
         type: RECEIVE_PROJECTS,
         projects: projects,
         links: new HATEOASReferences(json.links)
-    }
+    };
 }
-
-
-/**
- * Toggle visibility of the create project form (showForm flag).
- */
-
-export const toggleShowProjectForm = (value) => ({
-    type: TOGGLE_SHOW_PROJECT_FORM,
-    value
-})

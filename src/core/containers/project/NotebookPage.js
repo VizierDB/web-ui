@@ -30,14 +30,13 @@ import { LargeMessageButton } from '../../components/Button';
 import ContentSpinner from '../../components/ContentSpinner';
 import { FetchError } from '../../components/Message';
 import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
-import EditableNotebook from '../../components/notebook/EditableNotebook';
 import NotebookStatusHeader from '../../components/notebook/NotebookStatusHeader';
-import TestReadOnlyNotebook from '../../components/notebook/TestReadOnlyNotebook';
-import ProjectResourcePage from '../../components/project/ProjectResourcePage';
+import Notebook from '../../components/notebook/Notebook';
+import ResourcePage from '../../components/ResourcePage';
 import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
     CONTENT_TIMESTAMPS } from '../../resources/Notebook';
-import { NotebookResource } from '../../resources/Project';
-import { isNotEmptyString, notebookPageUrl } from '../../util/App.js';
+import { NotebookResource } from '../../util/App';
+import { isNotEmptyString, notebookPageUrl } from '../../util/App';
 
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
@@ -275,44 +274,23 @@ class NotebookPage extends Component {
         } else if (notebook != null) {
             const { modalOpen, modalTitle } = this.state;
             // List of notebook cells
-            let notebookCells = [];
-            //if (notebook.readOnly) {
-                notebookCells = (
-                    <TestReadOnlyNotebook
-                        activeNotebookCell={activeCell}
-                        notebook={notebook}
-                        project={project}
-                        reversed={reversed}
-                        onAddFilteredCommand={this.handleAddFilteredCommand}
-                        onChangeGrouping={this.handleChangeGrouping}
-                        onCreateBranch={this.showCreateBranchModal}
-                        onDatasetNavigate={this.handleDatasetNavigate}
-                        onFetchAnnotations={this.handleFetchDatasetCellAnnotations}
-                        onOutputSelect={this.handleSelectOutput}
-                        onRemoveFilteredCommand={this.handleRemoveFilteredCommand}
-                        onSelectNotebookCell={this.handleSelectActiveCell}
-                        userSettings={userSettings}
-                    />
-                );
-            /*} else {
-                notebookCells = (
-                    <EditableNotebook
-                        isEmptyNotebook={(notebook.cells.length === 0)}
-                        groupMode={groupMode}
-                        notebook={notebook}
-                        project={project}
-                        reversed={reversed}
-                        onChangeGrouping={this.handleChangeGrouping}
-                        onCreateBranch={this.createBranch}
-                        onDeleteModule={this.deleteModule}
-                        onInsertModule={this.insertModule}
-                        onNavigateDataset={this.navigateDataset}
-                        onOutputSelect={this.selectOutput}
-                        onReplaceModule={this.replaceModule}
-                        onSelectDatasetCell={this.handleSelectDatasetCell}
-                    />
-                );
-            }*/
+            let notebookCells =  (
+                <Notebook
+                    activeNotebookCell={activeCell}
+                    notebook={notebook}
+                    project={project}
+                    reversed={reversed}
+                    onAddFilteredCommand={this.handleAddFilteredCommand}
+                    onChangeGrouping={this.handleChangeGrouping}
+                    onCreateBranch={this.showCreateBranchModal}
+                    onDatasetNavigate={this.handleDatasetNavigate}
+                    onFetchAnnotations={this.handleFetchDatasetCellAnnotations}
+                    onOutputSelect={this.handleSelectOutput}
+                    onRemoveFilteredCommand={this.handleRemoveFilteredCommand}
+                    onSelectNotebookCell={this.handleSelectActiveCell}
+                    userSettings={userSettings}
+                />
+            );
             // Add modal form for user to enter branch name when creating a new
             // branch.
             let notebookFooter = (
@@ -331,7 +309,7 @@ class NotebookPage extends Component {
                         <LargeMessageButton
                             message='This is a read-only notebook. Create a new branch to start editing.'
                             icon='code-fork'
-                            onClick={() => (this.showCreateBranchModal(notebook.lastCell.module))}
+                            onClick={() => (this.showCreateBranchModal(notebook.lastCell().module))}
                         />
                         { notebookFooter }
                     </div>
@@ -351,7 +329,7 @@ class NotebookPage extends Component {
                 </div>
             );
             content = (
-                <ProjectResourcePage
+                <ResourcePage
                     actionError={actionError}
                     branch={branch}
                     content={pageContent}

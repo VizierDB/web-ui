@@ -175,10 +175,6 @@ export class ProjectHandle {
 // Project page resource
 // -----------------------------------------------------------------------------
 
-const RESOURCE_BRANCH = 'RESOURCE_BRANCH';
-const RESOURCE_NOTEBOOK = 'RESOURCE_NOTEBOOK';
-
-
 /**
  * Wrapper for the project resource. The resource captures one of the following
  * content types: Notebook, Branch History, Spreadsheet, Chart view, or Error.
@@ -193,18 +189,7 @@ export class ProjectResource {
     constructor(resourceType) {
         this.resourceType = resourceType;
     }
-    /**
-     * Various flags to check the type of the content.
-     */
-    isBranch = () => (this.resourceType === RESOURCE_BRANCH);
-    isNotebook = () => (this.resourceType === RESOURCE_NOTEBOOK);
-
 }
-
-
-// Shortcuts for different content types
-export const BranchResource = () => (new ProjectResource(RESOURCE_BRANCH));
-export const NotebookResource = (notebook) => (new ProjectResource(RESOURCE_NOTEBOOK));
 
 export const ChartResource = () => (new ProjectResource(-1));
 export const DatasetErrorResource = () => (new ProjectResource(-1));

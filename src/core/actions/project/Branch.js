@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import { NO_OP } from '../main/App';
 import { projectActionError, projectFetchError, requestProjectAction, setBranch, setProject } from './Project';
 import { BranchDescriptor } from '../../resources/Branch';
 import { WorkflowDescriptor } from '../../resources/Workflow';
@@ -66,6 +67,8 @@ export const createBranch = (project, branch, workflowId, moduleId, name, histor
                 const resultBranch = new BranchDescriptor().fromJson(json);
                 dispatch(setProject(project.addBranch(resultBranch)));
                 history.push(notebookPageUrl(project.id, resultBranch.id));
+                // Avoid action undefined error
+                return ({type: NO_OP});
             },
             (message) => (
                 projectActionError('Error creating new branch', message)
@@ -92,11 +95,13 @@ export const deleteBranch = (project, branch, urlFactory, history) => (dispatch)
     dispatch(
         deleteResource(
             branch.links.get('branch.delete'),
-            () => (() => {
+            () => {
                 dispatch(setProject(project.deleteBranch(branch.id)));
                 const defaultBranchId = project.getDefaultBranch().id;
                 history.push(urlFactory(project.id, defaultBranchId));
-            }),
+                // Avoid action undefined error
+                return ({type: NO_OP});
+            },
             (message) => (
                 projectActionError('Error deleting branch', message)
             ),

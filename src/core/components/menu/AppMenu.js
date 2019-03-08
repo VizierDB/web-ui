@@ -18,7 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Icon, Menu } from 'semantic-ui-react';
+import { Icon, Image, Menu } from 'semantic-ui-react';
 import BranchMenuDropdown from './BranchMenuDropdown';
 import ChartMenuDropdown from './ChartMenuDropdown';
 import DatasetMenuDropdown from './DatasetMenuDropdown';
@@ -32,6 +32,8 @@ import { isNotEmptyString, notebookPageUrl } from '../../util/App';
 import '../../../css/ResourceListing.css';
 import '../../../css/ProjectPage.css';
 
+import logo from '../../../img/logo_small.png';
+
 /**
  * Component that allows to select the current branch. In addition to switching
  * between branches the component allows to edit the branch name and to delete
@@ -41,27 +43,33 @@ import '../../../css/ProjectPage.css';
 /*
  * Identify the different types of modals that may be displayed.
  */
-
+const MODAL_CREATE_PROJECT = 'MODAL_CREATE_PROJECT';
 const MODAL_DELETE_BRANCH = 'MODAL_DELETE_BRANCH';
+const MODAL_DELETE_PROJECT = 'MODAL_DELETE_PROJECT';
 const MODAL_EDIT_BRANCH_NAME = 'MODAL_EDIT_BRANCH_NAME';
 const MODAL_EDIT_PROJECT_NAME = 'MODAL_EDIT_PROJECT_NAME';
 
-class MainProjectMenu extends React.Component {
+
+class AppMenu extends React.Component {
     static propTypes = {
         branch: PropTypes.object,
         notebook: PropTypes.object,
-        onDeleteBranch: PropTypes.func.isRequired,
+        onCreateProject: PropTypes.func.isRequired,
+        onDeleteBranch: PropTypes.func,
+        onDeleteProject: PropTypes.func.isRequired,
         onEditBranch: PropTypes.func.isRequired,
         onEditProject: PropTypes.func.isRequired,
+        onGoHome: PropTypes.func.isRequired,
         onHideCells: PropTypes.func.isRequired,
         onReverse: PropTypes.func.isRequired,
+        onSetFilter: PropTypes.func.isRequired,
         onShowChart: PropTypes.func.isRequired,
         onShowDataset: PropTypes.func.isRequired,
         onShowHistory: PropTypes.func.isRequired,
-        onShowNotebook: PropTypes.func.isRequired,
+        onShowNotebook: PropTypes.func,
         onShowProject: PropTypes.func.isRequired,
-        onSwitchBranch: PropTypes.func.isRequired,
-        project: PropTypes.object.isRequired,
+        onSwitchBranch: PropTypes.func,
+        project: PropTypes.object,
         projectList: PropTypes.array,
         resource: PropTypes.object.isRequired,
         userSettings: PropTypes.object.isRequired
@@ -77,10 +85,19 @@ class MainProjectMenu extends React.Component {
     /**
      * Submit request to delete the current branch.
      */
-    deleteCurrentBranch = (branch) => {
+    handleDeleteCurrentBranch = (branch) => {
         const { onDeleteBranch } = this.props;
         onDeleteBranch(branch);
         this.hideModal();
+    }
+    /**
+     * Hide the modal and delete the current project using the given callback
+     * handler.
+     */
+    handleDeleteProject = () => {
+        const { onDeleteProject, project } = this.props;
+        this.hideModal();
+        onDeleteProject(project);
     }
     /**
      * Hide any open modal.
@@ -93,8 +110,11 @@ class MainProjectMenu extends React.Component {
         const {
             branch,
             notebook,
+            onCreateProject,
+            onGoHome,
             onHideCells,
             onReverse,
+            onSetFilter,
             onShowChart,
             onShowDataset,
             onShowDatasetError,
@@ -110,58 +130,77 @@ class MainProjectMenu extends React.Component {
         // The basic layout contains a menu bar and an optional modal or error
         // message.
         // Start by generating the list of elements in the menu bar.
-        let menuItems = [
-            <Menu.Item
-                header
-                key='title'
-                onClick={this.showEditProjectNameModal}
-            >
-                <Icon name='database' />
-                <span className='project-name'>{project.name}</span>
+        let menuItems = [];
+        // Show the project logo and project name as the first element. If the
+        // project is not set show application name instead.
+        let name = null;
+        if (project != null) {
+            name = project.name;
+        } else {
+            name = 'Vizier DB';
+        }
+        menuItems.push(
+            <Menu.Item key='logo' header>
+                <Icon name='vimeo v' />
+                {name}
             </Menu.Item>
-        ];
+        );
+        // Show the home link. This is only active if we are not on the main
+        // page
+        if (!resource.isMainPage()) {
+            menuItems.push(<Menu.Item key='home' as='a' onClick={onGoHome}>Home</Menu.Item>);
+        } else {
+            menuItems.push(<Menu.Item key='home'>Home</Menu.Item>);
+        }
         menuItems.push(
             <ProjectMenuDropdown
                 key='project'
+                onCreate={this.showCreateProjecthModal}
+                onDelete={this.showDeleteProjectModal}
                 onEdit={this.showEditProjectNameModal}
                 onSelect={onShowProject}
                 project={project}
                 projectList={projectList}
             />
         );
-        let isLiveEnabled = false;
-        if (notebook != null) {
-            isLiveEnabled = notebook.readOnly;
-        }
-        menuItems.push(
-            <BranchMenuDropdown
-                key='branches'
-                branches={project.branches}
-                isLive={!isLiveEnabled}
-                onDelete={this.showDeleteBranchModal}
-                onEdit={this.showEditBranchNameModal}
-                onGoLive={this.switchToBranchHead}
-                onSelect={onSwitchBranch}
-                onShowHistory={onShowHistory}
-                resource={resource}
-                selectedBranch={branch}
-            />
-        );
         if (resource != null) {
+            // Show the branch menu if the branch is given
+            if (branch != null) {
+                let isLiveEnabled = false;
+                if (notebook != null) {
+                    isLiveEnabled = notebook.readOnly;
+                }
+                menuItems.push(
+                    <BranchMenuDropdown
+                        key='branches'
+                        branches={project.branches}
+                        isLive={!isLiveEnabled}
+                        onDelete={this.showDeleteBranchModal}
+                        onEdit={this.showEditBranchNameModal}
+                        onGoLive={this.switchToBranchHead}
+                        onSelect={onSwitchBranch}
+                        onShowHistory={onShowHistory}
+                        resource={resource}
+                        selectedBranch={branch}
+                    />
+                );
+            }
             // Depending on whether the resource is a notebook or not the
             // notebook menue is changed. If the resource is not a notebook the
             // menu item is a button that allows to show the notebook. If the
             // resource is a notebook the menu is a dropdown that allows th user
             // to select properties of how the notebook is displayed.
-            menuItems.push(
-                <Menu.Item
-                    key='notebook'
-                    icon='file alternate outline'
-                    name='Notebook'
-                    disabled={resource.isNotebook()}
-                    onClick={onShowNotebook}
-                />
-            );
+            if (!resource.isMainPage()) {
+                menuItems.push(
+                    <Menu.Item
+                        key='notebook'
+                        icon='file alternate outline'
+                        name='Notebook'
+                        disabled={resource.isNotebook()}
+                        onClick={onShowNotebook}
+                    />
+                );
+            }
             /*} else {
                 menuItems.push(
                     <NotebookMenuDropdown
@@ -201,10 +240,11 @@ class MainProjectMenu extends React.Component {
                 key='settings'
                 onHideCells={onHideCells}
                 onReverse={onReverse}
+                onSetFilter={onSetFilter}
                 userSettings={userSettings}
             />);
         let menuBar = (
-            <Menu secondary>
+            <Menu fixed='top' >
                 { menuItems }
             </Menu>
         );
@@ -212,33 +252,51 @@ class MainProjectMenu extends React.Component {
         let optionalModalOrMessage = null;
         const { modal } = this.state;
         if (modal !== null) {
-            if ((modal === MODAL_DELETE_BRANCH) && (branch != null)) {
-                optionalModalOrMessage = <DeleteResourceModal
+            if (modal === MODAL_CREATE_PROJECT) {
+                optionalModalOrMessage = (<EditResourceNameModal
+                    isValid={isNotEmptyString}
+                    open={true}
+                    prompt='Enter a name for the new project'
+                    title={'Create project'}
+                    onCancel={this.hideModal}
+                    onSubmit={onCreateProject}
+                />);
+            } else if ((modal === MODAL_DELETE_BRANCH) && (branch != null)) {
+                optionalModalOrMessage = (<DeleteResourceModal
                     open={true}
                     onCancel={this.hideModal}
-                    onSubmit={this.deleteCurrentBranch}
+                    onSubmit={this.handleDeleteCurrentBranch}
                     prompt={'Do you really want to delete the branch ' + branch.name + '?'}
                     title={'Delete branch'}
                     value={branch}
-                />
-            } else if (modal === MODAL_EDIT_PROJECT_NAME) {
-                optionalModalOrMessage = <EditResourceNameModal
+                />)
+            } else if ((modal === MODAL_DELETE_PROJECT) && (project != null)) {
+                optionalModalOrMessage = (<DeleteResourceModal
+                    open={true}
+                    onCancel={this.hideModal}
+                    onSubmit={this.handleDeleteProject}
+                    prompt={'Do you really want to delete the project ' + project.name + '?'}
+                    title={'Delete project'}
+                    value={branch}
+                />)
+            } else if ((modal === MODAL_EDIT_PROJECT_NAME) && (project != null)) {
+                optionalModalOrMessage = (<EditResourceNameModal
                     isValid={isNotEmptyString}
                     open={true}
                     onCancel={this.hideModal}
                     onSubmit={this.submitUpdateProjectName}
                     title={'Edit project name'}
                     value={project.name}
-                />
+                />)
             } else if ((modal === MODAL_EDIT_BRANCH_NAME) && (branch != null)) {
-                optionalModalOrMessage = <EditResourceNameModal
+                optionalModalOrMessage = (<EditResourceNameModal
                     isValid={isNotEmptyString}
                     open={true}
                     onCancel={this.hideModal}
                     onSubmit={this.submitUpdateBranchName}
                     title={'Edit branch name'}
                     value={branch.name}
-                />
+                />)
             }
         }
         return (
@@ -249,9 +307,17 @@ class MainProjectMenu extends React.Component {
         );
     }
     /**
+     * Show modal dialog to enter a new project name.
+     */
+    showCreateProjecthModal = () => (this.setState({modal: MODAL_CREATE_PROJECT }));
+    /**
      * Show modal dialog to confirm branch delete.
      */
     showDeleteBranchModal = () => (this.setState({modal: MODAL_DELETE_BRANCH }));
+    /**
+     * Show modal dialog to confirm project delete.
+     */
+    showDeleteProjectModal = () => (this.setState({modal: MODAL_DELETE_PROJECT }));
     /**
      * Show modal to edit the current branch name.
      */
@@ -281,12 +347,6 @@ class MainProjectMenu extends React.Component {
         }
     }
     /**
-     * Submit redirect request when switching branches.
-     */
-    switchBranch = (branch) => {
-
-    }
-    /**
      * Show workflow at branch head when user wants to 'Go Live'
      */
     switchToBranchHead = () => {
@@ -295,4 +355,4 @@ class MainProjectMenu extends React.Component {
     }
 }
 
-export default MainProjectMenu;
+export default AppMenu;

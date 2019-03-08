@@ -17,7 +17,8 @@
  */
 
 import { UserSettings } from '../../util/Settings';
-import { ADD_FILTERED_COMMAND, HIDE_CELLS, REMOVE_FILTERED_COMMAND, REVERSE_ORDER } from '../../actions/main/App';
+import { ADD_FILTERED_COMMAND, HIDE_CELLS, REMOVE_FILTERED_COMMAND,
+    REVERSE_ORDER, SET_FILTERED_MODULES } from '../../actions/main/App';
 
 /**
 * This application state contains the user preferences object.
@@ -36,14 +37,25 @@ export const app = (state = INITIAL_STATE, action) => {
                 userSettings: state.userSettings.addCommandToHiddenList(action.command)
             };
         case HIDE_CELLS:
-            return {...state, userSettings: state.userSettings.toggleHideCells()};
+            return {
+                ...state,
+                userSettings: state.userSettings.toggleHideCells()
+            };
         case REMOVE_FILTERED_COMMAND:
             return {
                 ...state,
                 userSettings: state.userSettings.removeCommandFromHiddenList(action.command)
             };
         case REVERSE_ORDER:
-            return {...state, userSettings: state.userSettings.reverseOrder()};
+            return {
+                ...state,
+                userSettings: state.userSettings.reverseOrder()
+            };
+        case SET_FILTERED_MODULES:
+            return {
+                ...state,
+                userSettings: state.userSettings.setFilter(action.filter)
+            };
         default:
             return state
     }

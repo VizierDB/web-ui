@@ -29,34 +29,50 @@ import { HATEOASReferences } from '../../util/HATEOAS'
 /**
  * STATE:
  *
+ * engine: INformation about the backend engine and the supported commands
  * error: Error while fetching service descriptor
  * isFetchig: Flag indicating whether fetching is in progress
+ * links: HATEOAS references in service descriptor
  * name: Service name
+ * links: List of HATEOAS references [rel, href]
  * properties: List of service properties (e.g., max. upload file size)
- * envs: List of execution environments [{id, name, description}]
- * links: List of HATEOAS references [{rel, href}]
+ * refetch: Flag indicating whether the service descriptor needs to be re-fetched
+ *          after the user entered authentication information.
  */
 
-export const serviceApi = (state = {}, action) => {
+ const INITIAL_STATE = {
+     error: null,
+     engine: null,
+     isFetchig: true,
+     links: null,
+     name: null,
+     properties: null,
+     refetch: false
+ }
+
+
+export const serviceApi = (state = INITIAL_STATE, action) => {
 	switch (action.type) {
     	case REQUEST_SERVICE:
+            console.log(REQUEST_SERVICE);
 	        return {
 	          ...state,
 	          isFetching: true
 	        }
 	    case RECEIVE_SERVICE:
-            console.log(action);
+            console.log(RECEIVE_SERVICE);
 	        return {
 	          ...state,
-	          isFetching: false,
-	          name: action.name,
-	          properties: action.properties,
-	          engine: {
+              engine: {
                   backend: action.environment.backend,
                   name: action.environment.name,
                   packages: new ModuleRegistry().fromJson(action.environment.packages)
               },
-	          links: new HATEOASReferences(action.links),
+              error: null,
+              isFetching: false,
+              links: new HATEOASReferences(action.links),
+	          name: action.name,
+	          properties: action.properties,
 	          refetch: false
 	        }
         case SERVICE_ERROR:

@@ -19,18 +19,12 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { Button, Icon, Table } from 'semantic-ui-react'
-import {
-    clearProjectActionError, createProject, deleteProject, fetchProjects,
-    toggleShowProjectForm
-} from '../../actions/project/ProjectListing'
-import { IconButton } from '../../components/Button'
+import { Icon, Table } from 'semantic-ui-react'
+import { clearProjectActionError, deleteProject, fetchProjects } from '../../actions/project/ProjectListing'
 import { ErrorMessage } from '../../components/Message';
 import DeleteResourceModal from '../../components/modals/DeleteResourceModal'
-import CreateProjectForm from '../../components/project/CreateProjectForm'
 import ContentSpinner from '../../components/ContentSpinner'
 import { notebookPageUrl } from '../../util/App.js';
-import { HATEOAS_PROJECTS_CREATE } from '../../util/HATEOAS';
 // For history to work this link was helpful. Does not seem to be required
 // for all components (?).
 // https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/withRouter.md
@@ -46,8 +40,7 @@ class ProjectListing extends Component {
         fetchMessage: PropTypes.string.isRequired,
         isFetching: PropTypes.bool.isRequired,
         projects: PropTypes.array,
-        links: PropTypes.object,
-        showForm: PropTypes.bool.isRequired
+        links: PropTypes.object
     }
     constructor(props) {
         super(props);
@@ -82,25 +75,6 @@ class ProjectListing extends Component {
         history.push(notebookPageUrl(project.id, project.defaultBranch));
     }
     /**
-     * Submit a create new project request. If the name is empty it is set to
-     * 'undefined' by default.
-     */
-    handleSubmitNewProject = (name) => {
-        const { dispatch, history, links } = this.props;
-        this.toggleCreateProjectForm();
-        let projectName = name.trim();
-        if (projectName === '') {
-            projectName = 'New Project';
-        }
-        dispatch(
-            createProject(
-                links.get(HATEOAS_PROJECTS_CREATE),
-                projectName,
-                history
-            )
-        );
-    }
-    /**
      * Hide all modals by setting the respective state variables to null..
      */
     hideModal = () => {
@@ -116,8 +90,7 @@ class ProjectListing extends Component {
             fetchError,
             fetchMessage,
             isFetching,
-            projects,
-            showForm
+            projects
         } = this.props;
         let content = null;
         if (isFetching) {
@@ -130,7 +103,7 @@ class ProjectListing extends Component {
         } else if (projects != null) {
             const tabHead = (
                     <Table.Row>
-                        <Table.HeaderCell className="resource">Name</Table.HeaderCell>
+                        <Table.HeaderCell className="resource">Project</Table.HeaderCell>
                         <Table.HeaderCell className="resource">Created</Table.HeaderCell>
                         <Table.HeaderCell className="resource">Last modified</Table.HeaderCell>
                         <Table.HeaderCell className="resource"></Table.HeaderCell>
@@ -152,10 +125,10 @@ class ProjectListing extends Component {
                     <Table.Cell className='resource-text'>{pj.lastModifiedAt}</Table.Cell>
                     <Table.Cell className='resource-buttons'>
                         <span className='button-wrapper'>
-                            <IconButton name="trash" onClick={(event) => {
-                                event.preventDefault();
-                                this.showDeleteProjectModal(pj);
-                            }}/>
+                            <Icon
+                            name="trash"
+                            link
+                            onClick={() => (this.showDeleteProjectModal(pj))} />
                         </span>
                     </Table.Cell>
                 </Table.Row>);
@@ -188,36 +161,13 @@ class ProjectListing extends Component {
                     onDismiss={this.clearActionError}
                 />)
             }
-            let createProjectForm = null;
-            if (showForm) {
-                createProjectForm = (
-                    <CreateProjectForm
-                        onClose={this.toggleCreateProjectForm}
-                        onSubmit={this.handleSubmitNewProject}
-                    />
-                );
-            }
             content = (
                 <div>
                     { projectActionErrorMessage }
-                    { createProjectForm }
                     <Table singleLine>
                         <Table.Header>{tabHead}</Table.Header>
                         <Table.Body>{rows}</Table.Body>
                     </Table>
-                    <div>
-                        <Button
-                            floated='left'
-                            icon
-                            labelPosition='left'
-                            size='tiny'
-                            positive
-                            disabled={showForm}
-                            onClick={this.toggleCreateProjectForm}
-                        >
-                          <Icon name='plus' /> New Project ...
-                        </Button>
-                    </div>
                     { modal }
                 </div>
             );
@@ -230,13 +180,6 @@ class ProjectListing extends Component {
     showDeleteProjectModal = (project) => {
         this.setState({deleteProject: project})
     }
-    /**
-     * Toggle visibility of the create project form.
-     */
-    toggleCreateProjectForm = () => {
-        const { dispatch } = this.props;
-        dispatch(toggleShowProjectForm())
-    }
 }
 
 const mapStateToProps = state => {
@@ -246,8 +189,7 @@ const mapStateToProps = state => {
         fetchMessage: state.projectListing.fetchMessage,
         isFetching: state.projectListing.isFetching,
         projects: state.projectListing.projects,
-        links: state.projectListing.links,
-        showForm: state.projectListing.showForm
+        links: state.projectListing.links
     }
 }
 

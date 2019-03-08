@@ -28,14 +28,21 @@ import '../../../../css/Notebook.css'
  * Dropdown menu for a notebook cell. Contains set of operations that are
  * available for the cell as well as the cell output and resulting resources.
  */
-class CellMenu extends React.Component {
+class CellDropDownMenu extends React.Component {
     static propTypes = {
         cell: PropTypes.object.isRequired,
         cellNumber: PropTypes.number.isRequired,
         notebook: PropTypes.object.isRequired,
         onAddFilteredCommand: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
+        onInsertCell: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired
+    }
+    handleInsertBefore = () => {
+        this.props.onInsertCell(-1);
+    }
+    handleInsertAfter = () => {
+        this.props.onInsertCell(0);
     }
     render() {
         const {
@@ -92,7 +99,7 @@ class CellMenu extends React.Component {
                     icon='arrow circle up'
                     text='Insert cell above'
                     title={'Insert new notebook cell before cell #' + cellNumber}
-                    onClick={() => (alert('Insert above'))}
+                    onClick={this.handleInsertBefore}
                 />
             );
             dropdownItems.push(
@@ -101,7 +108,7 @@ class CellMenu extends React.Component {
                     icon='arrow circle down'
                     text='Insert cell below'
                     title={'Insert new notebook cell after cell #' + cellNumber}
-                    onClick={() => (alert('Insert below'))}
+                    onClick={this.handleInsertAfter}
                 />
             );
             dropdownItems.push(<Dropdown.Divider key='div2'/>);
@@ -210,4 +217,4 @@ class CellMenu extends React.Component {
     }
 }
 
-export default CellMenu;
+export default CellDropDownMenu;

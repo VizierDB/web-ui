@@ -19,12 +19,17 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { Dropdown, Grid, Icon, Menu } from 'semantic-ui-react'
-import { toggleShowProjectForm } from '../../actions/project/ProjectListing'
-import { ConnectionInfo } from '../../components/Api'
+import { Button, Icon } from 'semantic-ui-react'
+import { createProject } from '../../actions/project/ProjectListing'
+import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
+import { LargeMessageButton } from '../../components/Button';
+import { MainPageResource } from '../../util/App.js';
 import ProjectListing from '../project/ProjectListing'
-import { notebookPageUrl } from '../../util/App.js';
+import ResourcePage from '../../components/ResourcePage';
+import { isNotEmptyString, notebookPageUrl } from '../../util/App.js';
+import { HATEOAS_PROJECTS_CREATE } from '../../util/HATEOAS';
 import '../../../css/App.css'
+import '../../../css/ResourceListing.css'
 
 
 class MainPage extends Component {
@@ -33,7 +38,22 @@ class MainPage extends Component {
         isFetching: PropTypes.bool.isRequired,
         projects: PropTypes.array,
         serviceApi: PropTypes.object,
-        showForm: PropTypes.bool.isRequired
+        userSettings: PropTypes.object.isRequired
+    }
+    constructor(props) {
+        super(props);
+        // Flag indicating if the create modal is being shown.
+        this.state = {showModal: false};
+    }
+    /**
+     * Submit a create new project request. If the name is empty it is set to
+     * 'undefined' by default.
+     */
+    handleCreateProject = (name) => {
+        const { dispatch, history, serviceApi } = this.props;
+        const url = serviceApi.links.get(HATEOAS_PROJECTS_CREATE);
+        this.hideModal();
+        dispatch(createProject(url, name, history));
     }
     /**
      * Show page for a selected project.
@@ -43,15 +63,22 @@ class MainPage extends Component {
         history.push(notebookPageUrl(project.id, project.defaultBranch));
     }
     /**
+     * Set the show modal flag to false;
+     */
+    hideModal = () => (this.setState({showModal: false}));
+    /**
      */
     render() {
         const {
+            dispatch,
             homePageContent,
             isFetching,
             projects,
             serviceApi,
-            showForm
+            showForm,
+            userSettings
         } = this.props;
+        // Headline and optional description contained in the service descriptor
         let headline = null;
         let description = null;
         if (homePageContent != null) {
@@ -60,135 +87,76 @@ class MainPage extends Component {
         } else {
             headline = (
                 <span>
-                    Welcome to Vizier
+                    Vizier
                     <span className='headline-small'>
                         Streamlined Data Curation
                     </span>
                 </span>
             );
         }
-        let createProjectLink = ' creating a new project';
-        if ((!showForm) && (!isFetching)) {
-            createProjectLink = (
-                <span className='action'>
-                    <a className='action-link' onClick={this.toggleCreateProjectForm}>
-                        {createProjectLink}
-                    </a>
-                </span>
+        // If the list of project is empty show a message and button to add a
+        // new project.
+        let listingContent = null;
+        if ((projects != null) && (projects.length === 0)) {
+            listingContent = (
+                <div className='empty-list-message'>
+                    <LargeMessageButton
+                        message='Your project list is empty. Start by creating a new project.'
+                        icon='plus'
+                        onClick={this.showCreateProjectModal}
+                    />
+                </div>
+            );
+        } else {
+            listingContent = (
+                <div>
+                    <div className='project-listing'>
+                        <ProjectListing />
+                    </div>
+                    <Button
+                        icon
+                        labelPosition='left'
+                        size='tiny'
+                        positive
+                        onClick={this.showCreateProjectModal}
+                    >
+                      <Icon name='plus' /> New Project ...
+                    </Button>
+                </div>
             );
         }
         const content = (
             <div className='home-content'>
                 <h1 className='home-headline'>{headline}</h1>
                 { description }
-                <Grid>
-                    <Grid.Row>
-                        <Grid.Column width={8}>
-                            <div className='home-sidebar'>
-                                <h3 className='home-headline'>Getting Started</h3>
-                                <p className='home-text'>
-                                    <span className='sys-name'>Vizier</span>  organizes
-                                    data curation workflows into projects. Start by
-                                    {createProjectLink} or by selecting a project from
-                                    the menu or the data curation projects list.
-                                </p>
-                                <h3 className='home-headline'>About Vizier</h3>
-                                <p className='home-text'>
-                                    <span className='sys-name'>Vizier</span> is a new powerful tool to streamline the data
-                                    curation process. Data curation (also known as data preparation,
-                                    wrangling, or cleaning) is a critical stage in data science
-                                    in which raw data is structured, validated, and repaired.
-                                    Data validation and repair establish trust in analytical
-                                    results, while appropriate structuring streamlines
-                                    analytics.
-                                </p>
-                                <p className='home-text'>
-                                    <span className='sys-name'>Vizier</span>  makes it easier and faster to explore and
-                                    analyze raw data by combining a simple notebook interface
-                                    with spreadsheet views of your data. Powerful back-end
-                                    tools that track changes, edits, and the effects of
-                                    automation. These forms of <span className='text-highlight'>provenance</span> capture
-                                    both parts of the exploratory curation process - how the
-                                    cleaning workflows evolve, and how the data changes over time.
-                                </p>
-                                <p className='home-text'>
-                                    <span className='sys-name'>Vizier</span> is
-                                    a collaboration between the <a href='http://www.buffalo.edu/' className='external-link'>University at Buffalo</a>, <a href='http://www.nyu.edu/' className='external-link'>New York University</a>, and the <a href='https://web.iit.edu/' className='external-link'>Illinois Institute of Technology</a>.
-                                </p>
-                            </div>
-                        </Grid.Column>
-                        <Grid.Column width={8}>
-                            <h3 className='home-headline'>Data Curation Projects</h3>
-                            <ProjectListing />
-                        </Grid.Column>
-                    </Grid.Row>
-                </Grid>
+                { listingContent }
+                <EditResourceNameModal
+                    isValid={isNotEmptyString}
+                    open={this.state.showModal}
+                    prompt='Enter a name for the new project'
+                    title={'Create project'}
+                    onCancel={this.hideModal}
+                    onSubmit={this.handleCreateProject}
+                />
             </div>
         );
-        let projectsMenu = null;
-        if (projects != null) {
-            const projectItems = [];
-            for (let i = 0; i < projects.length; i++) {
-                const pj = projects[i];
-                projectItems.push(
-                    <Dropdown.Item
-                        key={pj.id}
-                        icon='database'
-                        text={pj.name}
-                        onClick={() => (this.handleShowProjectPage(pj))}
-                    />
-                );
-            }
-            // Only show the project menu divider if the list of projects is
-            // not empty
-            let projectMenuDivider = null;
-            if (projects.length > 0) {
-                projectMenuDivider = (<Dropdown.Divider />);
-            }
-            projectsMenu = (
-                <Dropdown
-                    item
-                    text='Projects'
-                >
-                    <Dropdown.Menu>
-                        { projectItems }
-                        { projectMenuDivider }
-                        <Dropdown.Item
-                            key='new'
-                            icon='plus'
-                            text='New Project ...'
-                            disabled={showForm || isFetching}
-                            onClick={this.toggleCreateProjectForm}
-                        />
-                    </Dropdown.Menu>
-                </Dropdown>
-            );
-        }
         return (
-            <div className='main-page'>
-                <div className='main-menu'>
-                    <Menu secondary>
-                        <Menu.Item header>
-                            <Icon name='home' />
-                            {window.env.APP_TITLE}
-                        </Menu.Item>
-                        { projectsMenu }
-                    </Menu>
-                </div>
-                <div className='page-content wide'>
-                    { content }
-                    <ConnectionInfo api={serviceApi}/>
-                </div>
-            </div>
+            <ResourcePage
+                content={content}
+                contentCss='wide'
+                dispatch={dispatch}
+                isActive={false}
+                projectList={projects}
+                resource={new MainPageResource()}
+                serviceApi={serviceApi}
+                userSettings={userSettings}
+            />
         );
     }
     /**
-     * Toggle visibility of the create project form.
+     * Show the create project modal.
      */
-    toggleCreateProjectForm = () => {
-        const { dispatch } = this.props;
-        dispatch(toggleShowProjectForm())
-    }
+    showCreateProjectModal = () => (this.setState({showModal: true}));
 }
 
 const mapStateToProps = state => {
@@ -198,7 +166,7 @@ const mapStateToProps = state => {
         isFetching: state.projectListing.isFetching,
         projects: state.projectListing.projects,
         serviceApi: state.serviceApi,
-        showForm: state.projectListing.showForm
+        userSettings: state.app.userSettings
     }
 }
 

@@ -19,6 +19,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Dropdown } from 'semantic-ui-react';
+import { DEFAULT_FILTERED_COMMANDS } from '../../util/Settings';
+
 
 /**
  * Dropdown menu for the global user preferences. The menu allow the user to
@@ -30,10 +32,11 @@ class SettingsMenuDropdown extends React.Component {
     static propTypes = {
         onHideCells: PropTypes.func.isRequired,
         onReverse: PropTypes.func.isRequired,
+        onSetFilter: PropTypes.func.isRequired,
         userSettings: PropTypes.object.isRequired
     }
     render() {
-        const { onHideCells, onReverse, userSettings } = this.props;
+        const { onHideCells, onReverse, onSetFilter, userSettings } = this.props;
         return (
             <Dropdown item text='Settings'>
                 <Dropdown.Menu>
@@ -55,29 +58,44 @@ class SettingsMenuDropdown extends React.Component {
                         onClick={onReverse}
                     />
                     <Dropdown.Divider key='div1' />
-                    <Dropdown.Header key='head2' content='Show / Hide Cells' />
+                    <Dropdown.Header key='head2' content='Filter Modules' />
+                    <Dropdown.Item
+                        key='showAll'
+                        icon='remove circle'
+                        text='Remove Filter'
+                        title={'Clear module filter to show all notebook cells'}
+                        onClick={() => (onSetFilter())}
+                    />
+                    <Dropdown.Item
+                        key='defaultFilter'
+                        icon='th'
+                        text='Filter VizUAL'
+                        title={'Filter VizUAL commands by default'}
+                        onClick={() => (onSetFilter(DEFAULT_FILTERED_COMMANDS))}
+                    />
                     <Dropdown.Item
                         disabled={true}
                         key='filter'
                         icon='filter'
-                        text='Filter ...'
-                        title={'Filter cells by the type of their command'}
+                        text='Customized Filter'
+                        title={'Show form to specify filter for all modules'}
                     />
                     <Dropdown.Divider key='div2' />
+                    <Dropdown.Header key='head3' content='Show Filtered Modules as ...' />
                     <Dropdown.Item
                         disabled={!userSettings.hideFilteredCommands()}
                         key='collapse'
                         icon='compress'
-                        text='Collapse'
-                        title='Collapse cells that contain filtered commands'
+                        text='Collapsed'
+                        title='Collapse cells that contain filtered modules'
                         onClick={onHideCells}
                     />
                     <Dropdown.Item
                         disabled={userSettings.hideFilteredCommands()}
                         key='hide'
                         icon='hide'
-                        text='Hide'
-                        title='Hide cells that contain filtered commands'
+                        text='Hidden'
+                        title='Hide cells that contain filtered modules'
                         onClick={onHideCells}
                     />
                 </Dropdown.Menu>

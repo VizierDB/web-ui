@@ -26,27 +26,46 @@ import { Dropdown } from 'semantic-ui-react';
 
 class ProjectMenuDropdown extends React.Component {
     static propTypes = {
+        onCreate: PropTypes.func.isRequired,
+        onDelete: PropTypes.func,
         onEdit: PropTypes.func.isRequired,
         onSelect: PropTypes.func.isRequired,
-        project: PropTypes.object.isRequired,
+        project: PropTypes.object,
         projectList: PropTypes.array,
     }
     render() {
-        const { onEdit, onSelect, project, projectList } = this.props;
+        const {
+            onCreate,
+            onDelete,
+            onEdit,
+            onSelect,
+            project,
+            projectList
+        } = this.props;
         const menuItems = [];
-        // Show the current project name and the rename option at all times
-        menuItems.push(<Dropdown.Header
-            key='header1'
-            icon='database'
-            content={project.name} />
-        );
-        menuItems.push(<Dropdown.Item
-            key='edit'
-            icon='edit'
-            text='Rename'
-            title='Edit project name'
-            onClick={onEdit}
-        />);
+        // Show the current project name, the rename option and the delete
+        // option if there is a current project
+        if (project != null) {
+            menuItems.push(<Dropdown.Header
+                key='header1'
+                icon='database'
+                content={project.name} />
+            );
+            menuItems.push(<Dropdown.Item
+                key='edit'
+                icon='edit'
+                text='Rename'
+                title='Edit project name'
+                onClick={onEdit}
+            />);
+            menuItems.push(<Dropdown.Item
+                key='delete'
+                icon='trash'
+                text='Delete'
+                title='Delete the current project'
+                onClick={onDelete}
+            />);
+        }
         // Show project listing only if the variable is set and contains more
         // than one project
         if ((projectList != null) && (projectList.length > 1)) {
@@ -57,7 +76,7 @@ class ProjectMenuDropdown extends React.Component {
             />);
             for (let i = 0; i < projectList.length; i++) {
                 let pj = projectList[i];
-                if (pj.id !== project.id) {
+                if ((project == null) || (pj.id !== project.id)) {
                     menuItems.push(<Dropdown.Item
                         key={pj.id}
                         icon='database'
@@ -68,8 +87,19 @@ class ProjectMenuDropdown extends React.Component {
                 }
             }
         }
+        // Show the add project option at the bottom of the menu
+        if (menuItems.length > 0) {
+            menuItems.push(<Dropdown.Divider key='div2'/>);
+        }
+        menuItems.push(<Dropdown.Item
+            key='create'
+            icon='plus'
+            text='New Project ...'
+            title='Create a new project'
+            onClick={onCreate}
+        />);
         return (
-            <Dropdown item text='Project'>
+            <Dropdown item text='Projects'>
                 <Dropdown.Menu>
                     { menuItems }
                 </Dropdown.Menu>

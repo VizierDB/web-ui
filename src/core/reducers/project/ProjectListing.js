@@ -18,8 +18,7 @@
 
 import {
   CLEAR_PROJECT_ACTION_ERROR, REQUEST_PROJECTS, RECEIVE_PROJECTS,
-  SET_PROJECT_CREATE_ERROR, SET_PROJECT_DELETE_ERROR, SET_PROJECTS_FETCH_ERROR,
-  TOGGLE_SHOW_PROJECT_FORM
+  SET_PROJECT_CREATE_ERROR, SET_PROJECT_DELETE_ERROR, SET_PROJECTS_FETCH_ERROR
 } from '../../actions/project/ProjectListing'
 import { ErrorObject } from '../../util/Error';
 
@@ -40,7 +39,6 @@ const DEFAULT_FETCH_MESSAGE = 'Loading Projects ...';
  * isFetchig: Flag indicating whether fetching is in progress
  * projects: List of retrieved project resources.
  * links: HATEOASReferences
- * showForm: Flagindicating whether the 'New Project ...' form is visible
  */
 
 const INITIAL_STATE = {
@@ -49,8 +47,7 @@ const INITIAL_STATE = {
     fetchMessage: DEFAULT_FETCH_MESSAGE,
     isFetching: false,
     projects: null,
-    links: null,
-    showForm: false
+    links: null
 }
 
 
@@ -71,7 +68,6 @@ export const projectListing = (state = INITIAL_STATE, action) => {
         case RECEIVE_PROJECTS:
             return {
                 ...state,
-                actionError: null,
                 fetchError: null,
                 isFetching: false,
                 projects: action.projects,
@@ -96,12 +92,6 @@ export const projectListing = (state = INITIAL_STATE, action) => {
                 fetchError: action.error,
                 projects: []
             }
-        case TOGGLE_SHOW_PROJECT_FORM:
-            let visibility = !state.showForm;
-            if (action.value != null) {
-                visibility = action.value;
-            }
-            return {...state, showForm: visibility}
     default:
       return state
   }

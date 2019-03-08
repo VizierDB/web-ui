@@ -22,6 +22,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { connect } from 'react-redux'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import { fetchService, receiveAuth } from '../../actions/main/Service'
+import { ConnectionInfo } from '../../components/Api';
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage } from '../../components/Message';
 import MainPage from './MainPage'
@@ -33,10 +34,11 @@ import {
     isNotEmptyString
 } from '../../util/App';
 
-import logo from '../../../img/logo_small.png';
 import '../../../css/App.css'
+import '../../../css/Connection.css'
 
 import { MODAL_AUTH } from '../../actions/main/Service'
+
 
 class App extends Component {
     static propTypes = {
@@ -78,7 +80,8 @@ class App extends Component {
         dispatch(fetchService())
     }
     /**
-     * Create the page header and the routing elements in the DOM.
+     * Create the routing elements in the DOM and display connection
+     * information.
      */
     render() {
         // Set the window title
@@ -87,12 +90,15 @@ class App extends Component {
         } else {
             document.title = 'Vizier DB'
         }
-        const { isFetching, error, showModal, refetch } = this.props;
+        const { error, isFetching, links, name, showModal, refetch } = this.props;
         let content = null;
         let connection = null;
         if (isFetching) {
+            // Show a content spinner if the API service descriptor is still
+            // being fetched.
             content = <ContentSpinner />;
         } else if (error) {
+            // Error message if the service descriptor could not be fetched
             let title = 'Error while loading service descriptor'
             if (this.props.serviceUrl) {
                 title = title + ' @ ' + this.props.serviceUrl
@@ -105,9 +111,13 @@ class App extends Component {
                         />
                 </div>
             );
-        } else if(refetch){
+        } else if (refetch) {
+            // Refetch service descriptor after the user entered authentication
+            // information
         	this.refetchService();
-        } else {
+        } else if ((name != null) && (links != null)) {
+            // If the service descriptor was loaded successfully display page
+            // content depending on the selected route
             content = (
                 <MuiThemeProvider>
                     <Router>
@@ -120,7 +130,14 @@ class App extends Component {
                     </Router>
                 </MuiThemeProvider>
             );
+            // Show connection information at the bottom of the page
+            connection = (
+                <div className='connection-info'>
+                    <ConnectionInfo name={name} links={links}/>
+                </div>
+            );
         }
+        // Add authentication modal
         const modals = (
                 <div>
                     <AuthModal
@@ -136,18 +153,9 @@ class App extends Component {
                );
         return (
             <div className="app">
-                <div className="app-header">
-                  <img src={logo} className="app-logo" alt="logo" />
-                  <span className="app-name">
-                      <a href={baseHref} className="home-link">vizier db</a>
-                      <span className="app-title">streamlined data curation</span>
-                  </span>
-                </div>
-                <div className="main-content">
-                    { content }
-                    { connection }
-                    { modals }
-                </div>
+                { content }
+                { connection }
+                { modals }
           </div>
         );
     }
@@ -157,6 +165,8 @@ const mapStateToProps = state => {
     return {
         error: state.serviceApi.error,
         isFetching: state.serviceApi.isFetching,
+        links: state.serviceApi.links,
+        name: state.serviceApi.name,
         serviceUrl: state.serviceApi.serviceUrl,
         showModal: state.serviceApi.showModal,
         refetch: state.serviceApi.refetch

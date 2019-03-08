@@ -20,10 +20,14 @@
 export const ADD_FILTERED_COMMAND = 'ADD_FILTERED_COMMAND';
 // Toggle the value of the hide cells property
 export const HIDE_CELLS= 'HIDE_CELLS';
+// Dummy action when redirecting as result of a received resource
+export const NO_OP = 'NO_OP';
 // Remove a command from list of filtered commands
 export const REMOVE_FILTERED_COMMAND = 'REMOVE_FILTERED_COMMAND';
 // Reverse notebook cell order
 export const REVERSE_ORDER = 'REVERSE_ORDER';
+// Set the object that conatins the filtered module identifier
+export const SET_FILTERED_MODULES = 'SET_FILTERED_MODULES';
 
 
 /**
@@ -35,6 +39,16 @@ export const addFilteredCommand = (command) => ({
     command
 })
 
+
+/**
+ * Set the object that contains the filtered module identifier. Expects an
+ * object where the properties are package identifier and the values are
+ * lists of command identifier.
+ */
+export const setModuleFilter = (filter) => ({
+    type: SET_FILTERED_MODULES,
+    filter
+})
 
 /**
  * Toggle the value of the hide filtered cells property in the user settings.

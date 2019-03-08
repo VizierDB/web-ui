@@ -24,6 +24,7 @@ let href = '';
 if (process.env.NODE_ENV === 'production') {
     href = href + 'vizier-db';
 }
+
 export const baseHref = '/' + href;
 export const projectHref = baseHref + 'projects/:project_id';
 export const branchHref = projectHref + '/branches/:branch_id';
@@ -119,3 +120,39 @@ export const notebookPageUrl = (projectId, branchId, workflowId) => {
  * Return given value or default value if value is null or undefined.
  */
 export const valueOrDefault = (val, defaultValue) => ((val != null) ? val : defaultValue);
+
+
+// -----------------------------------------------------------------------------
+// Project page resource
+// -----------------------------------------------------------------------------
+
+const RESOURCE_BRANCH = 'RESOURCE_BRANCH';
+const RESOURCE_MAIN_PAGE = 'RESOURCE_MAIN_PAGE';
+const RESOURCE_NOTEBOOK = 'RESOURCE_NOTEBOOK';
+
+
+/**
+ * Wrapper for the application resource that are displayed in the resource page
+ * component. The resource captures one of the following content types: Branch
+ * History Page, Main Page, or Notebook Page.
+ */
+export class AppResource {
+    /**
+     * Constructor expects the content type information and a type-specific
+     * content object.
+     */
+    constructor(resourceType) {
+        this.resourceType = resourceType;
+    }
+    /**
+     * Various flags to check the type of the content.
+     */
+    isBranch = () => (this.resourceType === RESOURCE_BRANCH);
+    isMainPage = () => (this.resourceType === RESOURCE_MAIN_PAGE);
+    isNotebook = () => (this.resourceType === RESOURCE_NOTEBOOK);
+}
+
+// Shortcuts for different content types
+export const BranchResource = () => (new AppResource(RESOURCE_BRANCH));
+export const MainPageResource = (notebook) => (new AppResource(RESOURCE_MAIN_PAGE));
+export const NotebookResource = (notebook) => (new AppResource(RESOURCE_NOTEBOOK));

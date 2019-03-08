@@ -84,7 +84,7 @@ class BranchMenuDropdown extends React.Component {
                 onClick={onGoLive}
             />);
         return (
-            <Dropdown item text='Branch'>
+            <Dropdown item text='Branches'>
                 <Dropdown.Menu>
                     <Dropdown.Header key='onBranch' icon='fork' content={selectedBranch.name} />
                     <Dropdown.Item

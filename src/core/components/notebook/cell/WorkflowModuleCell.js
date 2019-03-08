@@ -19,7 +19,7 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
 import CellCommandText from './CellCommandText';
-import CellMenu from './CellMenu';
+import CellDropDownMenu from './CellDropDownMenu';
 import CellOutputArea from './output/CellOutputArea';
 import { TextButton } from '../../../components/Button'
 import '../../../../css/Notebook.css';
@@ -71,6 +71,16 @@ class WorkflowModuleCell extends React.Component {
     handleDatasetNavigate = (dataset, offset, limit) => {
         const { cell, onDatasetNavigate } = this.props;
         onDatasetNavigate(cell.module, dataset, offset, limit);
+    }
+    handleInsertCell = (offset) => {
+        const { cellNumber, userSettings } = this.props;
+        let cellIndex = cellNumber;
+        if (userSettings.showNotebookReversed()) {
+            cellIndex -= offset;
+        } else {
+            cellIndex += offset;
+        }
+        alert('Insert cell at position ' + cellIndex);
     }
     /**
      * Remove the command that is associated with this notebook cell module
@@ -138,12 +148,13 @@ class WorkflowModuleCell extends React.Component {
         if (isActiveCell) {
             css += ' active-cell';
             cellMenu = (
-                <CellMenu
+                <CellDropDownMenu
                     cell={cell}
                     cellNumber={cellNumber}
                     notebook={notebook}
                     onAddFilteredCommand={this.handleAddFilteredCommand}
                     onCreateBranch={this.handleCreateBranch}
+                    onInsertCell={this.handleInsertCell}
                     onOutputSelect={onOutputSelect}
                 />
             );

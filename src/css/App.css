@@ -67,21 +67,20 @@ color: #fff;
     border: 1px solid rgba(34,36,38,.15);
     box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
     padding: 20px;
-}
-
-div.page-content {
-    margin-top: 20px;
+    margin-top: 50px;
 }
 
 div.page-content.slim {
     margin-left: auto;
     margin-right: auto;
+    margin-top: 50px;
     width: 1140px;
 }
 
 div.page-content.wide {
     margin-left: 25px;
     margin-right: 25px;
+    margin-top: 50px;
 }
 
 div.main-menu {
@@ -89,6 +88,10 @@ div.main-menu {
     border-bottom: 1px solid rgba(34,36,38,.15);
     box-shadow: 0px 4px 2px -2px rgba(87, 87, 87, 0.2);
     padding: 2px 0px;
+}
+
+div.project-listing {
+    margin-bottom: 10px;
 }
 
 a.home-link {
@@ -144,20 +147,14 @@ a.external-link:hover {
 
 h1.home-headline {
     color: #3b4151;
-    margin-bottom: 40px;
+    margin-bottom: 10px;
     font-size: 3em;
     font-weight: bold;
     font-family: Titillium Web,sans-serif;
 }
 
-h3.home-headline {
-    color: #3b4151;
-    font-weight: bold;
-    font-size: 1.75em;
-}
-
 span.headline-small {
-    font-size: 0.7em;
+    font-size: 0.6em;
     margin-left: 25px;
     font-weight: 300;
     font-family: Titillium Web,sans-serif;

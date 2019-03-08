@@ -25,8 +25,8 @@ import { fetchProject, setBranch } from '../../actions/project/Project';
 import { fetchProjects } from '../../actions/project/ProjectListing';
 import ContentSpinner from '../../components/ContentSpinner';
 import { FetchError } from '../../components/Message';
-import ProjectResourcePage from '../../components/project/ProjectResourcePage';
-import { BranchResource } from '../../resources/Project';
+import ResourcePage from '../../components/ResourcePage';
+import { BranchResource } from '../../util/App';
 import { branchPageUrl, notebookPageUrl } from '../../util/App.js';
 
 import '../../../css/App.css';
@@ -232,7 +232,7 @@ class BranchPage extends Component {
             // Show branch history table as the main content in a project
             // resource page
             content = (
-                <ProjectResourcePage
+                <ResourcePage
                     actionError={actionError}
                     branch={branch}
                     content={pageContent}

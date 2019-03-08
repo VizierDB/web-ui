@@ -18,13 +18,14 @@
 
 import React from 'react';
 import { PropTypes } from 'prop-types';
+import { LargeMessageButton } from '../../components/Button'
 import WorkflowModuleCell from './cell/WorkflowModuleCell';
 
 
 /**
  * List of cells in a read-only notebook.
  */
-class TestReadOnlyNotebook extends React.Component {
+class Notebook extends React.Component {
     static propTypes = {
         activeNotebookCell: PropTypes.string,
         notebook: PropTypes.object.isRequired,
@@ -50,6 +51,18 @@ class TestReadOnlyNotebook extends React.Component {
             onRemoveFilteredCommand,
             userSettings
         } = this.props;
+        // For empty notebooks a message is shown that contains a button to
+        // add the first notebook cell.
+        if (notebook.cells.length === 0) {
+            return (
+                <LargeMessageButton
+                    message='Your notebook is empty. Start by adding a new cell.'
+                    icon='plus'
+                    css='notebook-footer'
+                    onClick={() => (alert('Add your first cell'))}
+                />
+            );
+        }
         // Create a notebook cell for each workflow module
         const notebookCells = [];
         for (let i = 0; i < notebook.cells.length; i++) {
@@ -84,4 +97,4 @@ class TestReadOnlyNotebook extends React.Component {
     }
 }
 
-export default TestReadOnlyNotebook;
+export default Notebook;

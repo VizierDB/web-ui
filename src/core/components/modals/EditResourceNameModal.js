@@ -117,14 +117,12 @@ class EditResourceNameModal extends React.Component {
                     </div>
                 </Modal.Content>
                 <Modal.Actions>
-                    <Button  negative onClick={this.handleCancel}>
-                        Cancel
-                    </Button>
+                    <Button  onClick={this.handleCancel}>Cancel</Button>
                     <Button
-                        positive
+                        primary
                         icon='checkmark'
                         labelPosition='right'
-                        content="Done"
+                        content='Submit'
                         disabled={!validName}
                         onClick={this.handleSubmit}
                     />
