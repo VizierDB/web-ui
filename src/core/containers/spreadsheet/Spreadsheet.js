@@ -543,6 +543,7 @@ class Spreadsheet extends React.Component {
             let valueValidFunc = null;
             let modalTitle = null;
             let modalPrompt = null;
+            let options = null;
             if (modal === VIZUAL.INSERT_COLUMN) {
                 valueValidFunc = isNotEmptyString;
                 modalTitle = 'Insert Column';
@@ -551,11 +552,12 @@ class Spreadsheet extends React.Component {
                 const { dataset } = this.props;
                 const columns = dataset.columns;
                 let column = null;
+                options = [];
                 for (let i = 0; i < columns.length; i++) {
                     if (columns[i].id === modalValue) {
                         column = columns[i];
-                        break;
                     }
+                    options.push({key:i,text:i,value:i});
                 }
                 valueValidFunc = isNonNegativeInt;
                 modalTitle = 'Move Column';
@@ -574,6 +576,7 @@ class Spreadsheet extends React.Component {
                     value={''}
                     onCancel={this.dismissModal}
                     onSubmit={this.handleSubmitModal}
+                    options={options}
                 />
             );
         }

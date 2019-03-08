@@ -18,7 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types'
-import { Button, Input, Modal } from 'semantic-ui-react'
+import { Button, Input, Modal, Dropdown } from 'semantic-ui-react'
 import '../../../css/ResourceListing.css'
 
 /**
@@ -33,7 +33,8 @@ class EditResourceNameModal extends React.Component {
         onCancel: PropTypes.func.isRequired,
         onSubmit: PropTypes.func.isRequired,
         title: PropTypes.string.isRequired,
-        value: PropTypes.string
+        value: PropTypes.string,
+        options: PropTypes.array
     }
     /**
      * Keep the new resource name in the local state.
@@ -58,7 +59,14 @@ class EditResourceNameModal extends React.Component {
      * Handle changes in the input control.
      */
     handleChange = (event) => {
-        const val = event.target.value
+    	const { options } = this.props;
+    	let val = null;
+    	if(options != null){
+    		val = event.target.textContent
+    	}
+    	else {
+        	val = event.target.value
+    	}
         this.setState({value: val})
     }
     /**
@@ -91,7 +99,7 @@ class EditResourceNameModal extends React.Component {
      * Show simple modal with input text box.
      */
     render() {
-        const { isValid, prompt, open, title } = this.props;
+        const { isValid, prompt, open, title, options } = this.props;
         const { value } = this.state;
         let message = null;
         if (prompt != null) {
@@ -101,19 +109,34 @@ class EditResourceNameModal extends React.Component {
         if (isValid != null) {
             validName = isValid(value);
         }
+        let input = null;
+        if(options != null){
+        	input = <Dropdown
+	            text={value}
+        	    className="resource-name-input"
+	            selection
+	            scrolling
+	            fluid
+	            options={options}
+	            onChange={this.handleChange}
+	        />;
+        }
+        else{
+        	input = <Input
+	            autoFocus
+	            className="resource-name-input"
+	            value={value}
+	            onChange={this.handleChange}
+	            onKeyDown={this.handleKeyDown}
+	        />
+        }
         return (
             <Modal open={open} size={'small'}>
                 <Modal.Header>{title}</Modal.Header>
                 <Modal.Content>
                     <div className="resource-name">
                         {message}
-                        <Input
-                            autoFocus
-                            className="resource-name-input"
-                            value={value}
-                            onChange={this.handleChange}
-                            onKeyDown={this.handleKeyDown}
-                        />
+                        {input}
                     </div>
                 </Modal.Content>
                 <Modal.Actions>

@@ -131,13 +131,14 @@ class CreateProjectForm extends React.Component {
                 }
             }
             return (
-                <Modal open={true} dimmer={'inverted'} size={'small'}>
+                <Modal autoFocus={false} open={true} dimmer={'inverted'} size={'small'}>
                     <Modal.Header>New Project ...</Modal.Header>
                     <Modal.Content>
                         <Form>
                             <Form.Field>
                                 <Input
                                     fluid
+                                    autoFocus={true}
                                     type='text'
                                     placeholder='New Project Name ...'
                                     value={this.state.value}

@@ -18,6 +18,7 @@
 
 import { createResource, deleteResource } from '../../util/Api'
 import { fetchAuthed, requestAuth } from '../main/Service';
+import { pageUrl } from '../../util/App.js';
 
 /**
 * Actions to update the internal state maintaining the project listing on
@@ -128,8 +129,9 @@ const projectDeleteError = (error) => ({
 /**
  * Handle errors when retrieving the project listing.
  */
-const projectCreateSuccess = () => (dispatch) => {
-    dispatch(fetchProjects())
+const projectCreateSuccess = (proj) => (dispatch) => {
+    let url = pageUrl(proj.id);
+	window.location.assign(url);
 }
 
 

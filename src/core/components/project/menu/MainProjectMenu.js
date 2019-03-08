@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Icon, Menu } from 'semantic-ui-react';
 import BranchMenuDropdown from './BranchMenuDropdown';
@@ -28,6 +28,10 @@ import ProjectMenuDropdown from './ProjectMenuDropdown';
 import DeleteResourceModal from '../../modals/DeleteResourceModal';
 import EditResourceNameModal from '../../modals/EditResourceNameModal';
 import { isNotEmptyString, pageUrl } from '../../../util/App';
+import { fetchResource } from '../../../util/Api';
+import {
+    projectActionError, requestProjectAction
+} from '../../../actions/project/ProjectPage';
 import '../../../../css/ResourceListing.css';
 import '../../../../css/ProjectPage.css';
 
@@ -44,8 +48,10 @@ import '../../../../css/ProjectPage.css';
 const MODAL_DELETE_BRANCH = 'MODAL_DELETE_BRANCH';
 const MODAL_EDIT_BRANCH_NAME = 'MODAL_EDIT_BRANCH_NAME';
 const MODAL_EDIT_PROJECT_NAME = 'MODAL_EDIT_PROJECT_NAME';
+const MODAL_CREATE_BRANCH = 'MODAL_CREATE_BRANCH';
 
-class MainProjectMenu extends React.Component {
+
+class MainProjectMenu extends Component {
     static propTypes = {
         groupMode: PropTypes.number.isRequired,
         project: PropTypes.object.isRequired,
@@ -61,6 +67,7 @@ class MainProjectMenu extends React.Component {
         onShowDataset: PropTypes.func.isRequired,
         onShowHistory: PropTypes.func.isRequired,
         onShowNotebook: PropTypes.func.isRequired,
+        onCreateBranch: PropTypes.func.isRequired
     }
     /**
      * Initialize internal state to keep track of any modal that may be shown.
@@ -70,6 +77,27 @@ class MainProjectMenu extends React.Component {
         // No modal shown initially
         this.state = {modal: null};
     }
+    /**
+     * Submit create new branch request from this module.
+     */
+    handleCreateBranch = (name) => {
+        const { dispatch, workflow, onCreateBranch } = this.props;
+        this.hideModal();
+        dispatch( 
+        	fetchResource(
+	            workflow.links.modules,
+	            (json) => (dispatch) => {
+	                return dispatch(
+	                	onCreateBranch(json.modules[json.modules.length-1], name)
+	                );
+	            },
+	            (message) => (
+	                projectActionError('Error loading module for branch', message)
+	            ),
+	            requestProjectAction
+	        ) 
+	    )
+    };
     /**
      * Submit request to delete the current branch.
      */
@@ -96,7 +124,8 @@ class MainProjectMenu extends React.Component {
             onShowDataset,
             onShowDatasetError,
             onShowHistory,
-            onShowNotebook
+            onShowNotebook,
+            onCreateBranch
         } = this.props;
         // The basic layout contains a menu bar and an optional modal or error
         // message.
@@ -128,6 +157,7 @@ class MainProjectMenu extends React.Component {
                     onShowHistory={onShowHistory}
                     isLive={(!workflow.readOnly) && (!resource.isHistory())}
                     selectedBranch={workflow.branch}
+                    onCreateBranch={this.showCreateBranchModal}
                 />
             );
             // Depending on whether the resource is a notebook or not the
@@ -211,7 +241,16 @@ class MainProjectMenu extends React.Component {
                     title={'Edit branch name'}
                     value={workflow.branch.name}
                 />
-            }
+            } else if ((modal === MODAL_CREATE_BRANCH) && (resource != null)) {
+                optionalModalOrMessage = <EditResourceNameModal
+	                isValid={isNotEmptyString}
+	                open={true}
+	                prompt='Enter a name for the new branch'
+	                title='Create branch'
+	                onCancel={this.hideModal}
+	                onSubmit={this.handleCreateBranch}
+	            />
+        }
         }
         return (
             <div className='project-menu'>
@@ -220,6 +259,10 @@ class MainProjectMenu extends React.Component {
             </div>
         );
     }
+    /**
+     * Show modal to enter new branch name.
+     */
+    showCreateBranchModal = () => (this.setState({modal: MODAL_CREATE_BRANCH}));
     /**
      * Show modal dialog to confirm branch delete.
      */

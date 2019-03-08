@@ -35,12 +35,13 @@ class BranchMenuDropdown extends React.Component {
         onGoLive: PropTypes.func.isRequired,
         onSelect: PropTypes.func.isRequired,
         onShowHistory: PropTypes.func.isRequired,
-        selectedBranch: PropTypes.object.isRequired
+        selectedBranch: PropTypes.object.isRequired,
+        onCreateBranch: PropTypes.func.isRequired
     }
     render() {
         const {
             branches, isLive, onDelete, onEdit, onGoLive, onSelect,
-            onShowHistory, selectedBranch
+            onShowHistory, selectedBranch, onCreateBranch
         } = this.props;
         // List of items in the dropdown menu
         let branchItems = null;
@@ -84,6 +85,13 @@ class BranchMenuDropdown extends React.Component {
                         disabled={selectedBranch.id === DEFAULT_BRANCH}
                         text='Delete'
                         onClick={onDelete}
+                    />
+                    <Dropdown.Item
+                        key='branch'
+                        icon='fork'
+                        disabled={false}
+                        text='New'
+                        onClick={onCreateBranch}
                     />
                     <Dropdown.Divider />
                     <Dropdown.Header content='Time Machine' />

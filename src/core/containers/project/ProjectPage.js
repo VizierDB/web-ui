@@ -45,6 +45,7 @@ import ProjectStatusHeader from '../../components/project/ProjectStatusHeader';
 import Notebook from '../notebook/Notebook';
 import Spreadsheet from '../spreadsheet/Spreadsheet';
 import { valueOrDefault } from '../../util/App';
+import { createBranch } from '../../actions/project/Branch';
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
 import '../../../css/BranchHistory.css';
@@ -189,6 +190,13 @@ class ProjectPage extends Component {
         const { dispatch } = this.props;
         dispatch(redirectTo(url));
     }
+    /**
+     * Create a new branch for the current workflow up until the given module.
+     */
+    createBranch = (module, name) => {
+        const { dispatch, project, workflow } = this.props;
+        dispatch(createBranch(project, workflow, module, name));
+    }
     render() {
         const {
             fetchError,
@@ -329,6 +337,8 @@ class ProjectPage extends Component {
                                 project={project}
                                 resource={resource}
                                 workflow={workflow}
+                                onCreateBranch={this.createBranch}
+                                dispatch={dispatch}
                             />
                             </Grid.Column>
                             <Grid.Column className='project-menu-bar' width={6}>
