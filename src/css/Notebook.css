@@ -90,7 +90,7 @@ table.cell {
 td.cell-index {
     text-align: center;
     vertical-align: top;
-    width: 50px;
+    width: 60px;
 }
 
 p.cell-index {
@@ -106,7 +106,7 @@ td.cell-area {
 }
 
 div.cell-menu {
-    color: #888;
+    color: #3b4151;
     margin-top: 10px;
 }
 
@@ -115,7 +115,7 @@ div.cell-menu {
  * Error state
  */
 table.cell.inactive-cell.error-cell {
-    border-left: solid 3px #d32f2f;
+    /*border-left: solid 3px #d32f2f;*/
 }
 
 td.cell-index.error-cell {
@@ -130,32 +130,33 @@ p.cell-index.error-cell {
  * Pending state
  */
 table.cell.inactive-cell.pending-cell {
-    border-left: solid 3px #ffa000;
+    /*border-left: solid 3px #ffa000;*/
 }
 
 td.cell-index.pending-cell {
-    background: #ffe7c0;
+    /*background: #ffe7c0;*/
 }
 
 p.cell-index.pending-cell {
-    color: #ffa000;
+    /*color: #ffa000;*/
+    color: #888;
 }
 
 /*
  * Running state
  */
- table.cell.inactive-cell.running-cell {
-     border-left: solid 3px #43a047;
- }
+table.cell.inactive-cell.running-cell {
+    /*border-left: solid 3px #43a047;*/
+}
 
- td.cell-index.running-cell {
-     background: #c5dbc6;
- }
+td.cell-index.running-cell {
+     /*background: #c5dbc6;*/
+}
 
- p.cell-index.running-cell {
-     color: #00a007;
- }
-
+p.cell-index.running-cell {
+    /*color: #00a007;*/
+    color: #888;
+}
 
 /* Command text */
 
@@ -215,18 +216,6 @@ span.header-name {
 
 /* Outputs */
 
-div.collapsed-output {
-    color: #3b4151;
-    padding: 0px 10px;
-    font-family: monospace,monospace;
-}
-
-div.collapsed-output-error {
-    color: #843534;
-    padding: 0px 1px;
-    font-family: monospace,monospace;
-}
-
 div.output-content {
     margin-top: 10px;
 }
@@ -240,23 +229,26 @@ div.module-timings {
 }
 
 p.output-info-headline {
-    background: #b7cee4;
-    border-top: solid 1px #1976d2;
-    color: #3b4151;
+    border-bottom: solid 1px #3b4151;
     padding: 5px;
     margin-bottom: 0px;
 }
 
+span.output-info-headline {
+    font-weight: bold;
+    color: #3b4151;
+}
+
 p.output-error-headline {
-    border-top: solid 1px #912d2b;
-    color: #912d2b;
+    border-bottom: solid 1px #912d2b;
     padding: 5px;
     margin-top: 25px;
     margin-bottom: 5px;
 }
 
-div.output-toolbar {
-    margin-bottom: 10px;
+span.output-error-headline {
+    color: #912d2b;
+    font-weight: bold;
 }
 
 div.dataset {

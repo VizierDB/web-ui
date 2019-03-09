@@ -250,3 +250,7 @@ div.spinner-padding-ms {
     text-align: center;
     margin: 150px;
 }
+
+div.centered {
+    text-align: center;
+}

@@ -54,13 +54,11 @@ import { HATEOASReferences } from '../../util/HATEOAS'
 export const serviceApi = (state = INITIAL_STATE, action) => {
 	switch (action.type) {
     	case REQUEST_SERVICE:
-            console.log(REQUEST_SERVICE);
 	        return {
 	          ...state,
 	          isFetching: true
 	        }
 	    case RECEIVE_SERVICE:
-            console.log(RECEIVE_SERVICE);
 	        return {
 	          ...state,
               engine: {

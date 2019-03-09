@@ -18,11 +18,15 @@
 
 import React from 'react';
 import { PropTypes } from 'prop-types';
+import { Button } from 'semantic-ui-react';
 import CellCommandText from './CellCommandText';
 import CellDropDownMenu from './CellDropDownMenu';
-import CellOutputArea from './output/CellOutputArea';
+import CellOutputArea from './CellOutputArea';
+import ContentSpinner from '../../ContentSpinner';
 import { TextButton } from '../../Button';
+import TimestampOutput from './TimestampOutput';
 import { INSERT_AFTER, INSERT_BEFORE } from '../../../resources/Notebook';
+import '../../../../css/App.css';
 import '../../../../css/Notebook.css';
 
 
@@ -100,7 +104,7 @@ class WorkflowModuleCell extends React.Component {
      */
     handleSelect = () => {
         const { cell, isActiveCell, onSelect } = this.props;
-        if (!isActiveCell) {
+        if ((!isActiveCell) && (!cell.isActive())) {
             onSelect(cell);
         }
     }
@@ -148,23 +152,23 @@ class WorkflowModuleCell extends React.Component {
         // If this is the active cell the cell menu is shown and the CSS style
         // is changed.
         let css = 'cell';
-        let cellMenu = null;
         if (isActiveCell) {
             css += ' active-cell';
-            cellMenu = (
-                <CellDropDownMenu
-                    cell={cell}
-                    cellNumber={cellNumber}
-                    notebook={notebook}
-                    onAddFilteredCommand={this.handleAddFilteredCommand}
-                    onCreateBranch={this.handleCreateBranch}
-                    onInsertCell={this.handleInsertCell}
-                    onOutputSelect={onOutputSelect}
-                />
-            );
         } else {
             css += ' inactive-cell';
         }
+        const cellMenu = (
+            <CellDropDownMenu
+                cell={cell}
+                cellNumber={cellNumber}
+                isActiveCell={isActiveCell}
+                notebook={notebook}
+                onAddFilteredCommand={this.handleAddFilteredCommand}
+                onCreateBranch={this.handleCreateBranch}
+                onInsertCell={this.handleInsertCell}
+                onOutputSelect={onOutputSelect}
+            />
+        );
         // Add style for cells that are not in success state
         let cssState = '';
         if (cell.isErrorOrCanceled()) {
@@ -173,6 +177,41 @@ class WorkflowModuleCell extends React.Component {
             cssState = ' running-cell';
         } else if (cell.isPending()) {
             cssState = ' pending-cell';
+        }
+        // The output area depends on whether the cell is running or not
+        let outputArea = null;
+        if (cell.isRunning()) {
+            outputArea = (
+                <div>
+                    <div className='module-timings'>
+                        <TimestampOutput label='Created at' time={cell.module.timestamps.createdAt} />
+                        <TimestampOutput label='Started at' time={cell.module.timestamps.startedAt} />
+                    </div>
+                    <ContentSpinner text='Running ...' size='small' />
+                    <div className='centered'>
+                        <Button negative>Cancel</Button>
+                    </div>
+                </div>
+            );
+        } else if (cell.isPending()) {
+            outputArea = (
+                <div>
+                    <div className='module-timings'>
+                        <TimestampOutput label='Created at' time={cell.module.timestamps.createdAt} />
+                    </div>
+                </div>
+            );
+        } else {
+            outputArea = (
+                <CellOutputArea
+                    cell={cell}
+                    onNavigateDataset={this.handleDatasetNavigate}
+                    onOutputSelect={onOutputSelect}
+                    onFetchAnnotations={onFetchAnnotations}
+                    onTextOutputClick={this.handleSelect}
+                    userSettings={userSettings}
+                />
+            );
         }
         return (
             <table className={css + cssState}><tbody>
@@ -187,14 +226,7 @@ class WorkflowModuleCell extends React.Component {
                             onClick={this.handleSelect}
                             onDoubleClick={onDefaultAction}
                         />
-                        <CellOutputArea
-                            cell={cell}
-                            onNavigateDataset={this.handleDatasetNavigate}
-                            onOutputSelect={onOutputSelect}
-                            onFetchAnnotations={onFetchAnnotations}
-                            onTextOutputClick={this.handleSelect}
-                            userSettings={userSettings}
-                        />
+                        { outputArea }
                     </td>
                 </tr>
             </tbody></table>

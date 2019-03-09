@@ -21,8 +21,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { addFilteredCommand, removeFilteredCommand } from '../../actions/main/App';
 import { createBranch, deleteBranch } from '../../actions/project/Branch';
-import { fetchWorkflow, hideCellOutput, showCellChart, fetchAnnotations,
-    selectNotebookCell, showCellDataset, showCellStdout,
+import { fetchAnnotations, fetchWorkflow, hideCellOutput, insertNotebookCell,
+    showCellChart, selectNotebookCell, showCellDataset, showCellStdout,
     showCellTimestamps } from '../../actions/project/Notebook';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import { fetchProjects } from '../../actions/project/ProjectListing';
@@ -185,10 +185,9 @@ class NotebookPage extends Component {
      * is empty.
      */
     handleInsertCell = (cell, position) => {
-        if (cell != null) {
-            alert('Insert for ' + cell.id + ' at ' + position);
-        } else {
-            alert('Insert to empty notebook');
+        const { dispatch, notebook } = this.props;
+        if (!notebook.hasNewCellAt(cell, position)) {
+            dispatch(insertNotebookCell(notebook, cell, position));
         }
     }
     /**

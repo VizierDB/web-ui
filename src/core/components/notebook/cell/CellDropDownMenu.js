@@ -18,7 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Dropdown } from 'semantic-ui-react';
+import { Dropdown, Icon } from 'semantic-ui-react';
 import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
     CONTENT_TIMESTAMPS, INSERT_AFTER, INSERT_BEFORE } from '../../../resources/Notebook';
 import '../../../../css/Notebook.css'
@@ -32,6 +32,7 @@ class CellDropDownMenu extends React.Component {
     static propTypes = {
         cell: PropTypes.object.isRequired,
         cellNumber: PropTypes.number.isRequired,
+        isActiveCell: PropTypes.bool.isRequired,
         notebook: PropTypes.object.isRequired,
         onAddFilteredCommand: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
@@ -55,23 +56,32 @@ class CellDropDownMenu extends React.Component {
         const {
             cell,
             cellNumber,
+            isActiveCell,
             notebook,
             onAddFilteredCommand,
             onCreateBranch,
             onOutputSelect
         } = this.props;
         const { module, output } = cell;
-        // Determine the key of the selected output to disable the respective
-        // menu entry.
-        let selectedKey = null;
-        if ((output.isText()) || (output.isHtml())) {
-            selectedKey = 'console';
-        } else if (output.isTimestamps()) {
-            selectedKey = 'timestamps';
-        } else if (output.isDataset()) {
-            selectedKey = 'ds-' + output.dataset.name;
-        } else if (output.isChart()) {
-            selectedKey = 'vw-' + output.name;
+        // If the cell is not the active cell the output depends on the cell
+        // state. If the cell module is not in a success state an icon is
+        // displayed. Otherwise, the result is null
+        if (!isActiveCell) {
+            let icon = null;
+            if (cell.isCanceled()) {
+                icon = (<Icon name='cancel' color='red' title='Canceled'/>);
+            } else if (cell.isError()) {
+                icon = (<Icon name='warning circle' color='red' title='Error' />);
+            } else if (cell.isPending()) {
+                icon = (<Icon name='hourglass half' title='Pending' />);
+            } else if (cell.isRunning()) {
+                icon = (<Icon name='circle notch' title='Running' />);
+            }
+            return (
+                <div className='cell-menu'>
+                { icon }
+                </div>
+            );
         }
         // Create list of dropdon menu items. The first section contains the
         // cell actions edit, delete, insert cell (above/below) create new
@@ -81,6 +91,7 @@ class CellDropDownMenu extends React.Component {
         //dropdownItems.push(<Dropdown.Header key='cell' content={'Cell (#' + cellNumber + ')'} />);
         //dropdownItems.push(<Dropdown.Divider key='div1'/>);
         if (!notebook.readOnly) {
+            dropdownItems.push(<Dropdown.Header key='header-cell' content="Cell"/>);
             dropdownItems.push(
                 <Dropdown.Item
                     key='edit'
@@ -99,7 +110,8 @@ class CellDropDownMenu extends React.Component {
                     onClick={() => (alert('Delete'))}
                 />
             );
-            dropdownItems.push(<Dropdown.Divider key='div1'/>);
+            dropdownItems.push(<Dropdown.Divider key='div-notebook'/>);
+            dropdownItems.push(<Dropdown.Header key='header-notebook' content="Notebook"/>);
             dropdownItems.push(
                 <Dropdown.Item
                     key='insert-above'
@@ -118,10 +130,11 @@ class CellDropDownMenu extends React.Component {
                     onClick={this.handleInsertAfter}
                 />
             );
-            dropdownItems.push(<Dropdown.Divider key='div2'/>);
+            dropdownItems.push(<Dropdown.Divider key='div-branch'/>);
         }
         // Have a descriptive title that shows the user which cells will be
         // included in the new branch
+        dropdownItems.push(<Dropdown.Header key='header-branch' content="Branch"/>);
         let branchRange = '1';
         if (cellNumber > 1) {
             branchRange += '-' + cellNumber;
@@ -135,6 +148,8 @@ class CellDropDownMenu extends React.Component {
                 onClick={onCreateBranch}
             />
         );
+        dropdownItems.push(<Dropdown.Divider key='div-filter'/>);
+        dropdownItems.push(<Dropdown.Header key='header-filter' content="Filter"/>);
         dropdownItems.push(
             <Dropdown.Item
                 key='hide-cmd'
@@ -147,10 +162,25 @@ class CellDropDownMenu extends React.Component {
         // The second section of the menu contains the available outputs. The
         // console output and the module timestamps are always available.
         // Datasets and views are optional.
-        dropdownItems.push(<Dropdown.Divider key='div3'/>);
-        dropdownItems.push(<Dropdown.Header key='output' content='Output' />);
-        dropdownItems.push(<Dropdown.Divider key='div4'/>);
-        dropdownItems.push(
+        // Determine the key of the selected output to disable the respective
+        // menu entry.
+        let selectedKey = null;
+        let selectedIcon = 'hide';
+        if ((output.isText()) || (output.isHtml())) {
+            selectedKey = 'console';
+            selectedIcon = 'desktop';
+        } else if (output.isTimestamps()) {
+            selectedKey = 'timestamps';
+            selectedIcon = 'clock outline';
+        } else if (output.isDataset()) {
+            selectedKey = 'ds-' + output.dataset.name;
+            selectedIcon = 'table';
+        } else if (output.isChart()) {
+            selectedKey = 'vw-' + output.name;
+            selectedIcon = 'bar chart';
+        }
+        let outputItems = [];
+        outputItems.push(
             <Dropdown.Item
                 key='console'
                 icon='desktop'
@@ -160,7 +190,7 @@ class CellDropDownMenu extends React.Component {
                 onClick={() => (onOutputSelect(module, CONTENT_TEXT))}
             />
         );
-        dropdownItems.push(
+        outputItems.push(
             <Dropdown.Item
                 key='hide'
                 icon='hide'
@@ -170,7 +200,7 @@ class CellDropDownMenu extends React.Component {
                 onClick={() => (onOutputSelect(module, CONTENT_HIDE))}
             />
         );
-        dropdownItems.push(
+        outputItems.push(
             <Dropdown.Item
                 key='timestamps'
                 icon='clock outline'
@@ -182,10 +212,11 @@ class CellDropDownMenu extends React.Component {
         );
         // Show dataset options if datasets are present in output
         if (module.datasets.length > 0) {
-            dropdownItems.push(<Dropdown.Divider key='div5'/>);
+            outputItems.push(<Dropdown.Divider key='div-ds'/>);
+            outputItems.push(<Dropdown.Header key='header-ds' content="Datasets"/>);
             for (let i = 0; i < module.datasets.length; i++) {
                 const ds = module.datasets[i];
-                dropdownItems.push(
+                outputItems.push(
                     <Dropdown.Item
                         key={'ds-' + ds.name}
                         icon='table'
@@ -199,10 +230,11 @@ class CellDropDownMenu extends React.Component {
         }
         // Show chart options if chart views are present in output
         if (module.charts.length > 0) {
-            dropdownItems.push(<Dropdown.Divider key='div6'/>);
+            outputItems.push(<Dropdown.Divider key='div-vw'/>);
+            outputItems.push(<Dropdown.Header key='header-vw' content="Charts"/>);
             for (let i = 0; i < module.charts.length; i++) {
                 const chart = module.charts[i];
-                dropdownItems.push(
+                outputItems.push(
                     <Dropdown.Item
                         key={'vw-' + chart.name}
                         icon='bar chart'
@@ -216,8 +248,11 @@ class CellDropDownMenu extends React.Component {
         }
         return (
             <div className='cell-menu'>
-                <Dropdown icon='bars' title='Cell actions and output'>
+                <Dropdown icon='bars' title='Cell actions'>
                     <Dropdown.Menu>{dropdownItems}</Dropdown.Menu>
+                </Dropdown>
+                <Dropdown icon={selectedIcon} title='Cell output'>
+                    <Dropdown.Menu>{outputItems}</Dropdown.Menu>
                 </Dropdown>
             </div>
         );

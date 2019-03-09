@@ -20,13 +20,13 @@ import React from 'react';
 import createReactClass from 'create-react-class';
 import { PropTypes } from 'prop-types';
 import { Dimmer, Icon, Loader } from 'semantic-ui-react';
-import DatasetChart from '../../../plot/DatasetChart';
-import DatasetView from '../../../spreadsheet/DatasetView';
-import { ErrorMessage } from '../../../Message';
+import DatasetChart from '../../plot/DatasetChart';
+import DatasetView from '../../spreadsheet/DatasetView';
+import { ErrorMessage } from '../../Message';
 import TimestampOutput from './TimestampOutput';
-import { CONTENT_TEXT, OutputText } from '../../../../resources/Notebook';
-import '../../../../../css/App.css';
-import '../../../../../css/Notebook.css';
+import { CONTENT_TEXT, OutputText } from '../../../resources/Notebook';
+import '../../../../css/App.css';
+import '../../../../css/Notebook.css';
 
 
 
@@ -142,7 +142,11 @@ class CellOutputArea extends React.Component {
             }
             outputContent = (
                 <div className='module-timings'>
-                    <p className='output-info-headline'><Icon color='blue' name='info circle' />Module timings</p>
+                    <p className='output-info-headline'>
+                        <span className='output-info-headline'>
+                            Module timings
+                        </span>
+                    </p>
                     <TimestampOutput label='Created at' time={output.createdAt} />
                     <TimestampOutput label='Started at' time={output.startedAt} />
                     <TimestampOutput label={finishedType} time={output.finishedAt} />
@@ -160,7 +164,11 @@ class CellOutputArea extends React.Component {
                 outputContent = (
                     <div>
                         { outputContent }
-                        <p className='output-error-headline'><Icon color='red' name='warning circle' />Module errors</p>
+                        <p className='output-error-headline'>
+                            <span className='output-error-headline'>
+                                Module errors
+                            </span>
+                        </p>
                         <pre className='error-text' onClick={onTextOutputClick}>
                             {errorOut.lines.join('\n')}
                         </pre>

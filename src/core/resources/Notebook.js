@@ -333,6 +333,14 @@ export class Notebook {
         const ds = this.datasets[datasetId];
         return new DatasetDescriptor(datasetId, name, ds.columns, ds.links);
     }
+    hasNewCellAt(cell, position) {
+        if (cell != null) {
+            alert('Insert for ' + cell.id + ' at ' + position);
+        } else {
+            alert('Insert to empty notebook');
+        }
+        return false;
+    }
     /**
      * Test if a notebook is empty.
      */
@@ -412,6 +420,10 @@ class NotebookCell {
     getCodeLanguage() {
         return this.commandSpec.parameters[0].language;
     }
+    /**
+     * Test if the associated workflow module is in an active state.
+     */
+    isActive = () => (this.isPending() || this.isRunning());
     /**
      * Test if the state of the associated module is canceled.
      */

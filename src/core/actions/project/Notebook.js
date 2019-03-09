@@ -107,6 +107,11 @@ const workflowFetchError = (message, status) => (
 // Notebooks
 // -----------------------------------------------------------------------------
 
+export const insertNotebookCell = (notebook, cell, position) => (dispatch) => {
+    return {type: 'NO_OP'};
+}
+
+
 /**
  * Set the identifier of the notebook cell that is active. The cell might be
  * null if the active cell selection is being cleared.
@@ -353,7 +358,7 @@ export const deleteNotebookCell = (module) => (dispatch) => {
  * url: string
  * data: {type: string, id: string, arguments: object}
  */
-export const insertNotebookCell = (url, data) => (dispatch) => {
+export const insertWorkflowModule = (url, data) => (dispatch) => {
     return dispatch(updateNotebookCell(url, 'POST', data));
 }
 
