@@ -17,7 +17,6 @@
  */
 
 import { DatasetDescriptor } from './Dataset';
-import { isError, isErrorOrCanceled } from './Workflow';
 import { HATEOASReferences } from '../util/HATEOAS';
 import { utc2LocalTime } from '../util/Timestamp';
 
@@ -236,6 +235,13 @@ export const StandardOutput = (module) => {
 // Notebook
 // -----------------------------------------------------------------------------
 
+// Workflow and module states
+const STATE_PENDING = 0;
+const STATE_RUNNING = 1
+const STATE_CANCELED = 2
+const STATE_ERROR = 3
+const STATE_SUCCESS = 4
+
 
 /**
  * Workflow module handle.
@@ -403,26 +409,73 @@ class NotebookCell {
         return this.commandSpec.parameters[0].language;
     }
     /**
+     * Test if the state of the associated module is canceled.
+     */
+    isCanceled() {
+        if (this.module != null) {
+            return this.module.state === STATE_CANCELED;
+        } else {
+            return false;
+        }
+    }
+    /**
      * Test if the command that is associated with the module contains script
      * code (e.g., Python code, SQL, Scala code). The code language can be
      * retrieved using the .getCodeLanguage() method.
      */
-    isCode() {
+    isCodeCell() {
         if (this.commandSpec.parameters.length === 1) {
             return this.commandSpec.parameters[0].datatype === 'code';
         }
         return false;
     }
     /**
-     * Test if the module is in error state.
+     * Test if the associated workflow module is in error state.
      */
     isError() {
-        return isError(this.module.state);
+        if (this.module != null) {
+            return this.module.state === STATE_ERROR
+        } else {
+            return false;
+        }
     }
     /**
-     * Test if the module is in error or canceled state.
+     * Test if the associated workflow module is in error or canceled state.
      */
-    isErrorOrCanceled() {
-        return isErrorOrCanceled(this.module.state);
+    isErrorOrCanceled = () => (this.isCanceled() || this.isError());
+    /**
+     * Test if this object represents a new cell in the notebook. A new cell
+     * does not have a workflow module associated with it.
+     */
+    isNewCell = () => (this.module == null);
+    /**
+     * Test if the associated workflow module is in pending state.
+     */
+    isPending() {
+        if (this.module != null) {
+            return this.module.state === STATE_PENDING
+        } else {
+            return false;
+        }
+    }
+    /**
+     * Test if the associated workflow module is in running state.
+     */
+    isRunning() {
+        if (this.module != null) {
+            return this.module.state === STATE_RUNNING
+        } else {
+            return false;
+        }
+    }
+    /**
+     * Test if the associated workflow module is in success state.
+     */
+    isSuccess() {
+        if (this.module != null) {
+            return this.module.state === STATE_SUCCESS
+        } else {
+            return false;
+        }
     }
 }

@@ -161,14 +161,23 @@ class WorkflowModuleCell extends React.Component {
         } else {
             css += ' inactive-cell';
         }
+        // Add style for cells that are not in success state
+        let cssState = '';
+        if (cell.isErrorOrCanceled()) {
+            cssState = ' error-cell';
+        } else if (cell.isRunning()) {
+            cssState = ' running-cell';
+        } else if (cell.isPending()) {
+            cssState = ' pending-cell';
+        }
         return (
-            <table className={css}><tbody>
+            <table className={css + cssState}><tbody>
                 <tr>
-                    <td className='cell-index' onClick={this.handleSelect}>
-                        <p className='cell-index'>[{cellNumber}]</p>
+                    <td className={'cell-index' + cssState} onClick={this.handleSelect}>
+                        <p className={'cell-index' + cssState}>[{cellNumber}]</p>
                         { cellMenu }
                     </td>
-                    <td className='cell-area'>
+                    <td className={'cell-area' + cssState}>
                         <CellCommandText
                             cell={cell}
                             onClick={this.handleSelect}

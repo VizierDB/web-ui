@@ -24,7 +24,7 @@ import DatasetChart from '../../../plot/DatasetChart';
 import DatasetView from '../../../spreadsheet/DatasetView';
 import { ErrorMessage } from '../../../Message';
 import TimestampOutput from './TimestampOutput';
-import { CONTENT_TEXT } from '../../../../resources/Notebook';
+import { CONTENT_TEXT, OutputText } from '../../../../resources/Notebook';
 import '../../../../../css/App.css';
 import '../../../../../css/Notebook.css';
 
@@ -132,14 +132,41 @@ class CellOutputArea extends React.Component {
                 </pre>
             );
         } else if (output.isTimestamps()) {
+            // Depending on whether the module completed successfully or not
+            // the label for the finished at timestamp changes.
+            let finishedType = '';
+            if (cell.isErrorOrCanceled()) {
+                finishedType = 'Canceled at';
+            } else {
+                finishedType = 'Finished at';
+            }
             outputContent = (
                 <div>
-                    <p className='output-info-headline'><Icon color='blue' name='info circle' />Module execution times</p>
+                    <p className='output-info-headline'><Icon color='blue' name='info circle' />Module timings</p>
                     <TimestampOutput label='Created at' time={output.createdAt} />
                     <TimestampOutput label='Started at' time={output.startedAt} />
-                    <TimestampOutput label='Finished at' time={output.finishedAt} />
+                    <TimestampOutput label={finishedType} time={output.finishedAt} />
                 </div>
             );
+        }
+        // If the cell is in error state and it has output written to stabdard
+        // error then we show those lines in an error box. We only show the
+        // error messages if the displayed output is console (i.e., either
+        // text or html)
+        if ((cell.isError()) && ((output.isHtml()) || (output.isText()))) {
+            const stderr = cell.module.outputs.stderr;
+            if (stderr.length > 0) {
+                const errorOut = new OutputText(stderr);
+                outputContent = (
+                    <div>
+                        { outputContent }
+                        <p className='output-error-headline'><Icon color='red' name='warning circle' />Module errors</p>
+                        <pre className='error-text' onClick={onTextOutputClick}>
+                            {errorOut.lines.join('\n')}
+                        </pre>
+                    </div>
+                );
+            }
         }
         // Show spinner while fetching the output
         return  (

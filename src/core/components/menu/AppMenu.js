@@ -54,6 +54,7 @@ class AppMenu extends React.Component {
     static propTypes = {
         branch: PropTypes.object,
         notebook: PropTypes.object,
+        onCreateBranch: PropTypes.func,
         onCreateProject: PropTypes.func.isRequired,
         onDeleteBranch: PropTypes.func,
         onDeleteProject: PropTypes.func.isRequired,
@@ -110,6 +111,7 @@ class AppMenu extends React.Component {
         const {
             branch,
             notebook,
+            onCreateBranch,
             onCreateProject,
             onGoHome,
             onHideCells,
@@ -175,6 +177,7 @@ class AppMenu extends React.Component {
                         key='branches'
                         branches={project.branches}
                         isLive={!isLiveEnabled}
+                        onCreateBranch={onCreateBranch}
                         onDelete={this.showDeleteBranchModal}
                         onEdit={this.showEditBranchNameModal}
                         onGoLive={this.switchToBranchHead}

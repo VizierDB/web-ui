@@ -45,17 +45,21 @@ export const REQUEST_BRANCH = 'REQUEST_BRANCH'
  *
  */
 export const createBranch = (project, branch, workflowId, moduleId, name, history) =>  (dispatch) => {
-    // Generate request body containing source information and branch properties
+    // Generate request body containing source information and branch
+    // properties. The branch source is empty if the given module identifier
+    // is empty
     const data = {
-        source: {
-            branchId: branch.id,
-            workflowId: workflowId,
-            moduleId: moduleId
-        },
         properties: [{
             key: 'name',
             value: name
         }]
+    }
+    if (moduleId != null) {
+        data.source = {
+            branchId: branch.id,
+            workflowId: workflowId,
+            moduleId: moduleId
+        }
     }
     // POST request to branches url contained in the project handle's links. On
     // success, redirect to the page for the new branch.

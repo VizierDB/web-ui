@@ -18,6 +18,7 @@
 
 import React from 'react';
 import { PropTypes } from 'prop-types';
+import { Icon } from 'semantic-ui-react';
 import { LargeMessageButton } from '../../components/Button'
 import WorkflowModuleCell from './cell/WorkflowModuleCell';
 
@@ -85,15 +86,42 @@ class Notebook extends React.Component {
                 />
             );
         }
+        // Show a message button to append a new cell (only if the last cell
+        // is not already a new cell and the workflow is not in error state).
+        let appendCellButton = null;
+        const lastCell = notebook.lastCell();
+        if ((!lastCell.isNewCell()) && (!lastCell.isErrorOrCanceled())) {
+            appendCellButton = (
+                <div className='spinner-padding-md'>
+                    <Icon
+                        size='big'
+                        link
+                        name='plus'
+                        onClick={() => (alert('Append'))}
+                        title='Append new cell'
+                     />
+                </div>
+            );
+        }
         // Reverse the notebook cells if flag is true
+        let content = null;
         if (userSettings.showNotebookReversed()) {
             notebookCells.reverse();
+            content = (
+                <div>
+                    { appendCellButton }
+                    { notebookCells }
+                </div>
+            );
+        } else {
+            content = (
+                <div>
+                    { notebookCells }
+                    { appendCellButton }
+                </div>
+            );
         }
-        return (
-            <div>
-                {notebookCells}
-            </div>
-        );
+        return content;
     }
 }
 

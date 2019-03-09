@@ -22,24 +22,6 @@ import { utc2LocalTime } from '../util/Timestamp';
 
 
 // -----------------------------------------------------------------------------
-// Workflow and module states
-// -----------------------------------------------------------------------------
-
-const STATE_PENDING = 0;
-const STATE_RUNNING = 1
-const STATE_CANCELED = 2
-const STATE_ERROR = 3
-const STATE_SUCCESS = 4
-
-export const isCanceled = (state) => (state === STATE_CANCELED);
-export const isError = (state) => (state === STATE_ERROR);
-export const isErrorOrCanceled = (state) => (isCanceled(state) || isError(state));
-export const isPending = (state) => (state === STATE_PENDING);
-export const isRunning = (state) => (state === STATE_RUNNING);
-export const isSuccess = (state) => (state === STATE_SUCCESS);
-export const isActive = (state) => (isPending(state) || isRunning(state));
-
-// -----------------------------------------------------------------------------
 // Workflow objects
 // -----------------------------------------------------------------------------
 

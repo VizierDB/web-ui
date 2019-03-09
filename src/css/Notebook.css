@@ -100,28 +100,61 @@ p.cell-index {
     margin: 0px;
 }
 
-div.cell-menu {
-    color: #888;
-    margin-top: 10px;
-}
-
 td.cell-area {
     padding-left: 10px;
     vertical-align: top;
 }
 
-/* Cell Index Link Formating */
-
-a.cell-index {
-    color: #303f9f;
-    outline: 0;
+div.cell-menu {
+    color: #888;
+    margin-top: 10px;
 }
 
-a.cell-index:hover {
-    color: #4183c4;
-    outline: 0;
-    cursor: pointer;
+
+/*
+ * Error state
+ */
+table.cell.inactive-cell.error-cell {
+    border-left: solid 3px #d32f2f;
 }
+
+td.cell-index.error-cell {
+    background: #ffcccc;
+}
+
+p.cell-index.error-cell {
+    color: #912d2b;
+}
+
+/*
+ * Pending state
+ */
+table.cell.inactive-cell.pending-cell {
+    border-left: solid 3px #ffa000;
+}
+
+td.cell-index.pending-cell {
+    background: #ffe7c0;
+}
+
+p.cell-index.pending-cell {
+    color: #ffa000;
+}
+
+/*
+ * Running state
+ */
+ table.cell.inactive-cell.running-cell {
+     border-left: solid 3px #43a047;
+ }
+
+ td.cell-index.running-cell {
+     background: #c5dbc6;
+ }
+
+ p.cell-index.running-cell {
+     color: #00a007;
+ }
 
 
 /* Command text */
@@ -203,8 +236,18 @@ div.output-content-html {
 }
 
 p.output-info-headline {
+    background: #b7cee4;
+    border-top: solid 1px #1976d2;
     color: #3b4151;
-    padding: 10px 10px 0px 0px;
+    padding: 5px;
+    margin-bottom: 0px;
+}
+
+p.output-error-headline {
+    border-top: solid 1px #912d2b;
+    color: #912d2b;
+    padding: 5px;
+    margin-top: 25px;
     margin-bottom: 5px;
 }
 
@@ -225,10 +268,8 @@ pre.plain-text {
     margin: 0px;
 }
 
-.notebook .fa-plus-square-o {
-	font-size: 4em;
-}
-
-.notebook .fa-minus-square-o {
-	font-size: 2em;
+pre.error-text {
+    color: #912d2b;
+    padding: 10px 10px 0px 0px;
+    margin: 0px;
 }

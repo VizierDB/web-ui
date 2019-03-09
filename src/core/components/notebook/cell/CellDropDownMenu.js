@@ -57,7 +57,7 @@ class CellDropDownMenu extends React.Component {
         // Determine the key of the selected output to disable the respective
         // menu entry.
         let selectedKey = null;
-        if (output.isText()) {
+        if ((output.isText()) || (output.isHtml())) {
             selectedKey = 'console';
         } else if (output.isTimestamps()) {
             selectedKey = 'timestamps';

@@ -42,6 +42,7 @@ class ResourcePage extends Component {
         history: PropTypes.object.isRequired,
         isActive: PropTypes.bool.isRequired,
         notebook: PropTypes.object,
+        onCreateBranch: PropTypes.func,
         onDeleteBranch: PropTypes.func,
         onShowNotebook: PropTypes.func,
         onSwitchBranch: PropTypes.func,
@@ -163,6 +164,7 @@ class ResourcePage extends Component {
             contentCss,
             isActive,
             notebook,
+            onCreateBranch,
             onDeleteBranch,
             onShowNotebook,
             onSwitchBranch,
@@ -208,6 +210,7 @@ class ResourcePage extends Component {
                         <AppMenu
                             branch={branch}
                             notebook={notebook}
+                            onCreateBranch={onCreateBranch}
                             onCreateProject={this.handleCreateProject}
                             onDeleteBranch={onDeleteBranch}
                             onDeleteProject={this.handleDeleteProject}

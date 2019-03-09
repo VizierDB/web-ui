@@ -309,7 +309,7 @@ class NotebookPage extends Component {
                         <LargeMessageButton
                             message='This is a read-only notebook. Create a new branch to start editing.'
                             icon='code-fork'
-                            onClick={() => (this.showCreateBranchModal(notebook.lastCell().module))}
+                            onClick={() => (this.showCreateBranchModal())}
                         />
                         { notebookFooter }
                     </div>
@@ -337,6 +337,7 @@ class NotebookPage extends Component {
                     dispatch={dispatch}
                     isActive={isActive}
                     notebook={notebook}
+                    onCreateBranch={this.showCreateBranchModal}
                     onDeleteBranch={this.handleDeleteBranch}
                     onShowNotebook={this.handleShowBranchHead}
                     onSwitchBranch={this.handleSwitchBranch}
@@ -356,18 +357,40 @@ class NotebookPage extends Component {
      */
     showCreateBranchModal = (module) => {
         const { notebook } = this.props;
+        let moduleId = null;
         let modalTitle = 'Create branch';
-        for (let i = 0; i < notebook.cells.length; i++) {
-            if (module.id === notebook.cells[i].id) {
-                if (i === 0) {
-                    modalTitle = 'New branch for cell [1]';
-                } else {
-                    modalTitle = 'New branch for cells [1-' + (i+1) + ']';
+        if (module == null) {
+            console.log('NULL');
+            if (notebook.cells.length > 0) {
+                // Find the last cell that has a module
+                for (let i = notebook.cells.length - 1; i >= 0; i--) {
+                    const cell = notebook.cells[i];
+                    if (!cell.isNewCell()) {
+                        console.log('FOUND IT');
+                        moduleId = cell.module.id;
+                        break;
+                    }
                 }
-                break;
             }
+        } else {
+            for (let i = 0; i < notebook.cells.length; i++) {
+                const cell = notebook.cells[i];
+                let count = 0;
+                if (!cell.isNewCell()) {
+                    count += 1;
+                    if (module.id === cell.id) {
+                        if (i === 0) {
+                            modalTitle = 'New branch for cell [1]';
+                        } else {
+                            modalTitle = 'New branch for cells [1-' + (count) + ']';
+                        }
+                        break;
+                    }
+                }
+            }
+            moduleId = module.id;
         }
-        this.setState({modalOpen: true, modalTitle, moduleId: module.id});
+        this.setState({modalOpen: true, modalTitle, moduleId: moduleId});
     }
 }
 

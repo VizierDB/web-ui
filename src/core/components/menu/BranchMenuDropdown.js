@@ -29,6 +29,7 @@ class BranchMenuDropdown extends React.Component {
     static propTypes = {
         branches: PropTypes.array.isRequired,
         isLive: PropTypes.bool.isRequired,
+        onCreateBranch: PropTypes.func,
         onDelete: PropTypes.func.isRequired,
         onEdit: PropTypes.func.isRequired,
         onGoLive: PropTypes.func.isRequired,
@@ -37,10 +38,25 @@ class BranchMenuDropdown extends React.Component {
         resource: PropTypes.object.isRequired,
         selectedBranch: PropTypes.object.isRequired
     }
+    /**
+     * Call the create branch callback without an argument to create a new
+     * branch at the end of the current notebook workflow.
+     */
+    handleCreateBranch = () => {
+        this.props.onCreateBranch();
+    }
     render() {
         const {
-            branches, isLive, onDelete, onEdit, onGoLive, onSelect,
-            onShowHistory, resource, selectedBranch
+            branches,
+            isLive,
+            onCreateBranch,
+            onDelete,
+            onEdit,
+            onGoLive,
+            onSelect,
+            onShowHistory,
+            resource,
+            selectedBranch
         } = this.props;
         // List of items in the dropdown menu
         let branchItems = [];
@@ -67,6 +83,15 @@ class BranchMenuDropdown extends React.Component {
                     />);
             }
         }
+        if (onCreateBranch != null) {
+            branchItems.push(<Dropdown.Divider key='divider-new'/>);
+            branchItems.push(<Dropdown.Item
+                    key='createBranch'
+                    icon='plus'
+                    text='New Branch ...'
+                    onClick={this.handleCreateBranch}
+                />);
+        }
         branchItems.push(<Dropdown.Divider key='divider-tm'/>);
         branchItems.push(<Dropdown.Header content='Time Machine' key='header-tm' />);
         branchItems.push(<Dropdown.Item
@@ -83,6 +108,8 @@ class BranchMenuDropdown extends React.Component {
                 text='Go Live!'
                 onClick={onGoLive}
             />);
+        // Add option to create a new branch from the end of the current
+        // notebook (if the onCreateBranch callback is given).
         return (
             <Dropdown item text='Branches'>
                 <Dropdown.Menu>

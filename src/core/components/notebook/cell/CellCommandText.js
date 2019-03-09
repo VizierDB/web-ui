@@ -39,11 +39,8 @@ class CellCommandText extends React.Component {
         // The stylesheet class name depends on the state of the module. Append
         // error-state in case of an error or if the module was canceled.
         let css = 'cell-cmd-text';
-        if (cell.isErrorOrCanceled()) {
-            css += ' error-state';
-        }
         let content = null;
-        if (cell.isCode()) {
+        if (cell.isCodeCell()) {
             // Use Syntax highlighter:
             // https://github.com/conorhastings/react-syntax-highlighter
             // CodeMirror did not work here for some reason.
