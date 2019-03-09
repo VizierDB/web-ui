@@ -19,9 +19,9 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
 import { Icon } from 'semantic-ui-react';
-import { LargeMessageButton } from '../../components/Button'
+import { LargeMessageButton } from '../Button'
 import WorkflowModuleCell from './cell/WorkflowModuleCell';
-
+import { INSERT_AFTER } from '../../resources/Notebook'
 
 /**
  * List of cells in a read-only notebook.
@@ -34,10 +34,23 @@ class Notebook extends React.Component {
         onCreateBranch: PropTypes.func.isRequired,
         onDatasetNavigate: PropTypes.func.isRequired,
         onFetchAnnotations: PropTypes.func.isRequired,
+        onInsertCell: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
         onRemoveFilteredCommand: PropTypes.func.isRequired,
         onSelectNotebookCell: PropTypes.func.isRequired,
         userSettings: PropTypes.object.isRequired
+    }
+    /**
+     * Append a new cell to the current notebook.
+     */
+    handleAppendCell = () => {
+        const { notebook, onInsertCell } = this.props;
+        // If the notebook is empty both parameters are null.
+        if (notebook.isEmpty()) {
+            onInsertCell();
+        } else {
+            onInsertCell(notebook.lastCell().module, INSERT_AFTER);
+        }
     }
     render() {
         const {
@@ -46,6 +59,7 @@ class Notebook extends React.Component {
             onAddFilteredCommand,
             onCreateBranch,
             onDatasetNavigate,
+            onInsertCell,
             onOutputSelect,
             onFetchAnnotations,
             onSelectNotebookCell,
@@ -60,7 +74,7 @@ class Notebook extends React.Component {
                     message='Your notebook is empty. Start by adding a new cell.'
                     icon='plus'
                     css='notebook-footer'
-                    onClick={() => (alert('Add your first cell'))}
+                    onClick={this.handleAppendCell}
                 />
             );
         }
@@ -78,6 +92,7 @@ class Notebook extends React.Component {
                     onAddFilteredCommand={onAddFilteredCommand}
                     onCreateBranch={onCreateBranch}
                     onDatasetNavigate={onDatasetNavigate}
+                    onInsertCell={onInsertCell}
                     onOutputSelect={onOutputSelect}
                     onFetchAnnotations={onFetchAnnotations}
                     onRemoveFilteredCommand={onRemoveFilteredCommand}
@@ -87,17 +102,18 @@ class Notebook extends React.Component {
             );
         }
         // Show a message button to append a new cell (only if the last cell
-        // is not already a new cell and the workflow is not in error state).
+        // is not already a new cell and the workflow is not in error state
+        // or read only).
         let appendCellButton = null;
         const lastCell = notebook.lastCell();
-        if ((!lastCell.isNewCell()) && (!lastCell.isErrorOrCanceled())) {
+        if ((!lastCell.isNewCell()) && (!lastCell.isErrorOrCanceled()) && (!notebook.readOnly)) {
             appendCellButton = (
                 <div className='spinner-padding-md'>
                     <Icon
                         size='big'
                         link
                         name='plus'
-                        onClick={() => (alert('Append'))}
+                        onClick={this.handleAppendCell}
                         title='Append new cell'
                      />
                 </div>

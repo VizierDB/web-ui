@@ -141,7 +141,7 @@ class CellOutputArea extends React.Component {
                 finishedType = 'Finished at';
             }
             outputContent = (
-                <div>
+                <div className='module-timings'>
                     <p className='output-info-headline'><Icon color='blue' name='info circle' />Module timings</p>
                     <TimestampOutput label='Created at' time={output.createdAt} />
                     <TimestampOutput label='Started at' time={output.startedAt} />

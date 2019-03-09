@@ -20,7 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Dropdown } from 'semantic-ui-react';
 import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
-    CONTENT_TIMESTAMPS } from '../../../resources/Notebook';
+    CONTENT_TIMESTAMPS, INSERT_AFTER, INSERT_BEFORE } from '../../../resources/Notebook';
 import '../../../../css/Notebook.css'
 
 
@@ -38,11 +38,18 @@ class CellDropDownMenu extends React.Component {
         onInsertCell: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired
     }
+    /**
+     * Insert new cell before the notebook cell that is associated with the
+     * menu.
+     */
     handleInsertBefore = () => {
-        this.props.onInsertCell(-1);
+        this.props.onInsertCell(INSERT_BEFORE);
     }
+    /**
+     * Insert new cell after the notebook cell that is associated with the menu.
+     */
     handleInsertAfter = () => {
-        this.props.onInsertCell(0);
+        this.props.onInsertCell(INSERT_AFTER);
     }
     render() {
         const {

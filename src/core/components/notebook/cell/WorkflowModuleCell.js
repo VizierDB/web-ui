@@ -21,7 +21,8 @@ import { PropTypes } from 'prop-types';
 import CellCommandText from './CellCommandText';
 import CellDropDownMenu from './CellDropDownMenu';
 import CellOutputArea from './output/CellOutputArea';
-import { TextButton } from '../../../components/Button'
+import { TextButton } from '../../Button';
+import { INSERT_AFTER, INSERT_BEFORE } from '../../../resources/Notebook';
 import '../../../../css/Notebook.css';
 
 
@@ -39,6 +40,7 @@ class WorkflowModuleCell extends React.Component {
         onAddFilteredCommand: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
         onDatasetNavigate: PropTypes.func.isRequired,
+        onInsertCell: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
         onFetchAnnotations: PropTypes.func.isRequired,
         onRemoveFilteredCommand: PropTypes.func.isRequired,
@@ -72,15 +74,17 @@ class WorkflowModuleCell extends React.Component {
         const { cell, onDatasetNavigate } = this.props;
         onDatasetNavigate(cell.module, dataset, offset, limit);
     }
-    handleInsertCell = (offset) => {
-        const { cellNumber, userSettings } = this.props;
-        let cellIndex = cellNumber;
+    handleInsertCell = (direction) => {
+        const { cell, onInsertCell, userSettings } = this.props;
         if (userSettings.showNotebookReversed()) {
-            cellIndex -= offset;
+            if (direction == INSERT_AFTER) {
+                onInsertCell(cell, INSERT_BEFORE);
+            } else {
+                onInsertCell(cell, INSERT_AFTER);
+            }
         } else {
-            cellIndex += offset;
+            onInsertCell(cell, direction);
         }
-        alert('Insert cell at position ' + cellIndex);
     }
     /**
      * Remove the command that is associated with this notebook cell module

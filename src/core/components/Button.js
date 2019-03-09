@@ -29,13 +29,14 @@ import '../../css/Button.css';
 /**
  * Clickable icon button using Font Awesome icons.
  */
-export const IconButton = ({name, onClick}) => (
-    <FontAwesome className="icon-button" name={name} onClick={onClick} />
+export const IconButton = ({name, onClick, title}) => (
+    <FontAwesome className="icon-button" name={name} onClick={onClick} title={title}/>
 )
 
 IconButton.propTypes = {
     name: PropTypes.string.isRequired,
-    onClick: PropTypes.func.isRequired
+    onClick: PropTypes.func.isRequired,
+    title: PropTypes.string
 };
 
 
@@ -52,11 +53,11 @@ CloseButton.propTypes = {
 };
 
 
-export const LargeMessageButton = ({message, icon, css, onClick}) => (
+export const LargeMessageButton = ({message, icon, css, onClick, title}) => (
     <div className={css}>
         <p className='lg-message'>{message}</p>
         <p className='lg-button'>
-            <IconButton name={icon + ' fa-4x'} onClick={onClick}/>
+            <IconButton name={icon + ' fa-4x'} title={title} onClick={onClick}/>
         </p>
     </div>
 );
@@ -65,7 +66,8 @@ LargeMessageButton.propTypes = {
     css: PropTypes.string,
     icon: PropTypes.string.isRequired,
     message: PropTypes.string.isRequired,
-    onClick: PropTypes.func.isRequired
+    onClick: PropTypes.func.isRequired,
+    title: PropTypes.string
 };
 
 

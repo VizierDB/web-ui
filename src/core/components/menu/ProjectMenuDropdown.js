@@ -76,15 +76,14 @@ class ProjectMenuDropdown extends React.Component {
             />);
             for (let i = 0; i < projectList.length; i++) {
                 let pj = projectList[i];
-                if ((project == null) || (pj.id !== project.id)) {
-                    menuItems.push(<Dropdown.Item
-                        key={pj.id}
-                        icon='database'
-                        text={pj.name}
-                        title={'Switch to project ' + pj.name}
-                        onClick={() => (onSelect(pj))}
-                    />);
-                }
+                menuItems.push(<Dropdown.Item
+                    key={pj.id}
+                    disabled={(project != null) && (pj.id === project.id)}
+                    icon='database'
+                    text={pj.name}
+                    title={'Switch to project ' + pj.name}
+                    onClick={() => (onSelect(pj))}
+                />);
             }
         }
         // Show the add project option at the bottom of the menu

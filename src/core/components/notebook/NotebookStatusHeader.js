@@ -33,6 +33,7 @@ class NotebookStatusHeader extends Component {
     static propTypes = {
         branch: PropTypes.object.isRequired,
         notebook: PropTypes.object.isRequired,
+        onShowHistory: PropTypes.func.isRequired,
         onSwitchBranch: PropTypes.func.isRequired,
         project: PropTypes.object.isRequired,
     }
@@ -49,11 +50,17 @@ class NotebookStatusHeader extends Component {
      * display the shareable link modal.
      */
     render() {
-        const { branch, notebook, onSwitchBranch, project } = this.props;
+        const {
+            branch,
+            notebook,
+            onShowHistory,
+            onSwitchBranch,
+            project
+        } = this.props;
         const { showModal } = this.state;
-        let readOnlyContent = null;
+        let extraContent = null;
         if (notebook.readOnly) {
-            readOnlyContent = (
+            extraContent = (
                 <span>
                     <span className='right-padding-sm'>{'at '}</span>
                     <span className='info-date'>{notebook.createdAt}</span>
@@ -65,6 +72,18 @@ class NotebookStatusHeader extends Component {
                                 onClick={() => (onSwitchBranch(branch))}
                             />
                         </span>
+                    </span>
+                </span>
+            );
+        } else {
+            extraContent = (
+                <span className='padding-sm'>
+                    <span className='clickable-icon'>
+                        <Icon
+                            name='history'
+                            title='Show history'
+                            onClick={onShowHistory}
+                        />
                     </span>
                 </span>
             );
@@ -80,7 +99,7 @@ class NotebookStatusHeader extends Component {
                 <span className='right-padding-sm'>
                     <span className='info-bold'>{branch.name}</span>
                 </span>
-                { readOnlyContent }
+                { extraContent }
                 <span className='clickable-icon'>
                     <Icon
                         name='linkify'

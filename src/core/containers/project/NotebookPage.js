@@ -36,7 +36,7 @@ import ResourcePage from '../../components/ResourcePage';
 import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
     CONTENT_TIMESTAMPS } from '../../resources/Notebook';
 import { NotebookResource } from '../../util/App';
-import { isNotEmptyString, notebookPageUrl } from '../../util/App';
+import { branchPageUrl, isNotEmptyString, notebookPageUrl } from '../../util/App';
 
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
@@ -179,6 +179,19 @@ class NotebookPage extends Component {
         dispatch(fetchAnnotations(notebook, module, dataset, columnId, rowId));
     }
     /**
+     * Event handler when the user wants to insert a new cell. The cell id is
+     * the identifier of the cell and the position is either before or after.
+     * The cell identifier and position may be null or undefined if the notebook
+     * is empty.
+     */
+    handleInsertCell = (cell, position) => {
+        if (cell != null) {
+            alert('Insert for ' + cell.id + ' at ' + position);
+        } else {
+            alert('Insert to empty notebook');
+        }
+    }
+    /**
      * Dispatch an action to load the resource that is being shown as output
      * for the notebook cell that displays the given workflow module.
      */
@@ -215,6 +228,13 @@ class NotebookPage extends Component {
      */
     handleSelectActiveCell = (cell) => {
         this.props.dispatch(selectNotebookCell(cell));
+    }
+    /**
+     * Show branch history page.
+     */
+    handleShowBranch = () => {
+        const { branch, history, project } = this.props;
+        history.push(branchPageUrl(project.id, branch.id));
     }
     /**
      * Dispatch action to load the workflow at the head of the current branch.
@@ -285,6 +305,7 @@ class NotebookPage extends Component {
                     onCreateBranch={this.showCreateBranchModal}
                     onDatasetNavigate={this.handleDatasetNavigate}
                     onFetchAnnotations={this.handleFetchDatasetCellAnnotations}
+                    onInsertCell={this.handleInsertCell}
                     onOutputSelect={this.handleSelectOutput}
                     onRemoveFilteredCommand={this.handleRemoveFilteredCommand}
                     onSelectNotebookCell={this.handleSelectActiveCell}
@@ -309,6 +330,7 @@ class NotebookPage extends Component {
                         <LargeMessageButton
                             message='This is a read-only notebook. Create a new branch to start editing.'
                             icon='code-fork'
+                            title='Create a new branch for this notebook'
                             onClick={() => (this.showCreateBranchModal())}
                         />
                         { notebookFooter }
@@ -321,6 +343,7 @@ class NotebookPage extends Component {
                     <NotebookStatusHeader
                         branch={branch}
                         notebook={notebook}
+                        onShowHistory={this.handleShowBranch}
                         onSwitchBranch={this.handleSwitchBranch}
                         project={project}
                     />

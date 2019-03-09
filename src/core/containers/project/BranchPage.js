@@ -236,7 +236,7 @@ class BranchPage extends Component {
                     actionError={actionError}
                     branch={branch}
                     content={pageContent}
-                    contentCss='wide'
+                    contentCss='slim'
                     dispatch={dispatch}
                     isActive={isActive}
                     onDeleteBranch={this.handleDeleteBranch}

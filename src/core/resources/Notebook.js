@@ -242,6 +242,10 @@ const STATE_CANCELED = 2
 const STATE_ERROR = 3
 const STATE_SUCCESS = 4
 
+// Relative positions when inserting a new cell
+export const INSERT_AFTER = 'INSERT_AFTER';
+export const INSERT_BEFORE = 'INSERT_BEFORE';
+
 
 /**
  * Workflow module handle.
