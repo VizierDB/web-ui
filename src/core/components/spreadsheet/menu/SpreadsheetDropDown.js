@@ -54,19 +54,19 @@ class SpreadsheetDropDown extends React.Component {
     }
     render() {
         return (
-            <Dropdown icon='table' title='Download dataset'>
+            <Dropdown icon='download' title='Download dataset'>
                 <Dropdown.Menu>
                     <Dropdown.Item
                         key={'download'}
                         icon='download'
-                        text='Download'
+                        text='Download File'
                         title='Download dataset as CSV file'
                         onClick={this.handleDownload}
                     />
                     <Dropdown.Item
                         key={'copy-link'}
                         icon='linkify'
-                        text='Copy URL to clipboard'
+                        text='Copy URL to Clipboard'
                         title='Copy shareable dataset URL to clipboard'
                         onClick={this.handleCopy}
                     />

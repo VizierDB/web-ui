@@ -58,6 +58,11 @@ div.notebook-cell-error {
     margin: 10px 0px;
 }
 
+div.notebook-header {
+    margin-bottom: 10px;
+}
+
+
 /* Divider */
 div.horizontal-divider {
     color: rgba(0,0,0,.85);
@@ -199,19 +204,16 @@ pre.cell-vizual-error {
 
 
 /* Outout Header */
-table.output-header {
+div.output-header {
+    color: #3b4151;
     border-spacing: 0px;
     padding: 0px;
     margin-bottom: 10px;
 }
 
-td.header-title {
-    color: #3b4151;
-    font-size: 1em;
-}
-
 span.header-name {
     letter-spacing: 2px;
+    padding-left: 5px;
 }
 
 /* Outputs */
@@ -225,12 +227,12 @@ div.output-content-html {
 }
 
 div.module-timings {
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 p.output-info-headline {
     border-bottom: solid 1px #3b4151;
-    padding: 5px;
+    padding-bottom: 5px;
     margin-bottom: 0px;
 }
 

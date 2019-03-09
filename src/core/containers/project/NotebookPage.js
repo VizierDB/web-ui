@@ -21,9 +21,9 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { addFilteredCommand, removeFilteredCommand } from '../../actions/main/App';
 import { createBranch, deleteBranch } from '../../actions/project/Branch';
-import { fetchAnnotations, fetchWorkflow, hideCellOutput, insertNotebookCell,
-    showCellChart, selectNotebookCell, showCellDataset, showCellStdout,
-    showCellTimestamps } from '../../actions/project/Notebook';
+import { dismissCellChanges, fetchAnnotations, fetchWorkflow, hideCellOutput,
+    insertNotebookCell, showCellChart, selectNotebookCell, showCellDataset,
+    showCellStdout, showCellTimestamps } from '../../actions/project/Notebook';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import { fetchProjects } from '../../actions/project/ProjectListing';
 import { LargeMessageButton } from '../../components/Button';
@@ -34,7 +34,7 @@ import NotebookStatusHeader from '../../components/notebook/NotebookStatusHeader
 import Notebook from '../../components/notebook/Notebook';
 import ResourcePage from '../../components/ResourcePage';
 import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
-    CONTENT_TIMESTAMPS } from '../../resources/Notebook';
+    CONTENT_TIMESTAMPS } from '../../resources/Outputs';
 import { NotebookResource } from '../../util/App';
 import { branchPageUrl, isNotEmptyString, notebookPageUrl } from '../../util/App';
 
@@ -174,21 +174,26 @@ class NotebookPage extends Component {
         const { dispatch, notebook } = this.props;
         dispatch(showCellDataset(notebook, module, dataset, offset, limit));
     }
+    /**
+     * Handle dismissal of all changes that were made to a notebook cell.
+     */
+    handleDismissCell = (cell) => {
+        const { dispatch, notebook } = this.props;
+        dispatch(dismissCellChanges(notebook, cell));
+    }
     handleFetchDatasetCellAnnotations = (module, dataset, columnId, rowId) => {
         const { dispatch, notebook } = this.props;
         dispatch(fetchAnnotations(notebook, module, dataset, columnId, rowId));
     }
     /**
-     * Event handler when the user wants to insert a new cell. The cell id is
-     * the identifier of the cell and the position is either before or after.
-     * The cell identifier and position may be null or undefined if the notebook
-     * is empty.
+     * Event handler when the user wants to insert a new cell. The new cell is
+     * inserted into the notebook at a position that is relative to the given
+     * cell (either before or after).  The cell and position may be null or
+     * undefined if the notebook is empty.
      */
     handleInsertCell = (cell, position) => {
         const { dispatch, notebook } = this.props;
-        if (!notebook.hasNewCellAt(cell, position)) {
-            dispatch(insertNotebookCell(notebook, cell, position));
-        }
+        dispatch(insertNotebookCell(notebook, cell, position));
     }
     /**
      * Dispatch an action to load the resource that is being shown as output
@@ -223,7 +228,8 @@ class NotebookPage extends Component {
     }
     /**
      * Dispatch action to set the given cell as the new active cell of the
-     * notebook.
+     * notebook. This will only be done if the given cell is a cell that is
+     * associated with a workflow module.
      */
     handleSelectActiveCell = (cell) => {
         this.props.dispatch(selectNotebookCell(cell));
@@ -296,6 +302,7 @@ class NotebookPage extends Component {
             let notebookCells =  (
                 <Notebook
                     activeNotebookCell={activeCell}
+                    apiEngine={serviceApi.engine}
                     notebook={notebook}
                     project={project}
                     reversed={reversed}
@@ -303,6 +310,7 @@ class NotebookPage extends Component {
                     onChangeGrouping={this.handleChangeGrouping}
                     onCreateBranch={this.showCreateBranchModal}
                     onDatasetNavigate={this.handleDatasetNavigate}
+                    onDismissCell={this.handleDismissCell}
                     onFetchAnnotations={this.handleFetchDatasetCellAnnotations}
                     onInsertCell={this.handleInsertCell}
                     onOutputSelect={this.handleSelectOutput}
@@ -382,26 +390,24 @@ class NotebookPage extends Component {
         let moduleId = null;
         let modalTitle = 'Create branch';
         if (module == null) {
-            console.log('NULL');
             if (notebook.cells.length > 0) {
                 // Find the last cell that has a module
                 for (let i = notebook.cells.length - 1; i >= 0; i--) {
                     const cell = notebook.cells[i];
                     if (!cell.isNewCell()) {
-                        console.log('FOUND IT');
                         moduleId = cell.module.id;
                         break;
                     }
                 }
             }
         } else {
+            let count = 0;
             for (let i = 0; i < notebook.cells.length; i++) {
                 const cell = notebook.cells[i];
-                let count = 0;
                 if (!cell.isNewCell()) {
-                    count += 1;
+                    count++;
                     if (module.id === cell.id) {
-                        if (i === 0) {
+                        if (count === 1) {
                             modalTitle = 'New branch for cell [1]';
                         } else {
                             modalTitle = 'New branch for cells [1-' + (count) + ']';

@@ -22,7 +22,7 @@ import Plots from './Plots';
 import '../../../css/Chart.css';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { Button, Dropdown, Icon } from 'semantic-ui-react';
+import { Button, Icon } from 'semantic-ui-react';
 import '../../../css/App.css';
 import '../../../css/Chart.css';
 import '../../../css/Notebook.css';
@@ -80,32 +80,14 @@ class DatasetChart extends React.Component {
         if (dataset !== undefined) {
             return (
                 <div>
-                    <table className='output-header'><tbody>
-                        <tr>
-                            <td className='header-dropdown'>
-                                <Dropdown icon='bar chart' title='Download chart'>
-                                    <Dropdown.Menu>
-                                        <Dropdown.Item
-                                            key={'download'}
-                                            icon='download'
-                                            text='Download'
-                                            title='Download chart as PDF file'
-                                            onClick={this.generatePDF}
-                                        />
-                                    </Dropdown.Menu>
-                                </Dropdown>
-                            </td>
-                            <td className='header-title'>
-                                <span className='header-name'>{identifier}</span>
-                            </td>
-                        </tr>
-                    </tbody></table>
+                    <div className='output-header'>
+                        <span className='header-name'>{identifier}</span>
+                    </div>
                     <div className='plot'>
                         <Plots
                             key={identifier}
                             identifier={plotName}
                             dataset={dataset}
-                            onDownload={this.generatePDF}
                         />
                     </div>
                     <div className='chart-download-btn'>

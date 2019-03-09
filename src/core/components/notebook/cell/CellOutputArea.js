@@ -19,12 +19,13 @@
 import React from 'react';
 import createReactClass from 'create-react-class';
 import { PropTypes } from 'prop-types';
-import { Dimmer, Icon, Loader } from 'semantic-ui-react';
+import { Button, Dimmer, Loader } from 'semantic-ui-react';
+import ContentSpinner from '../../ContentSpinner';
 import DatasetChart from '../../plot/DatasetChart';
 import DatasetView from '../../spreadsheet/DatasetView';
 import { ErrorMessage } from '../../Message';
 import TimestampOutput from './TimestampOutput';
-import { CONTENT_TEXT, OutputText } from '../../../resources/Notebook';
+import { CONTENT_TEXT, OutputText } from '../../../resources/Outputs';
 import '../../../../css/App.css';
 import '../../../../css/Notebook.css';
 
@@ -74,8 +75,32 @@ class CellOutputArea extends React.Component {
             userSettings
         } = this.props;
         const { output } = cell;
-        // The output content depends on the state of the output resource
-        // handle. First, we distinguish between successful output or error
+        // The output content depends on the status of the cell. For running and
+        // pending cells only timestamps (and a cancel button) is displayed.
+        if (cell.isRunning()) {
+            return (
+                <div>
+                    <div className='module-timings'>
+                        <TimestampOutput label='Created at' time={cell.module.timestamps.createdAt} />
+                        <TimestampOutput label='Started at' time={cell.module.timestamps.startedAt} />
+                    </div>
+                    <ContentSpinner text='Running ...' size='small' />
+                    <div className='centered'>
+                        <Button negative>Cancel</Button>
+                    </div>
+                </div>
+            );
+        } else if (cell.isPending()) {
+            return (
+                <div>
+                    <div className='module-timings'>
+                        <TimestampOutput label='Created at' time={cell.module.timestamps.createdAt} />
+                    </div>
+                </div>
+            );
+        }
+        // For cells that are in success or an error state the output depends
+        // on the type of the output resource handle.
         // messages
         let outputContent = null;
         if (output.isChart()) {
@@ -106,6 +131,11 @@ class CellOutputArea extends React.Component {
                 message={fetchError.message}
                 onDismiss={this.handleOutputDismiss}
             />;
+        } else if (output.isHidden()) {
+            outputContent = (
+                <pre className='plain-text' onClick={onTextOutputClick}>
+                </pre>
+            );
         } else if (output.isHtml()) {
             const Response = createReactClass({
                 render: function() {

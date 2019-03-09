@@ -18,32 +18,39 @@
 
 import React from 'react';
 import { PropTypes } from 'prop-types';
-import { Button } from 'semantic-ui-react';
 import CellCommandText from './CellCommandText';
 import CellDropDownMenu from './CellDropDownMenu';
 import CellOutputArea from './CellOutputArea';
-import ContentSpinner from '../../ContentSpinner';
+import ModuleInputArea from '../input/ModuleInputArea';
 import { TextButton } from '../../Button';
-import TimestampOutput from './TimestampOutput';
 import { INSERT_AFTER, INSERT_BEFORE } from '../../../resources/Notebook';
 import '../../../../css/App.css';
 import '../../../../css/Notebook.css';
 
 
 /**
- * Cell in a notebook for an existing module in a curation workflow. Displays
- * the cell index, cell command text or module input form and the cell output
- * area.
+ * Cell in a notebook. The cell may either represent an existing module in a
+ * workflow or a new notebook cell. For cells that contain a workflow module
+ * the redered components include the cell index, an optional cell menu,
+ * the cell command text or the module input form and the cell output area.
+ *
+ * For new cells an empty cell index is shown together with the module input
+ * form.
  */
-class WorkflowModuleCell extends React.Component {
+class NotebookCell extends React.Component {
     static propTypes = {
+        apiEngine: PropTypes.object.isRequired,
         cell: PropTypes.object.isRequired,
         cellNumber: PropTypes.number.isRequired,
+        datasets: PropTypes.array.isRequired,
         isActiveCell: PropTypes.bool.isRequired,
+        isNewNext: PropTypes.bool.isRequired,
+        isNewPrevious: PropTypes.bool.isRequired,
         notebook: PropTypes.object.isRequired,
         onAddFilteredCommand: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
         onDatasetNavigate: PropTypes.func.isRequired,
+        onDismissCell: PropTypes.func.isRequired,
         onInsertCell: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
         onFetchAnnotations: PropTypes.func.isRequired,
@@ -78,10 +85,16 @@ class WorkflowModuleCell extends React.Component {
         const { cell, onDatasetNavigate } = this.props;
         onDatasetNavigate(cell.module, dataset, offset, limit);
     }
+    /**
+     * Submit action to insert a new notebook cell relative to this cell.
+     *
+     * We need to adjust the given position based on the current setting for
+     * notebook cell order.
+     */
     handleInsertCell = (direction) => {
         const { cell, onInsertCell, userSettings } = this.props;
         if (userSettings.showNotebookReversed()) {
-            if (direction == INSERT_AFTER) {
+            if (direction === INSERT_AFTER) {
                 onInsertCell(cell, INSERT_BEFORE);
             } else {
                 onInsertCell(cell, INSERT_AFTER);
@@ -110,98 +123,85 @@ class WorkflowModuleCell extends React.Component {
     }
     render() {
         const {
+            apiEngine,
             cell,
             cellNumber,
+            datasets,
             isActiveCell,
+            isNewNext,
+            isNewPrevious,
             notebook,
+            onDismissCell,
             onOutputSelect,
             onFetchAnnotations,
             userSettings
         } = this.props;
-        // Check if the command that is associated with the cell is filtered
-        // by the user settings. If the command is filtered we either return
-        // a collapsed cell or null depending on the hide filtered cells
-        // property.
-        const cmdSpec = cell.commandSpec;
-        if (userSettings.isFiltered(cmdSpec)) {
-            if (!userSettings.hideFilteredCommands()) {
-                return (
-                    <div className='horizontal-divider'>
-                        <TextButton
-                            css='code-text'
-                            text={cmdSpec.name}
-                            title='Show cells of this type'
-                            onClick={this.handleRemoveFilteredCommand}
-                        />
-                    </div>
-                );
-            } else {
-                return null;
-            }
-        }
-        // The default action when the user double clicks on the cell command
-        // depends on whether the notebook is read-only or not. For read-only
-        // notebooks 'Create branch' is the default option. Otherwise it is
-        // 'Edit cell'.
-        let onDefaultAction = null;
-        if (notebook.readOnly) {
-            onDefaultAction = this.handleCreateBranch;
-        } else {
-            onDefaultAction = this.handleEditCell;
-        }
-        // If this is the active cell the cell menu is shown and the CSS style
-        // is changed.
-        let css = 'cell';
-        if (isActiveCell) {
-            css += ' active-cell';
-        } else {
-            css += ' inactive-cell';
-        }
-        const cellMenu = (
-            <CellDropDownMenu
-                cell={cell}
-                cellNumber={cellNumber}
-                isActiveCell={isActiveCell}
-                notebook={notebook}
-                onAddFilteredCommand={this.handleAddFilteredCommand}
-                onCreateBranch={this.handleCreateBranch}
-                onInsertCell={this.handleInsertCell}
-                onOutputSelect={onOutputSelect}
-            />
-        );
-        // Add style for cells that are not in success state
-        let cssState = '';
-        if (cell.isErrorOrCanceled()) {
-            cssState = ' error-cell';
-        } else if (cell.isRunning()) {
-            cssState = ' running-cell';
-        } else if (cell.isPending()) {
-            cssState = ' pending-cell';
-        }
-        // The output area depends on whether the cell is running or not
+        // The main components of a notebook cell are the cell index, the cell
+        // dropdown menu, the cell command text or input form and the cell
+        // output area.
+        let cellIndex = null;
+        let cellMenu = null;
+        let commandText = null;
         let outputArea = null;
-        if (cell.isRunning()) {
-            outputArea = (
-                <div>
-                    <div className='module-timings'>
-                        <TimestampOutput label='Created at' time={cell.module.timestamps.createdAt} />
-                        <TimestampOutput label='Started at' time={cell.module.timestamps.startedAt} />
-                    </div>
-                    <ContentSpinner text='Running ...' size='small' />
-                    <div className='centered'>
-                        <Button negative>Cancel</Button>
-                    </div>
-                </div>
-            );
-        } else if (cell.isPending()) {
-            outputArea = (
-                <div>
-                    <div className='module-timings'>
-                        <TimestampOutput label='Created at' time={cell.module.timestamps.createdAt} />
-                    </div>
-                </div>
-            );
+        // For a cell that contains a new workflow module only the module input
+        // for is being displayed.
+        if (cell.isNewCell()) {
+            cellIndex = ' ';
+            commandText = (
+                <ModuleInputArea
+                    apiEngine={apiEngine}
+                    datasets={datasets}
+                    cell={cell}
+                    onDismiss={onDismissCell}
+                    onSubmit={() => (alert('Submit'))}
+                />);
         } else {
+            // Check if the command that is associated with the cell is filtered
+            // by the user settings. If the command is filtered we either return
+            // a collapsed cell or null depending on the hide filtered cells
+            // property.
+            const cmdSpec = cell.commandSpec;
+            if (userSettings.isFiltered(cmdSpec)) {
+                if (!userSettings.hideFilteredCommands()) {
+                    return (
+                        <div className='horizontal-divider'>
+                            <TextButton
+                                css='code-text'
+                                text={cmdSpec.name}
+                                title='Show cells of this type'
+                                onClick={this.handleRemoveFilteredCommand}
+                            />
+                        </div>
+                    );
+                } else {
+                    return null;
+                }
+            }
+            // The default action when the user double clicks on the cell command
+            // depends on whether the notebook is read-only or not. For read-only
+            // notebooks 'Create branch' is the default option. Otherwise it is
+            // 'Edit cell'.
+            let onDefaultAction = null;
+            if (notebook.readOnly) {
+                onDefaultAction = this.handleCreateBranch;
+            } else {
+                onDefaultAction = this.handleEditCell;
+            }
+            cellIndex = cellNumber;
+            cellMenu = (
+                <CellDropDownMenu
+                    cell={cell}
+                    cellNumber={cellNumber}
+                    isActiveCell={isActiveCell}
+                    isNewNext={isNewNext}
+                    isNewPrevious={isNewPrevious}
+                    notebook={notebook}
+                    onAddFilteredCommand={this.handleAddFilteredCommand}
+                    onCreateBranch={this.handleCreateBranch}
+                    onInsertCell={this.handleInsertCell}
+                    onOutputSelect={onOutputSelect}
+                />
+            );
             outputArea = (
                 <CellOutputArea
                     cell={cell}
@@ -212,20 +212,35 @@ class WorkflowModuleCell extends React.Component {
                     userSettings={userSettings}
                 />
             );
+            commandText = (
+                <CellCommandText
+                    cell={cell}
+                    onClick={this.handleSelect}
+                    onDoubleClick={onDefaultAction}
+                />
+            );
+        }
+        // The CSS class depends on whether the cell is active or not and
+        // on the cell status
+        const css = (isActiveCell) ? 'cell active-cell' : 'cell inactive-cell';
+        // Add style for cells that are not in success state
+        let cssState = '';
+        if (cell.isErrorOrCanceled()) {
+            cssState = ' error-cell';
+        } else if (cell.isRunning()) {
+            cssState = ' running-cell';
+        } else if (cell.isPending()) {
+            cssState = ' pending-cell';
         }
         return (
             <table className={css + cssState}><tbody>
                 <tr>
                     <td className={'cell-index' + cssState} onClick={this.handleSelect}>
-                        <p className={'cell-index' + cssState}>[{cellNumber}]</p>
+                        <p className={'cell-index' + cssState}>[{cellIndex}]</p>
                         { cellMenu }
                     </td>
                     <td className={'cell-area' + cssState}>
-                        <CellCommandText
-                            cell={cell}
-                            onClick={this.handleSelect}
-                            onDoubleClick={onDefaultAction}
-                        />
+                        { commandText }
                         { outputArea }
                     </td>
                 </tr>
@@ -234,4 +249,4 @@ class WorkflowModuleCell extends React.Component {
     }
 }
 
-export default WorkflowModuleCell;
+export default NotebookCell;

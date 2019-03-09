@@ -20,7 +20,7 @@ import React from 'react';
 import { PropTypes } from 'prop-types';
 import { Icon } from 'semantic-ui-react';
 import { LargeMessageButton } from '../Button'
-import WorkflowModuleCell from './cell/WorkflowModuleCell';
+import NotebookCell from './cell/NotebookCell';
 import { INSERT_AFTER } from '../../resources/Notebook'
 
 /**
@@ -29,10 +29,12 @@ import { INSERT_AFTER } from '../../resources/Notebook'
 class Notebook extends React.Component {
     static propTypes = {
         activeNotebookCell: PropTypes.string,
+        apiEngine: PropTypes.object.isRequired,
         notebook: PropTypes.object.isRequired,
         onAddFilteredCommand: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
         onDatasetNavigate: PropTypes.func.isRequired,
+        onDismissCell: PropTypes.func.isRequired,
         onFetchAnnotations: PropTypes.func.isRequired,
         onInsertCell: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
@@ -55,10 +57,12 @@ class Notebook extends React.Component {
     render() {
         const {
             activeNotebookCell,
+            apiEngine,
             notebook,
             onAddFilteredCommand,
             onCreateBranch,
             onDatasetNavigate,
+            onDismissCell,
             onInsertCell,
             onOutputSelect,
             onFetchAnnotations,
@@ -80,18 +84,33 @@ class Notebook extends React.Component {
         }
         // Create a notebook cell for each workflow module
         const notebookCells = [];
+        // Counter for notebook cells that contain a workflow module
+        let moduleCount = 1;
+        let isNewPrevious = false;
+        let datasets = [];
         for (let i = 0; i < notebook.cells.length; i++) {
             const cell = notebook.cells[i];
+            let isNewNext = false;
+            if (i < notebook.cells.length - 1) {
+                isNewNext = notebook.cells[i + 1].isNewCell();
+            }
+            // The cell number depends on whether the cell is a new cell or
+            // a cell for a workflow module.
             notebookCells.push(
-                <WorkflowModuleCell
+                <NotebookCell
                     key={cell.id}
+                    apiEngine={apiEngine}
                     cell={cell}
-                    cellNumber={i+1}
+                    cellNumber={moduleCount}
+                    datasets={datasets}
                     isActiveCell={cell.id === activeNotebookCell}
+                    isNewNext={isNewNext}
+                    isNewPrevious={isNewPrevious}
                     notebook={notebook}
                     onAddFilteredCommand={onAddFilteredCommand}
                     onCreateBranch={onCreateBranch}
                     onDatasetNavigate={onDatasetNavigate}
+                    onDismissCell={onDismissCell}
                     onInsertCell={onInsertCell}
                     onOutputSelect={onOutputSelect}
                     onFetchAnnotations={onFetchAnnotations}
@@ -100,6 +119,11 @@ class Notebook extends React.Component {
                     userSettings={userSettings}
                 />
             );
+            if (!cell.isNewCell()) {
+                moduleCount++;
+                datasets = cell.module.datasets;
+            }
+            isNewPrevious = cell.isNewCell();
         }
         // Show a message button to append a new cell (only if the last cell
         // is not already a new cell and the workflow is not in error state

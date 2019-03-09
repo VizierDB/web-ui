@@ -18,6 +18,15 @@ div.module-form-error {
     margin: 10px 0px;
 }
 
+div.module-form-empty {
+    text-align: center;
+    margin: 25px 0px;
+}
+
+div.module-form-buttons {
+    text-align: right;
+}
+
 div.file-selector {
     background: #fff;
     border-radius: .28571429rem;

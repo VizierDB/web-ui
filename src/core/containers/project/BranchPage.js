@@ -198,7 +198,11 @@ class BranchPage extends Component {
                         color = 'blue';
                         action = 'Replace cell';
                     }
-                    command = serviceApi.engine.packages[wf.packageId].commands[wf.commandId].name;
+                    command = serviceApi
+                        .engine
+                        .packages
+                        .getCommandSpec(wf.packageId, wf.commandId)
+                        .name;
                 }
                 const isHead = (i === workflows.length - 1);
                 rows.push(

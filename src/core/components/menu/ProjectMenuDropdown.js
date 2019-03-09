@@ -69,11 +69,13 @@ class ProjectMenuDropdown extends React.Component {
         // Show project listing only if the variable is set and contains more
         // than one project
         if ((projectList != null) && (projectList.length > 1)) {
-            menuItems.push(<Dropdown.Divider key='div1'/>);
-            menuItems.push(<Dropdown.Header
-                key='header2'
-                content='Other Projects'
-            />);
+            if (menuItems.length > 0) {
+                menuItems.push(<Dropdown.Divider key='div1'/>);
+                menuItems.push(<Dropdown.Header
+                    key='header2'
+                    content='Projects'
+                />);
+            }
             for (let i = 0; i < projectList.length; i++) {
                 let pj = projectList[i];
                 menuItems.push(<Dropdown.Item

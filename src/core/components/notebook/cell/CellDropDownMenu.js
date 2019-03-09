@@ -19,20 +19,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Dropdown, Icon } from 'semantic-ui-react';
+import { INSERT_AFTER, INSERT_BEFORE } from '../../../resources/Notebook';
 import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
-    CONTENT_TIMESTAMPS, INSERT_AFTER, INSERT_BEFORE } from '../../../resources/Notebook';
+    CONTENT_TIMESTAMPS } from '../../../resources/Outputs';
 import '../../../../css/Notebook.css'
 
 
 /**
- * Dropdown menu for a notebook cell. Contains set of operations that are
- * available for the cell as well as the cell output and resulting resources.
+ * Dropdown menu for a notebook cell. Displays two icons with dropdown menus.
+ * The first menu contains operations that are available for the cell. The
+ * second menu allows to change the content that is being displayed in the cell
+ * output area.
  */
 class CellDropDownMenu extends React.Component {
     static propTypes = {
         cell: PropTypes.object.isRequired,
         cellNumber: PropTypes.number.isRequired,
         isActiveCell: PropTypes.bool.isRequired,
+        isNewNext: PropTypes.bool.isRequired,
+        isNewPrevious: PropTypes.bool.isRequired,
         notebook: PropTypes.object.isRequired,
         onAddFilteredCommand: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
@@ -57,6 +62,8 @@ class CellDropDownMenu extends React.Component {
             cell,
             cellNumber,
             isActiveCell,
+            isNewNext,
+            isNewPrevious,
             notebook,
             onAddFilteredCommand,
             onCreateBranch,
@@ -115,6 +122,7 @@ class CellDropDownMenu extends React.Component {
             dropdownItems.push(
                 <Dropdown.Item
                     key='insert-above'
+                    disabled={isNewPrevious}
                     icon='arrow circle up'
                     text='Insert cell above'
                     title={'Insert new notebook cell before cell #' + cellNumber}
@@ -124,6 +132,7 @@ class CellDropDownMenu extends React.Component {
             dropdownItems.push(
                 <Dropdown.Item
                     key='insert-below'
+                    disabled={isNewNext}
                     icon='arrow circle down'
                     text='Insert cell below'
                     title={'Insert new notebook cell after cell #' + cellNumber}

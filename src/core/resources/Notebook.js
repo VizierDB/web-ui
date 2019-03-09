@@ -1,7 +1,7 @@
 /**
- * Copyright (C) 2018 New York University
- *                    University at Buffalo,
- *                    Illinois Institute of Technology.
+ * Copyright (C) 2018-2019 New York University
+ *                         University at Buffalo,
+ *                         Illinois Institute of Technology.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,222 +18,9 @@
 
 import { DatasetDescriptor } from './Dataset';
 import { HATEOASReferences } from '../util/HATEOAS';
+import { OutputChart, OutputHtml, OutputText } from './Outputs';
 import { utc2LocalTime } from '../util/Timestamp';
 
-
-// -----------------------------------------------------------------------------
-// Cell Output
-// -----------------------------------------------------------------------------
-
-// Output cell resource type identifier
-export const CONTENT_CHART = 'CONTENT_CHART';
-export const CONTENT_DATASET = 'CONTENT_DATASET';
-export const CONTENT_ERROR = 'CONTENT_ERROR';
-export const CONTENT_HTML = 'CONTENT_HTML';
-export const CONTENT_HIDE = 'CONTENT_HIDE';
-export const CONTENT_TEXT = 'CONTENT_TEXT';
-export const CONTENT_TIMESTAMPS = 'CONTENT_TIMESTAMPS';
-
-/**
- * Output resource content. Contains functionality to determine content type
- * and whether the content is currently being fetched from the server.
- */
-class OutputResource {
-    constructor(type, isFetching) {
-        this.type = type;
-        this.isFetching = (isFetching != null) ? isFetching : false;
-    }
-    isChart = () => (this.type === CONTENT_CHART);
-    isDataset = () => (this.type === CONTENT_DATASET);
-    isError = () => (this.type === CONTENT_ERROR);
-    isHidden = () => (this.type === CONTENT_HIDE);
-    isHtml = () => (this.type === CONTENT_HTML);
-    isText = () => (this.type === CONTENT_TEXT);
-    isTimestamps = () => (this.type === CONTENT_TIMESTAMPS);
-}
-
-// Extended output resources for the different types of output.
-
-
-/**
- * Output resource for showing a chart plotted for a given dataset in a
- * notebook cell.
- */
-export class OutputChart extends OutputResource {
-    constructor(name, dataset, isFetching) {
-        super(CONTENT_CHART, isFetching);
-        this.name = name;
-        this.dataset = dataset;
-    }
-    /**
-     * Return a copy of the resource where the isFetching flag is true.
-     */
-    setFetching() {
-        return new OutputChart(this.name, this.dataset, true);
-    }
-}
-
-
-/**
- * Output resource for showing dataset rows in a notebook cell
- */
-export class OutputDataset extends OutputResource {
-    constructor(dataset, isFetching) {
-        super(CONTENT_DATASET, isFetching);
-        this.dataset = dataset;
-    }
-    /**
-     * Return a copy of the resource where the isFetching flag is true.
-     */
-    setFetching() {
-        return new OutputDataset(this.dataset, true);
-    }
-}
-
-
-/**
- * Output resource for showing an error message resulting from a content
- * fetch error.
- */
-export class OutputError extends OutputResource {
-    constructor(error, isFetching) {
-        super(CONTENT_ERROR, isFetching);
-        this.error = error;
-    }
-    /**
-     * Return a copy of the resource where the isFetching flag is true.
-     */
-    setFetching() {
-        return new OutputError(this.error, true);
-    }
-}
-
-
-/**
- * Output resource when hiding output for a notebook cell.
- */
-export class OutputHidden extends OutputResource {
-    constructor(isFetching) {
-        super(CONTENT_HIDE, isFetching);
-    }
-    /**
-     * Return a copy of the resource where the isFetching flag is true.
-     */
-    setFetching() {
-        return new OutputHidden(true);
-    }
-}
-
-
-/**
- * Output resource for showing content of the module standard output as HTML
- * in the output area of a notebook cell.
- */
-export class OutputHtml extends OutputResource {
-    constructor(outputObjects, isFetching) {
-        super(CONTENT_HTML, isFetching);
-        this.lines  = [];
-        for (let j = 0; j < outputObjects.length; j++) {
-            const out = outputObjects[j];
-            if (out.type != null) {
-                if (out.type === 'text/html') {
-                    this.lines.push(out.value);
-                }
-            } else {
-                this.lines.push(out);
-            }
-        }
-    }
-    /**
-     * Return a copy of the resource where the isFetching flag is true.
-     */
-    setFetching() {
-        return new OutputHtml(this.lines, true);
-    }
-}
-
-
-/**
- * Output resource for showing content of the module standard output as plain
- * text in the output area of a notebook cell.
- */
-export class OutputText extends OutputResource {
-    constructor(outputObjects, isFetching) {
-        super(CONTENT_TEXT, isFetching);
-        this.lines  = [];
-        for (let j = 0; j < outputObjects.length; j++) {
-            const out = outputObjects[j];
-            if (out.type != null) {
-                if (out.type === 'text/plain') {
-                    this.lines.push(out.value);
-                }
-            } else {
-                this.lines.push(out);
-            }
-        }
-    }
-    /**
-     * Return a copy of the resource where the isFetching flag is true.
-     */
-    setFetching() {
-        return new OutputText(this.lines, true);
-    }
-}
-
-
-/**
- * Output resource for showing the timestamps for different stages of module
- * execution in the output area of a notebook cell.
- */
-export class OutputTimestamps extends OutputResource {
-    constructor(createdAt, startedAt, finishedAt) {
-        super(CONTENT_TIMESTAMPS);
-        this.createdAt = createdAt;
-        this.startedAt = startedAt;
-        this.finishedAt = finishedAt;
-    }
-    /**
-     * Return a copy of the resource where the isFetching flag is true.
-     */
-    setFetching() {
-        return new OutputTimestamps(
-            this.createdAt,
-            this.startedAt,
-            this.finishedAt,
-            true
-        );
-    }
-}
-
-// Shortcut to show text output for all lines in standard output. Depending on
-// whether the output is plai/text of html a different output resource is
-// returned.
-export const StandardOutput = (module) => {
-    const stdout = module.outputs.stdout;
-    let outputResource = null;
-    if (stdout.length === 1) {
-        // If the output is a chart view it is expected to be the only
-        // output element
-        const out = stdout[0];
-        if (out.type === 'text/html') {
-            outputResource = new OutputHtml(stdout);
-        } else  {
-            outputResource = new OutputText(stdout);
-        }
-    } else {
-        outputResource = new OutputText(stdout);
-    }
-    // Make sure that there is some output
-    if (outputResource === null) {
-        outputResource = new OutputText([]);
-    }
-    return outputResource;
-}
-
-
-// -----------------------------------------------------------------------------
-// Notebook
-// -----------------------------------------------------------------------------
 
 // Workflow and module states
 const STATE_PENDING = 0;
@@ -275,11 +62,15 @@ class ModuleHandle {
  * in an underlying workflow. In addition to the workflow module each cell in
  * the notebook has an output resource. This resource is shown in the output
  * area when the notebook cell is rendered.
+ *
+ * Each notebook maintains a counter for for new cells to generate unique cell
+ * identifier.
  */
 export class Notebook {
-    constructor(workflow, cells) {
+    constructor(workflow, cells, cellCounter) {
         this.workflow = workflow;
         this.cells = cells;
+        this.cellCounter = (cellCounter != null) ? cellCounter : 0;
         // Set a few shortcuts
         this.id = workflow.id;
         this.createdAt = workflow.createdAt;
@@ -317,9 +108,30 @@ export class Notebook {
             if (outputResource === null) {
                 outputResource = new OutputText([]);
             }
-            this.cells.push(new NotebookCell(module, commandSpec, outputResource));
+            this.cells.push(
+                new NotebookCell(module.id, module, commandSpec, outputResource)
+            );
         }
         return this;
+    }
+    /**
+     * Dismiss changes that were made for a given cell. If the cell is a new
+     * cell it will be removed from the list of cells. If the cell represents
+     * an existing workflow module all changes will be reset..
+     */
+    dismissChangesForCell(cellId) {
+        const cellList = [];
+        for (let i = 0; i < this.cells.length; i++) {
+            const cell = this.cells[i];
+            if (cell.id === cellId) {
+                if (!cell.isNewCell()) {
+                    cellList.push(cell);
+                }
+            } else {
+                cellList.push(cell);
+            }
+        }
+        return new Notebook(this.workflow, cellList, this.cellCounter);
     }
     /**
      * Get a descriptor for the dataset with the given name in the given module.
@@ -333,13 +145,37 @@ export class Notebook {
         const ds = this.datasets[datasetId];
         return new DatasetDescriptor(datasetId, name, ds.columns, ds.links);
     }
-    hasNewCellAt(cell, position) {
+    /**
+     * Insert a new cell into the notebook. The position of the new cell is relative
+     * to the given cell (either before or after). If cell is null the new cell is
+     * being added to an empty notebook.
+     */
+    insertNewCell(cell, position) {
+        const newCell = new NotebookCell('__' + this.cellCounter + '__');
         if (cell != null) {
-            alert('Insert for ' + cell.id + ' at ' + position);
+            const cellList = [];
+            for (let i = 0; i < this.cells.length; i++) {
+                const c = this.cells[i];
+                if (c.id === cell.id) {
+                    if (position === INSERT_BEFORE) {
+                        cellList.push(newCell);
+                        cellList.push(c);
+                    } else {
+                        cellList.push(c);
+                        cellList.push(newCell);
+                    }
+                } else {
+                    cellList.push(c);
+                }
+            }
+            return new Notebook(this.workflow, cellList, this.cellCounter + 1);
         } else {
-            alert('Insert to empty notebook');
+            if (this.cells.length === 0) {
+                const cell = newCell
+                return new Notebook(this.workflow, [cell], this.cellCounter + 1);
+            }
         }
-        return false;
+        return this;
     }
     /**
      * Test if a notebook is empty.
@@ -367,14 +203,16 @@ export class Notebook {
         const modifiedCells = [];
         for (let i = 0; i < this.cells.length; i++) {
             const cell = this.cells[i];
-            if (cell.module.id === moduleId) {
+            const module = cell.module;
+            if ((module != null) && (module.id === moduleId)) {
                 modifiedCells.push(
-                    new NotebookCell(cell.module, cell.commandSpec, output));
+                    new NotebookCell(module.id, module, cell.commandSpec, output)
+                );
             } else {
                 modifiedCells.push(cell);
             }
         }
-        return new Notebook(this.workflow, modifiedCells);
+        return new Notebook(this.workflow, modifiedCells, this.cellCounter);
     }
     /**
      * Set the isFetching flag in the notebook cell that that contains the
@@ -385,10 +223,12 @@ export class Notebook {
         const modifiedCells = [];
         for (let i = 0; i < this.cells.length; i++) {
             const cell = this.cells[i];
-            if (cell.module.id === moduleId) {
+            const module = cell.module;
+            if ((module != null) && (module.id === moduleId)) {
                 modifiedCells.push(
                     new NotebookCell(
-                        cell.module,
+                        module.id,
+                        module,
                         cell.commandSpec,
                         cell.output.setFetching()
                     )
@@ -397,7 +237,7 @@ export class Notebook {
                 modifiedCells.push(cell);
             }
         }
-        return new Notebook(this.workflow, modifiedCells);
+        return new Notebook(this.workflow, modifiedCells, this.cellCounter);
     }
 }
 
@@ -408,8 +248,8 @@ export class Notebook {
  * output area.
  */
 class NotebookCell {
-    constructor(module, commandSpec, output) {
-        this.id = module.id;
+    constructor(id, module, commandSpec, output) {
+        this.id = id;
         this.module = module;
         this.commandSpec = commandSpec;
         this.output = output;

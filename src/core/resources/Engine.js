@@ -33,11 +33,24 @@
  *   package in turn is an list of modules in that package.
  * .types: List pf package identifier
  */
+
+ import { sortByName } from '../util/Sort';
+
+
 export class ModuleRegistry {
     fromJson(json) {
+        this.packageList = [];
+        this.packageIndex = {};
         for (let i = 0; i < json.length; i++) {
             const obj = json[i];
-            this[obj.id] = new PackageModule().fromJson(obj);
+            this.packageIndex[obj.id] = new PackageModule().fromJson(obj);
+            const commands = obj.commands;
+            sortByName(commands)
+            this.packageList.push({
+                id: obj.id,
+                name: obj.name,
+                commands: commands
+            });
         }
         return this;
     }
@@ -45,7 +58,7 @@ export class ModuleRegistry {
      * Get the specification for a given command.
      */
     getCommandSpec(packageId, commandId) {
-        return this[packageId].commands[commandId];
+        return this.packageIndex[packageId].commands[commandId];
     }
 }
 

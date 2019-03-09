@@ -69,19 +69,13 @@ class DatasetView extends React.Component {
         const activeCell = this.state;
         // Content header
         const contentHeader = (
-            <table className='output-header'><tbody>
-                <tr>
-                    <td className='header-dropdown'>
-                        <SpreadsheetDropDown dataset={dataset} />
-                    </td>
-                    <td className='header-title'>
-                        <span className='header-name'>{dataset.name}</span>
-                        <span> (</span>
-                        <span className='number-highlight'>{dataset.rowCount}</span>
-                        <span> rows)</span>
-                    </td>
-                </tr>
-            </tbody></table>
+            <div className='output-header'>
+                <span className='header-name'>{dataset.name}</span>
+                <span> (</span>
+                <span className='number-highlight'>{dataset.rowCount}</span>
+                <span className='right-padding-md'> rows)</span>
+                <SpreadsheetDropDown dataset={dataset} />
+            </div>
         );
         const columns = dataset.columns;
         // Grid header

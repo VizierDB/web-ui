@@ -21,7 +21,7 @@ import { fetchAuthed, requestAuth } from '../main/Service';
 import { AnnotationList } from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
 import { OutputChart, OutputDataset, OutputError, OutputHidden,
-    OutputTimestamps, StandardOutput } from '../../resources/Notebook';
+    OutputTimestamps, StandardOutput } from '../../resources/Outputs';
 import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource } from '../../util/Api';
 import { ErrorObject } from '../../util/Error';
@@ -34,6 +34,8 @@ import { VIZUAL, VIZUAL_OP } from '../../util/Vizual';
  */
 // Change the value of the group mode state
 export const CHANGE_GROUP_MODE = 'CHANGE_GROUP_MODE';
+// Insert a new cell into the notebook
+export const INSERT_NOTEBOOK_CELL = 'INSERT_NOTEBOOK_CELL';
 // Signals for fetching workflow modules
 export const RECEIVE_WORKFLOW = 'RECEIVE_WORKFLOW';
 export const REQUEST_WORKFLOW = 'REQUEST_WORKFLOW';
@@ -107,9 +109,25 @@ const workflowFetchError = (message, status) => (
 // Notebooks
 // -----------------------------------------------------------------------------
 
-export const insertNotebookCell = (notebook, cell, position) => (dispatch) => {
-    return {type: 'NO_OP'};
-}
+
+/**
+ * Dismiss any changes that were made to the given cell.
+ */
+export const dismissCellChanges = (notebook, cell) => ({
+    type: UPDATE_NOTEBOOK,
+    notebook: notebook.dismissChangesForCell(cell.id)
+})
+
+
+/**
+ * Insert a new cell into the notebook. The position of the new cell is relative
+ * to the given cell (either before or after). If cell is null the new cell is
+ * being added to an empty notebook.
+ */
+export const insertNotebookCell = (notebook, cell, position) => ({
+    type: UPDATE_NOTEBOOK,
+    notebook: notebook.insertNewCell(cell, position)
+})
 
 
 /**
