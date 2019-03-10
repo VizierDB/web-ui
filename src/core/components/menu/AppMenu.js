@@ -133,26 +133,16 @@ class AppMenu extends React.Component {
         // message.
         // Start by generating the list of elements in the menu bar.
         let menuItems = [];
-        // Show the project logo and project name as the first element. If the
-        // project is not set show application name instead.
-        let name = null;
-        if (project != null) {
-            name = project.name;
-        } else {
-            name = 'Vizier DB';
-        }
-        menuItems.push(
-            <Menu.Item key='logo' header>
-                <Icon name='vimeo v' />
-                {name}
-            </Menu.Item>
-        );
-        // Show the home link. This is only active if we are not on the main
-        // page
+        // Show the project logo as the first element. If not on the main page
+        // have the logo be clickable to get to the homepage.
         if (!resource.isMainPage()) {
-            menuItems.push(<Menu.Item key='home' as='a' onClick={onGoHome}>Home</Menu.Item>);
+            menuItems.push(<Menu.Item key='logo' icon='vimeo v' header onClick={onGoHome} />);
         } else {
-            menuItems.push(<Menu.Item key='home'>Home</Menu.Item>);
+            menuItems.push(<Menu.Item key='logo'  icon='vimeo v' header />);
+        }
+        // Show the project name if the project is set
+        if (project != null) {
+            menuItems.push(<Menu.Item key='name' header>{project.name}</Menu.Item>);
         }
         menuItems.push(
             <ProjectMenuDropdown

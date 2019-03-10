@@ -32,9 +32,11 @@ class Notebook extends React.Component {
         apiEngine: PropTypes.object.isRequired,
         notebook: PropTypes.object.isRequired,
         onAddFilteredCommand: PropTypes.func.isRequired,
+        onCopyCell: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
         onDatasetNavigate: PropTypes.func.isRequired,
         onDismissCell: PropTypes.func.isRequired,
+        onEditCell: PropTypes.func.isRequired,
         onFetchAnnotations: PropTypes.func.isRequired,
         onInsertCell: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
@@ -60,9 +62,11 @@ class Notebook extends React.Component {
             apiEngine,
             notebook,
             onAddFilteredCommand,
+            onCopyCell,
             onCreateBranch,
             onDatasetNavigate,
             onDismissCell,
+            onEditCell,
             onInsertCell,
             onOutputSelect,
             onFetchAnnotations,
@@ -108,9 +112,11 @@ class Notebook extends React.Component {
                     isNewPrevious={isNewPrevious}
                     notebook={notebook}
                     onAddFilteredCommand={onAddFilteredCommand}
+                    onCopyCell={onCopyCell}
                     onCreateBranch={onCreateBranch}
                     onDatasetNavigate={onDatasetNavigate}
                     onDismissCell={onDismissCell}
+                    onEditCell={onEditCell}
                     onInsertCell={onInsertCell}
                     onOutputSelect={onOutputSelect}
                     onFetchAnnotations={onFetchAnnotations}

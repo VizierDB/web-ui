@@ -18,6 +18,8 @@
 
 // Add a command to the list of hidden commands
 export const ADD_FILTERED_COMMAND = 'ADD_FILTERED_COMMAND';
+// Copy a given cell to the clipboard that is contained in the user settings
+export const COPY_CELL = 'COPY_CELL';
 // Toggle the value of the hide cells property
 export const HIDE_CELLS= 'HIDE_CELLS';
 // Dummy action when redirecting as result of a received resource
@@ -39,6 +41,14 @@ export const addFilteredCommand = (command) => ({
     command
 })
 
+
+/**
+ * Copy the given cell to the clipboard that is contained in the user settings.
+ */
+export const copyCell = (cell) => ({
+    type: COPY_CELL,
+    cell
+})
 
 /**
  * Set the object that contains the filtered module identifier. Expects an

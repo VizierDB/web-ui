@@ -19,11 +19,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { addFilteredCommand, removeFilteredCommand } from '../../actions/main/App';
+import { addFilteredCommand, copyCell, removeFilteredCommand } from '../../actions/main/App';
 import { createBranch, deleteBranch } from '../../actions/project/Branch';
-import { dismissCellChanges, fetchAnnotations, fetchWorkflow, hideCellOutput,
-    insertNotebookCell, showCellChart, selectNotebookCell, showCellDataset,
-    showCellStdout, showCellTimestamps } from '../../actions/project/Notebook';
+import { dismissCellChanges, editNotebookCell, fetchAnnotations, fetchWorkflow,
+    hideCellOutput, insertNotebookCell, showCellChart, selectNotebookCell,
+    showCellDataset, showCellStdout, showCellTimestamps } from '../../actions/project/Notebook';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import { fetchProjects } from '../../actions/project/ProjectListing';
 import { LargeMessageButton } from '../../components/Button';
@@ -142,6 +142,14 @@ class NotebookPage extends Component {
         this.props.dispatch(addFilteredCommand(command));
     }
     /**
+     * Dispatch action to copy the given cell to the clipboard that is contained
+     * in the user settings.
+     */
+    handleCopyCell = (cell) => {
+        const { dispatch } = this.props;
+        dispatch(copyCell(cell));
+    }
+    /**
      * Create a new branch and switch to that branch on success.
      */
     handleCreateBranch = (name) => {
@@ -181,6 +189,15 @@ class NotebookPage extends Component {
         const { dispatch, notebook } = this.props;
         dispatch(dismissCellChanges(notebook, cell));
     }
+    /**
+     * Set an existing cell into edit mode.
+     */
+    handleEditCell = (cell) => {
+        // Cell has to be an existing workflow module cell. This should be
+        // ensured by the child component (not validated here).
+        const { dispatch, notebook } = this.props;
+        dispatch(editNotebookCell(notebook, cell));
+    }
     handleFetchDatasetCellAnnotations = (module, dataset, columnId, rowId) => {
         const { dispatch, notebook } = this.props;
         dispatch(fetchAnnotations(notebook, module, dataset, columnId, rowId));
@@ -192,6 +209,8 @@ class NotebookPage extends Component {
      * undefined if the notebook is empty.
      */
     handleInsertCell = (cell, position) => {
+        // Cell has to be an existing workflow module cell. This should be
+        // ensured by the child component (not validated here).
         const { dispatch, notebook } = this.props;
         dispatch(insertNotebookCell(notebook, cell, position));
     }
@@ -308,9 +327,11 @@ class NotebookPage extends Component {
                     reversed={reversed}
                     onAddFilteredCommand={this.handleAddFilteredCommand}
                     onChangeGrouping={this.handleChangeGrouping}
+                    onCopyCell={this.handleCopyCell}
                     onCreateBranch={this.showCreateBranchModal}
                     onDatasetNavigate={this.handleDatasetNavigate}
                     onDismissCell={this.handleDismissCell}
+                    onEditCell={this.handleEditCell}
                     onFetchAnnotations={this.handleFetchDatasetCellAnnotations}
                     onInsertCell={this.handleInsertCell}
                     onOutputSelect={this.handleSelectOutput}

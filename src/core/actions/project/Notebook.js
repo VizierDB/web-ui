@@ -120,13 +120,23 @@ export const dismissCellChanges = (notebook, cell) => ({
 
 
 /**
+ * Start editing a cell in a notebook. The cell is expected to contain a
+ * workflow module that contains the command that is being edited.
+ */
+export const editNotebookCell = (notebook, cell) => ({
+    type: UPDATE_NOTEBOOK,
+    notebook: notebook.editCell(cell)
+})
+
+
+/**
  * Insert a new cell into the notebook. The position of the new cell is relative
  * to the given cell (either before or after). If cell is null the new cell is
  * being added to an empty notebook.
  */
 export const insertNotebookCell = (notebook, cell, position) => ({
     type: UPDATE_NOTEBOOK,
-    notebook: notebook.insertNewCell(cell, position)
+    notebook: notebook.editCell(cell, position)
 })
 
 

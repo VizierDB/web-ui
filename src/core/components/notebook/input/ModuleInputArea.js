@@ -35,7 +35,8 @@ class ModuleInputArea extends React.Component {
         datasets: PropTypes.array.isRequired,
         cell: PropTypes.object.isRequired,
         onDismiss: PropTypes.func.isRequired,
-        onSubmit: PropTypes.func.isRequired
+        onSubmit: PropTypes.func.isRequired,
+        userSettings: PropTypes.object.isRequired
     }
     constructor(props) {
         super(props);
@@ -49,13 +50,24 @@ class ModuleInputArea extends React.Component {
         const { cell, onDismiss } = this.props;
         onDismiss(cell);
     }
+    /**
+     * Set the command in the user settings clipboard as the selected command.
+     */
+    handlePasteCommand = () => {
+        const { userSettings } = this.props;
+        this.setState({selectedCommand: userSettings.clipboard.commandSpec});
+    }
+    /**
+     * Update the selected command to the command that is identified by the
+     * given pair of package and command identifier.
+     */
     handleSelectCommand = (packageId, commandId) => {
         const { apiEngine, onDismiss, onSubmit } = this.props;
         const cmd = apiEngine.packages.getCommandSpec(packageId, commandId);
         this.setState({selectedCommand: cmd});
     }
     render() {
-        const { apiEngine, onDismiss, onSubmit } = this.props;
+        const { apiEngine, onDismiss, onSubmit, userSettings } = this.props;
         const { selectedCommand } = this.state;
         // The main content depends on whether a command has been selected or
         // not. If no command is selected a simple message is shown the alert
@@ -86,10 +98,17 @@ class ModuleInputArea extends React.Component {
                 </div>
             );
         }
+        // The onPaste function is only set if the user settings clipboard is
+        // defined
+        let onPaste = null;
+        if (userSettings.clipboard != null) {
+            onPaste = this.handlePasteCommand;
+        }
         return (
             <div>
                 <CommandMenu
                     apiEngine={apiEngine}
+                    onPaste={onPaste}
                     onSelect={this.handleSelectCommand}
                     selectedCommand={selectedCommand}
                 />

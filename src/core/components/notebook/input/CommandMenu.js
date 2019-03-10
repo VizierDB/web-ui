@@ -27,10 +27,11 @@ class CommandMenu extends React.Component {
     static propTypes = {
         apiEngine: PropTypes.object.isRequired,
         selectedCommand: PropTypes.object,
+        onPaste: PropTypes.func,
         onSelect: PropTypes.func.isRequired
     }
     render() {
-        const { apiEngine, onSelect, selectedCommand } = this.props;
+        const { apiEngine, onPaste, onSelect, selectedCommand } = this.props;
         // Add one item per package. For packages that contain multiple commands
         // a nested menu item is shown. If a package contains only a single
         // command do not show a nested menu. Use the single command as the
@@ -63,7 +64,7 @@ class CommandMenu extends React.Component {
                 item = (
                     <Dropdown.Item key={pckg.id}>
                         <Icon name='dropdown' />
-                        <span className='text'>{pckg.name}</span>
+                        <span className='text'>{pckg.name.toUpperCase()}</span>
                         <Dropdown.Menu>
                             { dropdownItems }
                         </Dropdown.Menu>
@@ -87,14 +88,33 @@ class CommandMenu extends React.Component {
         if (selectedCommand != null) {
             menuHeader = (<Menu.Item header>{selectedCommand.name}</Menu.Item>);
         }
+        // Display a paste button. The button is enabled only if the onPaste
+        // method is given.
+        let pasteButton = null;
+        if (onPaste != null) {
+            pasteButton = (
+                <Menu.Item>
+                    <Icon
+                        name='paste'
+                        title='Paste command from clipboard'
+                        onClick={onPaste}
+                    />
+                </Menu.Item>
+            );
+        } else {
+            pasteButton = (
+                <Menu.Item><Icon name='paste' disabled /></Menu.Item>
+            );
+        }
         return (
-            <Menu attached='top'>
+            <Menu inverted>
                 <Dropdown item icon='wrench' simple>
                     <Dropdown.Menu>
                         {menuItems}
                     </Dropdown.Menu>
                 </Dropdown>
                 { menuHeader }
+                { pasteButton }
             </Menu>
         );
     }

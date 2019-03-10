@@ -35,6 +35,15 @@ export const INSERT_BEFORE = 'INSERT_BEFORE';
 
 
 /**
+ * New cells have a string identifier that contains  unique counter value. Here
+ * we assume that modules fetched from the API contain identifier that do not
+ * match this pattern (i.e., do not start and end with underlines). As an
+ * alternative we could use unique UUID's here.
+ */
+const getNewCellId = (id) => ('__' + id + '__');
+
+
+/**
  * Workflow module handle.
  */
 class ModuleHandle {
@@ -113,8 +122,7 @@ export class Notebook {
                     module.id,
                     module,
                     commandSpec,
-                    outputResource,
-                    this.inEdit
+                    outputResource
                 )
             );
         }
@@ -123,7 +131,7 @@ export class Notebook {
     /**
      * Dismiss changes that were made for a given cell. If the cell is a new
      * cell it will be removed from the list of cells. If the cell represents
-     * an existing workflow module all changes will be reset..
+     * an existing workflow module all changes will be reset.
      */
     dismissChangesForCell(cellId) {
         const cellList = [];
@@ -131,13 +139,75 @@ export class Notebook {
             const cell = this.cells[i];
             if (cell.id === cellId) {
                 if (!cell.isNewCell()) {
-                    cellList.push(cell);
+                    cellList.push(
+                        new NotebookCell(
+                            cell.id,
+                            cell.module,
+                            cell.commandSpec,
+                            cell.output,
+                            false
+                    ));
                 }
             } else {
                 cellList.push(cell);
             }
         }
         return new Notebook(this.workflow, cellList, this.cellCounter);
+    }
+    /**
+     * Insert a new cell or set an existing cell into edit mode. There are three
+     * options here: (1) if cell is null or undefined a new cell is being added
+     * to an empty notebook, (2) if cell is defined and position is null or
+     * undefined the given cell is being edited, or (3) if cell and position
+     * are defined a new cell is inserted at a position relative to the given
+     * cell (either before or after).
+     */
+    editCell(cell, position) {
+        if (cell != null) {
+            const cellList = [];
+            for (let i = 0; i < this.cells.length; i++) {
+                const c = this.cells[i];
+                if (c.id === cell.id) {
+                    // Depending on whether position is defined or not we either
+                    // add a new cell (as defined by position) or set the given
+                    // cell into edit mode.
+                    if (position != null) {
+                        const newCell = new NotebookCell(
+                            getNewCellId(this.cellCounter)
+                        );
+                        if (position === INSERT_BEFORE) {
+                            cellList.push(newCell);
+                            cellList.push(c);
+                        } else {
+                            cellList.push(c);
+                            cellList.push(newCell);
+                        }
+                    } else {
+                        cellList.push(
+                            new NotebookCell(
+                                c.id,
+                                c.module,
+                                c.commandSpec,
+                                c.output,
+                                true
+                        ));
+                    }
+                } else {
+                    cellList.push(c);
+                }
+            }
+            return new Notebook(this.workflow, cellList, this.cellCounter + 1);
+        } else {
+            // I\f the notebook is empty a new cell is added.
+            if (this.cells.length === 0) {
+                return new Notebook(
+                    this.workflow,
+                    [new NotebookCell(getNewCellId(this.cellCounter))],
+                    this.cellCounter + 1
+                );
+            }
+        }
+        return this;
     }
     /**
      * Get a descriptor for the dataset with the given name in the given module.
@@ -150,38 +220,6 @@ export class Notebook {
         // name
         const ds = this.datasets[datasetId];
         return new DatasetDescriptor(datasetId, name, ds.columns, ds.links);
-    }
-    /**
-     * Insert a new cell into the notebook. The position of the new cell is relative
-     * to the given cell (either before or after). If cell is null the new cell is
-     * being added to an empty notebook.
-     */
-    insertNewCell(cell, position) {
-        const newCell = new NotebookCell('__' + this.cellCounter + '__');
-        if (cell != null) {
-            const cellList = [];
-            for (let i = 0; i < this.cells.length; i++) {
-                const c = this.cells[i];
-                if (c.id === cell.id) {
-                    if (position === INSERT_BEFORE) {
-                        cellList.push(newCell);
-                        cellList.push(c);
-                    } else {
-                        cellList.push(c);
-                        cellList.push(newCell);
-                    }
-                } else {
-                    cellList.push(c);
-                }
-            }
-            return new Notebook(this.workflow, cellList, this.cellCounter + 1);
-        } else {
-            if (this.cells.length === 0) {
-                const cell = newCell
-                return new Notebook(this.workflow, [cell], this.cellCounter + 1);
-            }
-        }
-        return this;
     }
     /**
      * Test if a notebook is empty.
@@ -217,7 +255,7 @@ export class Notebook {
                         module,
                         cell.commandSpec,
                         output,
-                        this.inEdit
+                        cell.inEdit
                     )
                 );
             } else {
@@ -243,7 +281,7 @@ export class Notebook {
                         module,
                         cell.commandSpec,
                         cell.output.setFetching(),
-                        this.inEdit
+                        cell.inEdit
                     )
                 );
             } else {
@@ -316,7 +354,7 @@ class NotebookCell {
     /**
      * Flag inficating that the cell is being edited.
      */
-    isInEdit() = (this.inEdit);
+    isInEdit = () => (this.inEdit);
     /**
      * Test if this object represents a new cell in the notebook. A new cell
      * does not have a workflow module associated with it.

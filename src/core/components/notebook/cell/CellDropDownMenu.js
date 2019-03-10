@@ -40,9 +40,25 @@ class CellDropDownMenu extends React.Component {
         isNewPrevious: PropTypes.bool.isRequired,
         notebook: PropTypes.object.isRequired,
         onAddFilteredCommand: PropTypes.func.isRequired,
+        onCopyCell: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
+        onEditCell: PropTypes.func.isRequired,
         onInsertCell: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired
+    }
+    /**
+     * Copy the associated cell to the clipboard in the user settings.
+     */
+    handleCopyCell = () => {
+        const { cell, onCopyCell } = this.props;
+        onCopyCell(cell);
+    }
+    /**
+     * Set the associated notebook cell into edit mode.
+     */
+    handleEditCell = () => {
+        const { cell, onEditCell } = this.props;
+        onEditCell(cell);
     }
     /**
      * Insert new cell before the notebook cell that is associated with the
@@ -102,10 +118,21 @@ class CellDropDownMenu extends React.Component {
             dropdownItems.push(
                 <Dropdown.Item
                     key='edit'
+                    disabled={cell.isInEdit()}
                     icon='pencil'
                     text='Edit'
                     title={'Edit notebook cell #' + cellNumber}
-                    onClick={() => (alert('Edit'))}
+                    onClick={this.handleEditCell}
+                />
+            );
+            dropdownItems.push(
+                <Dropdown.Item
+                    key='copy'
+                    disabled={cell.isInEdit()}
+                    icon='copy'
+                    text='Copy'
+                    title={'Copy command from notebook cell #' + cellNumber}
+                    onClick={this.handleCopyCell}
                 />
             );
             dropdownItems.push(

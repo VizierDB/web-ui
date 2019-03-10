@@ -48,9 +48,11 @@ class NotebookCell extends React.Component {
         isNewPrevious: PropTypes.bool.isRequired,
         notebook: PropTypes.object.isRequired,
         onAddFilteredCommand: PropTypes.func.isRequired,
+        onCopyCell: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
         onDatasetNavigate: PropTypes.func.isRequired,
         onDismissCell: PropTypes.func.isRequired,
+        onEditCell: PropTypes.func.isRequired,
         onInsertCell: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
         onFetchAnnotations: PropTypes.func.isRequired,
@@ -131,7 +133,9 @@ class NotebookCell extends React.Component {
             isNewNext,
             isNewPrevious,
             notebook,
+            onCopyCell,
             onDismissCell,
+            onEditCell,
             onOutputSelect,
             onFetchAnnotations,
             userSettings
@@ -154,6 +158,7 @@ class NotebookCell extends React.Component {
                     cell={cell}
                     onDismiss={onDismissCell}
                     onSubmit={() => (alert('Submit'))}
+                    userSettings={userSettings}
                 />);
         } else {
             // Check if the command that is associated with the cell is filtered
@@ -197,11 +202,36 @@ class NotebookCell extends React.Component {
                     isNewPrevious={isNewPrevious}
                     notebook={notebook}
                     onAddFilteredCommand={this.handleAddFilteredCommand}
+                    onCopyCell={onCopyCell}
                     onCreateBranch={this.handleCreateBranch}
+                    onEditCell={onEditCell}
                     onInsertCell={this.handleInsertCell}
                     onOutputSelect={onOutputSelect}
                 />
             );
+            // The visible cell command depends on whether the cell is in edit
+            // mode or not. If not in edit mode the command text is shown. In
+            // edit mode the module input area is shown.
+            if (cell.isInEdit()) {
+                commandText = (
+                    <ModuleInputArea
+                        apiEngine={apiEngine}
+                        datasets={datasets}
+                        cell={cell}
+                        onDismiss={onDismissCell}
+                        onSubmit={() => (alert('Submit'))}
+                        userSettings={userSettings}
+                    />
+                );
+            } else {
+                commandText = (
+                    <CellCommandText
+                        cell={cell}
+                        onClick={this.handleSelect}
+                        onDoubleClick={onDefaultAction}
+                    />
+                );
+            }
             outputArea = (
                 <CellOutputArea
                     cell={cell}
@@ -210,13 +240,6 @@ class NotebookCell extends React.Component {
                     onFetchAnnotations={onFetchAnnotations}
                     onTextOutputClick={this.handleSelect}
                     userSettings={userSettings}
-                />
-            );
-            commandText = (
-                <CellCommandText
-                    cell={cell}
-                    onClick={this.handleSelect}
-                    onDoubleClick={onDefaultAction}
                 />
             );
         }

@@ -43,11 +43,12 @@ const DEFAULT_SHOW_NOTEBOOK_REVERESED = false;
  * Object to capture all user preferences and their default values.
  */
 export class UserSettings {
-    constructor(filteredCommands, cellRowLimit, reversedOrder, hideCommands) {
+    constructor(filteredCommands, cellRowLimit, reversedOrder, hideCommands, clipboard) {
         this.filteredCommands = (filteredCommands != null) ? filteredCommands : DEFAULT_FILTERED_COMMANDS;
         this.cellDatasetRowLimit = (cellRowLimit != null) ? cellRowLimit : DEFAULT_CELL_DATASET_ROW_LIMIT;
         this.reversedOrder = (reversedOrder != null) ? reversedOrder : DEFAULT_SHOW_NOTEBOOK_REVERESED;
         this.hideCommands = (hideCommands != null) ? hideCommands : DEFAULT_HIDE_FILTERED_COMMANDS;
+        this.clipboard = clipboard;
     }
     /**
      * Add the given command to the list of commands that are selected to
@@ -91,6 +92,27 @@ export class UserSettings {
      */
     cellRowLimit() {
         return this.cellDatasetRowLimit;
+    }
+    /**
+     * Copy the module specification and command arguments of the given cell to
+     * the clipboard. Returns a modified object.
+     */
+    copyCell(cell) {
+        let content = null;
+        if (!cell.isNewCell()) {
+            content = {
+                commandSpec: cell.commandSpec,
+                arguments: cell.module.command.arguments
+            };
+            console.log(content);
+        }
+        return new UserSettings(
+            this.filteredCommands,
+            this.cellRowLimitValue,
+            this.reversedOrder,
+            this.hideCommands,
+            content
+        );
     }
     /**
      * Test if a given command is included in the list of filtered commands.

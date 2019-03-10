@@ -17,7 +17,7 @@
  */
 
 import { UserSettings } from '../../util/Settings';
-import { ADD_FILTERED_COMMAND, HIDE_CELLS, REMOVE_FILTERED_COMMAND,
+import { ADD_FILTERED_COMMAND, COPY_CELL, HIDE_CELLS, REMOVE_FILTERED_COMMAND,
     REVERSE_ORDER, SET_FILTERED_MODULES } from '../../actions/main/App';
 
 /**
@@ -35,6 +35,11 @@ export const app = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 userSettings: state.userSettings.addCommandToHiddenList(action.command)
+            };
+        case COPY_CELL:
+            return {
+                ...state,
+                userSettings: state.userSettings.copyCell(action.cell)
             };
         case HIDE_CELLS:
             return {
