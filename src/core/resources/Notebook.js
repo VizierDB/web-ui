@@ -109,7 +109,13 @@ export class Notebook {
                 outputResource = new OutputText([]);
             }
             this.cells.push(
-                new NotebookCell(module.id, module, commandSpec, outputResource)
+                new NotebookCell(
+                    module.id,
+                    module,
+                    commandSpec,
+                    outputResource,
+                    this.inEdit
+                )
             );
         }
         return this;
@@ -206,7 +212,13 @@ export class Notebook {
             const module = cell.module;
             if ((module != null) && (module.id === moduleId)) {
                 modifiedCells.push(
-                    new NotebookCell(module.id, module, cell.commandSpec, output)
+                    new NotebookCell(
+                        module.id,
+                        module,
+                        cell.commandSpec,
+                        output,
+                        this.inEdit
+                    )
                 );
             } else {
                 modifiedCells.push(cell);
@@ -230,7 +242,8 @@ export class Notebook {
                         module.id,
                         module,
                         cell.commandSpec,
-                        cell.output.setFetching()
+                        cell.output.setFetching(),
+                        this.inEdit
                     )
                 );
             } else {
@@ -248,11 +261,12 @@ export class Notebook {
  * output area.
  */
 class NotebookCell {
-    constructor(id, module, commandSpec, output) {
+    constructor(id, module, commandSpec, output, inEdit) {
         this.id = id;
         this.module = module;
         this.commandSpec = commandSpec;
         this.output = output;
+        this.inEdit = (inEdit != null) ? inEdit : false;
     }
     /**
      * Get the value of the language property for ccode cells.
@@ -299,6 +313,10 @@ class NotebookCell {
      * Test if the associated workflow module is in error or canceled state.
      */
     isErrorOrCanceled = () => (this.isCanceled() || this.isError());
+    /**
+     * Flag inficating that the cell is being edited.
+     */
+    isInEdit() = (this.inEdit);
     /**
      * Test if this object represents a new cell in the notebook. A new cell
      * does not have a workflow module associated with it.
