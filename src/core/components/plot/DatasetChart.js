@@ -52,7 +52,8 @@ class DatasetChart extends React.Component {
 
     static propTypes = {
         dataset: PropTypes.object.isRequired,
-        identifier: PropTypes.string.isRequired
+        identifier: PropTypes.string.isRequired,
+        onSelectCell: PropTypes.func
     }
 
     /**
@@ -75,12 +76,12 @@ class DatasetChart extends React.Component {
         ;
     }
     render() {
-        const { dataset, identifier } = this.props
+        const { dataset, identifier, onSelectCell } = this.props
         const plotName = 'plot_' + identifier
         if (dataset !== undefined) {
             return (
                 <div>
-                    <div className='output-header'>
+                    <div className='output-header' onClick={onSelectCell}>
                         <span className='header-name'>{identifier}</span>
                     </div>
                     <div className='plot'>
@@ -88,6 +89,7 @@ class DatasetChart extends React.Component {
                             key={identifier}
                             identifier={plotName}
                             dataset={dataset}
+                            onSelectCell={onSelectCell}
                         />
                     </div>
                     <div className='chart-download-btn'>

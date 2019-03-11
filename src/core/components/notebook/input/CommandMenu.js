@@ -84,37 +84,30 @@ class CommandMenu extends React.Component {
             menuItems.push(item);
         }
         // Display the name of the selected command (if not null)
-        let menuHeader = null;
+        let menuHeader = 'Select Command';
         if (selectedCommand != null) {
-            menuHeader = (<Menu.Item header>{selectedCommand.name}</Menu.Item>);
+            menuHeader = selectedCommand.name;
         }
-        // Display a paste button. The button is enabled only if the onPaste
-        // method is given.
-        let pasteButton = null;
+        // Add paste item to menu if the onPaste callback is given.
         if (onPaste != null) {
-            pasteButton = (
-                <Menu.Item>
-                    <Icon
-                        name='paste'
-                        title='Paste command from clipboard'
-                        onClick={onPaste}
-                    />
-                </Menu.Item>
-            );
-        } else {
-            pasteButton = (
-                <Menu.Item><Icon name='paste' disabled /></Menu.Item>
+            menuItems.push(<Dropdown.Divider key='__divider__'/>);
+            menuItems.push(
+                <Dropdown.Item
+                    key={'__paste__'}
+                    icon='paste'
+                    text='Paste'
+                    title='Paste command from clipboard'
+                    onClick={onPaste}
+                />
             );
         }
         return (
-            <Menu inverted>
-                <Dropdown item icon='wrench' simple>
+            <Menu>
+                <Dropdown item text={menuHeader} simple>
                     <Dropdown.Menu>
                         {menuItems}
                     </Dropdown.Menu>
                 </Dropdown>
-                { menuHeader }
-                { pasteButton }
             </Menu>
         );
     }

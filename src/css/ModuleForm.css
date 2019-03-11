@@ -8,6 +8,11 @@ div.module-form {
     margin: 10px 0px;
 }
 
+div.module-form-menu {
+    padding-left: 10px;
+    padding-bottom: 10px;
+}
+
 div.module-form-error {
     border-radius: 4px;
     background: #f2dede;
@@ -18,12 +23,8 @@ div.module-form-error {
     margin: 10px 0px;
 }
 
-div.module-form-empty {
-    text-align: center;
-    margin: 25px 0px;
-}
-
 div.module-form-buttons {
+    padding-top: 10px;
     text-align: right;
 }
 

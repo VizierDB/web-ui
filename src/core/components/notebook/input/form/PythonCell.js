@@ -278,18 +278,18 @@ class PythonCell extends React.Component {
         id: PropTypes.string.isRequired,
         value: PropTypes.string,
         editing: PropTypes.bool.isRequired,
-        sequenceIndex: PropTypes.number.isRequired,
         cursorPosition: PropTypes.object.isRequired,
         newLines: PropTypes.string,
         onChange: PropTypes.func.isRequired
     }
     constructor(props) {
         super(props);
-        const { id, value, editing, sequenceIndex, cursorPosition, newLines, onChange } = props;
+        console.log('Constructor for python cell')
+        const { id, value, editing, cursorPosition, newLines, onChange } = props;
         let evalue = value;
         let addLines = false;
         let newCursorPos = cursorPosition;
-        let active = (sequenceIndex === window.activeCodeCell || sequenceIndex === -1);
+        let active = (id === window.activeCodeCell || window.activeCodeCell == null);
         if(newLines){
         	addLines = true;
         	evalue = newLines;
@@ -299,14 +299,18 @@ class PythonCell extends React.Component {
         }
         this.state = {editorValue: evalue, snippetSelectorVisible: false, editing: editing, active:active, cursorPosition: newCursorPos, addLines:addLines};
         if(addLines){
+            console.log('add lines')
         	onChange(id, evalue);
         }
+    }
+    componentWillUnmount() {
+        console.log('Python code will unmount')
     }
     /**
      * Append a code snippet to the current editor value. The code snippet is
      * expected to be a list of strings (code lines).
      *
-     * Tries to determine the current indent from the last line tin the current
+     * Tries to determine the current indent from the last line in the current
      * editor value.
      */
     appendCode = (lines) => {

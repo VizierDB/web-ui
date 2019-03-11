@@ -20,7 +20,7 @@ import React from 'react';
 import { PropTypes } from 'prop-types';
 import { Icon } from 'semantic-ui-react';
 import { LargeMessageButton } from '../Button'
-import NotebookCell from './cell/NotebookCell';
+import NotebookCell from './NotebookCell';
 import { INSERT_AFTER } from '../../resources/Notebook'
 
 /**
@@ -36,7 +36,6 @@ class Notebook extends React.Component {
         onCreateBranch: PropTypes.func.isRequired,
         onDatasetNavigate: PropTypes.func.isRequired,
         onDismissCell: PropTypes.func.isRequired,
-        onEditCell: PropTypes.func.isRequired,
         onFetchAnnotations: PropTypes.func.isRequired,
         onInsertCell: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
@@ -66,7 +65,6 @@ class Notebook extends React.Component {
             onCreateBranch,
             onDatasetNavigate,
             onDismissCell,
-            onEditCell,
             onInsertCell,
             onOutputSelect,
             onFetchAnnotations,
@@ -116,7 +114,6 @@ class Notebook extends React.Component {
                     onCreateBranch={onCreateBranch}
                     onDatasetNavigate={onDatasetNavigate}
                     onDismissCell={onDismissCell}
-                    onEditCell={onEditCell}
                     onInsertCell={onInsertCell}
                     onOutputSelect={onOutputSelect}
                     onFetchAnnotations={onFetchAnnotations}

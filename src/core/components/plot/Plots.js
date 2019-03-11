@@ -33,7 +33,8 @@ class Plots extends React.Component {
 
     static propTypes = {
         dataset: PropTypes.object.isRequired,
-        identifier: PropTypes.string.isRequired
+        identifier: PropTypes.string.isRequired,
+        onSelectCell: PropTypes.func
     }
 
     constructor(props){
@@ -388,7 +389,7 @@ class Plots extends React.Component {
     }
     render() {
 
-        const { dataset, identifier } = this.props;
+        const { dataset, identifier, onSelectCell } = this.props;
         // Return null if the dataset is empty
         if (dataset.series.length === 0) {
             return null;
@@ -426,7 +427,7 @@ class Plots extends React.Component {
             <div>
                 <div className='plot-menu'>
                     <table className='plot-form-table'><tbody><tr>
-                        <td className='plot-form-label'>{"Charts"}</td>
+                        <td className='plot-form-label' onClick={onSelectCell}>{"Charts"}</td>
                         <td className='plot-form-dropdown'>
                             <Dropdown
                                 text={chartType}
@@ -440,7 +441,7 @@ class Plots extends React.Component {
                         { groupedCheckbox }
                     </tr></tbody></table>
                 </div>
-                  <div id={identifier} className='plot-view'>
+                  <div id={identifier} className='plot-view' onClick={onSelectCell}>
                   <div>
                       {chart}
                   </div>

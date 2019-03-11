@@ -229,6 +229,11 @@ span.left-padding-lg {
     padding-left: 20px;
 }
 
+
+span.right-padding-lg {
+    padding-right: 20px;
+}
+
 span.sys-name {
     font-weight: bold;
 }

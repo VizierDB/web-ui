@@ -34,9 +34,25 @@
  * .types: List pf package identifier
  */
 
- import { sortByName } from '../util/Sort';
+import { sortByName } from '../util/Sort';
 
 
+/**
+ * Constants for supported datatypes of command parameters in the command
+ * specifications that are included in the module registry that is obtained
+ * from the API..
+ */
+
+export const DT_CODE = 'code';
+export const DT_RECORD = 'record';
+export const DT_LIST = 'list';
+
+
+/**
+ * The module registry contains a list of all packages. Each package contains
+ * a list of all commands in the package. The registry also maintains a package
+ * index that enables access to a package by its identifier.
+ */
 export class ModuleRegistry {
     fromJson(json) {
         this.packageList = [];

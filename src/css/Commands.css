@@ -1,3 +1,7 @@
+div.commands-listing {
+    padding-left: 10px;
+}
+
 p.commands-listing-header {
     color: #888;
     font-weight: bold;

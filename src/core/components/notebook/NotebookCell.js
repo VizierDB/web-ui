@@ -18,21 +18,23 @@
 
 import React from 'react';
 import { PropTypes } from 'prop-types';
-import CellCommandText from './CellCommandText';
+import CellCommandArea from './input/CellCommandArea';
 import CellDropDownMenu from './CellDropDownMenu';
-import CellOutputArea from './CellOutputArea';
-import ModuleInputArea from '../input/ModuleInputArea';
-import { TextButton } from '../../Button';
-import { INSERT_AFTER, INSERT_BEFORE } from '../../../resources/Notebook';
-import '../../../../css/App.css';
-import '../../../../css/Notebook.css';
+import CellOutputArea from './output/CellOutputArea';
+import { TextButton } from '../Button';
+import { INSERT_AFTER, INSERT_BEFORE } from '../../resources/Notebook';
+import '../../../css/App.css';
+import '../../../css/Notebook.css';
 
 
 /**
  * Cell in a notebook. The cell may either represent an existing module in a
  * workflow or a new notebook cell. For cells that contain a workflow module
  * the redered components include the cell index, an optional cell menu,
- * the cell command text or the module input form and the cell output area.
+ * the cell command area and the cell output area.
+ *
+ * Depending on whether the associated notebook cell is in edit mode or not
+ * the command area will display the command text or a command input form.
  *
  * For new cells an empty cell index is shown together with the module input
  * form.
@@ -52,7 +54,6 @@ class NotebookCell extends React.Component {
         onCreateBranch: PropTypes.func.isRequired,
         onDatasetNavigate: PropTypes.func.isRequired,
         onDismissCell: PropTypes.func.isRequired,
-        onEditCell: PropTypes.func.isRequired,
         onInsertCell: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
         onFetchAnnotations: PropTypes.func.isRequired,
@@ -75,9 +76,6 @@ class NotebookCell extends React.Component {
     handleCreateBranch = () => {
         const { cell, onCreateBranch } = this.props;
         onCreateBranch(cell.module);
-    }
-    handleEditCell = () => {
-        alert('Edit')
     }
     /**
      * Scroll to the given positions in the given dataset that is being
@@ -135,7 +133,6 @@ class NotebookCell extends React.Component {
             notebook,
             onCopyCell,
             onDismissCell,
-            onEditCell,
             onOutputSelect,
             onFetchAnnotations,
             userSettings
@@ -145,21 +142,11 @@ class NotebookCell extends React.Component {
         // output area.
         let cellIndex = null;
         let cellMenu = null;
-        let commandText = null;
         let outputArea = null;
         // For a cell that contains a new workflow module only the module input
         // for is being displayed.
         if (cell.isNewCell()) {
             cellIndex = ' ';
-            commandText = (
-                <ModuleInputArea
-                    apiEngine={apiEngine}
-                    datasets={datasets}
-                    cell={cell}
-                    onDismiss={onDismissCell}
-                    onSubmit={() => (alert('Submit'))}
-                    userSettings={userSettings}
-                />);
         } else {
             // Check if the command that is associated with the cell is filtered
             // by the user settings. If the command is filtered we either return
@@ -182,16 +169,6 @@ class NotebookCell extends React.Component {
                     return null;
                 }
             }
-            // The default action when the user double clicks on the cell command
-            // depends on whether the notebook is read-only or not. For read-only
-            // notebooks 'Create branch' is the default option. Otherwise it is
-            // 'Edit cell'.
-            let onDefaultAction = null;
-            if (notebook.readOnly) {
-                onDefaultAction = this.handleCreateBranch;
-            } else {
-                onDefaultAction = this.handleEditCell;
-            }
             cellIndex = cellNumber;
             cellMenu = (
                 <CellDropDownMenu
@@ -204,45 +181,35 @@ class NotebookCell extends React.Component {
                     onAddFilteredCommand={this.handleAddFilteredCommand}
                     onCopyCell={onCopyCell}
                     onCreateBranch={this.handleCreateBranch}
-                    onEditCell={onEditCell}
                     onInsertCell={this.handleInsertCell}
                     onOutputSelect={onOutputSelect}
+                    onSelectCell={this.handleSelect}
                 />
             );
-            // The visible cell command depends on whether the cell is in edit
-            // mode or not. If not in edit mode the command text is shown. In
-            // edit mode the module input area is shown.
-            if (cell.isInEdit()) {
-                commandText = (
-                    <ModuleInputArea
-                        apiEngine={apiEngine}
-                        datasets={datasets}
-                        cell={cell}
-                        onDismiss={onDismissCell}
-                        onSubmit={() => (alert('Submit'))}
-                        userSettings={userSettings}
-                    />
-                );
-            } else {
-                commandText = (
-                    <CellCommandText
-                        cell={cell}
-                        onClick={this.handleSelect}
-                        onDoubleClick={onDefaultAction}
-                    />
-                );
-            }
             outputArea = (
                 <CellOutputArea
                     cell={cell}
                     onNavigateDataset={this.handleDatasetNavigate}
                     onOutputSelect={onOutputSelect}
                     onFetchAnnotations={onFetchAnnotations}
-                    onTextOutputClick={this.handleSelect}
+                    onSelectCell={this.handleSelect}
                     userSettings={userSettings}
                 />
             );
         }
+        const commandText = (
+            <CellCommandArea
+                apiEngine={apiEngine}
+                datasets={datasets}
+                cell={cell}
+                isActiveCell={(isActiveCell) && (!notebook.readOnly)}
+                onClick={this.handleSelect}
+                onDismiss={onDismissCell}
+                onSelectCell={this.handleSelect}
+                onSubmit={() => (alert('Submit'))}
+                userSettings={userSettings}
+            />
+        );
         // The CSS class depends on whether the cell is active or not and
         // on the cell status
         const css = (isActiveCell) ? 'cell active-cell' : 'cell inactive-cell';

@@ -40,7 +40,7 @@ export const INSERT_BEFORE = 'INSERT_BEFORE';
  * match this pattern (i.e., do not start and end with underlines). As an
  * alternative we could use unique UUID's here.
  */
-const getNewCellId = (id) => ('__' + id + '__');
+export const getNewCellId = (id) => ('__' + id + '__');
 
 
 /**
@@ -139,14 +139,7 @@ export class Notebook {
             const cell = this.cells[i];
             if (cell.id === cellId) {
                 if (!cell.isNewCell()) {
-                    cellList.push(
-                        new NotebookCell(
-                            cell.id,
-                            cell.module,
-                            cell.commandSpec,
-                            cell.output,
-                            false
-                    ));
+                    cellList.push(cell);
                 }
             } else {
                 cellList.push(cell);
@@ -254,8 +247,7 @@ export class Notebook {
                         module.id,
                         module,
                         cell.commandSpec,
-                        output,
-                        cell.inEdit
+                        output
                     )
                 );
             } else {
@@ -280,8 +272,7 @@ export class Notebook {
                         module.id,
                         module,
                         cell.commandSpec,
-                        cell.output.setFetching(),
-                        cell.inEdit
+                        cell.output.setFetching()
                     )
                 );
             } else {
@@ -295,22 +286,15 @@ export class Notebook {
 
 /**
  * Each cell in a notebook contains a corresponding workflow module and a cell
- * output resource to kkep track of the information that is shown in the cell
+ * output resource to keep track of the information that is shown in the cell
  * output area.
  */
 class NotebookCell {
-    constructor(id, module, commandSpec, output, inEdit) {
+    constructor(id, module, commandSpec, output) {
         this.id = id;
         this.module = module;
         this.commandSpec = commandSpec;
         this.output = output;
-        this.inEdit = (inEdit != null) ? inEdit : false;
-    }
-    /**
-     * Get the value of the language property for ccode cells.
-     */
-    getCodeLanguage() {
-        return this.commandSpec.parameters[0].language;
     }
     /**
      * Test if the associated workflow module is in an active state.
@@ -327,17 +311,6 @@ class NotebookCell {
         }
     }
     /**
-     * Test if the command that is associated with the module contains script
-     * code (e.g., Python code, SQL, Scala code). The code language can be
-     * retrieved using the .getCodeLanguage() method.
-     */
-    isCodeCell() {
-        if (this.commandSpec.parameters.length === 1) {
-            return this.commandSpec.parameters[0].datatype === 'code';
-        }
-        return false;
-    }
-    /**
      * Test if the associated workflow module is in error state.
      */
     isError() {
@@ -351,10 +324,6 @@ class NotebookCell {
      * Test if the associated workflow module is in error or canceled state.
      */
     isErrorOrCanceled = () => (this.isCanceled() || this.isError());
-    /**
-     * Flag inficating that the cell is being edited.
-     */
-    isInEdit = () => (this.inEdit);
     /**
      * Test if this object represents a new cell in the notebook. A new cell
      * does not have a workflow module associated with it.

@@ -19,10 +19,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Dropdown, Icon } from 'semantic-ui-react';
-import { INSERT_AFTER, INSERT_BEFORE } from '../../../resources/Notebook';
+import { INSERT_AFTER, INSERT_BEFORE } from '../../resources/Notebook';
 import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
-    CONTENT_TIMESTAMPS } from '../../../resources/Outputs';
-import '../../../../css/Notebook.css'
+    CONTENT_TIMESTAMPS } from '../../resources/Outputs';
+import '../../../css/Notebook.css'
 
 
 /**
@@ -42,9 +42,9 @@ class CellDropDownMenu extends React.Component {
         onAddFilteredCommand: PropTypes.func.isRequired,
         onCopyCell: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
-        onEditCell: PropTypes.func.isRequired,
         onInsertCell: PropTypes.func.isRequired,
-        onOutputSelect: PropTypes.func.isRequired
+        onOutputSelect: PropTypes.func.isRequired,
+        onSelectCell: PropTypes.func.isRequired
     }
     /**
      * Copy the associated cell to the clipboard in the user settings.
@@ -54,11 +54,12 @@ class CellDropDownMenu extends React.Component {
         onCopyCell(cell);
     }
     /**
-     * Set the associated notebook cell into edit mode.
+     * Set the associated notebook cell as the active cell which will
+     * automatically set it into edit mode.
      */
     handleEditCell = () => {
-        const { cell, onEditCell } = this.props;
-        onEditCell(cell);
+        const { cell, onSelectCell } = this.props;
+        onSelectCell(cell);
     }
     /**
      * Insert new cell before the notebook cell that is associated with the
@@ -86,16 +87,11 @@ class CellDropDownMenu extends React.Component {
             onOutputSelect
         } = this.props;
         const { module, output } = cell;
-        // If the cell is not the active cell the output depends on the cell
-        // state. If the cell module is not in a success state an icon is
-        // displayed. Otherwise, the result is null
-        if (!isActiveCell) {
+        // If the cell is in pending or running state no menu is displayed. We
+        // only show an icon that depicts the cell status.
+        if (cell.isActive()) {
             let icon = null;
-            if (cell.isCanceled()) {
-                icon = (<Icon name='cancel' color='red' title='Canceled'/>);
-            } else if (cell.isError()) {
-                icon = (<Icon name='warning circle' color='red' title='Error' />);
-            } else if (cell.isPending()) {
+            if (cell.isPending()) {
                 icon = (<Icon name='hourglass half' title='Pending' />);
             } else if (cell.isRunning()) {
                 icon = (<Icon name='circle notch' title='Running' />);
@@ -118,7 +114,7 @@ class CellDropDownMenu extends React.Component {
             dropdownItems.push(
                 <Dropdown.Item
                     key='edit'
-                    disabled={cell.isInEdit()}
+                    disabled={isActiveCell}
                     icon='pencil'
                     text='Edit'
                     title={'Edit notebook cell #' + cellNumber}
@@ -128,7 +124,7 @@ class CellDropDownMenu extends React.Component {
             dropdownItems.push(
                 <Dropdown.Item
                     key='copy'
-                    disabled={cell.isInEdit()}
+                    disabled={isActiveCell}
                     icon='copy'
                     text='Copy'
                     title={'Copy command from notebook cell #' + cellNumber}
@@ -282,14 +278,30 @@ class CellDropDownMenu extends React.Component {
                 );
             }
         }
+        // If the cell is in an error state we show an additional icon that
+        // depicts the cell status
+        let cellStatusIcon = null;
+        if (cell.isErrorOrCanceled()) {
+            if (cell.isCanceled()) {
+                cellStatusIcon = (<Icon name='cancel' color='red' title='Canceled'/>);
+            } else if (cell.isError()) {
+                cellStatusIcon = (<Icon name='warning circle' color='red' title='Error' />);
+            }
+            cellStatusIcon = (
+                <div className='cell-status-icon'>{ cellStatusIcon }</div>
+            );
+        }
         return (
-            <div className='cell-menu'>
-                <Dropdown icon='bars' title='Cell actions'>
-                    <Dropdown.Menu>{dropdownItems}</Dropdown.Menu>
-                </Dropdown>
-                <Dropdown icon={selectedIcon} title='Cell output'>
-                    <Dropdown.Menu>{outputItems}</Dropdown.Menu>
-                </Dropdown>
+            <div>
+                <div className='cell-menu'>
+                    <Dropdown icon='bars' title='Cell actions'>
+                        <Dropdown.Menu>{dropdownItems}</Dropdown.Menu>
+                    </Dropdown>
+                    <Dropdown icon={selectedIcon} title='Cell output'>
+                        <Dropdown.Menu>{outputItems}</Dropdown.Menu>
+                    </Dropdown>
+                </div>
+                { cellStatusIcon }
             </div>
         );
     }

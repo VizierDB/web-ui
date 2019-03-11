@@ -105,8 +105,11 @@ p.cell-index {
     margin: 0px;
 }
 
+div.cell-status-icon {
+    margin: 10px 0px;
+}
+
 td.cell-area {
-    padding-left: 10px;
     vertical-align: top;
 }
 
@@ -170,6 +173,7 @@ pre.cell-cmd-text {
     /*border-radius: 2px;
     border: solid 1px #d0d0d0;*/
     color: #303f9f;
+    padding-left: 10px;
     margin: 0px;
 }
 
@@ -216,17 +220,29 @@ span.header-name {
     padding-left: 5px;
 }
 
+div.input-content {
+    padding-left: 10px;
+}
+
 /* Outputs */
 
 div.output-content {
+    padding-left: 10px;
+    margin-top: 10px;
+}
+
+div.output-error {
+    padding-left: 10px;
     margin-top: 10px;
 }
 
 div.output-content-html {
+    padding-left: 10px;
 	text-align: center;
 }
 
 div.module-timings {
+    padding-left: 10px;
     margin-top: 10px;
 }
 
@@ -241,18 +257,6 @@ span.output-info-headline {
     color: #3b4151;
 }
 
-p.output-error-headline {
-    border-bottom: solid 1px #912d2b;
-    padding: 5px;
-    margin-top: 25px;
-    margin-bottom: 5px;
-}
-
-span.output-error-headline {
-    color: #912d2b;
-    font-weight: bold;
-}
-
 div.dataset {
     background: #00ff00;
     position: 'relative';
@@ -262,7 +266,7 @@ div.dataset {
 }
 
 pre.plain-text {
-    padding: 10px 10px 0px 0px;
+    padding: 10px 10px 0px 10px;
     margin: 0px;
 }
 

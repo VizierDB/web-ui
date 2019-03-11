@@ -19,167 +19,200 @@
 import React from 'react';
 import createReactClass from 'create-react-class';
 import { PropTypes } from 'prop-types';
-import { Dimmer, Loader } from 'semantic-ui-react';
-import AnnotationObject from '../../annotation/AnnotationObject';
-import { ErrorMessage } from '../../Message';
+import { Button, Dimmer, Loader } from 'semantic-ui-react';
+import ContentSpinner from '../../ContentSpinner';
 import DatasetChart from '../../plot/DatasetChart';
-import DatasetOutput from './DatasetOutput';
-import TextOutput from './TextOutput';
-import OutputSelector from './OutputSelector';
-import { CONTENT_TEXT, OutputText } from '../../../resources/Notebook';
-
+import DatasetView from '../../spreadsheet/DatasetView';
+import { ErrorMessage } from '../../Message';
+import TimestampOutput from './TimestampOutput';
+import { CONTENT_TEXT, OutputText } from '../../../resources/Outputs';
 import '../../../../css/App.css';
 import '../../../../css/Notebook.css';
 
 
+
 /**
- * Output are for notebook cells that have a workflow module associated with
- * them. The output area is a two column layout. The left column contains the
- * output selector and the right column shows the selected output.
+ * Output area for notebook cells that have a workflow module associated with
+ * them.
  */
 class CellOutputArea extends React.Component {
     static propTypes = {
-        activeDatasetCell: PropTypes.object.isRequired,
         cell: PropTypes.object.isRequired,
-        output: PropTypes.object.isRequired,
-        onOutputSelect: PropTypes.func.isRequired,
         onNavigateDataset: PropTypes.func.isRequired,
-        onShowAnnotations: PropTypes.func.isRequired
+        onOutputSelect: PropTypes.func.isRequired,
+        onFetchAnnotations: PropTypes.func.isRequired,
+        onSelectCell: PropTypes.func.isRequired,
+        userSettings: PropTypes.object.isRequired
     };
     /**
-     * Discard a displayed annotation.
+     * Discard a displayed annotation (by clearing the selected cell
+     * annotations).
      */
     handleDiscardAnnotation = () => {
-        const { module, output, onShowAnnotations } = this.props;
-        onShowAnnotations(module, output.content.dataset, -1, -1);
+        this.handleSelectCell(-1, -1);
     }
     /**
-     * Simulate user selecting console output when dismissing an error message
-     * or an ouput resource.
+     * Show console output when user dismisses an error message.
      */
     handleOutputDismiss = () => {
-        const { module, onOutputSelect } = this.props;
-        onOutputSelect(module, CONTENT_TEXT);
+        const { cell, onOutputSelect } = this.props;
+        onOutputSelect(cell.module, CONTENT_TEXT);
     }
     /**
-     * Submit navigate dataset request (should only happen when displaying a
-     * dataset in the output area).
+     * Show spreadsteeh cell annotations when the user clicks on a table cell.
      */
-    handleNavigateDataset = (url) => {
-        const { module, output, onNavigateDataset} = this.props;
-        onNavigateDataset(url, module, output.content.name);
-    }
-    handleSelectCell = (columnId, rowId) => {
-        const { module, output, onShowAnnotations } = this.props;
-        const dataset = output.content.dataset;
-        if (dataset.hasAnnotations(columnId, rowId)) {
-            onShowAnnotations(module, dataset, columnId, rowId);
-        } else {
-            onShowAnnotations(module, dataset, -1, -1);
-        }
+    handleFetchAnnotations = (columnId, rowId) => {
+        const { cell, onFetchAnnotations } = this.props;
+        const { output, module } = cell;
+        const dataset = output.dataset;
+        onFetchAnnotations(module, dataset, columnId, rowId);
     }
     render() {
-        const { activeDatasetCell, cell, output, onOutputSelect } = this.props;
-        const { module } = cell;
-        // Only show an output selector if there are datasets or views, no
-        // errors, and fetching is not in progress.
-        let outputSelector = null;
-        const hasOutputObjects = ((module.datasets.length > 0) || (module.views.length > 0));
-        if ((!cell.isError()) && (output.isFetching !== true) && (hasOutputObjects)) {
-            outputSelector = (
-                <OutputSelector
-                    module={module}
-                    output={output}
-                    onSelect={onOutputSelect}
-                />
+        const {
+            cell,
+            onNavigateDataset,
+            onSelectCell,
+            userSettings
+        } = this.props;
+        const { output } = cell;
+        // The output content depends on the status of the cell. For running and
+        // pending cells only timestamps (and a cancel button) is displayed.
+        if (cell.isRunning()) {
+            return (
+                <div>
+                    <div className='module-timings'>
+                        <TimestampOutput label='Created at' time={cell.module.timestamps.createdAt} />
+                        <TimestampOutput label='Started at' time={cell.module.timestamps.startedAt} />
+                    </div>
+                    <ContentSpinner text='Running ...' size='small' />
+                    <div className='centered'>
+                        <Button negative>Cancel</Button>
+                    </div>
+                </div>
+            );
+        } else if (cell.isPending()) {
+            return (
+                <div>
+                    <div className='module-timings'>
+                        <TimestampOutput label='Created at' time={cell.module.timestamps.createdAt} />
+                    </div>
+                </div>
             );
         }
-        // The output content depends on the state of the output resource
-        // handle. First, we distinguish between successful output or error
+        // For cells that are in success or an error state the output depends
+        // on the type of the output resource handle.
         // messages
         let outputContent = null;
-        if (cell.outputs.stderr.length > 0) {
-            // In case of error all the text output that has been written to
-            // either standarc ouput or standard error is being shown.
-            const allOutput = cell.outputs.stdout.concat(cell.outputs.stderr);
-            const lines = new OutputText(allOutput).lines;
-            outputContent = <TextOutput isError={true} lines={lines} />;
-        } else {
-            if (output.isError()) {
-                const fetchError = output.content;
-                outputContent = <ErrorMessage
-                    title={fetchError.title}
-                    message={fetchError.message}
-                    onDismiss={this.handleOutputDismiss}
-                />;
-            } else {
-                if (output.isText()) {
-                    outputContent = <TextOutput isError={false} lines={output.content.lines} />;
-                } else if (output.isChart()) {
-                    outputContent = (
-                        <div className='output-content'>
-                            <span className='output-content-header'>
-                                {output.content.name}
-                            </span>
-                            <DatasetChart
-                                identifier={output.content.name}
-                                dataset={output.content.dataset}
-                            />
-                        </div>
-                    );
-                } else if (output.isDataset()) {
-                    outputContent = (
-                        <div className='output-content'>
-                            <span className='output-content-header'>
-                                {output.content.name}
-                            </span>
-                            <AnnotationObject
-                                annotation={activeDatasetCell}
-                                onDiscard={this.handleDiscardAnnotation}
-                            />
-                            <DatasetOutput
-                                activeCell={activeDatasetCell}
-                                dataset={output.content.dataset}
-                                onNavigate={this.handleNavigateDataset}
-                                onSelectCell={this.handleSelectCell}
-                            />
-                        </div>
-                    );
-                } else if (output.isHtml()) {
-                    var Response = createReactClass({
-                        render: function(){
-                        	return (<div className='output-content-html' dangerouslySetInnerHTML={{__html: output.content.lines}}></div>)
-                        }
-                    });
-                	outputContent = (
-                        <div className='output-content'>
-                            <span className='output-content-header'>
-                                {output.content.name}
-                            </span>
-                            <Response />
-                        </div>
-                    );
+        if (output.isChart()) {
+            outputContent = (
+                <div className='output-content'>
+                    <DatasetChart
+                        identifier={output.name}
+                        dataset={output.dataset}
+                        onSelectCell={onSelectCell}
+                    />
+                </div>
+            );
+        } else if (output.isDataset()) {
+            const dataset = output.dataset;
+            outputContent = (
+                <div className='output-content'>
+                    <DatasetView
+                        dataset={dataset}
+                        onNavigate={onNavigateDataset}
+                        onFetchAnnotations={this.handleFetchAnnotations}
+                        onSelectCell={onSelectCell}
+                        userSettings={userSettings}
+                    />
+                </div>
+            );
+        } else if (output.isError()) {
+            const fetchError = output.error;
+            outputContent = <ErrorMessage
+                title={fetchError.title}
+                message={fetchError.message}
+                onDismiss={this.handleOutputDismiss}
+            />;
+        } else if ((output.isHidden()) && (!cell.isCanceled())) {
+            outputContent = (
+                <pre className='plain-text' onClick={onSelectCell} />
+            );
+        } else if (output.isHtml()) {
+            const Response = createReactClass({
+                render: function() {
+                	return (
+                        <div
+                            className='output-content-html'
+                            dangerouslySetInnerHTML={{__html: output.lines}}
+                        />
+                    )
                 }
-                // Show spinner while fetching the output
-                outputContent =  (
-                    <Dimmer.Dimmable dimmed={output.isFetching}>
-                        <Loader active={output.isFetching}/>
-                        {outputContent}
-                    </Dimmer.Dimmable>
+            });
+        	outputContent = (
+                <div className='output-content'>
+                    <span className='output-content-header'>
+                        {output.name}
+                    </span>
+                    <Response />
+                </div>
+            );
+        } else if ((output.isText()) && (!cell.isCanceled())) {
+            outputContent = (
+                <pre className='plain-text' onClick={onSelectCell}>
+                    {output.lines.join('\n')}
+                </pre>
+            );
+        } else if (output.isTimestamps()) {
+            // Depending on whether the module completed successfully or not
+            // the label for the finished at timestamp changes.
+            let finishedType = '';
+            if (cell.isErrorOrCanceled()) {
+                finishedType = 'Canceled at';
+            } else {
+                finishedType = 'Finished at';
+            }
+            outputContent = (
+                <div className='module-timings' onClick={onSelectCell}>
+                    <p className='output-info-headline'>
+                        <span className='output-info-headline'>
+                            Module timings
+                        </span>
+                    </p>
+                    <TimestampOutput label='Created at' time={output.createdAt} />
+                    <TimestampOutput label='Started at' time={output.startedAt} />
+                    <TimestampOutput label={finishedType} time={output.finishedAt} />
+                </div>
+            );
+        }
+        // If the cell is in error state and it has output written to standard
+        // error then we show those lines in an error box. We only show the
+        // error messages if the displayed output is console (i.e., either
+        // text or html)
+        if ((cell.isError()) && ((output.isHtml()) || (output.isText()))) {
+            const stderr = cell.module.outputs.stderr;
+            if (stderr.length > 0) {
+                const errorOut = new OutputText(stderr);
+                outputContent = (
+                    <div>
+                        { outputContent }
+                        <div className='output-error'>
+                            <pre className='error-text' onClick={onSelectCell}>
+                                {errorOut.lines.join('\n')}
+                            </pre>
+                        </div>
+                    </div>
                 );
             }
         }
-        // Return two column layout
-        return (
-            <table className='cell-area'><tbody>
-                <tr>
-                    <td className='output-selector'>{outputSelector}</td>
-                    <td>
-                        <div className={'notebook-cell-output'}>{outputContent}</div>
-                    </td>
-                </tr>
-            </tbody></table>
-        )
+        // Show spinner while fetching the output
+        return  (
+            <div className='output-area'>
+                <Dimmer.Dimmable dimmed={output.isFetching}>
+                    <Loader active={output.isFetching}/>
+                    {outputContent}
+                </Dimmer.Dimmable>
+            </div>
+        );
     }
 }
 

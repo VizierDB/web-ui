@@ -18,7 +18,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Grid, List } from 'semantic-ui-react'
+import { Grid, List, Segment } from 'semantic-ui-react'
 import { sortByName } from '../../../util/Sort';
 import '../../../../css/Commands.css'
 
@@ -93,14 +93,16 @@ class CommandsListing extends React.Component {
         }
         return (
             <div className='commands-listing'>
-                <p className='commands-listing-header'>
-                    Select a module from the menu or the list below.
-                </p>
-                <Grid columns={groups.length} divided>
-                    <Grid.Row>
-                        { gridColumns }
-                    </Grid.Row>
-                </Grid>
+                <Segment>
+                    <p className='commands-listing-header'>
+                        Select a module from the menu or the list below.
+                    </p>
+                    <Grid columns={groups.length} divided>
+                        <Grid.Row>
+                            { gridColumns }
+                        </Grid.Row>
+                    </Grid>
+                </Segment>
             </div>
         )
     }
