@@ -18,7 +18,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Grid, List, Segment } from 'semantic-ui-react'
+import { Grid, Icon, List, Segment } from 'semantic-ui-react'
 import { sortByName } from '../../../util/Sort';
 import '../../../../css/Commands.css'
 
@@ -30,10 +30,11 @@ import '../../../../css/Commands.css'
 class CommandsListing extends React.Component {
     static propTypes = {
         apiEngine: PropTypes.object.isRequired,
+        onDismiss: PropTypes.func.isRequired,
         onSelect: PropTypes.func.isRequired
     }
     render() {
-        const { apiEngine, onSelect } = this.props;
+        const { apiEngine, onDismiss, onSelect } = this.props;
         // Get a list of command types
         const gridColumns = [];
         // Sort the list of module group identifier.
@@ -96,6 +97,13 @@ class CommandsListing extends React.Component {
                 <Segment>
                     <p className='commands-listing-header'>
                         Select a module from the menu or the list below.
+                        <span className='pull-right clickable-icon'>
+                            <Icon
+                                name='close'
+                                link
+                                onClick={onDismiss}
+                            />
+                        </span>
                     </p>
                     <Grid columns={groups.length} divided>
                         <Grid.Row>

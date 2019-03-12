@@ -19,148 +19,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { HotKeys } from 'react-hotkeys';
-import { Button, Header, Icon, Form, Segment } from 'semantic-ui-react';
+import { Button, Form } from 'semantic-ui-react';
 import CommandMenu from './CommandMenu';
 import CommandsListing from './CommandsListing';
 import CodeCell from './form/CodeCell'
-import { DT_CODE, DT_LIST, DT_RECORD } from '../../../resources/Engine';
+import ModuleInputForm from './ModuleInputForm';
+import { CodeSnippetsSelector as PythonSnippets } from './form/PythonCell';
+import { ScalaCodeSnippetsSelector as ScalaSnippets } from './form/ScalaCell';
+import { DT_CODE, formValues, getCodeParameter } from '../../../resources/Engine';
 import '../../../../css/App.css';
 import '../../../../css/ModuleForm.css';
-
-import {
-    DT_AS_ROW, DT_BOOL, DT_COLUMN_ID, DT_DATASET_ID, DT_DECIMAL, DT_FILE_ID,
-    DT_GROUP, DT_INT, DT_ROW_ID, DT_STRING
-} from './ModuleSpec';
-
-
-/**
- * Get default value for an argument in a command specification. The given
- * argValue variable contains values in the corresponding values in the module
- * arguments from the workflow (if they exist). The value may be undefined.
- *
- * The supported argument data types and their respective default values are:
- *
- * asRow: {child1, chiild2, ...}
- * bool: false
- * colid: ''
- * datasetid: ID of first dataset in list or ''
- * decimal:''
- * fileid: ID of first file in list or ''
- * group: {tuples: [], values: {child1, chiild2, ...}}
- * int: ''
- * pyCode: ''
- * rowid: ''
- * string: ''
- */
-const DEFAULT_VALUE = (argument, command, datasets, argValue) => {
-    const dt = argument.datatype;
-    // Test for a structured argument data type first.
-    if (dt === DT_AS_ROW) {
-        let values = {};
-        for (let i = 0; i < command.arguments.length; i++) {
-            const arg = command.arguments[i];
-            if (arg.parent === argument.id) {
-                let val;
-                if (argValue !== undefined) {
-                    val = argValue[arg.id];
-                }
-                values[arg.id] = DEFAULT_VALUE(arg, command, datasets, val);
-            }
-        }
-        return {values};
-    } else if (dt === DT_GROUP) {
-        let values = {};
-        for (let i = 0; i < command.arguments.length; i++) {
-            const arg = command.arguments[i];
-            if (arg.parent === argument.id) {
-                values[arg.id] = DEFAULT_VALUE(arg, command, datasets);
-            }
-        }
-        let tuples = argValue;
-        // Ensure that tuples is at least an empty array and not undefined or
-        // null.
-        if (tuples == null) {
-            tuples = [];
-        }
-        return {tuples, values};
-    } else if (argValue !== undefined) {
-        // The argument contains a scalar value. Return any given value if it is
-        // not undefined
-        return argValue;
-    } else if (dt === DT_BOOL) {
-        return false;
-    } else if (dt === DT_DATASET_ID) {
-        return datasets.length > 0 ? datasets[0].name : '';
-    } else if (dt === DT_FILE_ID) {
-        return {fileid: null, filename: null, url: null};
-    } else if ((dt === DT_STRING) && (argument.values)) {
-        for (let i = 0; i < argument.values.length; i++) {
-            const entry = argument.values[i];
-            // Check whether the entry is a structured value or a string
-            if (typeof entry === 'object') {
-                // If the entry has .isDefault set to true return the entry key
-                // or value (depending on whether there is a key or not; the
-                // value property os expected to be present in all cases).
-                if (entry.isDefault === true) {
-                    if (entry.key) {
-                        return entry.key;
-                    } else {
-                        return entry.value;
-                    }
-                }
-            }
-        }
-    }
-    // Make sure to keep this return statement outside the if-else because the
-    // DT_STRING and values block may not return a value.
-    return '';
-}
-
-
-/**
- * Create an object containing default values for each parameter in a given
- * command specification. Initialize values from the given module arguments,
- * where possible.
- */
-const formValues = (commandSpec, datasets, moduleArgs) => {
-    const values = {};
-    for (let i = 0; i < commandSpec.parameters.length; i++) {
-        const para = commandSpec.parameters[i];
-        if (DT_RECORD) {
-
-        } else if (DT_LIST) {
-
-        } else if (para.parent == null) {
-            // Get the value for the parameter. We first try to get the value
-            // from the respective element in the module arguments array. If
-            // the argument does not exist we try to get a default value from
-            // the optional values enumeration in the command specification.
-            let val = null;
-            if (moduleArgs != null) {
-                const arg = moduleArgs.find((a) => (a.id === para.id));
-                if (arg != null) {
-                    val = arg.value;
-                }
-            }
-            if (para.values != null) {
-                // By default the first value in the list is used as the default
-                // value.
-                val = para.values[0].value;
-                if (para.values[0].isDefault !== true) {
-                    for (let j = 1; j < para.values.length; j++) {
-                        const opt = para.values[i];
-                        if (opt.isDefault === true) {
-                            val = opt.value;
-                            break;
-                        }
-                    }
-                }
-            }
-            values[para.id] = val;
-        }
-    }
-    return values;
-}
 
 
 /**
@@ -195,7 +63,11 @@ class CellCommandArea extends React.Component {
         // a code-snippet selector
         let values = null;
         if (!cell.isNewCell()) {
-            values = formValues(cell.commandSpec, datasets, cell.module.command.arguments);
+            values = formValues(
+                cell.commandSpec,
+                datasets,
+                cell.module.command.arguments
+            );
         }
         this.state = {
             codeEditorProps: {
@@ -204,50 +76,131 @@ class CellCommandArea extends React.Component {
             },
             formValues: values,
             selectedCommand: cell.commandSpec,
-            showCommandsListing: (cell.commandSpec == null)
+            showCommandsListing: (cell.commandSpec == null),
+            snippetSelectorVisible: false
         }
     }
     /**
-     * Handle cell expand event for code editor change.
+     * Set this as the active cell (if it isn't yet). This method is intended
+     * when a rebdered code editor receives the focus.
      */
-    handleCodeEditorChange = (id, value, cursorPosition) => {
-    	//const { cell, isActiveCell, onSelectCell } = this.props;
-        // Use the onEdit callback to set the cell in edit mode if it currently
-        // is not in edit mode.
-        console.log('Change ' + id)
-        console.log(value)
-        console.log(cursorPosition)
-    	//window.activeCodeCell = cell.id;
-    	/*this.setState({
-            codeEditorProps: {
-                cursorPosition: cursorPosition,
-                newLines: value
-            }
-        });*/
-    }
-    /**
-     * If the cell is being selected (e.g., a contained code cell received the
-     * cursor) we need to set this cell as the active notebook cell.
-     */
-    handleSelectCell = () => {
+    handleActivateCell = () => {
         const { cell, isActiveCell, onSelectCell } = this.props;
         if (!isActiveCell) {
             onSelectCell(cell);
         }
     }
     /**
+     * Append a code snippet to the current editor value. The code snippet is
+     * expected to be a list of strings (code lines).
+     *
+     * Tries to determine the current indent from the last line in the current
+     * editor value.
+     */
+    handleAppendCode = (lines) => {
+        const { id, onChange } = this.props;
+        const  { codeEditorProps, formValues, selectedCommand } = this.state;
+        const paraCode = getCodeParameter(selectedCommand);
+        const editorValue = formValues[paraCode.id];
+        const cursorPosition = codeEditorProps.cursorPosition;
+        // Get the current indent from the last line of the editor value
+        let indent = '';
+        let script = editorValue.split('\n');
+        if (script.length > 0 && editorValue !== '') {
+            const refLine = script[cursorPosition.line];
+            let i = 0;
+            while (i < refLine.length) {
+                const c = refLine.charAt(i);
+                if ((c === ' ') || (c === '\t')) {
+                    i++;
+                } else {
+                    break;
+                }
+            }
+            indent = refLine.substring(0, i);
+        }
+        // Append the given lines to the current value of the editor (indentent
+        // based on the indent of the current last line).
+        for (let i = 0; i < lines.length; i++) {
+            // If the current editor value is empty do not append a new line at
+            // the start.
+            script.splice(cursorPosition.line+i, 0, indent + lines[i]);
+        }
+        // Insert an empty line for readability if the current script is not
+        // empty.
+        if (editorValue !== '') {
+        	script.splice(cursorPosition.line, 0, "");
+        }
+
+        let value = script.join("\n");
+        // Update the local state and propagate the change to the conrolling
+        // notebook cell
+        this.handleFormValueChange(paraCode.id, value);
+        // Hide the snippet selector
+        this.handleToggleSnippetSelector();
+    }
+    /**
+     * Handle change in on of the elements in a displayed module input form.
+     * If the cell displays a code editor the optional cursorPosition specifies
+     * the new position of the cursor in the editor.
+     */
+    handleFormValueChange = (id, value, cursorPosition) => {
+        const { formValues, codeEditorProps } = this.state;
+        const modifiedValues = {...formValues};
+        modifiedValues[id] = value;
+        let modifiedEditorProps = null;
+        if (cursorPosition != null) {
+            modifiedEditorProps = { cursorPosition: cursorPosition };
+        } else {
+            modifiedEditorProps = codeEditorProps;
+        }
+        this.setState({
+            formValues: modifiedValues,
+            codeEditorProps: modifiedEditorProps
+        });
+    }
+    /**
+     * Keep track of the cursor position of a displayed code cell.
+
+     */
+    handleCursorChange = (cursorPos) => {
+        this.setState({ codeEditorProps: { cursorPosition: cursorPos } });
+    }
+    /**
      * Dismiss changes to the cell when the user presses the Dismiss button.
+     * If this is a new cell the dismissal will remove the cell from the
+     * notebook. Otherwise we need to adjust some of the internal state settings
+     * for a fresh start when the cell becomes the active cell again.
      */
     handleDismiss = () => {
-        const { cell, onDismiss } = this.props;
+        const { cell, datasets, onDismiss } = this.props;
+        // Clean up for fresh start when cell becomes active again
         if (!cell.isNewCell()) {
-            this.setState({selectedCommand: cell.commandSpec});
+            this.setState({
+                formValues: formValues(
+                    cell.commandSpec,
+                    datasets,
+                    cell.module.command.arguments
+                ),
+                selectedCommand: cell.commandSpec,
+                snippetSelectorVisible: false
+            });
         }
         onDismiss(cell);
     }
-    handleFormSubmit = () => {
-        const { onSubmit } = this.props;
-        onSubmit();
+    /**
+     * Event handler for dismissing a shown command listing. The result depends
+     * on whether the cell currently has a selected command or not. In the
+     * latter case this is a new cell that is empty and we call the cell dismiss
+     * method.
+     */
+    handleDismissCommandsListing = () => {
+        const { selectedCommand } = this.state;
+        if (selectedCommand != null) {
+            this.setState({showCommandsListing: false});
+        } else {
+            this.handleDismiss();
+        }
     }
     /**
      * Set the command in the user settings clipboard as the selected command.
@@ -268,13 +221,25 @@ class CellCommandArea extends React.Component {
     /**
      * Set the showCommandsListing to true to show a list of available commands.
      */
-    handleSchowCommandsListing = () => {
+    handleShowCommandsListing = () => {
         this.setState({showCommandsListing: true});
+    }
+    handleSubmitForm = () => {
+        const { onSubmit } = this.props;
+        onSubmit();
+    }
+    /**
+     * Toggle visibility of an optional code snippet selector.
+     */
+    handleToggleSnippetSelector = () => {
+        const { snippetSelectorVisible } = this.state;
+        this.setState({snippetSelectorVisible: !snippetSelectorVisible});
     }
     render() {
         const {
             apiEngine,
             cell,
+            datasets,
             isActiveCell,
             onClick,
             onDismiss,
@@ -286,11 +251,15 @@ class CellCommandArea extends React.Component {
         const {
             formValues,
             selectedCommand,
-            showCommandsListing
+            showCommandsListing,
+            snippetSelectorVisible
         } = this.state;
         // The main content depends on whether a command specification is
         // defined for the associated notebook cell or not.
         let mainContent = null;
+        // For code cells an additional button is shown to toggle vizibility of
+        // a code snippet selector.
+        let codeSnippetButton = null;
         if ((isActiveCell) && ((selectedCommand == null) || (showCommandsListing))) {
             let onPaste = null;
             if (userSettings.clipboard != null) {
@@ -302,16 +271,14 @@ class CellCommandArea extends React.Component {
             mainContent = (
                 <CommandsListing
                     apiEngine={apiEngine}
+                    onDismiss={this.handleDismissCommandsListing}
                     onSelect={this.handleSelectCommand} />
             );
         } else {
-            // Use hotkeys to submit and dismiss a shown command input form.
-            const keyMap = {
-                runCell: 'ctrl+enter',
-                dismiss: 'esc'
-            }
+            // Set hotkey handler to submit and dismiss a shown command input
+            // form.
             const handlers = {
-              'runCell': this.handleFormSubmit,
+              'runCell': this.handleSubmitForm,
               'dismiss': this.handleDismiss
             };
             // If there is a command specification defined for this component
@@ -324,35 +291,74 @@ class CellCommandArea extends React.Component {
                 paraCode = getCodeParameter(cell.commandSpec);
             }
             if (paraCode != null) {
-                const { codeEditorProps } = this.state;
-                let codeCell = null;
-                if (paraCode.language === 'python') {
-                    console.log(formValues);
-                    codeCell = (
-                        <CodeCell
-                            key={paraCode.id}
-                            id={paraCode.id}
-                            value={formValues[paraCode.id]}
-                            editing={false}
-                            cursorPosition={codeEditorProps.cursorPosition}
-                            onChange={this.handleCodeEditorChange}
-                            onSelectCell={this.handleSelectCell}
-                        />
-                    );
+                // Show (optional) code snippet selector for different code cell
+                // types. The snippet selector is only visible if this is the
+                // active cell and the show snippet flag is true.
+                let codeSnippetPanel = null;
+                if ((isActiveCell) && (snippetSelectorVisible)) {
+                    if (paraCode.language === 'python') {
+                        codeSnippetPanel = (
+                            <PythonSnippets onSelect={this.handleAppendCode}/>
+                        );
+                    } else if (paraCode.language === 'scala') {
+                        codeSnippetPanel = (
+                            <ScalaSnippets onSelect={this.handleAppendCode}/>
+                        );
+                    }
                 }
+                const { codeEditorProps } = this.state;
+                const keyMap = { runCell: 'ctrl+enter' };
                 mainContent = (
                     <HotKeys keyMap={keyMap} handlers={handlers}>
-                        <Form>{codeCell}</Form>
+                        <Form>
+                            <CodeCell
+                                cursorPosition={codeEditorProps.cursorPosition}
+                                editing={false}
+                                id={paraCode.id}
+                                isActiveCell={isActiveCell}
+                                key={paraCode.id}
+                                language={paraCode.language}
+                                onChange={this.handleFormValueChange}
+                                onCursor={this.handleCursorChange}
+                                onFocus={this.handleActivateCell}
+                                value={formValues[paraCode.id]}
+                            />
+                        </Form>
+                        { codeSnippetPanel }
                     </HotKeys>
                 );
+                // The snippet toggle button text depends on whether the snippet
+                // selector is vizible or not
+                const buttonTitle = (snippetSelectorVisible) ? 'Hide' : 'Show';
+                codeSnippetButton = (
+                    <Button
+                        content={ buttonTitle + '  Code Examples' }
+                        icon='info'
+                        labelPosition='left'
+                        primary
+                        onClick={this.handleToggleSnippetSelector}
+                    />
+                );
             } else if (isActiveCell) {
-
+                const keyMap = { runCell: 'ctrl+enter', dismiss: 'esc' };
+                mainContent = (
+                    <HotKeys keyMap={keyMap} handlers={handlers}>
+                        <ModuleInputForm
+                            datasets={datasets}
+                            selectedCommand={selectedCommand}
+                            values={formValues}
+                        />
+                    </HotKeys>
+                );
             } else if ((cell.isNewCell())  && (selectedCommand != null)) {
                 mainContent = (
                     <pre
                         className={'cell-cmd-text'}
                         onClick={onClick}
                         onDoubleClick={onDoubleClick}
+                        onChange={() => (alert('Change'))}
+                        onDismissErrors={() => (alert('Change'))}
+                        onSubmit={() => (alert('Change'))}
                     >
                         {selectedCommand.name}
                     </pre>
@@ -377,18 +383,21 @@ class CellCommandArea extends React.Component {
         if ((isActiveCell) && (!showCommandsListing)) {
             buttons = (
                 <div className='module-form-buttons'>
+                    { codeSnippetButton }
+                    <span className='padding-lg'>
                     <Button
                         content='Change Command'
                         icon='wrench'
                         labelPosition='left'
-                        onClick={this.handleSchowCommandsListing}
+                        onClick={this.handleShowCommandsListing}
                     />
+                    </span>
                     <Button
                         content='Submit'
                         icon='paper plane outline'
                         labelPosition='left'
                         positive
-                        onClick={this.handleFormSubmit}
+                        onClick={this.handleSubmitForm}
                     />
                     <Button
                         content='Dismiss'
@@ -401,7 +410,7 @@ class CellCommandArea extends React.Component {
             );
         }
         return (
-            <div>
+            <div className='cell-command-area'>
                 { mainContent }
                 { buttons }
             </div>
@@ -412,15 +421,6 @@ class CellCommandArea extends React.Component {
 // -----------------------------------------------------------------------------
 // Helper Methods
 // -----------------------------------------------------------------------------
-
-/**
- * To test if a coomand specification is a code command we look for a parameter
- * that is of type DT_CODE. If such a parameter exists it will have a language
- * property that further specifies the type of cell.
- */
-const getCodeParameter = (commandSpec) => (
-    commandSpec.parameters.find((p) => (p.datatype === DT_CODE))
-);
 
 
 export default CellCommandArea;

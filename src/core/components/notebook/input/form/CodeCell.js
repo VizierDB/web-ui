@@ -21,91 +21,24 @@ import PropTypes from 'prop-types';
 import { Icon, Grid, List } from 'semantic-ui-react';
 import {Controlled as CodeMirror} from 'react-codemirror2'
 import 'codemirror/lib/codemirror.css';
+import 'codemirror/mode/clike/clike';
 import 'codemirror/mode/python/python';
+import 'codemirror/mode/sql/sql';
 import '../../../../../css/App.css';
 import '../../../../../css/ModuleForm.css';
 
 
 class CodeCell extends React.Component {
     static propTypes = {
-        id: PropTypes.string.isRequired,
-        value: PropTypes.string,
-        editing: PropTypes.bool.isRequired,
         cursorPosition: PropTypes.object.isRequired,
-        newLines: PropTypes.string,
+        editing: PropTypes.bool.isRequired,
+        id: PropTypes.string.isRequired,
+        isActiveCell: PropTypes.bool.isRequired,
+        language: PropTypes.string.isRequired,
         onChange: PropTypes.func.isRequired,
-        onSelectCell: PropTypes.func.isRequired,
-    }
-    constructor(props) {
-        super(props);
-        console.log('Constructor for python cell')
-        const { id, value, editing, cursorPosition, newLines, onChange } = props;
-        let evalue = value;
-        let addLines = false;
-        let newCursorPos = cursorPosition;
-        let active = (id === window.activeCodeCell);
-        if(newLines){
-        	addLines = true;
-        	evalue = newLines;
-        }
-        else if(active && window.cursorPosition){
-        	newCursorPos = window.cursorPosition;
-        }
-        this.state = {editorValue: evalue, snippetSelectorVisible: false, editing: editing, active:active, cursorPosition: newCursorPos, addLines:addLines};
-        if(addLines){
-            console.log('add lines')
-        	onChange(id, evalue);
-        }
-    }
-    componentWillUnmount() {
-        console.log('Python code will unmount')
-    }
-    /**
-     * Append a code snippet to the current editor value. The code snippet is
-     * expected to be a list of strings (code lines).
-     *
-     * Tries to determine the current indent from the last line in the current
-     * editor value.
-     */
-    appendCode = (lines) => {
-        const { id, onChange } = this.props;
-        const  { editorValue, cursorPosition } = this.state;
-        // Get the current indent from the last line of the editor value
-        let indent = '';
-        let script = editorValue.split('\n');
-        if (script.length > 0 && editorValue !== '') {
-            const refLine = script[cursorPosition.line];
-            let i = 0;
-            while (i < refLine.length) {
-                const c = refLine.charAt(i);
-                if ((c === ' ') || (c === '\t')) {
-                    i++;
-                } else {
-                    break;
-                }
-            }
-            indent = refLine.substring(0, i);
-        }
-        // Append the given lines to the current value of the editor (indentent
-        // based on the indent of the current last line).
-        for (let i = 0; i < lines.length; i++) {
-            // If the current editor value is empty do not append a new line at
-            // the start.
-            script.splice(cursorPosition.line+i, 0, indent + lines[i]);
-        }
-        // Insert an empty line for readability if the current script is not
-        // empty.
-        if (editorValue !== '') {
-        	script.splice(cursorPosition.line, 0, "");
-        }
-
-        let value = script.join("\n");
-        // Update the local state and propagate the change to the conrolling
-        // notebook cell
-        this.setState({editorValue: value});
-        onChange(id, value);
-        // Hide the snippet selector
-        this.toggleSnippetSelector();
+        onCursor: PropTypes.func.isRequired,
+        onFocus: PropTypes.func.isRequired,
+        value: PropTypes.string,
     }
     /**
      * Handle changes in the code mirror editor. Keep track of the editor value
@@ -115,7 +48,6 @@ class CodeCell extends React.Component {
     handleChange = (editor, value, data) => {
         const { id, onChange } = this.props;
         let cursorp = editor.getCursor();
-        this.setState({editorValue: value, cursorPosition: cursorp});
         if(data.to &&  data.from && data.origin){
         	if(data.origin === '+input' || data.origin === 'paste'){
         		let newLines = data.text;
@@ -132,7 +64,6 @@ class CodeCell extends React.Component {
         		cursorp = {line:data.from.line, ch:data.from.ch};
         	}
         }
-        window.cursorPosition = cursorp;
         onChange(id, value, cursorp);
     }
     /**
@@ -140,79 +71,55 @@ class CodeCell extends React.Component {
      * locally so that it sets properly on render.
      */
     handleCursorActivity = (editor, data) => {
-    	const { active } = this.state;
-        let cursorp = editor.getCursor();
-        this.setState({cursorPosition: cursorp});
-        if(active){
-        	window.cursorPosition = cursorp;
-        }
-    }
-    /**
-     * after the component mounts set the focus if it is the active cell.
-     */
-    handleEditorDidMount = (editor) => {
-    	const { active } = this.state;
-        if(active){
-        	editor.focus();
-        }
+        let cursorPos = editor.getCursor();
+        this.props.onCursor(cursorPos);
     }
     /**
      * Show the code editor and optionally the code snippet selector.
      */
     render() {
-        const { onSelectCell } = this.props;
-        const  {
-            editorValue,
-            editing,
-            active,
-            cursorPosition
-        } = this.state;
-        let headerCss = '';
-        let selectorPanel = null;
-        let examplePanel = null;
-        let editorContainerCss = active ? '' : ' collapsed'
-        if (editing) {
-            examplePanel =
-            	<div className='python-examples'>
-			        <div className={'snippet-header' + headerCss}>
-			            <Icon name='help circle' color='blue' onClick={this.toggleSnippetSelector} />
-			            <span className='left-padding-sm' onClick={this.toggleSnippetSelector}>
-			                Code examples for dataset manipulation
-			            </span>
-			        </div>
-			        { selectorPanel }
-			    </div>
+        const {
+            cursorPosition,
+            isActiveCell,
+            language,
+            onFocus,
+            value
+        } = this.props;
+        // The editor mode and the shown code snippet selector depends on the
+        // value of the language property. By now we support the following
+        // three languages: Python, Scala, SQL. It would be nice to have a more
+        // comprehensive mapping of language identifier to CodeMirror modes.
+        let mode = null;
+        if (language === 'python') {
+            mode = 'python';
+        } else if (language === 'scala') {
+            mode = 'text/x-scala';
+        } else if (language == 'sql') {
+            mode = 'text/x-sql';
+        } else {
+            console.log('Language is ' + language)
         }
         return (
-            <div className='input-content'>
-                {examplePanel}
-                <div className={'editor-container' + editorContainerCss }>
-                    <CodeMirror
-                        value={editorValue}
-                        cursor={cursorPosition}
-                        options={{
-                            lineNumbers: true,
-                            mode: 'python',
-                            indentUnit: 4
-                        }}
-                        onBeforeChange={(editor, data, value) => {
-                            this.handleChange(editor, value, data);
-                        }}
-                        editorDidMount={(editor) => {
-	                    	this.handleEditorDidMount(editor)
-	                    }}
-                    	onCursor={(editor, data) => {
-                    		this.handleCursorActivity(editor, data)
-                    	}}
-                        onCursor={onSelectCell}
-                    />
-                </div>
+            <div className='editor-container'>
+                <CodeMirror
+                    value={value}
+                    cursor={cursorPosition}
+                    options={{
+                        autofocus: isActiveCell,
+                        lineNumbers: true,
+                        mode: mode,
+                        indentUnit: 4
+                    }}
+                    onBeforeChange={(editor, data, value) => {
+                        this.handleChange(editor, value, data);
+                    }}
+                	onCursor={(editor, data) => {
+                		this.handleCursorActivity(editor, data)
+                	}}
+                    onFocus={onFocus}
+                />
             </div>
         );
-    }
-    toggleSnippetSelector = () => {
-        const  { snippetSelectorVisible } = this.state;
-        this.setState({snippetSelectorVisible: !snippetSelectorVisible});
     }
 }
 

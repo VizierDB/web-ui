@@ -234,8 +234,8 @@ span.right-padding-lg {
     padding-right: 20px;
 }
 
-span.sys-name {
-    font-weight: bold;
+span.padding-lg {
+    padding: 0px 20px;
 }
 
 

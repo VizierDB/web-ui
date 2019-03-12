@@ -40,7 +40,7 @@ const DATASET = 'DATASET';
 
 
 
-class SQLCodeSnippetsSelector extends React.Component {
+export class SQLCodeSnippetsSelector extends React.Component {
     static propTypes = {
         onSelect: PropTypes.func.isRequired
     }

@@ -64,6 +64,7 @@ div.notebook-header {
 
 
 /* Divider */
+
 div.horizontal-divider {
     color: rgba(0,0,0,.85);
     font-size: 0.8em;
@@ -75,6 +76,7 @@ div.horizontal-divider {
     white-space: nowrap;
     -moz-user-select: none;
 }
+
 
 /* Cell layout table */
 
@@ -173,7 +175,6 @@ pre.cell-cmd-text {
     /*border-radius: 2px;
     border: solid 1px #d0d0d0;*/
     color: #303f9f;
-    padding-left: 10px;
     margin: 0px;
 }
 
@@ -207,7 +208,17 @@ pre.cell-vizual-error {
 }
 
 
-/* Outout Header */
+div.cell-command-area {
+    padding-left: 10px;
+}
+
+div.module-form-buttons {
+    padding-top: 10px;
+    text-align: right;
+}
+
+
+/* Output Header */
 div.output-header {
     color: #3b4151;
     border-spacing: 0px;
@@ -218,10 +229,6 @@ div.output-header {
 span.header-name {
     letter-spacing: 2px;
     padding-left: 5px;
-}
-
-div.input-content {
-    padding-left: 10px;
 }
 
 /* Outputs */

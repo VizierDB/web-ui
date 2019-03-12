@@ -51,7 +51,7 @@ const UPDATE_ANNOTATION = 'UPDATE_ANNOTATION';
 const UPDATE_DATASET = 'UPDATE_DATASET';
 
 
-class CodeSnippetsSelector extends React.Component {
+export class CodeSnippetsSelector extends React.Component {
     static propTypes = {
         onSelect: PropTypes.func.isRequired
     }

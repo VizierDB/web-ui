@@ -43,9 +43,20 @@ import { sortByName } from '../util/Sort';
  * from the API..
  */
 
+export const DT_BOOL = 'bool';
 export const DT_CODE = 'code';
-export const DT_RECORD = 'record';
+export const DT_COLUMN_ID = 'colid';
+export const DT_DATASET_ID = 'dataset';
+export const DT_DECIMAL = 'decimal';
+export const DT_FILE_ID = 'fileid';
+export const DT_INT = 'int';
 export const DT_LIST = 'list';
+export const DT_RECORD = 'record';
+export const DT_ROW_INDEX = 'rowidx';
+export const DT_ROW_ID = 'rowid';
+export const DT_SCALAR = 'scalar';
+export const DT_STRING = 'string';
+
 
 
 /**
@@ -90,8 +101,120 @@ class PackageModule {
         for (let i = 0; i < json.commands.length; i++) {
             const obj = json.commands[i];
             obj.packageId = json.id;
+            obj.parameters.sort((a, b) => (a.index - b.index));
             this.commands[obj.id] = obj;
         }
         return this;
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// Helper Methods
+// -----------------------------------------------------------------------------
+
+/**
+ * Create an object containing default values for each parameter in a given
+ * command specification. Initialize values from the given module arguments,
+ * where possible.
+ */
+export const formValues = (commandSpec, datasets, moduleArgs, parent) => {
+    const values = {};
+    for (let i = 0; i < commandSpec.parameters.length; i++) {
+        const para = commandSpec.parameters[i];
+        if (para.parent == parent) {
+            const arg = (moduleArgs != null) ? moduleArgs.find((a) => (a.id === para.id)) : null;
+            let val = null;
+            if (para.datatype === DT_RECORD) {
+                // Get a list of parameter specifications for the children of
+                // the given record.
+                const recordVal = (arg != null) ? arg.value : [];
+                val = formValues(commandSpec, datasets, recordVal, para.id);
+            } else if (para.datatype === DT_LIST) {
+                // The argument value is a list of lists (one for each record
+                // in the list)
+                val = [];
+                if (arg != null) {
+                    for (let rec = 0; rec < arg.value.length; rec++) {
+                        val.push(
+                            formValues(
+                                commandSpec,
+                                datasets,
+                                arg.value[rec],
+                                para.id
+                            )
+                        );
+                    }
+                }
+            } else {
+                // Get the value for the parameter. We first try to get the
+                // value from the respective element in the module arguments
+                // array. If the argument does not exist we try to get a default
+                // value from the optional values enumeration in the command
+                // specification.
+                if (arg != null) {
+                    val = arg.value;
+                } else if (para.values != null) {
+                    // By default the first value in the list is used as the
+                    // default value.
+                    val = para.values[0].value;
+                    if (para.values[0].isDefault !== true) {
+                        for (let j = 1; j < para.values.length; j++) {
+                            const opt = para.values[i];
+                            if (opt.isDefault === true) {
+                                val = opt.value;
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    // If the value is still undefined we set it to a defined
+                    // default. For some datatypes, howeber, the value remains
+                    // null.
+                    if (para.datatype === DT_BOOL) {
+                        val = false;
+                    } else if (para.datatype === DT_DATASET_ID) {
+                        val = (datasets.length > 0) ? datasets[0].name : '';
+                    } else if (para.datatype === DT_FILE_ID) {
+                        val = {fileid: null, filename: null, url: null};
+                    }
+                }
+            }
+            values[para.id] = val;
+        }
+    }
+    return values;
+}
+
+
+/**
+ * To test if a coomand specification is a code command we look for a parameter
+ * that is of type DT_CODE. If such a parameter exists it will have a language
+ * property that further specifies the type of cell.
+ */
+export const getCodeParameter = (commandSpec) => (
+    commandSpec.parameters.find((p) => (p.datatype === DT_CODE))
+);
+
+
+/**
+ * Returns the selected dataset if the command specification has a top-level
+ * argument of type 'dataset' and the value in the module form for this
+ * argument is set.
+ */
+export const selectedDataset = (commandSpec, values, datasets) => {
+    for (let i = 0; i < commandSpec.parameters.length; i++) {
+        const arg = commandSpec.parameters[i];
+        if (arg.datatype === DT_DATASET_ID) {
+            const val = values[arg.id];
+            if (val != null) {
+                for (let j = 0; j < datasets.length; j++) {
+                    const ds = datasets[j];
+                    if (ds.name === val) {
+                        return ds;
+                    }
+                }
+            }
+        }
     }
 }

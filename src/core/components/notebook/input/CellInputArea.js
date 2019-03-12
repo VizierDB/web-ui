@@ -485,15 +485,15 @@ class CellInputArea extends React.Component {
         const { hasError, errors, formValues, selectedCommand } = this.state
         let content = null;
         if (selectedCommand !== null) {
-        	 
+
         	const keyMap = {
         	    runCell: 'ctrl+enter',
         	}
-        	 
+
         	const handlers = {
         	  'runCell': (event) => this.handleFormSubmit()
         	};
-        	 
+
         	content = (
         			<HotKeys keyMap={keyMap} handlers={handlers}>
 	        			<div>

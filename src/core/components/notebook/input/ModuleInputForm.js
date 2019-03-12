@@ -24,45 +24,13 @@ import PythonCell from './form/PythonCell';
 import SQLCell from './form/SQLCell';
 import ScalaCell from './form/ScalaCell';
 import ModuleFormControl from './form/ModuleFormControl';
-import { DT_DATASET_ID, DT_FILE_ID, DT_PYTHON_CODE, DT_SQL_CODE, DT_SCALA_CODE } from './ModuleSpec';
+import { DT_CODE, DT_FILE_ID, selectedDataset } from '../../../resources/Engine';
 import '../../../../css/ModuleForm.css';
 
-
-// -----------------------------------------------------------------------------
-// Helper Methods
-// -----------------------------------------------------------------------------
-
-/**
- * Returns the selected dataset if the command specification has a top-level
- * argument of type 'dataset' and the value in the module form for this
- * argument is set.
- */
-const SELECTED_DATASET = (command, values, datasets) => {
-    for (let i = 0; i < command.arguments.length; i++) {
-        const arg = command.arguments[i];
-        if (arg.datatype === DT_DATASET_ID) {
-            const val = values[arg.id];
-            if (val != null) {
-                for (let j = 0; j < datasets.length; j++) {
-                    const ds = datasets[j];
-                    if (ds.name === val) {
-                        return ds;
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-// -----------------------------------------------------------------------------
-// Components
-// -----------------------------------------------------------------------------
 
 class ModuleInputForm extends React.Component {
     static propTypes = {
         datasets: PropTypes.array.isRequired,
-        env: PropTypes.object.isRequired,
         errors: PropTypes.array,
         hasError: PropTypes.bool.isRequired,
         selectedCommand: PropTypes.object.isRequired,
@@ -75,7 +43,6 @@ class ModuleInputForm extends React.Component {
     render() {
         const {
             datasets,
-            env,
             errors,
             hasError,
             selectedCommand,
@@ -100,123 +67,53 @@ class ModuleInputForm extends React.Component {
                 )
             }
         }
-        const args = selectedCommand.arguments
-        if ((args.length === 1) && (args[0].datatype === DT_PYTHON_CODE)) {
-            const arg = args[0];
-            return (
-                <div className='code-form'>
-                    { error }
-                    <Form>
-                        <PythonCell
-                            key={arg.id}
-                            id={arg.id}
-                            name={arg.id}
-                            value={values[arg.id]}
-	                        editing={true}
-                        	sequenceIndex={codeEditorProps.sequenceIndex}
-	                        cursorPosition={codeEditorProps.cursorPosition}
-                        	newLines={codeEditorProps.newLines}
-	                        onChange={onChange}
-                        />
-                    </Form>
-                </div>
-            );
-        }
-        else if ((args.length === 2) && (args[0].datatype === DT_SQL_CODE)) {
-        	const srcarg = args[0];
-        	const odsarg = args[1];
-            return (
-                <div className='code-form'>
-                    { error }
-                    <Form>
-                        <SQLCell
-                            key={srcarg.id}
-                            id={srcarg.id}
-                            name={srcarg.id}
-                        	datasets={datasets}
-                            value={values[srcarg.id]}
-	                        editing={true}
-                        	sequenceIndex={codeEditorProps.sequenceIndex}
-	                        cursorPosition={codeEditorProps.cursorPosition}
-	                    	newLines={codeEditorProps.newLines}
-	                        outputDataset={values[odsarg.id]}
+        // Check if the command specification contains a dataset column. If so,
+        // try to find the dataset that is being selected.
+        const selectedDS = selectedDataset(selectedCommand, values, datasets);
+        let cssTable = 'form-table';
+        let components = [];
+        for (let i = 0; i < selectedCommand.parameters.length; i++) {
+            const para = selectedCommand.parameters[i];
+            // Skip elements that are part of a group, hidden or are of type
+            // code
+            if ((para.parent) || (para.hidden === true) || (para.datatype === DT_CODE)) {
+                continue;
+            }
+            components.push(
+                <tr key={para.id}>
+                    <td className='form-label'>{para.name}</td>
+                    <td className='form-control'>
+                        <ModuleFormControl
+                            key={para.id}
+                            commandArgs={selectedCommand.parameters}
+                            controlSpec={para}
+                            datasets={datasets}
+                            selectedDataset={selectedDS}
+                            value={values[para.id]}
                             onChange={onChange}
+                            onSubmit={onSubmit}
                         />
-                    </Form>
-                </div>
+                    </td>
+                </tr>
             );
-        }
-        else if ((args.length === 1) && (args[0].datatype === DT_SCALA_CODE)) {
-        	const arg = args[0];
-            return (
-                <div className='code-form'>
-                    { error }
-                    <Form>
-	                    <ScalaCell
-		                    key={arg.id}
-		                    id={arg.id}
-		                    name={arg.id}
-		                    value={values[arg.id]}
-		                    editing={true}
-	                        sequenceIndex={codeEditorProps.sequenceIndex}
-	                        cursorPosition={codeEditorProps.cursorPosition}
-	                    	newLines={codeEditorProps.newLines}
-	                        onChange={onChange}
-		                />
-                    </Form>
-                </div>
-            );
-        }
-        else {
-            // Check if the command specification contains a dataset column. If so,
-            // try to find the dataset that is being selected.
-            const selectedDataset = SELECTED_DATASET(selectedCommand, values, datasets);
-            args.sort((a, b) => (a.index - b.index));
-            let cssTable = 'form-table';
-            let components = [];
-            for (let i = 0; i < args.length; i++) {
-                const arg = args[i];
-                // Skip elements that are part of a group or hidden
-                if ((arg.parent) || (arg.hidden === true)) {
-                    continue;
-                }
-                components.push(
-                    <tr key={arg.id}>
-                        <td className='form-label'>{arg.name}</td>
-                        <td className='form-control'>
-                            <ModuleFormControl
-                                key={arg.id}
-                                commandArgs={args}
-                                controlSpec={arg}
-                                datasets={datasets}
-                                env={env}
-                                selectedDataset={selectedDataset}
-                                value={values[arg.id]}
-                                onChange={onChange}
-                                onSubmit={onSubmit}
-                            />
-                        </td>
-                    </tr>
-                );
-                if (arg.datatype === DT_FILE_ID) {
-                    cssTable += ' wide';
-                }
+            if (para.datatype === DT_FILE_ID) {
+                cssTable += ' wide';
             }
-            let formCss = 'module-form';
-            if (hasError) {
-                formCss += '-error';
-            }
-            return (
-                <div className={formCss}>
-                    { error }
-                    <table className={cssTable}>
-                        <tbody>
-                            { components }
-                        </tbody>
-                    </table>
-                </div>
-            );
         }
+        let formCss = 'module-form';
+        if (hasError) {
+            formCss += '-error';
+        }
+        return (
+            <div className={formCss}>
+                { error }
+                <table className={cssTable}>
+                    <tbody>
+                        { components }
+                    </tbody>
+                </table>
+            </div>
+        );
     }
 }
 

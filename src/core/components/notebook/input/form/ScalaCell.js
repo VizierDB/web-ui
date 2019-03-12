@@ -38,7 +38,7 @@ const OUTPUT_COLUMN_NAMES = 'OUTPUT_COLUMN_NAMES';
 const OUTPUT_CELL_VALUES = 'OUTPUT_CELL_VALUES';
 
 
-class ScalaCodeSnippetsSelector extends React.Component {
+export class ScalaCodeSnippetsSelector extends React.Component {
     static propTypes = {
         onSelect: PropTypes.func.isRequired
     }

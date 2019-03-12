@@ -23,11 +23,6 @@ div.module-form-error {
     margin: 10px 0px;
 }
 
-div.module-form-buttons {
-    padding-top: 10px;
-    text-align: right;
-}
-
 div.file-selector {
     background: #fff;
     border-radius: .28571429rem;
@@ -165,6 +160,7 @@ div.snippet-selector {
     border: solid 1px #dedede;
     border-radius: .28571429rem;
     padding: 10px 10px 10px 20px;
+    margin-top: 10px;
 }
 
 div.ui.labeled.input {
