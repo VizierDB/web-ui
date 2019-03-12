@@ -18,7 +18,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Icon, Grid, List } from 'semantic-ui-react';
 import {Controlled as CodeMirror} from 'react-codemirror2'
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/clike/clike';
@@ -94,7 +93,7 @@ class CodeCell extends React.Component {
             mode = 'python';
         } else if (language === 'scala') {
             mode = 'text/x-scala';
-        } else if (language == 'sql') {
+        } else if (language === 'sql') {
             mode = 'text/x-sql';
         } else {
             console.log('Language is ' + language)

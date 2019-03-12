@@ -175,6 +175,7 @@ pre.cell-cmd-text {
     /*border-radius: 2px;
     border: solid 1px #d0d0d0;*/
     color: #303f9f;
+    cursor: pointer;
     margin: 0px;
 }
 

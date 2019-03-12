@@ -27,9 +27,9 @@ import FileSelector from './FileSelector';
 import TextControl from './TextControl';
 import TextSelector from './TextSelector';
 import {
-    DT_AS_ROW, DT_BOOL, DT_COLUMN_ID, DT_DATASET_ID, DT_DECIMAL, DT_FILE_ID,
-    DT_GROUP, DT_INT, DT_ROW_ID, DT_STRING
-} from '../ModuleSpec';
+    DT_BOOL, DT_COLUMN_ID, DT_DATASET_ID, DT_DECIMAL, DT_FILE_ID, DT_INT,
+    DT_LIST, DT_RECORD, DT_ROW_ID, DT_ROW_INDEX, DT_SCALAR, DT_STRING
+} from '../../../../resources/Engine';
 
 
 /**
@@ -39,15 +39,17 @@ import {
 class ModuleFormControl extends React.Component {
     static propTypes = {
         commandArgs: PropTypes.array.isRequired,
+        commandSpec: PropTypes.object.isRequired,
         controlSpec: PropTypes.object.isRequired,
         datasets: PropTypes.array.isRequired,
-        env: PropTypes.object.isRequired,
         selectedDataset: PropTypes.object,
+        serviceProperties: PropTypes.object.isRequired,
         value: PropTypes.oneOfType([
             PropTypes.string,
             PropTypes.number,
             PropTypes.bool,
-            PropTypes.object
+            PropTypes.object,
+            PropTypes.array
         ]),
         onChange: PropTypes.func.isRequired,
         onSubmit: PropTypes.func
@@ -55,10 +57,11 @@ class ModuleFormControl extends React.Component {
     render() {
         const {
             commandArgs,
+            commandSpec,
             controlSpec,
             datasets,
-            env,
             selectedDataset,
+            serviceProperties,
             value,
             onChange,
             onSubmit
@@ -100,10 +103,12 @@ class ModuleFormControl extends React.Component {
                 />
             )
         } else if (
-            (controlSpec.datatype === DT_STRING) ||
-            (controlSpec.datatype === DT_ROW_ID) ||
+            (controlSpec.datatype === DT_DECIMAL) ||
             (controlSpec.datatype === DT_INT) ||
-            (controlSpec.datatype === DT_DECIMAL)
+            (controlSpec.datatype === DT_ROW_ID) ||
+            (controlSpec.datatype === DT_ROW_INDEX) ||
+            (controlSpec.datatype === DT_SCALAR) ||
+            (controlSpec.datatype === DT_STRING)
         ) {
             return (
                 <TextControl
@@ -133,12 +138,12 @@ class ModuleFormControl extends React.Component {
                     id={controlSpec.id}
                     isRequired={controlSpec.required ? true : false}
                     name={controlSpec.id}
-                    serviceProperties={env.serviceProperties}
+                    serviceProperties={serviceProperties}
                     value={value}
                     onChange={onChange}
                 />
             )
-        } else if (controlSpec.datatype === DT_GROUP) {
+        } else if (controlSpec.datatype === DT_LIST) {
             const children = []
             for (let j = 0; j < commandArgs.length; j++) {
                 const child = commandArgs[j]
@@ -151,16 +156,17 @@ class ModuleFormControl extends React.Component {
                     key={controlSpec.id}
                     children={children}
                     commandArgs={commandArgs}
+                    commandSpec={commandSpec}
                     datasets={datasets}
-                    env={env}
                     id={controlSpec.id}
                     name={controlSpec.id}
                     selectedDataset={selectedDataset}
+                    serviceProperties={serviceProperties}
                     value={value}
                     onChange={onChange}
                 />
             )
-        } else if (controlSpec.datatype === DT_AS_ROW) {
+        } else if (controlSpec.datatype === DT_RECORD) {
             const children = []
             for (let j = 0; j < commandArgs.length; j++) {
                 const child = commandArgs[j]
@@ -173,11 +179,12 @@ class ModuleFormControl extends React.Component {
                     key={controlSpec.id}
                     children={children}
                     commandArgs={commandArgs}
+                    commandSpec={commandSpec}
                     datasets={datasets}
-                    env={env}
                     id={controlSpec.id}
                     name={controlSpec.id}
                     selectedDataset={selectedDataset}
+                    serviceProperties={serviceProperties}
                     value={value}
                     onChange={onChange}
                 />

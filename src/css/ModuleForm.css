@@ -5,7 +5,7 @@ div.module-form {
     background: rgba(97,175,254,.075);
     border: 1px solid rgba(97,175,254, .25);
     padding: 10px 10px 10px 10px;
-    margin: 10px 0px;
+    margin: 0px;
 }
 
 div.module-form-menu {
@@ -21,6 +21,13 @@ div.module-form-error {
     border: 1px solid rgba(97,175,254, .25);*/
     padding: 20px 20px;
     margin: 10px 0px;
+}
+
+p.module-form-header {
+    color: #303f9f;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 20px;
 }
 
 div.file-selector {
@@ -114,6 +121,11 @@ td.inner-form-control {
 td.inner-form-button {
     text-align: center;
     width: 50px;
+}
+
+div.form-add-button {
+    margin-top: 10px;
+    text-align: left;
 }
 
 td.inner-form-checkbox {

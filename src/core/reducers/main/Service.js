@@ -64,7 +64,8 @@ export const serviceApi = (state = INITIAL_STATE, action) => {
               engine: {
                   backend: action.environment.backend,
                   name: action.environment.name,
-                  packages: new ModuleRegistry().fromJson(action.environment.packages)
+                  packages: new ModuleRegistry().fromJson(action.environment.packages),
+                  serviceProperties: {}
               },
               error: null,
               isFetching: false,

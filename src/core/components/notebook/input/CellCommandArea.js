@@ -20,13 +20,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { HotKeys } from 'react-hotkeys';
 import { Button, Form } from 'semantic-ui-react';
-import CommandMenu from './CommandMenu';
 import CommandsListing from './CommandsListing';
 import CodeCell from './form/CodeCell'
 import ModuleInputForm from './ModuleInputForm';
 import { CodeSnippetsSelector as PythonSnippets } from './form/PythonCell';
 import { ScalaCodeSnippetsSelector as ScalaSnippets } from './form/ScalaCell';
-import { DT_CODE, formValues, getCodeParameter } from '../../../resources/Engine';
+import { DT_DATASET_ID, getCodeParameter, toFormValues, resetColumnIds } from '../../../resources/Engine';
 import '../../../../css/App.css';
 import '../../../../css/ModuleForm.css';
 
@@ -63,7 +62,7 @@ class CellCommandArea extends React.Component {
         // a code-snippet selector
         let values = null;
         if (!cell.isNewCell()) {
-            values = formValues(
+            values = toFormValues(
                 cell.commandSpec,
                 datasets,
                 cell.module.command.arguments
@@ -98,7 +97,6 @@ class CellCommandArea extends React.Component {
      * editor value.
      */
     handleAppendCode = (lines) => {
-        const { id, onChange } = this.props;
         const  { codeEditorProps, formValues, selectedCommand } = this.state;
         const paraCode = getCodeParameter(selectedCommand);
         const editorValue = formValues[paraCode.id];
@@ -145,15 +143,23 @@ class CellCommandArea extends React.Component {
      * the new position of the cursor in the editor.
      */
     handleFormValueChange = (id, value, cursorPosition) => {
-        const { formValues, codeEditorProps } = this.state;
+        const { codeEditorProps, formValues, selectedCommand } = this.state;
         const modifiedValues = {...formValues};
         modifiedValues[id] = value;
+        // If the modified control is a dataset selector we need to reset all
+        // column identifier controls.
+        const cntrlSpec = selectedCommand.parameters.find((p) => (p.id === id));
+        if (cntrlSpec.datatype === DT_DATASET_ID) {
+            resetColumnIds(modifiedValues, selectedCommand);
+        }
         let modifiedEditorProps = null;
         if (cursorPosition != null) {
             modifiedEditorProps = { cursorPosition: cursorPosition };
         } else {
             modifiedEditorProps = codeEditorProps;
         }
+        console.log('NEW FORM VALUES');
+        console.log(modifiedValues);
         this.setState({
             formValues: modifiedValues,
             codeEditorProps: modifiedEditorProps
@@ -177,7 +183,7 @@ class CellCommandArea extends React.Component {
         // Clean up for fresh start when cell becomes active again
         if (!cell.isNewCell()) {
             this.setState({
-                formValues: formValues(
+                formValues: toFormValues(
                     cell.commandSpec,
                     datasets,
                     cell.module.command.arguments
@@ -206,17 +212,29 @@ class CellCommandArea extends React.Component {
      * Set the command in the user settings clipboard as the selected command.
      */
     handlePasteCommand = () => {
-        const { userSettings } = this.props;
-        this.setState({selectedCommand: userSettings.clipboard.commandSpec});
+        const { datasets, userSettings } = this.props;
+        this.setState({
+            formValues: toFormValues(
+                userSettings.clipboard.commandSpec,
+                datasets,
+                userSettings.clipboard.arguments
+            ),
+            selectedCommand: userSettings.clipboard.commandSpec,
+            showCommandsListing: false
+        });
     }
     /**
      * Update the selected command to the command that is identified by the
      * given pair of package and command identifier.
      */
     handleSelectCommand = (packageId, commandId) => {
-        const { apiEngine, onDismiss, onSubmit } = this.props;
+        const { apiEngine, datasets, onDismiss, onSubmit } = this.props;
         const cmd = apiEngine.packages.getCommandSpec(packageId, commandId);
-        this.setState({selectedCommand: cmd, showCommandsListing: (cmd == null)});
+        this.setState({
+            formValues: toFormValues(cmd, datasets),
+            selectedCommand: cmd,
+            showCommandsListing: false
+        });
     }
     /**
      * Set the showCommandsListing to true to show a list of available commands.
@@ -244,7 +262,6 @@ class CellCommandArea extends React.Component {
             onClick,
             onDismiss,
             onDoubleClick,
-            onSelectCell,
             onSubmit,
             userSettings
         } = this.props;
@@ -272,6 +289,7 @@ class CellCommandArea extends React.Component {
                 <CommandsListing
                     apiEngine={apiEngine}
                     onDismiss={this.handleDismissCommandsListing}
+                    onPaste={onPaste}
                     onSelect={this.handleSelectCommand} />
             );
         } else {
@@ -343,11 +361,17 @@ class CellCommandArea extends React.Component {
                 const keyMap = { runCell: 'ctrl+enter', dismiss: 'esc' };
                 mainContent = (
                     <HotKeys keyMap={keyMap} handlers={handlers}>
-                        <ModuleInputForm
-                            datasets={datasets}
-                            selectedCommand={selectedCommand}
-                            values={formValues}
-                        />
+                        <div className='module-form'>
+                            <p className='module-form-header'>{selectedCommand.name}</p>
+                            <ModuleInputForm
+                                datasets={datasets}
+                                onChange={this.handleFormValueChange}
+                                onSubmit={this.handleSubmitForm}
+                                selectedCommand={selectedCommand}
+                                serviceProperties={apiEngine.serviceProperties}
+                                values={formValues}
+                            />
+                        </div>
                     </HotKeys>
                 );
             } else if ((cell.isNewCell())  && (selectedCommand != null)) {

@@ -163,7 +163,7 @@ class SpreadsheetScrollbar extends React.Component {
                         />
                         <ScrollButton
                             enabled={hasPrevious}
-                            icon='angle up'
+                            icon='caret up'
                             title='Previous row'
                             onClick={this.handleNavigatePreviousRow}
                         />
@@ -171,7 +171,7 @@ class SpreadsheetScrollbar extends React.Component {
                     <div className='vertical-scroll-down'>
                         <ScrollButton
                             enabled={hasNext}
-                            icon='angle down'
+                            icon='caret down'
                             title='Next row'
                             onClick={this.handleNavigateNextRow}
                         />

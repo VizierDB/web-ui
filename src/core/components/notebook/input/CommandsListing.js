@@ -31,10 +31,11 @@ class CommandsListing extends React.Component {
     static propTypes = {
         apiEngine: PropTypes.object.isRequired,
         onDismiss: PropTypes.func.isRequired,
+        onPaste: PropTypes.func,
         onSelect: PropTypes.func.isRequired
     }
     render() {
-        const { apiEngine, onDismiss, onSelect } = this.props;
+        const { apiEngine, onDismiss, onPaste, onSelect } = this.props;
         // Get a list of command types
         const gridColumns = [];
         // Sort the list of module group identifier.
@@ -92,11 +93,30 @@ class CommandsListing extends React.Component {
                 </Grid.Column>
             );
         }
+        // Show a paste command button in the title if the onPaste callback is
+        // given.
+        let title = null;
+        if (onPaste != null) {
+            title = (
+                <div>
+                    {'Select a module from the list below or paste '}
+                    <Icon
+                        name='paste'
+                        link
+                        onClick={onPaste}
+                        title='Paste from clipboard'
+                    />
+                    {'from clipboard.'}
+                </div>
+            );
+        } else {
+            title = 'Select a module from the list below.'
+        }
         return (
             <div className='commands-listing'>
                 <Segment>
-                    <p className='commands-listing-header'>
-                        Select a module from the menu or the list below.
+                    <div className='commands-listing-header'>
+                        { title }
                         <span className='pull-right clickable-icon'>
                             <Icon
                                 name='close'
@@ -104,7 +124,7 @@ class CommandsListing extends React.Component {
                                 onClick={onDismiss}
                             />
                         </span>
-                    </p>
+                    </div>
                     <Grid columns={groups.length} divided>
                         <Grid.Row>
                             { gridColumns }

@@ -20,7 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'semantic-ui-react';
 import ModuleFormControl from './ModuleFormControl';
-import { DT_COLUMN_ID, DT_FILE_ID } from '../ModuleSpec';
+import { toFormValues } from '../../../../resources/Engine';
 import '../../../../../css/Notebook.css';
 import '../../../../../css/ModuleForm.css';
 
@@ -57,148 +57,212 @@ class ControlGroup extends React.Component {
     static propTypes = {
         children: PropTypes.array.isRequired,
         commandArgs: PropTypes.array.isRequired,
+        commandSpec: PropTypes.object.isRequired,
         datasets: PropTypes.array.isRequired,
-        env: PropTypes.object.isRequired,
         id: PropTypes.string.isRequired,
+        onChange: PropTypes.func.isRequired,
         selectedDataset: PropTypes.object,
-        value: PropTypes.object.isRequired,
-        onChange: PropTypes.func.isRequired
-    }
-    constructor(props) {
-        super(props);
-        const { value } = this.props;
-        this.defaultValues = {...value.values};
-        this.state = ({formValues: value.values, tuples: value.tuples});
-    }
-    /**
-     * Update internal state if any column id children have been reset.
-     */
-    componentWillReceiveProps(newProps) {
-        const { value } = newProps;
-        this.setState({formValues: value.values, tuples: value.tuples});
-    }
-    /**
-     * Handle change in any of the group's input controls.
-     */
-    handleChange = (name, value) => {
-        const { id, onChange } = this.props;
-        const { formValues, tuples } = this.state;
-        const values = {...formValues};
-        values[name] = value;
-        this.setState({formValues: values});
-        onChange(id, {values, tuples})
+        serviceProperties: PropTypes.object.isRequired,
+        value: PropTypes.array.isRequired
     }
     /**
      * Add the current values in the form controls as a tuple to the list of
      * argument values.
      */
     handleAdd = () => {
+        const { id, commandSpec, datasets, onChange } = this.props;
+        const formValue = this.props.value;
+        // Make a copy of the current form value
+        const rows = []
+        for (let i = 0; i < formValue.length; i++) {
+            rows.push(formValue[i])
+        }
+        // Add a new row of default values to the modified row list
+        rows.push(toFormValues(commandSpec, datasets, null, id));
+        onChange(id, rows);
+    }
+    /**
+     * Handle change in any of the group's input controls.
+     */
+    handleChange = (rowIdx, name, value) => {
         const { id, onChange } = this.props;
-        const { formValues, tuples } = this.state;
-        tuples.push({...formValues});
-        // Clear the form values
-        const values = {...this.defaultValues};
-        this.setState({formValues: values, tuples});
-        onChange(id, {values, tuples});
+        console.log('Change ' + rowIdx + ' ' + name + ' to ' + value)
+        const formValue = this.props.value;
+        // Make a copy of the form values where the value of the tuple that
+        // is isentified by the row index is modified
+        const rows = [];
+        for (let i = 0; i < formValue.length; i++) {
+            if ((i === rowIdx) || (value === null)) {
+                const row = {...formValue[i]};
+                row[name] = value;
+                rows.push(row);
+            } else {
+                rows.push(formValue[i])
+            }
+        }
+        onChange(id, rows);
     }
     /**
      * Remove an existing tuple from the list of argument values.
      */
-    handleRemove = (e, { value }) => {
-        const { id, onChange } = this.props
-        const { tuples } = this.state
-        const modifiedTuples = []
-        let removedTuple =  null
-        for (let i = 0; i < tuples.length; i++) {
+    handleDelete = (e, { value }) => {
+        const { id, onChange } = this.props;
+        const formValue = this.props.value;
+        // Make a copy of the current form value that does not contain the
+        // row that is currently at position value
+        const rows = []
+        for (let i = 0; i < formValue.length; i++) {
             if (i !== value) {
-                modifiedTuples.push(tuples[i])
-            }
-            else{
-            	removedTuple = {...tuples[i]}
+                rows.push(formValue[i])
             }
         }
-        this.setState({tuples: modifiedTuples, formValues:removedTuple})
-        onChange(id, {values: removedTuple, tuples: modifiedTuples})
+        onChange(id, rows);
+    }
+    /**
+     * Move the row at the given position (value) one position down in the form
+     * value list.
+     */
+    handleMoveDown = (e, { value }) => {
+        const { id, onChange } = this.props;
+        const formValue = this.props.value;
+        // Make a copy of the current form value
+        const rows = [];
+        let row = null;
+        for (let i = 0; i < formValue.length; i++) {
+            if (i === value) {
+                row = formValue[i];
+            } else {
+                rows.push(formValue[i]);
+                if (i === (value + 1)) {
+                    rows.push(row);
+                }
+            }
+        }
+        onChange(id, rows);
+    }
+    /**
+     * Move the row at the given position (value) one position up in the form
+     * value list.
+     */
+    handleMoveUp = (e, { value }) => {
+        const { id, onChange } = this.props;
+        const formValue = this.props.value;
+        // Make a copy of the current form value
+        const rows = [];
+        let row = null;
+        for (let i = 0; i < formValue.length; i++) {
+            if (i === (value - 1)) {
+                row = formValue[i];
+            } else {
+                rows.push(formValue[i]);
+                if (i === value) {
+                    rows.push(row);
+                }
+            }
+        }
+        onChange(id, rows);
     }
     render() {
         const {
-            children, commandArgs, datasets, env, selectedDataset
+            children,
+            commandArgs,
+            commandSpec,
+            datasets,
+            id,
+            selectedDataset,
+            serviceProperties,
+            value
         } = this.props;
-        const { tuples, formValues } = this.state;
-        // The layout is a table with three main components: The input control
-        // names, existing group tuples, and the form controls.
         const rows = [];
-        // Stat by generating the header and control row.
-        const formControls = [];
+        // Stat by generating the header for the elements in the control group.
         const formLabels = [];
         for (let i = 0; i < children.length; i++) {
             const child = children[i]
             formLabels.push(
-                <td key={formLabels.length} className='inner-form-header'>
+                <td key={'th_ctrl' + i} className='inner-form-header'>
                     {child.name}
                 </td>
             );
-            formControls.push(
-                <td key={formControls.length} className='inner-form-control'>
-                    <ModuleFormControl
-                        key={child.id}
-                        commandArgs={commandArgs}
-                        controlSpec={child}
-                        datasets={datasets}
-                        env={env}
-                        selectedDataset={selectedDataset}
-                        value={formValues[child.id]}
-                        onChange={this.handleChange}
+        }
+        // Add columns for controll buttons
+        formLabels.push(<td key={'th_btn1'} className='inner-form-header'></td>);
+        formLabels.push(<td key={'th_btn2'} className='inner-form-header'></td>);
+        formLabels.push(<td key={'th_btn3'} className='inner-form-header'></td>);
+        rows.push(<tr key='header'>{formLabels}</tr>);
+        // Add a row of controls for each row in the form
+        for (let t = 0; t < value.length; t++) {
+            let tuple = value[t];
+            const key = 'r_' + t + '_' + id;
+            const rowControls = [];
+            for (let c = 0; c < children.length; c++) {
+                const child = children[c]
+                rowControls.push(
+                    <td key={key + '_ctrl_' + child.id} className='inner-form-control'>
+                        <ModuleFormControl
+                            key={child.id}
+                            commandArgs={commandArgs}
+                            commandSpec={commandSpec}
+                            controlSpec={child}
+                            datasets={datasets}
+                            onChange={(name, value) => (this.handleChange(t, name, value))}
+                            selectedDataset={selectedDataset}
+                            serviceProperties={serviceProperties}
+                            value={tuple[child.id]}
+                        />
+                    </td>
+                );
+            }
+            rowControls.push(
+                <td key={key + '_btn_del'} className='inner-form-button'>
+                    <Button
+                        icon='trash'
+                        value={t}
+                        negative
+                        onClick={this.handleDelete}
+                        title='Delete row from the list'
                     />
                 </td>
             );
-        }
-        // Add empty column to label header (as placeholder for tuple and
-        // control buttons).
-        formLabels.push(
-            <td key={formLabels.length}  className='inner-form-button' />
-        )
-        // Add button to control row to add the current control values as a new
-        // tuple.
-        formControls.push(
-            <td key={formControls.length} className='inner-form-button'>
-                <Button icon='plus' positive onClick={this.handleAdd}/>
-            </td>
-        )
-        // Add labels as first row of output table.
-        rows.push(<tr key='header'>{formLabels}</tr>);
-        // Create output table rows for existing tuples
-        for (let i = 0; i < tuples.length; i++) {
-            const tuple = tuples[i]
-            const row = []
-            for (let j = 0; j < children.length; j++) {
-                const child = children[j];
-                // If the child is a dataset or file selector we need to replace
-                // the value with the respective resource name.
-                let tval = tuple[children[j].id];
-                if ((child.datatype === DT_COLUMN_ID) && (selectedDataset != null)) {
-                    tval = resourceName(selectedDataset.columns, tval);
-                } else if ((child.datatype === DT_COLUMN_ID) && (selectedDataset == null)) {
-                        tval = 'unknown';
-                } else if (child.datatype === DT_FILE_ID) {
-                    tval = 'file';
-                }
-                row.push(
-                    <td key={i + '#' + j} className='form-constant'>
-                        {tval}
-                    </td>
-                )
-            }
-            row.push(
-                <td key={i + '#' + children.length} className='inner-form-button'>
-                    <Button icon='trash' value={i} negative onClick={this.handleRemove}/>
+            rowControls.push(
+                <td key={key + '_btn_up'} className='inner-form-button'>
+                    <Button
+                        icon='chevron up'
+                        disabled={t === 0}
+                        onClick={this.handleMoveUp}
+                        title='Move row one position up'
+                        value={t}
+                    />
                 </td>
-            )
-            rows.push(<tr key={'tuples' + i}>{row}</tr>)
+            );
+            rowControls.push(
+                <td key={key + '_btn_dowm'} className='inner-form-button'>
+                    <Button
+                        icon='chevron down'
+                        disabled={t === (value.length - 1)}
+                        onClick={this.handleMoveDown}
+                        title='Move row one position down'
+                        value={t}
+                    />
+                </td>
+            );
+            rows.push(<tr key={key}>{rowControls}</tr>);
         }
-        // Add form conrols as last row of output table
-        rows.push(<tr key='controls'>{formControls}</tr>);
-        return (<table className='inner-form'><tbody>{rows}</tbody></table>);
+        // Add another row that contains the add button.
+        return (
+            <div>
+                <table className='inner-form'><tbody>{rows}</tbody></table>
+                <div className='form-add-button'>
+                    <Button
+                        content='Add Row'
+                        icon='plus'
+                        labelPosition='left'
+                        positive
+                        onClick={this.handleAdd}
+                        title='Add a new row to the list'
+                    />
+                </div>
+            </div>
+        );
     }
 }
 

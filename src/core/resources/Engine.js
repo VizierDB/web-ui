@@ -114,22 +114,82 @@ class PackageModule {
 // -----------------------------------------------------------------------------
 
 /**
+ * To test if a coomand specification is a code command we look for a parameter
+ * that is of type DT_CODE. If such a parameter exists it will have a language
+ * property that further specifies the type of cell.
+ */
+export const getCodeParameter = (commandSpec) => (
+    commandSpec.parameters.find((p) => (p.datatype === DT_CODE))
+);
+
+
+/**
+ * Returns the selected dataset if the command specification has a top-level
+ * argument of type 'dataset' and the value in the module form for this
+ * argument is set.
+ */
+export const getSelectedDataset = (commandSpec, values, datasets) => {
+    // If values is undefined we can return immediately
+    if (values == null) {
+        return null;
+    }
+    for (let i = 0; i < commandSpec.parameters.length; i++) {
+        const arg = commandSpec.parameters[i];
+        if (arg.datatype === DT_DATASET_ID) {
+            const val = values[arg.id];
+            if (val != null) {
+                for (let j = 0; j < datasets.length; j++) {
+                    const ds = datasets[j];
+                    if (ds.name === val) {
+                        return ds;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+/**
+ * Set the values of all column identifier arguments to null. This reset is
+ * necessary when the user selects a new top-level dataset in the command input
+ * form.
+ */
+export const resetColumnIds = (values, commandSpec, parent) => {
+    for (let i = 0; i < commandSpec.parameters.length; i++) {
+        const para = commandSpec.parameters[i];
+        if ((para.parent === parent) || ((para.parent == null) && (parent == null))) {
+            if (para.datatype === DT_COLUMN_ID) {
+                values[para.id] = null;
+            } else if (para.datatype === DT_RECORD) {
+                resetColumnIds(values[para.id], commandSpec, para.id );
+            } else if (para.datatype === DT_LIST) {
+                for (let r = 0; r < values[para.id].length; r++) {
+                    resetColumnIds(values[para.id][r], commandSpec, para.id );
+                }
+            }
+        }
+    }
+}
+
+
+/**
  * Create an object containing default values for each parameter in a given
  * command specification. Initialize values from the given module arguments,
  * where possible.
  */
-export const formValues = (commandSpec, datasets, moduleArgs, parent) => {
+export const toFormValues = (commandSpec, datasets, moduleArgs, parent) => {
     const values = {};
     for (let i = 0; i < commandSpec.parameters.length; i++) {
         const para = commandSpec.parameters[i];
-        if (para.parent == parent) {
+        if ((para.parent === parent) || ((para.parent == null) && (parent == null))) {
             const arg = (moduleArgs != null) ? moduleArgs.find((a) => (a.id === para.id)) : null;
             let val = null;
             if (para.datatype === DT_RECORD) {
                 // Get a list of parameter specifications for the children of
                 // the given record.
                 const recordVal = (arg != null) ? arg.value : [];
-                val = formValues(commandSpec, datasets, recordVal, para.id);
+                val = toFormValues(commandSpec, datasets, recordVal, para.id);
             } else if (para.datatype === DT_LIST) {
                 // The argument value is a list of lists (one for each record
                 // in the list)
@@ -137,7 +197,7 @@ export const formValues = (commandSpec, datasets, moduleArgs, parent) => {
                 if (arg != null) {
                     for (let rec = 0; rec < arg.value.length; rec++) {
                         val.push(
-                            formValues(
+                            toFormValues(
                                 commandSpec,
                                 datasets,
                                 arg.value[rec],
@@ -160,7 +220,7 @@ export const formValues = (commandSpec, datasets, moduleArgs, parent) => {
                     val = para.values[0].value;
                     if (para.values[0].isDefault !== true) {
                         for (let j = 1; j < para.values.length; j++) {
-                            const opt = para.values[i];
+                            const opt = para.values[j];
                             if (opt.isDefault === true) {
                                 val = opt.value;
                                 break;
@@ -169,8 +229,7 @@ export const formValues = (commandSpec, datasets, moduleArgs, parent) => {
                     }
                 } else {
                     // If the value is still undefined we set it to a defined
-                    // default. For some datatypes, howeber, the value remains
-                    // null.
+                    // default.
                     if (para.datatype === DT_BOOL) {
                         val = false;
                     } else if (para.datatype === DT_DATASET_ID) {
@@ -184,37 +243,4 @@ export const formValues = (commandSpec, datasets, moduleArgs, parent) => {
         }
     }
     return values;
-}
-
-
-/**
- * To test if a coomand specification is a code command we look for a parameter
- * that is of type DT_CODE. If such a parameter exists it will have a language
- * property that further specifies the type of cell.
- */
-export const getCodeParameter = (commandSpec) => (
-    commandSpec.parameters.find((p) => (p.datatype === DT_CODE))
-);
-
-
-/**
- * Returns the selected dataset if the command specification has a top-level
- * argument of type 'dataset' and the value in the module form for this
- * argument is set.
- */
-export const selectedDataset = (commandSpec, values, datasets) => {
-    for (let i = 0; i < commandSpec.parameters.length; i++) {
-        const arg = commandSpec.parameters[i];
-        if (arg.datatype === DT_DATASET_ID) {
-            const val = values[arg.id];
-            if (val != null) {
-                for (let j = 0; j < datasets.length; j++) {
-                    const ds = datasets[j];
-                    if (ds.name === val) {
-                        return ds;
-                    }
-                }
-            }
-        }
-    }
 }

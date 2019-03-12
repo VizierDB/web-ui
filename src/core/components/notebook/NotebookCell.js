@@ -146,7 +146,7 @@ class NotebookCell extends React.Component {
         // For a cell that contains a new workflow module only the module input
         // for is being displayed.
         if (cell.isNewCell()) {
-            cellIndex = ' ';
+            cellIndex = '*';
         } else {
             // Check if the command that is associated with the cell is filtered
             // by the user settings. If the command is filtered we either return

@@ -47,12 +47,20 @@ export const getNewCellId = (id) => ('__' + id + '__');
  * Workflow module handle.
  */
 class ModuleHandle {
-    fromJson(json) {
+    fromJson(json, datasets) {
         this.id = json.id;
         this.state = json.state;
         this.command = json.command;
         this.outputs = json.outputs;
-        this.datasets = json.datasets;
+        this.datasets = [];
+        for (let i = 0; i < json.datasets.length; i++) {
+            const { id, name } = json.datasets[i];
+            const ds = datasets[id];
+            this.datasets.push(
+                new DatasetDescriptor(id, name, ds.columns, ds.links)
+            );
+        }
+        json.datasets;
         this.charts = json.charts;
         this.text = json.text;
         this.links = new HATEOASReferences(json.links);
@@ -94,7 +102,10 @@ export class Notebook {
         // the API
         this.cells = [];
         for (let i = 0; i < workflow.modules.length; i++) {
-            const module = new ModuleHandle().fromJson(workflow.modules[i]);
+            const module = new ModuleHandle().fromJson(
+                workflow.modules[i],
+                workflow.datasets
+            );
             const commandSpec = workflow.getCommandSpec(module.command);
             // Get cell output resource
             const stdout = module.outputs.stdout;

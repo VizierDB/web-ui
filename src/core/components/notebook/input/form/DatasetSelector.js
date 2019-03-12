@@ -31,9 +31,25 @@ class DatasetSelector extends React.Component {
         value: PropTypes.string,
         onChange: PropTypes.func.isRequired
     }
+    constructor(props) {
+        super(props);
+        const { value } = this.props;
+        this.state = {ctrlValue: value};
+    }
+    /**
+     * Handle change in the dropdown box. This event fires whenever the user
+     * clicks on the select box. We maintain the current value in the local
+     * state to avoid updating the form values if nothing has changed.
+     * This is important here since a change to the dataset selector will
+     * trigger all column id controls to reset.
+     */
     handleChange = (e, { value }) => {
         const { id, onChange } = this.props
-        onChange(id, value)
+        const { ctrlValue } = this.state;
+        if (ctrlValue !== value) {
+            this.setState({ctrlValue: value});
+            onChange(id, value, null)
+        }
     }
     render() {
         const { datasets, isRequired, value } = this.props

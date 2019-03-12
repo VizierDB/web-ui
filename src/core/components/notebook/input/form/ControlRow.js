@@ -34,41 +34,33 @@ class ControlRow extends React.Component {
     static propTypes = {
         children: PropTypes.array.isRequired,
         commandArgs: PropTypes.array.isRequired,
+        commandSpec: PropTypes.object.isRequired,
         datasets: PropTypes.array.isRequired,
-        env: PropTypes.object.isRequired,
         id: PropTypes.string.isRequired,
+        onChange: PropTypes.func.isRequired,
         selectedDataset: PropTypes.object,
-        value: PropTypes.object.isRequired,
-        onChange: PropTypes.func.isRequired
-    }
-    constructor(props) {
-        super(props);
-        const { value } = props;
-        this.state = {formValues: value.values}
-    }
-    /**
-     * Update internal state if any column id children have been reset.
-     */
-    componentWillReceiveProps(newProps) {
-        const { value } = newProps;
-        this.setState({formValues: value.values});
+        serviceProperties: PropTypes.object.isRequired,
+        value: PropTypes.object.isRequired
     }
     /**
      * Handle change in any of the group's input controls.
      */
     handleChange = (name, value) => {
-        const { formValues } = this.state;
         const { id, onChange } = this.props;
-        let values = {...formValues};
-        values[name] = value;
-        this.setState({formValues: values});
-        onChange(id, {values})
+        let formValue = {...this.props.value};
+        formValue[name] = value;
+        onChange(id, formValue)
     }
     render() {
         const {
-            children, commandArgs, datasets, env, selectedDataset
-        } = this.props
-        const { formValues } = this.state
+            children,
+            commandArgs,
+            commandSpec,
+            datasets,
+            selectedDataset,
+            serviceProperties,
+            value
+        } = this.props;
         const formLabels = []
         const formControls = []
         for (let i = 0; i < children.length; i++) {
@@ -83,12 +75,13 @@ class ControlRow extends React.Component {
                     <ModuleFormControl
                         key={child.id}
                         commandArgs={commandArgs}
+                        commandSpec={commandSpec}
                         controlSpec={child}
                         datasets={datasets}
-                        env={env}
-                        selectedDataset={selectedDataset}
-                        value={formValues[child.id]}
                         onChange={this.handleChange}
+                        selectedDataset={selectedDataset}
+                        serviceProperties={serviceProperties}
+                        value={value[child.id]}
                     />
                 </td>
             );
