@@ -21,9 +21,10 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { addFilteredCommand, copyCell, removeFilteredCommand } from '../../actions/main/App';
 import { createBranch, deleteBranch } from '../../actions/project/Branch';
-import { checkModuleStatus, dismissCellChanges, fetchAnnotations, fetchWorkflow,
-    hideCellOutput, insertNotebookCell, showCellChart, selectNotebookCell,
-    showCellDataset, showCellStdout, showCellTimestamps } from '../../actions/project/Notebook';
+import { cancelWorkflowExecution, checkModuleStatus, dismissCellChanges,
+    fetchAnnotations, fetchWorkflow, hideCellOutput, insertNotebookCell,
+    showCellChart, selectNotebookCell, showCellDataset, showCellStdout,
+    showCellTimestamps } from '../../actions/project/Notebook';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import { fetchProjects } from '../../actions/project/ProjectListing';
 import { LargeMessageButton } from '../../components/Button';
@@ -145,7 +146,8 @@ class NotebookPage extends Component {
      * Callback handler to cancel the execution of a currently active workflow.
      */
     handleCancelWorkflowExec = () => {
-        alert('Cancel');
+        const { dispatch, notebook } = this.props;
+        dispatch(cancelWorkflowExecution(notebook));
     }
     /**
      * Call method to fetch workflow module handle and update notebook on state

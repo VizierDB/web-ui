@@ -274,7 +274,7 @@ export class Notebook {
      * is received. Replaces the respective modules in notebook cells with
      * their updated counterparts. Returns a new notebook object.
      */
-    updateWorkflow(workflow, modified_module_id) {
+    updateWorkflow(workflow, modifiedCellId) {
         // Start by creating an index of module handles for the new workflow
         const moduleIndex = {};
         for (let i = 0; i < workflow.modules.length; i++) {
@@ -295,7 +295,7 @@ export class Notebook {
                 // If the modified module identifier is given then we need to
                 // set the module output to its default value.
                 let outputResource = null;
-                if (module.id === modified_module_id) {
+                if (module.id === modifiedCellId) {
                     outputResource = getModuleDefaultOutput(module);
                 } else {
                     outputResource = cell.output;

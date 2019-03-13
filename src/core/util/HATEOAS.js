@@ -42,6 +42,9 @@ export const HATEOAS_PROJECTS_DELETE = 'project.delete';
 export const HATEOAS_PROJECTS_LIST = 'project.list';
 export const HATEOAS_PROJECT_UPDATE_PROPERTY = 'project.update';
 
+// Workflow
+export const HATEOAS_WORKFLOW_CANCEL = 'workflow.cancel';
+
 
 /**
  * Maintain a list of HATEOAS references that are given as an array of
@@ -68,6 +71,8 @@ export class HATEOASReferences {
         if (ref != null) {
             return ref.href;
         } else {
+            console.log('NOT FOUND IN')
+            console.log(this.links);
             return null;
         }
     }
