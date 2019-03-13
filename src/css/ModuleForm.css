@@ -8,19 +8,11 @@ div.module-form {
     margin: 0px;
 }
 
-div.module-form-menu {
-    padding-left: 10px;
-    padding-bottom: 10px;
-}
-
-div.module-form-error {
-    border-radius: 4px;
-    background: #f2dede;
-    border: solid 1px #ebccd1;
+div.module-form.error {
+    background: #fff6f6;
+    border: solid 1px #e0b4b4;
     /*background: rgba(97,175,254,.075);
     border: 1px solid rgba(97,175,254, .25);*/
-    padding: 20px 20px;
-    margin: 10px 0px;
 }
 
 p.module-form-header {
@@ -28,6 +20,10 @@ p.module-form-header {
     font-size: 1.2em;
     font-weight: bold;
     margin-bottom: 20px;
+}
+
+p.module-form-header.error {
+    color: #b46361;
 }
 
 div.file-selector {

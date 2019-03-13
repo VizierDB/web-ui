@@ -95,8 +95,6 @@ class CodeCell extends React.Component {
             mode = 'text/x-scala';
         } else if (language === 'sql') {
             mode = 'text/x-sql';
-        } else {
-            console.log('Language is ' + language)
         }
         return (
             <div className='editor-container'>

@@ -284,7 +284,6 @@ class PythonCell extends React.Component {
     }
     constructor(props) {
         super(props);
-        console.log('Constructor for python cell')
         const { id, value, editing, cursorPosition, newLines, onChange } = props;
         let evalue = value;
         let addLines = false;
@@ -299,12 +298,8 @@ class PythonCell extends React.Component {
         }
         this.state = {editorValue: evalue, snippetSelectorVisible: false, editing: editing, active:active, cursorPosition: newCursorPos, addLines:addLines};
         if(addLines){
-            console.log('add lines')
         	onChange(id, evalue);
         }
-    }
-    componentWillUnmount() {
-        console.log('Python code will unmount')
     }
     /**
      * Append a code snippet to the current editor value. The code snippet is

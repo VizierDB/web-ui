@@ -22,10 +22,12 @@ import { HotKeys } from 'react-hotkeys';
 import { Button, Form } from 'semantic-ui-react';
 import CommandsListing from './CommandsListing';
 import CodeCell from './form/CodeCell'
+import { ErrorListMessage } from '../../Message';
 import ModuleInputForm from './ModuleInputForm';
 import { CodeSnippetsSelector as PythonSnippets } from './form/PythonCell';
 import { ScalaCodeSnippetsSelector as ScalaSnippets } from './form/ScalaCell';
-import { DT_DATASET_ID, getCodeParameter, toFormValues, resetColumnIds } from '../../../resources/Engine';
+import { DT_DATASET_ID, formValuesToRequestData, getCodeParameter,
+    toFormValues, resetColumnIds } from '../../../resources/Engine';
 import '../../../../css/App.css';
 import '../../../../css/ModuleForm.css';
 
@@ -43,7 +45,6 @@ class CellCommandArea extends React.Component {
         isActiveCell: PropTypes.bool.isRequired,
         onClick: PropTypes.func.isRequired,
         onDismiss: PropTypes.func.isRequired,
-        onDoubleClick: PropTypes.func,
         onSelectCell: PropTypes.func.isRequired,
         onSubmit: PropTypes.func.isRequired,
         userSettings: PropTypes.object.isRequired
@@ -73,7 +74,9 @@ class CellCommandArea extends React.Component {
                 cursorPosition: { line: 0, ch: 0 },
                 newLines: ""
             },
+            errors: null,
             formValues: values,
+            hasErrors: false,
             selectedCommand: cell.commandSpec,
             showCommandsListing: (cell.commandSpec == null),
             snippetSelectorVisible: false
@@ -158,8 +161,6 @@ class CellCommandArea extends React.Component {
         } else {
             modifiedEditorProps = codeEditorProps;
         }
-        console.log('NEW FORM VALUES');
-        console.log(modifiedValues);
         this.setState({
             formValues: modifiedValues,
             codeEditorProps: modifiedEditorProps
@@ -209,6 +210,12 @@ class CellCommandArea extends React.Component {
         }
     }
     /**
+     * Clear the list of error messages.
+     */
+    handleDismissErrors = () => {
+        this.setState({errors: null});
+    }
+    /**
      * Set the command in the user settings clipboard as the selected command.
      */
     handlePasteCommand = () => {
@@ -244,7 +251,14 @@ class CellCommandArea extends React.Component {
     }
     handleSubmitForm = () => {
         const { onSubmit } = this.props;
-        onSubmit();
+        const { formValues, selectedCommand } = this.state;
+        const req = formValuesToRequestData(selectedCommand, formValues);
+        if (req.errors.length > 0) {
+            this.setState({errors: req.errors, hasErrors: true});
+        } else {
+            this.setState({errors: null, hasErrors: false});
+            onSubmit();
+        }
     }
     /**
      * Toggle visibility of an optional code snippet selector.
@@ -261,16 +275,28 @@ class CellCommandArea extends React.Component {
             isActiveCell,
             onClick,
             onDismiss,
-            onDoubleClick,
             onSubmit,
             userSettings
         } = this.props;
         const {
+            errors,
             formValues,
+            hasErrors,
             selectedCommand,
             showCommandsListing,
             snippetSelectorVisible
         } = this.state;
+        // Show an list of error messages if the form did not validate
+        let errorMessage = null;
+        if (errors != null) {
+            errorMessage = (
+                <ErrorListMessage
+                    title='There are errors in the form'
+                    errors={errors}
+                    onDismiss={this.handleDismissErrors}
+                />
+            );
+        }
         // The main content depends on whether a command specification is
         // defined for the associated notebook cell or not.
         let mainContent = null;
@@ -359,10 +385,13 @@ class CellCommandArea extends React.Component {
                 );
             } else if (isActiveCell) {
                 const keyMap = { runCell: 'ctrl+enter', dismiss: 'esc' };
+                const errorCss = (hasErrors) ? ' error' : '';
                 mainContent = (
                     <HotKeys keyMap={keyMap} handlers={handlers}>
-                        <div className='module-form'>
-                            <p className='module-form-header'>{selectedCommand.name}</p>
+                        <div className={'module-form' + errorCss}>
+                            <p className={'module-form-header' + errorCss}>
+                                {selectedCommand.name}
+                            </p>
                             <ModuleInputForm
                                 datasets={datasets}
                                 onChange={this.handleFormValueChange}
@@ -376,14 +405,7 @@ class CellCommandArea extends React.Component {
                 );
             } else if ((cell.isNewCell())  && (selectedCommand != null)) {
                 mainContent = (
-                    <pre
-                        className={'cell-cmd-text'}
-                        onClick={onClick}
-                        onDoubleClick={onDoubleClick}
-                        onChange={() => (alert('Change'))}
-                        onDismissErrors={() => (alert('Change'))}
-                        onSubmit={() => (alert('Change'))}
-                    >
+                    <pre className='cell-cmd-text' onClick={onClick}>
                         {selectedCommand.name}
                     </pre>
                 );
@@ -392,11 +414,7 @@ class CellCommandArea extends React.Component {
                 // it is not a new cell then the cell has to have an associated
                 // workflow module. In this case we show the command text.
                 mainContent = (
-                    <pre
-                        className={'cell-cmd-text'}
-                        onClick={onClick}
-                        onDoubleClick={onDoubleClick}
-                    >
+                    <pre className='cell-cmd-text' onClick={onClick}>
                         {cell.module.text}
                     </pre>
                 );
@@ -409,20 +427,13 @@ class CellCommandArea extends React.Component {
                 <div className='module-form-buttons'>
                     { codeSnippetButton }
                     <span className='padding-lg'>
-                    <Button
-                        content='Change Command'
-                        icon='wrench'
-                        labelPosition='left'
-                        onClick={this.handleShowCommandsListing}
-                    />
+                        <Button
+                            content='Change Command'
+                            icon='wrench'
+                            labelPosition='left'
+                            onClick={this.handleShowCommandsListing}
+                        />
                     </span>
-                    <Button
-                        content='Submit'
-                        icon='paper plane outline'
-                        labelPosition='left'
-                        positive
-                        onClick={this.handleSubmitForm}
-                    />
                     <Button
                         content='Dismiss'
                         icon='close'
@@ -430,11 +441,19 @@ class CellCommandArea extends React.Component {
                         negative
                         onClick={this.handleDismiss}
                     />
+                    <Button
+                        content='Submit'
+                        icon='paper plane outline'
+                        labelPosition='left'
+                        positive
+                        onClick={this.handleSubmitForm}
+                    />
                 </div>
             );
         }
         return (
             <div className='cell-command-area'>
+                { errorMessage }
                 { mainContent }
                 { buttons }
             </div>

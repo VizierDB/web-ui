@@ -30,21 +30,6 @@ import '../../../../../css/ModuleForm.css';
 // -----------------------------------------------------------------------------
 
 /**
- * Get the value of the name property for a resource with given id. Expects a
- * list of objects that have .name and .id properties. If no matching resource
- * is found the result is null;
- */
-const resourceName = (resources, id) => {
-    const res = resources.find((r) => (r.id === id));
-    if (res != null) {
-        return res.name;
-    } else {
-        return null;
-    }
-}
-
-
-/**
  * A group of control elements. Allows user to insert a set of tuples.
  *
  * Expects a value which is a pair of .values and .tuplels. The .values element
@@ -86,7 +71,6 @@ class ControlGroup extends React.Component {
      */
     handleChange = (rowIdx, name, value) => {
         const { id, onChange } = this.props;
-        console.log('Change ' + rowIdx + ' ' + name + ' to ' + value)
         const formValue = this.props.value;
         // Make a copy of the form values where the value of the tuple that
         // is isentified by the row index is modified

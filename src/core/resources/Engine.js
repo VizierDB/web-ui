@@ -114,6 +114,50 @@ class PackageModule {
 // -----------------------------------------------------------------------------
 
 /**
+ * Convert form values for the gien command specification into a format that is
+ * expected by the API. Returns an object that contains the request and a
+ * potentially empty list of error messages for form values that failed to
+ * validate.
+ */
+export const formValuesToRequestData = (commandSpec, values, parent) => {
+    const result = {data: {}, errors: []};
+    for (let i = 0; i < commandSpec.parameters.length; i++) {
+        const para = commandSpec.parameters[i];
+        if ((para.parent === parent) || ((para.parent == null) && (parent == null))) {
+            const val = values[para.id];
+            if (para.datatype === DT_RECORD) {
+                if (val != null) {
+                    const recordResult = formValuesToRequestData(commandSpec, val, para.id);
+                    result.data[para.id] = recordResult.data;
+                    recordResult.errors.forEach((err) => (result.errors.push(err)))
+                } else if (para.required) {
+                    result.errors.push('Missing value for ' + para.name);
+                }
+            } else if (para.datatype === DT_LIST) {
+                if ((val != null) && (val.length > 0)) {
+                    for (let r = 0; r < val.length; r++) {
+                        const rowResult = formValuesToRequestData(
+                            commandSpec,
+                            val[r],
+                            para.id
+                        );
+                        result.data[para.id] = rowResult.data;
+                        rowResult.errors.forEach((err) => (result.errors.push(err)))
+                    }
+                } else if (para.required) {
+                    result.errors.push('Missing value for ' + para.name);
+                }
+            } else {
+                validateArgument(para, val, para.name, result.errors);
+                result.data[para.id] = val;
+            }
+        }
+    }
+    return result;
+}
+
+
+/**
  * To test if a coomand specification is a code command we look for a parameter
  * that is of type DT_CODE. If such a parameter exists it will have a language
  * property that further specifies the type of cell.
@@ -243,4 +287,40 @@ export const toFormValues = (commandSpec, datasets, moduleArgs, parent) => {
         }
     }
     return values;
+}
+
+
+/**
+ * Validate a single argument in a module command specification. Append all
+ * error messages to a given list.
+ */
+const validateArgument = (paraSpec, value, name, errors) => {
+    if ((value === null) && (paraSpec.required)) {
+        errors.push('Missing value for ' + name);
+    } else if ((value !== null) && (paraSpec.datatype === DT_FILE_ID)) {
+        // For source file arguments there needs to be a filename/file or
+        // url combination.
+        const { file, fileid, filename, url } = value;
+        if ((file != null) && (filename != null)) {
+        } else if ((fileid != null) && (filename != null)) {
+        } else if (url != null) {
+        } else {
+            errors.push('No file selected for ' + name);
+        }
+    } else if (value != null) {
+        if ((value === '') && (paraSpec.required)) {
+            errors.push('Missing value for ' + name);
+        } else {
+            const dt = paraSpec.datatype;
+            if ((dt === DT_INT) || (dt === DT_ROW_ID)) {
+                if (isNaN(value)) {
+                    errors.push('Expected integer value for ' + name);
+                }
+            } else if (dt === DT_DECIMAL) {
+                if (isNaN(value)) {
+                    errors.push('Expected decimal value for ' + name);
+                }
+            }
+        }
+    }
 }

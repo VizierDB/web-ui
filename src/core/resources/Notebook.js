@@ -60,7 +60,6 @@ class ModuleHandle {
                 new DatasetDescriptor(id, name, ds.columns, ds.links)
             );
         }
-        json.datasets;
         this.charts = json.charts;
         this.text = json.text;
         this.links = new HATEOASReferences(json.links);

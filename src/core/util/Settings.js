@@ -104,7 +104,6 @@ export class UserSettings {
                 commandSpec: cell.commandSpec,
                 arguments: cell.module.command.arguments
             };
-            console.log(content);
         }
         return new UserSettings(
             this.filteredCommands,
