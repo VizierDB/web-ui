@@ -38,8 +38,6 @@ import {
  */
 class ModuleFormControl extends React.Component {
     static propTypes = {
-        commandArgs: PropTypes.array.isRequired,
-        commandSpec: PropTypes.object.isRequired,
         controlSpec: PropTypes.object.isRequired,
         datasets: PropTypes.array.isRequired,
         selectedDataset: PropTypes.object,
@@ -51,20 +49,16 @@ class ModuleFormControl extends React.Component {
             PropTypes.object,
             PropTypes.array
         ]),
-        onChange: PropTypes.func.isRequired,
-        onSubmit: PropTypes.func
+        onChange: PropTypes.func.isRequired
     }
     render() {
         const {
-            commandArgs,
-            commandSpec,
             controlSpec,
             datasets,
             selectedDataset,
             serviceProperties,
             value,
-            onChange,
-            onSubmit
+            onChange
         } = this.props;
         if (controlSpec.datatype === DT_COLUMN_ID) {
              return (
@@ -118,7 +112,6 @@ class ModuleFormControl extends React.Component {
                     placeholder={controlSpec.name}
                     value={value}
                     onChange={onChange}
-                    onSubmit={onSubmit}
                 />
             )
         } else if (controlSpec.datatype === DT_BOOL) {
@@ -144,19 +137,10 @@ class ModuleFormControl extends React.Component {
                 />
             )
         } else if (controlSpec.datatype === DT_LIST) {
-            const children = []
-            for (let j = 0; j < commandArgs.length; j++) {
-                const child = commandArgs[j]
-                if (child.parent === controlSpec.id) {
-                    children.push(child)
-                }
-            }
             return (
                 <ControlGroup
                     key={controlSpec.id}
-                    children={children}
-                    commandArgs={commandArgs}
-                    commandSpec={commandSpec}
+                    controlSpec={controlSpec}
                     datasets={datasets}
                     id={controlSpec.id}
                     name={controlSpec.id}
@@ -167,19 +151,10 @@ class ModuleFormControl extends React.Component {
                 />
             )
         } else if (controlSpec.datatype === DT_RECORD) {
-            const children = []
-            for (let j = 0; j < commandArgs.length; j++) {
-                const child = commandArgs[j]
-                if (child.parent === controlSpec.id) {
-                    children.push(child)
-                }
-            }
             return (
                 <ControlRow
                     key={controlSpec.id}
-                    children={children}
-                    commandArgs={commandArgs}
-                    commandSpec={commandSpec}
+                    controlSpec={controlSpec}
                     datasets={datasets}
                     id={controlSpec.id}
                     name={controlSpec.id}

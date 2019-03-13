@@ -19,7 +19,7 @@
 import {
 	MODAL_AUTH, REQUEST_SERVICE, RECEIVE_SERVICE, SERVICE_ERROR, REQUEST_AUTH, RECEIVE_AUTH
 } from '../../actions/main/Service'
-import { ModuleRegistry } from '../../resources/Engine';
+import { PackageRegistry } from '../../resources/Engine';
 import { HATEOASReferences } from '../../util/HATEOAS'
 
 /**
@@ -64,7 +64,7 @@ export const serviceApi = (state = INITIAL_STATE, action) => {
               engine: {
                   backend: action.environment.backend,
                   name: action.environment.name,
-                  packages: new ModuleRegistry().fromJson(action.environment.packages),
+                  packages: new PackageRegistry().fromJson(action.environment.packages),
                   serviceProperties: action.properties
               },
               error: null,

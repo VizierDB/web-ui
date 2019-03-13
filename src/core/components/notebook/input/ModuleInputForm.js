@@ -29,8 +29,7 @@ class ModuleInputForm extends React.Component {
         selectedCommand: PropTypes.object.isRequired,
         serviceProperties: PropTypes.object.isRequired,
         values: PropTypes.object.isRequired,
-        onChange: PropTypes.func.isRequired,
-        onSubmit: PropTypes.func.isRequired
+        onChange: PropTypes.func.isRequired
     }
     render() {
         const {
@@ -38,7 +37,6 @@ class ModuleInputForm extends React.Component {
             selectedCommand,
             serviceProperties,
             onChange,
-            onSubmit,
             values
         } = this.props;
         // Check if the command specification contains a dataset column. If so,
@@ -64,15 +62,12 @@ class ModuleInputForm extends React.Component {
                         <td className='form-control'>
                             <ModuleFormControl
                                 key={para.id}
-                                commandArgs={selectedCommand.parameters}
-                                commandSpec={selectedCommand}
                                 controlSpec={para}
                                 datasets={datasets}
                                 selectedDataset={selectedDataset}
                                 serviceProperties={serviceProperties}
                                 value={values[para.id]}
                                 onChange={onChange}
-                                onSubmit={onSubmit}
                             />
                         </td>
                     </tr>

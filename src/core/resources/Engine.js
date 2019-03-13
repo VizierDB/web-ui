@@ -58,53 +58,97 @@ export const DT_SCALAR = 'scalar';
 export const DT_STRING = 'string';
 
 
+/**
+ * Declaration of a command in a workflow package. The command maintains a
+ * nested list of parameter declarations based on the defined parent-child
+ * relationships in the parameter list.
+ *
+ * The command declaration also maintains a reference to a top-level parameter
+ * of type DT_CODE (if it exist). We currently assume that there is at most
+ * one code parameter for a command declaration.
+ */
+class CommandDeclaration {
+    constructor(packageId) {
+        this.packageId = packageId;
+    }
+    fromJson(obj) {
+        this.id = obj.id;
+        this.name = obj.name;
+        this.description = obj.description;
+        // Sort parameters by identifier to ensure that they will be rendered
+        // in the correct order. Then convert the flat list of parameters
+        // into a nested list based on parent-child relationships
+        obj.parameters.sort((a, b) => (a.index - b.index));
+        this.parameters = nestCommandParameters(obj.parameters);
+        // Set the code parameter property for faster access when rendering
+        // notebook cells
+        this.codeParameter = this.parameters.find((p) => (p.datatype === DT_CODE));
+        return this;
+    }
+}
+
 
 /**
- * The module registry contains a list of all packages. Each package contains
+ * The package declaration contains the declarations for all commands in a
+ * package of workflow modules.
+ */
+class PackageDeclaration {
+    fromJson(json) {
+        this.id = json.id;
+        this.name = json.name;
+        // Maintain a list of all commands sorted by their name
+        this.elements = [];
+        this.commands = {};
+        for (let i = 0; i < json.commands.length; i++) {
+            const cmd = new CommandDeclaration(json.id).fromJson(json.commands[i]);
+            this.commands[cmd.id] = cmd;
+            this.elements.push(cmd);
+        }
+        // Sort the command listing by name
+        sortByName(this.elements);
+        return this;
+    }
+    /**
+     * Get a listing of all commands in the package.
+     */
+    toList() {
+        return this.elements;
+    }
+}
+
+
+/**
+ * The package registry contains a list of all packages. Each package contains
  * a list of all commands in the package. The registry also maintains a package
  * index that enables access to a package by its identifier.
  */
-export class ModuleRegistry {
+export class PackageRegistry {
     fromJson(json) {
-        this.packageList = [];
-        this.packageIndex = {};
+        // Maintain a list of all packages
+        this.elements = [];
+        // Maintain an index of packages where packages are accessible by their
+        // identifier
+        this.packages = {};
         for (let i = 0; i < json.length; i++) {
-            const obj = json[i];
-            this.packageIndex[obj.id] = new PackageModule().fromJson(obj);
-            const commands = obj.commands;
-            sortByName(commands)
-            this.packageList.push({
-                id: obj.id,
-                name: obj.name,
-                commands: commands
-            });
+            const pckg = new PackageDeclaration().fromJson(json[i]);
+            this.packages[pckg.id] = pckg;
+            this.elements.push(pckg);
         }
+        // Sort package list by package name
+        sortByName(this.elements);
         return this;
     }
     /**
      * Get the specification for a given command.
      */
     getCommandSpec(packageId, commandId) {
-        return this.packageIndex[packageId].commands[commandId];
+        return this.packages[packageId].commands[commandId];
     }
-}
-
-
-/**
- * Command declaration in a package of workflow commands.
- */
-class PackageModule {
-    fromJson(json) {
-        this.id = json.id;
-        this.name = json.name;
-        this.commands = {};
-        for (let i = 0; i < json.commands.length; i++) {
-            const obj = json.commands[i];
-            obj.packageId = json.id;
-            obj.parameters.sort((a, b) => (a.index - b.index));
-            this.commands[obj.id] = obj;
-        }
-        return this;
+    /**
+     * Get a listing of package declarations in the registry.
+     */
+    toList() {
+        return this.elements;
     }
 }
 
@@ -119,52 +163,43 @@ class PackageModule {
  * potentially empty list of error messages for form values that failed to
  * validate.
  */
-export const formValuesToRequestData = (commandSpec, values, parent) => {
+export const formValuesToRequestData = (values, parameters) => {
     const result = {data: {}, errors: []};
-    for (let i = 0; i < commandSpec.parameters.length; i++) {
-        const para = commandSpec.parameters[i];
-        if ((para.parent === parent) || ((para.parent == null) && (parent == null))) {
-            const val = values[para.id];
-            if (para.datatype === DT_RECORD) {
-                if (val != null) {
-                    const recordResult = formValuesToRequestData(commandSpec, val, para.id);
-                    result.data[para.id] = recordResult.data;
-                    recordResult.errors.forEach((err) => (result.errors.push(err)))
-                } else if (para.required) {
-                    result.errors.push('Missing value for ' + para.name);
-                }
-            } else if (para.datatype === DT_LIST) {
-                if ((val != null) && (val.length > 0)) {
-                    for (let r = 0; r < val.length; r++) {
-                        const rowResult = formValuesToRequestData(
-                            commandSpec,
-                            val[r],
-                            para.id
-                        );
-                        result.data[para.id] = rowResult.data;
-                        rowResult.errors.forEach((err) => (result.errors.push(err)))
-                    }
-                } else if (para.required) {
-                    result.errors.push('Missing value for ' + para.name);
-                }
-            } else {
-                validateArgument(para, val, para.name, result.errors);
-                result.data[para.id] = val;
+    for (let i = 0; i < parameters.length; i++) {
+        const para = parameters[i];
+        const val = values[para.id];
+        if (para.datatype === DT_RECORD) {
+            if (val != null) {
+                const recordResult = formValuesToRequestData(
+                    val,
+                    para.parameters
+                );
+                result.data[para.id] = recordResult.data;
+                recordResult.errors.forEach((err) => (result.errors.push(err)))
+            } else if (para.required) {
+                result.errors.push('Missing value for ' + para.name);
             }
+        } else if (para.datatype === DT_LIST) {
+            if ((val != null) && (val.length > 0)) {
+                result.data[para.id] = [];
+                for (let r = 0; r < val.length; r++) {
+                    const rowResult = formValuesToRequestData(
+                        val[r],
+                        para.parameters
+                    );
+                    result.data[para.id].push(rowResult.data);
+                    rowResult.errors.forEach((err) => (result.errors.push(err)))
+                }
+            } else if (para.required) {
+                result.errors.push('Missing value for ' + para.name);
+            }
+        } else {
+            validateArgument(val, para, result.errors);
+            result.data[para.id] = val;
         }
     }
     return result;
 }
-
-
-/**
- * To test if a coomand specification is a code command we look for a parameter
- * that is of type DT_CODE. If such a parameter exists it will have a language
- * property that further specifies the type of cell.
- */
-export const getCodeParameter = (commandSpec) => (
-    commandSpec.parameters.find((p) => (p.datatype === DT_CODE))
-);
 
 
 /**
@@ -195,22 +230,41 @@ export const getSelectedDataset = (commandSpec, values, datasets) => {
 
 
 /**
+ * Create a nested object of command parameters based on parent-child
+ * relationships of parameters in a command declaration.
+ */
+const nestCommandParameters = (parameters, parent) => {
+    const result = [];
+    for (let i = 0; i < parameters.length; i++) {
+        const para = parameters[i];
+        if ((para.parent === parent) || ((para.parent == null) && (parent == null))) {
+            if ((para.datatype === DT_RECORD) || (para.datatype === DT_LIST)) {
+                // Add nested parameters property for records and lists
+                para.parameters = nestCommandParameters(parameters, para.id);
+            }
+            result.push(para);
+        }
+    }
+    return result;
+}
+
+
+/**
  * Set the values of all column identifier arguments to null. This reset is
  * necessary when the user selects a new top-level dataset in the command input
  * form.
  */
-export const resetColumnIds = (values, commandSpec, parent) => {
-    for (let i = 0; i < commandSpec.parameters.length; i++) {
-        const para = commandSpec.parameters[i];
-        if ((para.parent === parent) || ((para.parent == null) && (parent == null))) {
-            if (para.datatype === DT_COLUMN_ID) {
-                values[para.id] = null;
-            } else if (para.datatype === DT_RECORD) {
-                resetColumnIds(values[para.id], commandSpec, para.id );
-            } else if (para.datatype === DT_LIST) {
-                for (let r = 0; r < values[para.id].length; r++) {
-                    resetColumnIds(values[para.id][r], commandSpec, para.id );
-                }
+export const resetColumnIds = (values, parameterSpecs) => {
+    for (let i = 0; i < parameterSpecs.length; i++) {
+        const para = parameterSpecs[i];
+        if (para.datatype === DT_COLUMN_ID) {
+            values[para.id] = null;
+        } else if (para.datatype === DT_RECORD) {
+            resetColumnIds(values[para.id], para.parameters);
+        } else if (para.datatype === DT_LIST) {
+            const rows = values[para.id];
+            for (let r = 0; r < rows.length; r++) {
+                resetColumnIds(rows[r], para.parameters);
             }
         }
     }
@@ -222,72 +276,63 @@ export const resetColumnIds = (values, commandSpec, parent) => {
  * command specification. Initialize values from the given module arguments,
  * where possible.
  */
-export const toFormValues = (commandSpec, datasets, moduleArgs, parent) => {
+export const toFormValues = (parameters, datasets, moduleArgs) => {
     const values = {};
-    for (let i = 0; i < commandSpec.parameters.length; i++) {
-        const para = commandSpec.parameters[i];
-        if ((para.parent === parent) || ((para.parent == null) && (parent == null))) {
-            const arg = (moduleArgs != null) ? moduleArgs.find((a) => (a.id === para.id)) : null;
-            let val = null;
-            if (para.datatype === DT_RECORD) {
-                // Get a list of parameter specifications for the children of
-                // the given record.
-                const recordVal = (arg != null) ? arg.value : [];
-                val = toFormValues(commandSpec, datasets, recordVal, para.id);
-            } else if (para.datatype === DT_LIST) {
-                // The argument value is a list of lists (one for each record
-                // in the list)
-                val = [];
-                if (arg != null) {
-                    for (let rec = 0; rec < arg.value.length; rec++) {
-                        val.push(
-                            toFormValues(
-                                commandSpec,
-                                datasets,
-                                arg.value[rec],
-                                para.id
-                            )
-                        );
-                    }
-                }
-            } else {
-                // Get the value for the parameter. We first try to get the
-                // value from the respective element in the module arguments
-                // array. If the argument does not exist we try to get a default
-                // value from the optional values enumeration in the command
-                // specification.
-                if (arg != null) {
-                    val = arg.value;
-                } else if (para.values != null) {
-                    // By default the first value in the list is used as the
-                    // default value.
-                    val = para.values[0].value;
-                    if (para.values[0].isDefault !== true) {
-                        for (let j = 1; j < para.values.length; j++) {
-                            const opt = para.values[j];
-                            if (opt.isDefault === true) {
-                                val = opt.value;
-                                break;
-                            }
-                        }
-                    }
-                } else if (para.defaultValue != null) {
-                    // A parameter may have an optional default value specified
-                    val = para.defaultValue;
-                } else {
-                    // If the value is still undefined we set it to a defined
-                    // default.
-                    if (para.datatype === DT_BOOL) {
-                        val = false;
-                    } else if (para.datatype === DT_DATASET_ID) {
-                        val = (datasets.length > 0) ? datasets[0].name : '';
-                    } else if (para.datatype === DT_FILE_ID) {
-                        val = {fileid: null, filename: null, url: null};
-                    }
+    for (let i = 0; i < parameters.length; i++) {
+        const para = parameters[i];
+        const arg = (moduleArgs != null) ? moduleArgs.find((a) => (a.id === para.id)) : null;
+        let val = null;
+        if (para.datatype === DT_RECORD) {
+            // Get a list of parameter specifications for the children of
+            // the given record.
+            const recordVal = (arg != null) ? arg.value : [];
+            val = toFormValues(para.parameters, datasets, recordVal);
+        } else if (para.datatype === DT_LIST) {
+            // The argument value is a list of lists (one for each record
+            // in the list)
+            val = [];
+            if (arg != null) {
+                for (let r = 0; r < arg.value.length; r++) {
+                    val.push(toFormValues(para.parameters, datasets, arg.value[r]));
                 }
             }
-            values[para.id] = val;
+        } else {
+            // Get the value for the parameter. We first try to get the
+            // value from the respective element in the module arguments
+            // array. If the argument does not exist we try to get a default
+            // value from the optional values enumeration in the command
+            // specification.
+            if (arg != null) {
+                val = arg.value;
+            } else if (para.values != null) {
+                // By default the first value in the list is used as the
+                // default value.
+                val = para.values[0].value;
+                if (para.values[0].isDefault !== true) {
+                    for (let j = 1; j < para.values.length; j++) {
+                        const opt = para.values[j];
+                        if (opt.isDefault === true) {
+                            val = opt.value;
+                            break;
+                        }
+                    }
+                }
+            } else if (para.defaultValue != null) {
+                // A parameter may have an optional default value specified
+                val = para.defaultValue;
+            } else {
+                // If the value is still undefined we set it to a defined
+                // default.
+                if (para.datatype === DT_BOOL) {
+                    val = false;
+                } else if (para.datatype === DT_DATASET_ID) {
+                    val = (datasets.length > 0) ? datasets[0].name : '';
+                } else if (para.datatype === DT_FILE_ID) {
+                    val = {fileid: null, filename: null, url: null};
+                }
+            }
         }
+        values[para.id] = val;
     }
     return values;
 }
@@ -297,7 +342,8 @@ export const toFormValues = (commandSpec, datasets, moduleArgs, parent) => {
  * Validate a single argument in a module command specification. Append all
  * error messages to a given list.
  */
-const validateArgument = (paraSpec, value, name, errors) => {
+const validateArgument = (value, paraSpec, errors) => {
+    const name = paraSpec.name;
     if ((value === null) && (paraSpec.required)) {
         errors.push('Missing value for ' + name);
     } else if ((value !== null) && (paraSpec.datatype === DT_FILE_ID)) {

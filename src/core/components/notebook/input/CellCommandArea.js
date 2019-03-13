@@ -26,8 +26,8 @@ import { ErrorListMessage } from '../../Message';
 import ModuleInputForm from './ModuleInputForm';
 import { CodeSnippetsSelector as PythonSnippets } from './form/PythonCell';
 import { ScalaCodeSnippetsSelector as ScalaSnippets } from './form/ScalaCell';
-import { DT_DATASET_ID, formValuesToRequestData, getCodeParameter,
-    toFormValues, resetColumnIds } from '../../../resources/Engine';
+import { DT_DATASET_ID, formValuesToRequestData, toFormValues,
+    resetColumnIds } from '../../../resources/Engine';
 import '../../../../css/App.css';
 import '../../../../css/ModuleForm.css';
 
@@ -64,7 +64,7 @@ class CellCommandArea extends React.Component {
         let values = null;
         if (!cell.isNewCell()) {
             values = toFormValues(
-                cell.commandSpec,
+                cell.commandSpec.parameters,
                 datasets,
                 cell.module.command.arguments
             );
@@ -101,7 +101,7 @@ class CellCommandArea extends React.Component {
      */
     handleAppendCode = (lines) => {
         const  { codeEditorProps, formValues, selectedCommand } = this.state;
-        const paraCode = getCodeParameter(selectedCommand);
+        const paraCode = selectedCommand.codeParameter;
         const editorValue = formValues[paraCode.id];
         const cursorPosition = codeEditorProps.cursorPosition;
         // Get the current indent from the last line of the editor value
@@ -153,7 +153,7 @@ class CellCommandArea extends React.Component {
         // column identifier controls.
         const cntrlSpec = selectedCommand.parameters.find((p) => (p.id === id));
         if (cntrlSpec.datatype === DT_DATASET_ID) {
-            resetColumnIds(modifiedValues, selectedCommand);
+            resetColumnIds(modifiedValues, selectedCommand.parameters);
         }
         let modifiedEditorProps = null;
         if (cursorPosition != null) {
@@ -185,7 +185,7 @@ class CellCommandArea extends React.Component {
         if (!cell.isNewCell()) {
             this.setState({
                 formValues: toFormValues(
-                    cell.commandSpec,
+                    cell.commandSpec.parameters,
                     datasets,
                     cell.module.command.arguments
                 ),
@@ -222,7 +222,7 @@ class CellCommandArea extends React.Component {
         const { datasets, userSettings } = this.props;
         this.setState({
             formValues: toFormValues(
-                userSettings.clipboard.commandSpec,
+                userSettings.clipboard.commandSpec.parameters,
                 datasets,
                 userSettings.clipboard.arguments
             ),
@@ -238,7 +238,7 @@ class CellCommandArea extends React.Component {
         const { apiEngine, datasets, onDismiss, onSubmit } = this.props;
         const cmd = apiEngine.packages.getCommandSpec(packageId, commandId);
         this.setState({
-            formValues: toFormValues(cmd, datasets),
+            formValues: toFormValues(cmd.parameters, datasets),
             selectedCommand: cmd,
             showCommandsListing: false
         });
@@ -252,7 +252,7 @@ class CellCommandArea extends React.Component {
     handleSubmitForm = () => {
         const { onSubmit } = this.props;
         const { formValues, selectedCommand } = this.state;
-        const req = formValuesToRequestData(selectedCommand, formValues);
+        const req = formValuesToRequestData(formValues, selectedCommand.parameters);
         if (req.errors.length > 0) {
             this.setState({errors: req.errors, hasErrors: true});
         } else {
@@ -330,9 +330,9 @@ class CellCommandArea extends React.Component {
             // command and (2) the cell is in edit state or not.
             let paraCode = null;
             if (isActiveCell) {
-                paraCode = getCodeParameter(selectedCommand);
+                paraCode = selectedCommand.codeParameter;
             } else if (!cell.isNewCell()) {
-                paraCode = getCodeParameter(cell.commandSpec);
+                paraCode = cell.commandSpec.codeParameter;
             }
             if (paraCode != null) {
                 // Show (optional) code snippet selector for different code cell
@@ -395,7 +395,6 @@ class CellCommandArea extends React.Component {
                             <ModuleInputForm
                                 datasets={datasets}
                                 onChange={this.handleFormValueChange}
-                                onSubmit={this.handleSubmitForm}
                                 selectedCommand={selectedCommand}
                                 serviceProperties={apiEngine.serviceProperties}
                                 values={formValues}

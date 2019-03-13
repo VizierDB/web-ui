@@ -32,9 +32,7 @@ import '../../../../../css/ModuleForm.css'
  */
 class ControlRow extends React.Component {
     static propTypes = {
-        children: PropTypes.array.isRequired,
-        commandArgs: PropTypes.array.isRequired,
-        commandSpec: PropTypes.object.isRequired,
+        controlSpec: PropTypes.object.isRequired,
         datasets: PropTypes.array.isRequired,
         id: PropTypes.string.isRequired,
         onChange: PropTypes.func.isRequired,
@@ -53,9 +51,7 @@ class ControlRow extends React.Component {
     }
     render() {
         const {
-            children,
-            commandArgs,
-            commandSpec,
+            controlSpec,
             datasets,
             selectedDataset,
             serviceProperties,
@@ -63,8 +59,8 @@ class ControlRow extends React.Component {
         } = this.props;
         const formLabels = []
         const formControls = []
-        for (let i = 0; i < children.length; i++) {
-            const child = children[i]
+        for (let i = 0; i < controlSpec.parameters.length; i++) {
+            const child = controlSpec.parameters[i]
             formLabels.push(
                 <td key={formLabels.length} className='inner-form-header'>
                     {child.name}
@@ -74,8 +70,6 @@ class ControlRow extends React.Component {
                 <td key={formControls.length} className='inner-form-control'>
                     <ModuleFormControl
                         key={child.id}
-                        commandArgs={commandArgs}
-                        commandSpec={commandSpec}
                         controlSpec={child}
                         datasets={datasets}
                         onChange={this.handleChange}

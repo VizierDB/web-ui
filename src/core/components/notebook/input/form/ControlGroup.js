@@ -40,9 +40,7 @@ import '../../../../../css/ModuleForm.css';
  */
 class ControlGroup extends React.Component {
     static propTypes = {
-        children: PropTypes.array.isRequired,
-        commandArgs: PropTypes.array.isRequired,
-        commandSpec: PropTypes.object.isRequired,
+        controlSpec: PropTypes.object.isRequired,
         datasets: PropTypes.array.isRequired,
         id: PropTypes.string.isRequired,
         onChange: PropTypes.func.isRequired,
@@ -55,7 +53,7 @@ class ControlGroup extends React.Component {
      * argument values.
      */
     handleAdd = () => {
-        const { id, commandSpec, datasets, onChange } = this.props;
+        const { id, controlSpec, datasets, onChange } = this.props;
         const formValue = this.props.value;
         // Make a copy of the current form value
         const rows = []
@@ -63,7 +61,7 @@ class ControlGroup extends React.Component {
             rows.push(formValue[i])
         }
         // Add a new row of default values to the modified row list
-        rows.push(toFormValues(commandSpec, datasets, null, id));
+        rows.push(toFormValues(controlSpec.parameters, datasets, null, id));
         onChange(id, rows);
     }
     /**
@@ -148,9 +146,7 @@ class ControlGroup extends React.Component {
     }
     render() {
         const {
-            children,
-            commandArgs,
-            commandSpec,
+            controlSpec,
             datasets,
             id,
             selectedDataset,
@@ -160,8 +156,8 @@ class ControlGroup extends React.Component {
         const rows = [];
         // Stat by generating the header for the elements in the control group.
         const formLabels = [];
-        for (let i = 0; i < children.length; i++) {
-            const child = children[i]
+        for (let i = 0; i < controlSpec.parameters.length; i++) {
+            const child = controlSpec.parameters[i]
             formLabels.push(
                 <td key={'th_ctrl' + i} className='inner-form-header'>
                     {child.name}
@@ -178,14 +174,12 @@ class ControlGroup extends React.Component {
             let tuple = value[t];
             const key = 'r_' + t + '_' + id;
             const rowControls = [];
-            for (let c = 0; c < children.length; c++) {
-                const child = children[c]
+            for (let c = 0; c < controlSpec.parameters.length; c++) {
+                const child = controlSpec.parameters[c]
                 rowControls.push(
                     <td key={key + '_ctrl_' + child.id} className='inner-form-control'>
                         <ModuleFormControl
                             key={child.id}
-                            commandArgs={commandArgs}
-                            commandSpec={commandSpec}
                             controlSpec={child}
                             datasets={datasets}
                             onChange={(name, value) => (this.handleChange(t, name, value))}

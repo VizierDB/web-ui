@@ -33,8 +33,7 @@ class TextControl extends React.Component {
             PropTypes.string,
             PropTypes.number
         ]),
-        onChange: PropTypes.func.isRequired,
-        onSubmit: PropTypes.func
+        onChange: PropTypes.func.isRequired
     }
     /**
      * Change handler for text control. Update the state of the control in the
@@ -44,20 +43,6 @@ class TextControl extends React.Component {
     handleChange = (event, { value }) => {
         const { id, onChange } = this.props
         onChange(id, value)
-    }
-    /**
-     * Handle RETURN to submit the form that contains the text control (if a
-     * onSubmit handler is given).
-     */
-    handleKeyDown = (event) => {
-        const { id, onChange, onSubmit } = this.props;
-        const { ctrlKey, keyCode } = event;
-        if ((onSubmit != null) && (keyCode === KEY.ENTER)) {
-            onSubmit();
-        } else if ((ctrlKey) && (keyCode === KEY.NULL)) {
-            event.preventDefault();
-            onChange(id, null);
-        }
     }
     render() {
         const { placeholder, value } = this.props;
@@ -75,7 +60,6 @@ class TextControl extends React.Component {
                 fluid
                 value={strValue}
                 onChange={this.handleChange}
-                onKeyDown={this.handleKeyDown}
             />
         );
     }

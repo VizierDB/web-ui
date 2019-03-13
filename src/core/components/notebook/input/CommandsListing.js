@@ -19,7 +19,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Grid, Icon, List, Segment } from 'semantic-ui-react'
-import { sortByName } from '../../../util/Sort';
 import '../../../../css/Commands.css'
 
 
@@ -38,19 +37,19 @@ class CommandsListing extends React.Component {
         const { apiEngine, onDismiss, onPaste, onSelect } = this.props;
         // Get a list of command types
         const gridColumns = [];
-        // Sort the list of module group identifier.
-        const groups = apiEngine.packages.packageList;
-        sortByName(groups);
+        // Get list of packages. The list is sorted by package name by default.
+        const packages = apiEngine.packages.toList();
         //max number of items pre col
         const fullCol = 9.5;
         // Further group modules by name
         let curCol = 0.0;
         let listItems = [];
-        for (let value of groups) {
-            const typeCommands = value.commands;
-            //add 1.25 for group and 1.0 for each command
-            curCol += 1.25 + typeCommands.length;
-            typeCommands.sort((c1, c2) => (c1.name.localeCompare(c2.name)));
+        for (let pckg of packages) {
+            // Get list of package commands. Elements in the list are sorted by
+            // the command name by default.
+            const commands = pckg.toList();
+            // add 1.25 for package and 1.0 for each command
+            curCol += 1.25 + commands.length;
             if (curCol >= fullCol) {
                 if (listItems.length > 0) {
                     gridColumns.push(
@@ -61,21 +60,21 @@ class CommandsListing extends React.Component {
                         </Grid.Column>
                     );
                     listItems = [];
-                    curCol = 1.25 + typeCommands.length;
+                    curCol = 1.25 + commands.length;
                 }
 
             }
             listItems.push(
-                <List.Item key={value.id}>
-                    <List.Header>{value.name.toUpperCase()}</List.Header>
+                <List.Item key={pckg.id}>
+                    <List.Header>{pckg.name.toUpperCase()}</List.Header>
                 </List.Item>
             );
-            for (let i = 0; i < typeCommands.length; i++) {
-                const cmd = typeCommands[i]
+            for (let i = 0; i < commands.length; i++) {
+                const cmd = commands[i]
                 listItems.push(
                     <List.Item
                         key={listItems.length}
-                        onClick={() => (onSelect(value.id, cmd.id))}
+                        onClick={() => (onSelect(pckg.id, cmd.id))}
                     >
                         <List.Content>
                             <List.Header as='a'>{cmd.name}</List.Header>
@@ -125,7 +124,7 @@ class CommandsListing extends React.Component {
                             />
                         </span>
                     </div>
-                    <Grid columns={groups.length} divided>
+                    <Grid columns={packages.length} divided>
                         <Grid.Row>
                             { gridColumns }
                         </Grid.Row>
