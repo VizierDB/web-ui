@@ -9,7 +9,7 @@ div.module-form {
 }
 
 div.module-form.error {
-    background: #fff6f6;
+    background: #ffcccc;
     border: solid 1px #e0b4b4;
     /*background: rgba(97,175,254,.075);
     border: 1px solid rgba(97,175,254, .25);*/
@@ -23,7 +23,7 @@ p.module-form-header {
 }
 
 p.module-form-header.error {
-    color: #b46361;
+    color: #843534;
 }
 
 div.file-selector {

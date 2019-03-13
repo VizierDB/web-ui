@@ -170,13 +170,21 @@ class NotebookCell extends React.Component {
                 }
             }
             cellIndex = cellNumber;
+            // The isNewNext and isNewPrevious flags need to be swapped if the
+            // notebook is currently being shown in reverse order
+            let isNewNextFlag = isNewNext;
+            let isNewPreviousFlag = isNewPrevious;
+            if (userSettings.showNotebookReversed()) {
+                isNewNextFlag = isNewPrevious;
+                isNewPreviousFlag = isNewNext
+            }
             cellMenu = (
                 <CellDropDownMenu
                     cell={cell}
                     cellNumber={cellNumber}
                     isActiveCell={isActiveCell}
-                    isNewNext={isNewNext}
-                    isNewPrevious={isNewPrevious}
+                    isNewNext={isNewNextFlag}
+                    isNewPrevious={isNewPreviousFlag}
                     notebook={notebook}
                     onAddFilteredCommand={this.handleAddFilteredCommand}
                     onCopyCell={onCopyCell}

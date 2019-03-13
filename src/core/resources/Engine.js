@@ -271,6 +271,9 @@ export const toFormValues = (commandSpec, datasets, moduleArgs, parent) => {
                             }
                         }
                     }
+                } else if (para.defaultValue != null) {
+                    // A parameter may have an optional default value specified
+                    val = para.defaultValue;
                 } else {
                     // If the value is still undefined we set it to a defined
                     // default.

@@ -111,9 +111,8 @@ class FileSelector extends React.Component {
                 </div>
             );
         } else {
-            let property = serviceProperties.find(prop => (prop.key === 'fileserver:maxFileSize'));
             let uploadInfo = null
-            if (property) {
+            if (serviceProperties.maxFileSize) {
                 uploadInfo = (
                     <p className='upload-info'>
                         <Icon name='info circle' />
@@ -121,7 +120,7 @@ class FileSelector extends React.Component {
                             The size for file uploads is limited to
                         </span>
                         <span className='upload-size'>
-                            {' ' + formatBytes(property.value, 2)}
+                            {' ' + formatBytes(serviceProperties.maxFileSize, 2)}
                         </span>
                     </p>
                 )

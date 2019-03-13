@@ -53,7 +53,7 @@ const requestService = () => ({
 const receiveService = (json) => ({
     type: RECEIVE_SERVICE,
     name: json.name,
-    properties: json.properties,
+    properties: json.defaults,
     environment: json.environment,
     links: json.links
 })
