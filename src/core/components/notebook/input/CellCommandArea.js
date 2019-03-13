@@ -235,7 +235,7 @@ class CellCommandArea extends React.Component {
      * given pair of package and command identifier.
      */
     handleSelectCommand = (packageId, commandId) => {
-        const { apiEngine, datasets, onDismiss, onSubmit } = this.props;
+        const { apiEngine, datasets } = this.props;
         const cmd = apiEngine.packages.getCommandSpec(packageId, commandId);
         this.setState({
             formValues: toFormValues(cmd.parameters, datasets),
@@ -274,8 +274,6 @@ class CellCommandArea extends React.Component {
             datasets,
             isActiveCell,
             onClick,
-            onDismiss,
-            onSubmit,
             userSettings
         } = this.props;
         const {

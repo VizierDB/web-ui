@@ -17,6 +17,7 @@
  */
 
 import { UPDATE_BRANCH } from '../../actions/project/Branch';
+import { UPDATE_NOTEBOOK } from '../../actions/project/Notebook';
 import {
   PROJECT_ACTION_ERROR, PROJECT_FETCH_ERROR, RECEIVE_PROJECT,
   RECEIVE_PROJECT_RESOURCE, REQUEST_PROJECT, REQUEST_PROJECT_ACTION,
@@ -104,6 +105,8 @@ export const projectPage = (state = INITIAL_STATE, action) => {
                 isActive: false,
                 project: action.project
             };
+        case UPDATE_NOTEBOOK:
+            return {...state, actionError: null, isActive: false};
         case UPDATE_PROJECT:
             return {
                 ...state,

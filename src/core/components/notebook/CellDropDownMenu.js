@@ -123,6 +123,7 @@ class CellDropDownMenu extends React.Component {
             dropdownItems.push(
                 <Dropdown.Item
                     key='delete'
+                    disabled={notebook.hasActiveCells()}
                     icon='trash'
                     text='Delete'
                     title={'Delete notebook cell #' + cellNumber}
@@ -163,6 +164,7 @@ class CellDropDownMenu extends React.Component {
         dropdownItems.push(
             <Dropdown.Item
                 key='branch'
+                disabled={notebook.hasActiveCells()}
                 icon='fork'
                 text='Create branch'
                 title={'Create new branch containing notebook cells [' + branchRange + ']'}

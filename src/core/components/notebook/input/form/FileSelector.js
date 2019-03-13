@@ -34,7 +34,7 @@ class FileSelector extends React.Component {
     static propTypes = {
         id: PropTypes.string.isRequired,
         isRequired: PropTypes.bool.isRequired,
-        serviceProperties: PropTypes.array.isRequired,
+        serviceProperties: PropTypes.object.isRequired,
         value: PropTypes.object.isRequired,
         onChange: PropTypes.func.isRequired
     }

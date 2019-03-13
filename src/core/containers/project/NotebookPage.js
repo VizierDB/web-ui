@@ -21,10 +21,10 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { addFilteredCommand, copyCell, removeFilteredCommand } from '../../actions/main/App';
 import { createBranch, deleteBranch } from '../../actions/project/Branch';
-import { cancelWorkflowExecution, checkModuleStatus, dismissCellChanges,
-    fetchAnnotations, fetchWorkflow, hideCellOutput, insertNotebookCell,
-    showCellChart, selectNotebookCell, showCellDataset, showCellStdout,
-    showCellTimestamps } from '../../actions/project/Notebook';
+import { cancelWorkflowExecution, checkModuleStatus, deleteNotebookCell,
+    dismissCellChanges, fetchAnnotations, fetchWorkflow, hideCellOutput,
+    insertNotebookCell, showCellChart, selectNotebookCell, showCellDataset,
+    showCellStdout, showCellTimestamps } from '../../actions/project/Notebook';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import { fetchProjects } from '../../actions/project/ProjectListing';
 import { LargeMessageButton } from '../../components/Button';
@@ -191,15 +191,19 @@ class NotebookPage extends Component {
         dispatch(deleteBranch(project, branch, notebookPageUrl, history));
     }
     /**
+     * Delete the given notebook cell and update the notebook state on success.
+     */
+    handleDeleteCell = (cell) => {
+        const { dispatch, notebook } = this.props;
+        dispatch(deleteNotebookCell(notebook, cell));
+    }
+    /**
      * Scroll to the given positions in the given dataset that is being
      * displayed in the output area of the cell.
      */
     handleDatasetNavigate = (module, dataset, offset, limit) => {
         const { dispatch, notebook } = this.props;
         dispatch(showCellDataset(notebook, module, dataset, offset, limit));
-    }
-    handleDeleteCell = (cell) => {
-        alert('Delete module ' + cell.module.id);
     }
     /**
      * Handle dismissal of all changes that were made to a notebook cell.

@@ -159,7 +159,6 @@ class NotebookCell extends React.Component {
             notebook,
             onCancelExec,
             onCheckStatus,
-            onDeleteCell,
             onDismissCell,
             onOutputSelect,
             onFetchAnnotations,

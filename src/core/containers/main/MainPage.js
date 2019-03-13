@@ -35,7 +35,6 @@ import '../../../css/ResourceListing.css'
 class MainPage extends Component {
     static propTypes = {
         homePageContent: PropTypes.string,
-        isFetching: PropTypes.bool.isRequired,
         projects: PropTypes.array,
         serviceApi: PropTypes.object,
         userSettings: PropTypes.object.isRequired
@@ -72,10 +71,8 @@ class MainPage extends Component {
         const {
             dispatch,
             homePageContent,
-            isFetching,
             projects,
             serviceApi,
-            showForm,
             userSettings
         } = this.props;
         // Headline and optional description contained in the service descriptor
@@ -163,7 +160,6 @@ const mapStateToProps = state => {
 
     return {
         homePageContent: state.mainPage.homePageContent,
-        isFetching: state.projectListing.isFetching,
         projects: state.projectListing.projects,
         serviceApi: state.serviceApi,
         userSettings: state.app.userSettings

@@ -27,7 +27,8 @@ import { OutputChart, OutputDataset, OutputError, OutputHidden,
 import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource, postResourceData } from '../../util/Api';
 import { ErrorObject } from '../../util/Error';
-import { HATEOASReferences, HATEOAS_BRANCH_HEAD, HATEOAS_WORKFLOW_CANCEL } from '../../util/HATEOAS';
+import { HATEOASReferences, HATEOAS_BRANCH_HEAD, HATEOAS_MODULE_DELETE,
+    HATEOAS_WORKFLOW_CANCEL } from '../../util/HATEOAS';
 import { VIZUAL, VIZUAL_OP } from '../../util/Vizual';
 
 
@@ -111,28 +112,6 @@ const workflowFetchError = (message, status) => (
 // Notebooks
 // -----------------------------------------------------------------------------
 
-
-export const cancelWorkflowExecution = (notebook) => (dispatch) => (
-    dispatch(
-        postResourceData(
-            notebook.workflow.links.get(HATEOAS_WORKFLOW_CANCEL),
-            {},
-            (json) => {
-                // Get the new workflow handle
-                const wf = new WorkflowHandle(
-                    notebook.workflow.engine
-                ).fromJson(json);
-                return {
-                    type: UPDATE_NOTEBOOK,
-                    notebook: notebook.updateWorkflow(wf)
-                };
-            },
-            workflowFetchError
-        )
-    )
-)
-
-
 /**
  * Check the status of an active notebook cell. If the status of the associated
  * module has changed we fetch the update version of the workflow and update
@@ -147,7 +126,21 @@ export const checkModuleStatus = (notebook, cell) => (dispatch) => (
                     // If the state of the module has changes update the given
                     // notebook after fetching the head of the workflow that is
                     // represented by that notebook
-                    dispatch(updateWorkflow(notebook, cell.id));
+                    dispatch(
+                        fetchResource(
+                            notebook.workflow.links.get(HATEOAS_BRANCH_HEAD),
+                            (json) => {
+                                // Get the new workflow handle
+                                const wf = new WorkflowHandle(
+                                    notebook.workflow.engine
+                                ).fromJson(json);
+                                return {
+                                    type: UPDATE_NOTEBOOK,
+                                    notebook: notebook.updateWorkflow(wf, cell.id)
+                                };
+                            },
+                            workflowFetchError
+                    ));
                 }
                 return dispatch({type: NO_OP});
             },
@@ -230,28 +223,6 @@ const updateNotebook = (notebook) => ({
     notebook
 });
 
-
-/**
- * Fetch the workflow at the branch head if the state of the resource at the
- * server has changed and update the corresponding notebook.
- */
-const updateWorkflow = (notebook, modifiedCellId) => (dispatch) => (
-    dispatch(
-        fetchResource(
-            notebook.workflow.links.get(HATEOAS_BRANCH_HEAD),
-            (json) => {
-                // Get the new workflow handle
-                const wf = new WorkflowHandle(
-                    notebook.workflow.engine
-                ).fromJson(json);
-                return {
-                    type: UPDATE_NOTEBOOK,
-                    notebook: notebook.updateWorkflow(wf, modifiedCellId)
-                };
-            },
-            workflowFetchError
-    ))
-)
 
 // -----------------------------------------------------------------------------
 // Update notebook cells
@@ -425,6 +396,31 @@ export const showCellTimestamps = (notebook, module) => (dispatch) => {
 // -----------------------------------------------------------------------------
 
 /**
+ * Cancel execution of a running workflow. The result is handle of the modified
+ * workflow. We use this to update the notebook accordingly.
+ */
+export const cancelWorkflowExecution = (notebook) => (dispatch) => (
+    dispatch(
+        postResourceData(
+            notebook.workflow.links.get(HATEOAS_WORKFLOW_CANCEL),
+            {},
+            (json) => {
+                // Get the new workflow handle
+                const wf = new WorkflowHandle(
+                    notebook.workflow.engine
+                ).fromJson(json);
+                return {
+                    type: UPDATE_NOTEBOOK,
+                    notebook: notebook.updateWorkflow(wf)
+                };
+            },
+            workflowFetchError
+        )
+    )
+)
+
+
+/**
  * Delete a cell in the current notebook. This action is only applicable to
  * cells that contain an existing module in the current workflow.
  *
@@ -434,16 +430,25 @@ export const showCellTimestamps = (notebook, module) => (dispatch) => {
  * (.workflow) and the information for the workflow notebook (.modules and
  * (.datasets).
  */
-export const deleteNotebookCell = (module) => (dispatch) => {
+export const deleteNotebookCell = (notebook, cell) => (dispatch) => {
     // Signal start by setting the project action flag
     dispatch(requestProjectAction());
     return fetchAuthed(
-        module.links.delete,
+        cell.module.links.get(HATEOAS_MODULE_DELETE),
         {method: 'DELETE'}
     )(dispatch).then(function(response) {
         if (response.status === 200) {
             // SUCCESS: Dispatch modified workflow handle
-            response.json().then(json => (dispatch(updateNotebook(json))));
+            response.json().then(json => {
+                // Get the new workflow handle
+                const wf = new WorkflowHandle(
+                    notebook.workflow.engine
+                ).fromJson(json);
+                dispatch({
+                    type: UPDATE_NOTEBOOK,
+                    notebook: notebook.updateWorkflow(wf)
+                });
+            });
         } else if(response.status === 401) {
         	// UNAUTHORIZED: re-request auth
         	dispatch(requestAuth())

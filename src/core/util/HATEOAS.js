@@ -45,6 +45,9 @@ export const HATEOAS_PROJECT_UPDATE_PROPERTY = 'project.update';
 // Workflow
 export const HATEOAS_WORKFLOW_CANCEL = 'workflow.cancel';
 
+// Module
+export const HATEOAS_MODULE_DELETE = 'module.delete';
+
 
 /**
  * Maintain a list of HATEOAS references that are given as an array of

@@ -203,6 +203,10 @@ export class Notebook {
         return new DatasetDescriptor(datasetId, name, ds.columns, ds.links);
     }
     /**
+     * Test if the associated workflow has modules that are in an active state.
+     */
+    hasActiveCells = () => ((this.workflow.state === STATE_PENDING) || (this.workflow.state === STATE_RUNNING));
+    /**
      * Test if a notebook is empty.
      */
     isEmpty() {
@@ -275,42 +279,66 @@ export class Notebook {
      * their updated counterparts. Returns a new notebook object.
      */
     updateWorkflow(workflow, modifiedCellId) {
-        // Start by creating an index of module handles for the new workflow
-        const moduleIndex = {};
-        for (let i = 0; i < workflow.modules.length; i++) {
+        // We iterate over the notebook cells and workflow modules until a
+        // difference in the corresponding module ids is encoutered. At that
+        // point we append the remaining workflow modules.
+        // Any new cell that is encountered before the first difference will
+        // also be included in the notebook.
+        const modifiedCells = [];
+        const size = Math.min(this.cells.length, workflow.modules.length);
+        let index = 0;
+        while (index < size) {
+            const cell = this.cells[index];
+            if (cell.isNewCell()) {
+                modifiedCells.push(cell);
+            } else {
+                const module = new ModuleHandle().fromJson(
+                    workflow.modules[index],
+                    workflow.datasets
+                );
+                if (cell.id === module.id) {
+                    // This is a cell that existed in the previous workflow. If
+                    // the modified module identifier is given then we need to
+                    // set the cell output to its default value if this is the
+                    // cell for the module whose state may have changed.
+                    let outputResource = null;
+                    if (module.id === modifiedCellId) {
+                        outputResource = getModuleDefaultOutput(module);
+                    } else {
+                        outputResource = cell.output;
+                    }
+                    modifiedCells.push(
+                        new NotebookCell(
+                            module.id,
+                            module,
+                            cell.commandSpec,
+                            outputResource
+                        )
+                    );
+                    index++;
+                } else {
+                    // Here is were the differences between the notebook and the
+                    // new workflow version starts. All modules from here on
+                    // will have new identifier. We append them to the modified
+                    // cell list below
+                    break;
+                }
+            }
+        }
+        // Append all workflow modules that have not been appended yet
+        for (let i = index; i < workflow.modules.length; i++) {
             const module = new ModuleHandle().fromJson(
                 workflow.modules[i],
                 workflow.datasets
             );
-            moduleIndex[module.id] = module;
-        }
-        // Create a list of modified cells. New cells in the current notebook
-        // remain unchanged. Cells that contain existing modules in the previous
-        // workflow version have their associated module updated.
-        const modifiedCells = [];
-        for (let i = 0; i < this.cells.length; i++) {
-            const cell = this.cells[i];
-            if (!cell.isNewCell()) {
-                const module = moduleIndex[cell.id];
-                // If the modified module identifier is given then we need to
-                // set the module output to its default value.
-                let outputResource = null;
-                if (module.id === modifiedCellId) {
-                    outputResource = getModuleDefaultOutput(module);
-                } else {
-                    outputResource = cell.output;
-                }
-                modifiedCells.push(
-                    new NotebookCell(
-                        module.id,
-                        module,
-                        cell.commandSpec,
-                        outputResource
-                    )
-                );
-            } else {
-                modifiedCells.push(cell);
-            }
+            modifiedCells.push(
+                new NotebookCell(
+                    module.id,
+                    module,
+                    workflow.getCommandSpec(module.command),
+                    getModuleDefaultOutput(module)
+                )
+            );
         }
         return new Notebook(workflow, modifiedCells, this.cellCounter);
     }
