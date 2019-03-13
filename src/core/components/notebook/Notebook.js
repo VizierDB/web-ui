@@ -32,9 +32,12 @@ class Notebook extends React.Component {
         apiEngine: PropTypes.object.isRequired,
         notebook: PropTypes.object.isRequired,
         onAddFilteredCommand: PropTypes.func.isRequired,
+        onCancelExec: PropTypes.func.isRequired,
+        onCheckStatus: PropTypes.func.isRequired,
         onCopyCell: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
         onDatasetNavigate: PropTypes.func.isRequired,
+        onDeleteCell: PropTypes.func.isRequired,
         onDismissCell: PropTypes.func.isRequired,
         onFetchAnnotations: PropTypes.func.isRequired,
         onInsertCell: PropTypes.func.isRequired,
@@ -61,14 +64,18 @@ class Notebook extends React.Component {
             apiEngine,
             notebook,
             onAddFilteredCommand,
+            onCancelExec,
+            onCheckStatus,
             onCopyCell,
             onCreateBranch,
             onDatasetNavigate,
+            onDeleteCell,
             onDismissCell,
             onInsertCell,
             onOutputSelect,
             onFetchAnnotations,
             onSelectNotebookCell,
+            onSubmitCell,
             onRemoveFilteredCommand,
             userSettings
         } = this.props;
@@ -89,12 +96,22 @@ class Notebook extends React.Component {
         // Counter for notebook cells that contain a workflow module
         let moduleCount = 1;
         let isNewPrevious = false;
+        let hasActiveCell = false;
         let datasets = [];
         for (let i = 0; i < notebook.cells.length; i++) {
             const cell = notebook.cells[i];
             let isNewNext = false;
             if (i < notebook.cells.length - 1) {
                 isNewNext = notebook.cells[i + 1].isNewCell();
+            }
+            let onCancelCallback = null;
+            if (cell.isActive()) {
+                // The first active cell will receive the onCancel callback to
+                // trigger the rendering of a cancel button.
+                if (!hasActiveCell) {
+                    onCancelCallback = onCancelExec;
+                }
+                hasActiveCell = true;
             }
             // The cell number depends on whether the cell is a new cell or
             // a cell for a workflow module.
@@ -110,15 +127,19 @@ class Notebook extends React.Component {
                     isNewPrevious={isNewPrevious}
                     notebook={notebook}
                     onAddFilteredCommand={onAddFilteredCommand}
+                    onCancelExec={onCancelCallback}
+                    onCheckStatus={onCheckStatus}
                     onCopyCell={onCopyCell}
                     onCreateBranch={onCreateBranch}
                     onDatasetNavigate={onDatasetNavigate}
+                    onDeleteCell={onDeleteCell}
                     onDismissCell={onDismissCell}
                     onInsertCell={onInsertCell}
                     onOutputSelect={onOutputSelect}
                     onFetchAnnotations={onFetchAnnotations}
                     onRemoveFilteredCommand={onRemoveFilteredCommand}
                     onSelect={onSelectNotebookCell}
+                    onSubmitCell={onSubmitCell}
                     userSettings={userSettings}
                 />
             );
@@ -135,15 +156,20 @@ class Notebook extends React.Component {
         const lastCell = notebook.lastCell();
         if ((!lastCell.isNewCell()) && (!lastCell.isErrorOrCanceled()) && (!notebook.readOnly)) {
             appendCellButton = (
-                <div className='spinner-padding-md'>
-                    <Icon
-                        size='big'
-                        link
-                        name='plus'
-                        onClick={this.handleAppendCell}
-                        title='Append new cell'
-                     />
-                </div>
+                <table className='cell'><tbody>
+                    <tr>
+                        <td className='cell-index'></td>
+                        <td className='cell-button'>
+                        <Icon
+                            size='big'
+                            link
+                            name='plus'
+                            onClick={this.handleAppendCell}
+                            title='Append new cell'
+                         />
+                        </td>
+                    </tr>
+                </tbody></table>
             );
         }
         // Reverse the notebook cells if flag is true

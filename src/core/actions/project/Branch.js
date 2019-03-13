@@ -22,7 +22,7 @@ import { BranchDescriptor } from '../../resources/Branch';
 import { WorkflowDescriptor } from '../../resources/Workflow';
 import { createResource, deleteResource, fetchResource, getProperty, updateResourceProperty } from '../../util/Api';
 import { notebookPageUrl } from '../../util/App';
-import { HATEOAS_SELF, HATEOAS_BRANCH_UPDATE_PROPERTY } from '../../util/HATEOAS';
+import { HATEOAS_BRANCH_UPDATE_PROPERTY } from '../../util/HATEOAS';
 
 
 // Actions for manipulating branches and retrieving branch information
@@ -131,7 +131,7 @@ export const fetchBranch = (project, branch) => (dispatch) => {
     } else {
         dispatch(
             fetchResource(
-                branch.links.get(HATEOAS_SELF),
+                branch.links.getSelf(),
                 (json) => (dispatch) => {
                     // Expect a listing of workflow version descriptors.
                     const workflows = json.workflows;

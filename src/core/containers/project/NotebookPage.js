@@ -21,9 +21,9 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { addFilteredCommand, copyCell, removeFilteredCommand } from '../../actions/main/App';
 import { createBranch, deleteBranch } from '../../actions/project/Branch';
-import { dismissCellChanges, fetchAnnotations, fetchWorkflow, hideCellOutput,
-    insertNotebookCell, showCellChart, selectNotebookCell, showCellDataset,
-    showCellStdout, showCellTimestamps } from '../../actions/project/Notebook';
+import { checkModuleStatus, dismissCellChanges, fetchAnnotations, fetchWorkflow,
+    hideCellOutput, insertNotebookCell, showCellChart, selectNotebookCell,
+    showCellDataset, showCellStdout, showCellTimestamps } from '../../actions/project/Notebook';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import { fetchProjects } from '../../actions/project/ProjectListing';
 import { LargeMessageButton } from '../../components/Button';
@@ -142,6 +142,20 @@ class NotebookPage extends Component {
         this.props.dispatch(addFilteredCommand(command));
     }
     /**
+     * Callback handler to cancel the execution of a currently active workflow.
+     */
+    handleCancelWorkflowExec = () => {
+        alert('Cancel');
+    }
+    /**
+     * Call method to fetch workflow module handle and update notebook on state
+     * change.
+     */
+    handleCheckWorkflowStatus = (cell) => {
+        const { dispatch, notebook } = this.props;
+        dispatch(checkModuleStatus(notebook, cell));
+    }
+    /**
      * Dispatch action to copy the given cell to the clipboard that is contained
      * in the user settings.
      */
@@ -181,6 +195,9 @@ class NotebookPage extends Component {
     handleDatasetNavigate = (module, dataset, offset, limit) => {
         const { dispatch, notebook } = this.props;
         dispatch(showCellDataset(notebook, module, dataset, offset, limit));
+    }
+    handleDeleteCell = (cell) => {
+        alert('Delete module ' + cell.module.id);
     }
     /**
      * Handle dismissal of all changes that were made to a notebook cell.
@@ -258,6 +275,11 @@ class NotebookPage extends Component {
         const { branch, history, project } = this.props;
         history.push(notebookPageUrl(project.id, branch.id));
     }
+    handleSubmitCell = (cell, data) => {
+        console.log(cell.id);
+        console.log(data);
+        alert('Submit');
+    }
     /**
      * Dispatch action to switch to a given branch and retrieve the workflow at
      * the head of the branch.
@@ -317,16 +339,20 @@ class NotebookPage extends Component {
                     project={project}
                     reversed={reversed}
                     onAddFilteredCommand={this.handleAddFilteredCommand}
+                    onCancelExec={this.handleCancelWorkflowExec}
                     onChangeGrouping={this.handleChangeGrouping}
+                    onCheckStatus={this.handleCheckWorkflowStatus}
                     onCopyCell={this.handleCopyCell}
                     onCreateBranch={this.showCreateBranchModal}
                     onDatasetNavigate={this.handleDatasetNavigate}
+                    onDeleteCell={this.handleDeleteCell}
                     onDismissCell={this.handleDismissCell}
                     onFetchAnnotations={this.handleFetchDatasetCellAnnotations}
                     onInsertCell={this.handleInsertCell}
                     onOutputSelect={this.handleSelectOutput}
                     onRemoveFilteredCommand={this.handleRemoveFilteredCommand}
                     onSelectNotebookCell={this.handleSelectActiveCell}
+                    onSubmitCell={this.handleSubmitCell}
                     userSettings={userSettings}
                 />
             );

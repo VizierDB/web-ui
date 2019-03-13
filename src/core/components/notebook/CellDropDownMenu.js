@@ -42,24 +42,10 @@ class CellDropDownMenu extends React.Component {
         onAddFilteredCommand: PropTypes.func.isRequired,
         onCopyCell: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
+        onDeleteCell: PropTypes.func.isRequired,
         onInsertCell: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
         onSelectCell: PropTypes.func.isRequired
-    }
-    /**
-     * Copy the associated cell to the clipboard in the user settings.
-     */
-    handleCopyCell = () => {
-        const { cell, onCopyCell } = this.props;
-        onCopyCell(cell);
-    }
-    /**
-     * Set the associated notebook cell as the active cell which will
-     * automatically set it into edit mode.
-     */
-    handleEditCell = () => {
-        const { cell, onSelectCell } = this.props;
-        onSelectCell(cell);
     }
     /**
      * Insert new cell before the notebook cell that is associated with the
@@ -83,8 +69,11 @@ class CellDropDownMenu extends React.Component {
             isNewPrevious,
             notebook,
             onAddFilteredCommand,
+            onCopyCell,
             onCreateBranch,
-            onOutputSelect
+            onDeleteCell,
+            onOutputSelect,
+            onSelectCell
         } = this.props;
         const { module, output } = cell;
         // If the cell is in pending or running state no menu is displayed. We
@@ -118,7 +107,7 @@ class CellDropDownMenu extends React.Component {
                     icon='pencil'
                     text='Edit'
                     title={'Edit notebook cell #' + cellNumber}
-                    onClick={this.handleEditCell}
+                    onClick={onSelectCell}
                 />
             );
             dropdownItems.push(
@@ -128,7 +117,7 @@ class CellDropDownMenu extends React.Component {
                     icon='copy'
                     text='Copy'
                     title={'Copy command from notebook cell #' + cellNumber}
-                    onClick={this.handleCopyCell}
+                    onClick={onCopyCell}
                 />
             );
             dropdownItems.push(
@@ -137,7 +126,7 @@ class CellDropDownMenu extends React.Component {
                     icon='trash'
                     text='Delete'
                     title={'Delete notebook cell #' + cellNumber}
-                    onClick={() => (alert('Delete'))}
+                    onClick={onDeleteCell}
                 />
             );
             dropdownItems.push(<Dropdown.Divider key='div-notebook'/>);

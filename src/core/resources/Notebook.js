@@ -105,34 +105,12 @@ export class Notebook {
                 workflow.modules[i],
                 workflow.datasets
             );
-            const commandSpec = workflow.getCommandSpec(module.command);
-            // Get cell output resource
-            const stdout = module.outputs.stdout;
-            let outputResource = null;
-            if (stdout.length === 1) {
-                // If the output is a chart view it is expected to be the only
-                // output element
-                const out = stdout[0];
-                if (out.type === 'chart/view') {
-                    outputResource = new OutputChart(out.value.data.name, out.value.result);
-                } else if (out.type === 'text/html') {
-                    outputResource = new OutputHtml(stdout);
-                } else  {
-                    outputResource = new OutputText(stdout);
-                }
-            } else {
-                outputResource = new OutputText(stdout);
-            }
-            // Make sure that there is some output
-            if (outputResource === null) {
-                outputResource = new OutputText([]);
-            }
             this.cells.push(
                 new NotebookCell(
                     module.id,
                     module,
-                    commandSpec,
-                    outputResource
+                    workflow.getCommandSpec(module.command),
+                    getModuleDefaultOutput(module)
                 )
             );
         }
@@ -291,6 +269,51 @@ export class Notebook {
         }
         return new Notebook(this.workflow, modifiedCells, this.cellCounter);
     }
+    /**
+     * Update the notebook whenever a new version of the associated workflow
+     * is received. Replaces the respective modules in notebook cells with
+     * their updated counterparts. Returns a new notebook object.
+     */
+    updateWorkflow(workflow, modified_module_id) {
+        // Start by creating an index of module handles for the new workflow
+        const moduleIndex = {};
+        for (let i = 0; i < workflow.modules.length; i++) {
+            const module = new ModuleHandle().fromJson(
+                workflow.modules[i],
+                workflow.datasets
+            );
+            moduleIndex[module.id] = module;
+        }
+        // Create a list of modified cells. New cells in the current notebook
+        // remain unchanged. Cells that contain existing modules in the previous
+        // workflow version have their associated module updated.
+        const modifiedCells = [];
+        for (let i = 0; i < this.cells.length; i++) {
+            const cell = this.cells[i];
+            if (!cell.isNewCell()) {
+                const module = moduleIndex[cell.id];
+                // If the modified module identifier is given then we need to
+                // set the module output to its default value.
+                let outputResource = null;
+                if (module.id === modified_module_id) {
+                    outputResource = getModuleDefaultOutput(module);
+                } else {
+                    outputResource = cell.output;
+                }
+                modifiedCells.push(
+                    new NotebookCell(
+                        module.id,
+                        module,
+                        cell.commandSpec,
+                        outputResource
+                    )
+                );
+            } else {
+                modifiedCells.push(cell);
+            }
+        }
+        return new Notebook(workflow, modifiedCells, this.cellCounter);
+    }
 }
 
 
@@ -369,4 +392,37 @@ class NotebookCell {
             return false;
         }
     }
+}
+
+
+// -----------------------------------------------------------------------------
+// Helper Methods
+// -----------------------------------------------------------------------------
+
+/**
+ * Get the default output resource for a given module.
+ */
+const getModuleDefaultOutput = (module) => {
+    // Get cell output resource
+    const stdout = module.outputs.stdout;
+    let outputResource = null;
+    if (stdout.length === 1) {
+        // If the output is a chart view it is expected to be the only
+        // output element
+        const out = stdout[0];
+        if (out.type === 'chart/view') {
+            outputResource = new OutputChart(out.value.data.name, out.value.result);
+        } else if (out.type === 'text/html') {
+            outputResource = new OutputHtml(stdout);
+        } else  {
+            outputResource = new OutputText(stdout);
+        }
+    } else {
+        outputResource = new OutputText(stdout);
+    }
+    // Make sure that there is some output
+    if (outputResource === null) {
+        outputResource = new OutputText([]);
+    }
+    return outputResource;
 }

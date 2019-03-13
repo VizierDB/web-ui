@@ -100,6 +100,19 @@ td.cell-index {
     width: 60px;
 }
 
+td.cell-area {
+    vertical-align: top;
+}
+
+td.cell-button {
+    text-align: center;
+}
+
+div.cell-menu {
+    color: #3b4151;
+    margin-top: 10px;
+}
+
 p.cell-index {
     color: #303f9f;
     font-family: monospace,monospace;
@@ -109,15 +122,6 @@ p.cell-index {
 
 div.cell-status-icon {
     margin: 10px 0px;
-}
-
-td.cell-area {
-    vertical-align: top;
-}
-
-div.cell-menu {
-    color: #3b4151;
-    margin-top: 10px;
 }
 
 
@@ -141,10 +145,12 @@ p.cell-index.error-cell {
  */
 table.cell.inactive-cell.pending-cell {
     /*border-left: solid 3px #ffa000;*/
+    border-left: solid 3px #cecece;
 }
 
 td.cell-index.pending-cell {
     /*background: #ffe7c0;*/
+    background: #dedede;
 }
 
 p.cell-index.pending-cell {
@@ -157,10 +163,12 @@ p.cell-index.pending-cell {
  */
 table.cell.inactive-cell.running-cell {
     /*border-left: solid 3px #43a047;*/
+    border-left: solid 3px #cecece;
 }
 
 td.cell-index.running-cell {
      /*background: #c5dbc6;*/
+     background: #dedede;
 }
 
 p.cell-index.running-cell {

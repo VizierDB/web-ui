@@ -18,13 +18,64 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { HATEOAS_API_DOC, HATEOAS_SELF } from '../util/HATEOAS';
-
+import { Button } from 'semantic-ui-react';
+import ContentSpinner from './ContentSpinner';
+import { HATEOAS_API_DOC } from '../util/HATEOAS';
+import '../../css/App.css';
 import '../../css/Connection.css'
 
+
 /**
- * Collection of componentsto interact with the Vizier DB Web service API.
+ * Component that continuously sends polling requests to the API and
+ * dispatches the result to a given callback handler.
+ *
+ * Displays a cancel button to activate a given callback handler.
+ *
+ * https://stackoverflow.com/questions/46140764/polling-api-every-x-seconds-with-react
  */
+export class ApiPolling extends React.Component {
+    static propTypes = {
+        interval: PropTypes.number.isRequired,
+        onCancel: PropTypes.func.isRequired,
+        onFetch: PropTypes.func.isRequired,
+        resource: PropTypes.object.isRequired,
+        text: PropTypes.string.isRequired
+    }
+    /**
+     * Start a timer to call the provided fetch function at the specified
+     * interval.
+     */
+    componentDidMount() {
+        const { interval, onFetch, resource } = this.props;
+        this.timer = setInterval(() => (onFetch(resource)), interval);
+    }
+    /**
+     * Cancel the fetch timer.
+     */
+    componentWillUnmount() {
+        clearInterval(this.timer);
+        this.timer = null;
+    }
+    /**
+     * Show a spinner with a cancel button.
+     */
+    render() {
+        const { onCancel, text } = this.props;
+        return (
+            <div>
+                <ContentSpinner text={ text } size='small' />
+                <div className='centered'>
+                    <Button
+                        content='Cancel'
+                        negative
+                        title='Cancel active task'
+                        onClick={onCancel}
+                    />
+                </div>
+            </div>
+        );
+    }
+}
 
 
 /**
@@ -37,7 +88,7 @@ export class ConnectionInfo extends React.Component {
     }
     render() {
         const { name, links } = this.props;
-        const url = links.get(HATEOAS_SELF);
+        const url = links.getSelf();
         return (
             <div className='connection-info'>
                 <pre className='connection-info'>

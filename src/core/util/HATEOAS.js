@@ -29,6 +29,7 @@ export const HATEOAS_API_DOC = 'api.doc';
 export const HATEOAS_USER_AUTH = 'user.auth';
 
 // Branch
+export const HATEOAS_BRANCH_HEAD = 'branch.head';
 export const HATEOAS_BRANCH_UPDATE_PROPERTY = 'branch.update';
 
 // Dataset
@@ -125,6 +126,10 @@ export class HATEOASReferences {
             return null;
         }
     }
+    /**
+     * Short-cut to get resource self reference.
+     */
+    getSelf = () => (this.get(HATEOAS_SELF));
     /**
      * Test if a HATEOAS reference with the given key exists.
      */

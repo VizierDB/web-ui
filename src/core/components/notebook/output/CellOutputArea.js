@@ -19,8 +19,8 @@
 import React from 'react';
 import createReactClass from 'create-react-class';
 import { PropTypes } from 'prop-types';
-import { Button, Dimmer, Loader } from 'semantic-ui-react';
-import ContentSpinner from '../../ContentSpinner';
+import { Dimmer, Loader } from 'semantic-ui-react';
+import { ApiPolling } from '../../Api';
 import DatasetChart from '../../plot/DatasetChart';
 import DatasetView from '../../spreadsheet/DatasetView';
 import { ErrorMessage } from '../../Message';
@@ -38,9 +38,11 @@ import '../../../../css/Notebook.css';
 class CellOutputArea extends React.Component {
     static propTypes = {
         cell: PropTypes.object.isRequired,
+        onCancelExec: PropTypes.func,
+        onCheckStatus: PropTypes.func,
+        onFetchAnnotations: PropTypes.func.isRequired,
         onNavigateDataset: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
-        onFetchAnnotations: PropTypes.func.isRequired,
         onSelectCell: PropTypes.func.isRequired,
         userSettings: PropTypes.object.isRequired
     };
@@ -70,6 +72,8 @@ class CellOutputArea extends React.Component {
     render() {
         const {
             cell,
+            onCancelExec,
+            onCheckStatus,
             onNavigateDataset,
             onSelectCell,
             userSettings
@@ -77,6 +81,32 @@ class CellOutputArea extends React.Component {
         const { output } = cell;
         // The output content depends on the status of the cell. For running and
         // pending cells only timestamps (and a cancel button) is displayed.
+        // If there has been an error we do not show the cancel button in order
+        // to avoid continuous polling.
+        let cancelButton = null;
+        if (onCancelExec != null) {
+            if (!output.isError()) {
+                cancelButton = (
+                    <ApiPolling
+                        interval={1000}
+                        onCancel={onCancelExec}
+                        onFetch={onCheckStatus}
+                        resource={cell}
+                        text={cell.isRunning() ? 'Running ...' : 'Pending ...'}
+                    />
+                );
+            } else {
+                const fetchError = output.error;
+                cancelButton =(
+                    <div className='output-error'>
+                        <ErrorMessage
+                            title={fetchError.title}
+                            message={fetchError.message}
+                        />
+                    </div>
+                );
+            }
+        }
         if (cell.isRunning()) {
             return (
                 <div>
@@ -84,10 +114,7 @@ class CellOutputArea extends React.Component {
                         <TimestampOutput label='Created at' time={cell.module.timestamps.createdAt} />
                         <TimestampOutput label='Started at' time={cell.module.timestamps.startedAt} />
                     </div>
-                    <ContentSpinner text='Running ...' size='small' />
-                    <div className='centered'>
-                        <Button negative>Cancel</Button>
-                    </div>
+                    { cancelButton }
                 </div>
             );
         } else if (cell.isPending()) {
@@ -96,6 +123,7 @@ class CellOutputArea extends React.Component {
                     <div className='module-timings'>
                         <TimestampOutput label='Created at' time={cell.module.timestamps.createdAt} />
                     </div>
+                    { cancelButton }
                 </div>
             );
         }

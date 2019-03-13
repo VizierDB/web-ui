@@ -50,15 +50,19 @@ class NotebookCell extends React.Component {
         isNewPrevious: PropTypes.bool.isRequired,
         notebook: PropTypes.object.isRequired,
         onAddFilteredCommand: PropTypes.func.isRequired,
+        onCancelExec: PropTypes.func,
+        onCheckStatus: PropTypes.func,
         onCopyCell: PropTypes.func.isRequired,
         onCreateBranch: PropTypes.func.isRequired,
         onDatasetNavigate: PropTypes.func.isRequired,
+        onDeleteCell: PropTypes.func.isRequired,
         onDismissCell: PropTypes.func.isRequired,
         onInsertCell: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
         onFetchAnnotations: PropTypes.func.isRequired,
         onRemoveFilteredCommand: PropTypes.func.isRequired,
         onSelect: PropTypes.func.isRequired,
+        onSubmitCell: PropTypes.func.isRequired,
         userSettings: PropTypes.object.isRequired
     }
     /**
@@ -68,6 +72,13 @@ class NotebookCell extends React.Component {
     handleAddFilteredCommand = () => {
         const { cell, onAddFilteredCommand } = this.props;
         onAddFilteredCommand(cell.commandSpec);
+    }
+    /**
+     * Copy the associated cell to the clipboard in the user settings.
+     */
+    handleCopyCell = () => {
+        const { cell, onCopyCell } = this.props;
+        onCopyCell(cell);
     }
     /**
      * Event handler when the user clicks the menu item to create a new branch
@@ -84,6 +95,13 @@ class NotebookCell extends React.Component {
     handleDatasetNavigate = (dataset, offset, limit) => {
         const { cell, onDatasetNavigate } = this.props;
         onDatasetNavigate(cell.module, dataset, offset, limit);
+    }
+    /**
+     * Delete the associated cell from the notebook.
+     */
+    handleDeleteCell = () => {
+        const { cell, onDeleteCell } = this.props;
+        onDeleteCell(cell);
     }
     /**
      * Submit action to insert a new notebook cell relative to this cell.
@@ -115,11 +133,19 @@ class NotebookCell extends React.Component {
      * Set this cell as the active notebook cell. Only if the cell is inactive
      * at the moment.
      */
-    handleSelect = () => {
+    handleSelectCell = () => {
         const { cell, isActiveCell, onSelect } = this.props;
         if ((!isActiveCell) && (!cell.isActive())) {
             onSelect(cell);
         }
+    }
+    /**
+     * Submit the given form data as the command for the associated notebook
+     * cell.
+     */
+    handleSubmitCell = (data) => {
+        const { cell, onSubmitCell } = this.props;
+        onSubmitCell(cell, data);
     }
     render() {
         const {
@@ -131,7 +157,9 @@ class NotebookCell extends React.Component {
             isNewNext,
             isNewPrevious,
             notebook,
-            onCopyCell,
+            onCancelExec,
+            onCheckStatus,
+            onDeleteCell,
             onDismissCell,
             onOutputSelect,
             onFetchAnnotations,
@@ -151,9 +179,10 @@ class NotebookCell extends React.Component {
             // Check if the command that is associated with the cell is filtered
             // by the user settings. If the command is filtered we either return
             // a collapsed cell or null depending on the hide filtered cells
-            // property.
+            // property. If a cell is active it is shown always for the user to
+            // know which (and how many) cells are still executing.
             const cmdSpec = cell.commandSpec;
-            if (userSettings.isFiltered(cmdSpec)) {
+            if ((!cell.isActive()) && (userSettings.isFiltered(cmdSpec))) {
                 if (!userSettings.hideFilteredCommands()) {
                     return (
                         <div className='horizontal-divider'>
@@ -187,20 +216,23 @@ class NotebookCell extends React.Component {
                     isNewPrevious={isNewPreviousFlag}
                     notebook={notebook}
                     onAddFilteredCommand={this.handleAddFilteredCommand}
-                    onCopyCell={onCopyCell}
+                    onCopyCell={this.handleCopyCell}
                     onCreateBranch={this.handleCreateBranch}
+                    onDeleteCell={this.handleDeleteCell}
                     onInsertCell={this.handleInsertCell}
                     onOutputSelect={onOutputSelect}
-                    onSelectCell={this.handleSelect}
+                    onSelectCell={this.handleSelectCell}
                 />
             );
             outputArea = (
                 <CellOutputArea
                     cell={cell}
+                    onCancelExec={onCancelExec}
+                    onCheckStatus={onCheckStatus}
+                    onFetchAnnotations={onFetchAnnotations}
                     onNavigateDataset={this.handleDatasetNavigate}
                     onOutputSelect={onOutputSelect}
-                    onFetchAnnotations={onFetchAnnotations}
-                    onSelectCell={this.handleSelect}
+                    onSelectCell={this.handleSelectCell}
                     userSettings={userSettings}
                 />
             );
@@ -211,10 +243,10 @@ class NotebookCell extends React.Component {
                 datasets={datasets}
                 cell={cell}
                 isActiveCell={(isActiveCell) && (!notebook.readOnly)}
-                onClick={this.handleSelect}
+                onClick={this.handleSelectCell}
                 onDismiss={onDismissCell}
-                onSelectCell={this.handleSelect}
-                onSubmit={() => (alert('Submit'))}
+                onSelectCell={this.handleSelectCell}
+                onSubmit={this.handleSubmitCell}
                 userSettings={userSettings}
             />
         );
@@ -233,7 +265,7 @@ class NotebookCell extends React.Component {
         return (
             <table className={css + cssState}><tbody>
                 <tr>
-                    <td className={'cell-index' + cssState} onClick={this.handleSelect}>
+                    <td className={'cell-index' + cssState} onClick={this.handleSelectCell}>
                         <p className={'cell-index' + cssState}>[{cellIndex}]</p>
                         { cellMenu }
                     </td>

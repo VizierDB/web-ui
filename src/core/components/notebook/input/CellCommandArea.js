@@ -257,7 +257,7 @@ class CellCommandArea extends React.Component {
             this.setState({errors: req.errors, hasErrors: true});
         } else {
             this.setState({errors: null, hasErrors: false});
-            onSubmit();
+            onSubmit(req.data);
         }
     }
     /**

@@ -16,8 +16,9 @@
  * limitations under the License.
  */
 
-import { projectActionError, projectFetchError, requestProjectAction } from './Project';
+import { NO_OP } from '../main/App';
 import { fetchAuthed, requestAuth } from '../main/Service';
+import { projectActionError, projectFetchError, requestProjectAction } from './Project';
 import { AnnotationList } from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
 import { getNewCellId } from '../../resources/Notebook';
@@ -26,7 +27,7 @@ import { OutputChart, OutputDataset, OutputError, OutputHidden,
 import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource } from '../../util/Api';
 import { ErrorObject } from '../../util/Error';
-import { HATEOASReferences, HATEOAS_SELF } from '../../util/HATEOAS';
+import { HATEOASReferences, HATEOAS_BRANCH_HEAD } from '../../util/HATEOAS';
 import { VIZUAL, VIZUAL_OP } from '../../util/Vizual';
 
 
@@ -109,6 +110,40 @@ const workflowFetchError = (message, status) => (
 // -----------------------------------------------------------------------------
 // Notebooks
 // -----------------------------------------------------------------------------
+
+
+export const checkModuleStatus = (notebook, cell) => (dispatch) => (
+    dispatch(
+        fetchResource(
+            cell.module.links.getSelf(),
+            (json) => {
+                if (json.state !== cell.module.state) {
+                    // If the state of the module has changes update the given
+                    // notebook after fetching the head of the workflow that is
+                    // represented by that notebook
+                    dispatch(fetchResource(
+                        notebook.workflow.links.get(HATEOAS_BRANCH_HEAD),
+                        (json) => {
+                            // Get the new workflow handle
+                            const wf = new WorkflowHandle(
+                                notebook.workflow.engine
+                            ).fromJson(json);
+                            return {
+                                type: UPDATE_NOTEBOOK,
+                                notebook: notebook.updateWorkflow(wf, cell.id)
+                            };
+                        },
+                        workflowFetchError
+                    ));
+                }
+                return dispatch({type: NO_OP});
+            },
+            (message) => (
+                setNotebookCellError(notebook, cell.module, 'module status', message)
+            )
+        )
+    )
+)
 
 
 /**
@@ -203,7 +238,7 @@ export const fetchAnnotations = (notebook, module, dataset, columnId, rowId) => 
                 );
             },
             (message) => {
-                setNotebookCellError(notebook, module, 'annotations fo dataset ' + dataset.name, message)
+                setNotebookCellError(notebook, module, 'annotations for dataset ' + dataset.name, message)
             },
             () => (setActiveDatasetCell(notebook, module))
         )
@@ -279,7 +314,7 @@ export const showCellChart = (notebook, module, name) => (dispatch) => {
         }
         if (chart !== null) {
             // Use the chart's self reference to fetch the data frm the Web API.
-            const url = new HATEOASReferences(chart.links).get(HATEOAS_SELF)
+            const url = new HATEOASReferences(chart.links).getSelf()
 
             dispatch(
                 fetchResource(
