@@ -43,6 +43,7 @@ class Notebook extends React.Component {
         onInsertCell: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
         onRemoveFilteredCommand: PropTypes.func.isRequired,
+        onSubmitCell: PropTypes.func.isRequired,
         onSelectNotebookCell: PropTypes.func.isRequired,
         userSettings: PropTypes.object.isRequired
     }
@@ -71,12 +72,12 @@ class Notebook extends React.Component {
             onDatasetNavigate,
             onDeleteCell,
             onDismissCell,
+            onFetchAnnotations,
             onInsertCell,
             onOutputSelect,
-            onFetchAnnotations,
+            onRemoveFilteredCommand,
             onSelectNotebookCell,
             onSubmitCell,
-            onRemoveFilteredCommand,
             userSettings
         } = this.props;
         // For empty notebooks a message is shown that contains a button to
@@ -104,14 +105,24 @@ class Notebook extends React.Component {
             if (i < notebook.cells.length - 1) {
                 isNewNext = notebook.cells[i + 1].isNewCell();
             }
+            // The first active cell will receive the onCancel callback to
+            // trigger the rendering of a cancel button.
             let onCancelCallback = null;
             if (cell.isActive()) {
-                // The first active cell will receive the onCancel callback to
-                // trigger the rendering of a cancel button.
                 if (!hasActiveCell) {
                     onCancelCallback = onCancelExec;
                 }
                 hasActiveCell = true;
+            }
+            // In an active notebook only the last cell will have a submit
+            // handler if it is a new cell.
+            let submitHandler = null;
+            if (notebook.hasActiveCells()) {
+                if ((cell.isNewCell()) && (i === notebook.cells.length - 1)) {
+                    submitHandler = onSubmitCell;
+                }
+            } else {
+                submitHandler = onSubmitCell;
             }
             // The cell number depends on whether the cell is a new cell or
             // a cell for a workflow module.
@@ -139,7 +150,7 @@ class Notebook extends React.Component {
                     onFetchAnnotations={onFetchAnnotations}
                     onRemoveFilteredCommand={onRemoveFilteredCommand}
                     onSelect={onSelectNotebookCell}
-                    onSubmitCell={onSubmitCell}
+                    onSubmitCell={submitHandler}
                     userSettings={userSettings}
                 />
             );

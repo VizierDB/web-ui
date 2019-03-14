@@ -30,13 +30,13 @@ import '../../../../../css/ModuleForm.css';
 class CodeCell extends React.Component {
     static propTypes = {
         cursorPosition: PropTypes.object.isRequired,
-        editing: PropTypes.bool.isRequired,
         id: PropTypes.string.isRequired,
         isActiveCell: PropTypes.bool.isRequired,
         language: PropTypes.string.isRequired,
         onChange: PropTypes.func.isRequired,
         onCursor: PropTypes.func.isRequired,
         onFocus: PropTypes.func.isRequired,
+        readOnly: PropTypes.bool.isRequired,
         value: PropTypes.string,
     }
     /**
@@ -82,6 +82,7 @@ class CodeCell extends React.Component {
             isActiveCell,
             language,
             onFocus,
+            readOnly,
             value
         } = this.props;
         // The editor mode and the shown code snippet selector depends on the
@@ -105,7 +106,8 @@ class CodeCell extends React.Component {
                         autofocus: isActiveCell,
                         lineNumbers: true,
                         mode: mode,
-                        indentUnit: 4
+                        indentUnit: 4,
+                        readOnly: readOnly
                     }}
                     onBeforeChange={(editor, data, value) => {
                         this.handleChange(editor, value, data);

@@ -36,8 +36,13 @@ import '../../../css/Notebook.css';
  * Depending on whether the associated notebook cell is in edit mode or not
  * the command area will display the command text or a command input form.
  *
- * For new cells an empty cell index is shown together with the module input
- * form.
+ * For new cells a cell index '*' is shown together with the module input
+ * form. There is no output area for new cells.
+ *
+ * The notebook cell does not receive a onSubmitCell callback if the notebook is
+ * active and the cell is not a cell that is appended after the active cell.
+ * In this case modification of the underlying workflow is not possible and
+ * submissions should be blocked.
  */
 class NotebookCell extends React.Component {
     static propTypes = {
@@ -62,7 +67,7 @@ class NotebookCell extends React.Component {
         onFetchAnnotations: PropTypes.func.isRequired,
         onRemoveFilteredCommand: PropTypes.func.isRequired,
         onSelect: PropTypes.func.isRequired,
-        onSubmitCell: PropTypes.func.isRequired,
+        onSubmitCell: PropTypes.func,
         userSettings: PropTypes.object.isRequired
     }
     /**

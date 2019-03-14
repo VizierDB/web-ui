@@ -46,7 +46,7 @@ class CellCommandArea extends React.Component {
         onClick: PropTypes.func.isRequired,
         onDismiss: PropTypes.func.isRequired,
         onSelectCell: PropTypes.func.isRequired,
-        onSubmit: PropTypes.func.isRequired,
+        onSubmit: PropTypes.func,
         userSettings: PropTypes.object.isRequired
     }
     constructor(props) {
@@ -249,13 +249,32 @@ class CellCommandArea extends React.Component {
     handleShowCommandsListing = () => {
         this.setState({showCommandsListing: true});
     }
+    /**
+     * Submit the values in the module input form. This method first converts
+     * the forma values into the representation that is expected by the API.
+     * During this conversion the input values are validated against the
+     * constraints in the command specification. If any of the values are not
+     * valid the form is not submitted but a list of validation errors will be
+     * shown instead.
+     */
     handleSubmitForm = () => {
         const { cell, onSubmit } = this.props;
+        // The onSubmit function may be none if submission is not permitted for
+        // an active notebook. Show an alert for the user.
+        if (onSubmit == null) {
+            alert('Cannot submit cell in an active notebook');
+            return;
+        }
         const { formValues, selectedCommand } = this.state;
+        // Convert form values into format expected by the API. During the
+        // conversion validate the form values.
         const req = formValuesToRequestData(formValues, selectedCommand.parameters);
         if (req.errors.length > 0) {
+            // Show list of error messages if validation of form values failed
             this.setState({errors: req.errors, hasErrors: true});
         } else {
+            // Clear the error state and submit the cell, command specification
+            // and form values to update the underlying workflow.
             this.setState({errors: null, hasErrors: false});
             onSubmit(cell, selectedCommand, req.data);
         }
@@ -274,6 +293,7 @@ class CellCommandArea extends React.Component {
             datasets,
             isActiveCell,
             onClick,
+            onSubmit,
             userSettings
         } = this.props;
         const {
@@ -317,12 +337,6 @@ class CellCommandArea extends React.Component {
                     onSelect={this.handleSelectCommand} />
             );
         } else {
-            // Set hotkey handler to submit and dismiss a shown command input
-            // form.
-            const handlers = {
-              'runCell': this.handleSubmitForm,
-              'dismiss': this.handleDismiss
-            };
             // If there is a command specification defined for this component
             // the output depends on whether (i) the command is a code cell
             // command and (2) the cell is in edit state or not.
@@ -349,9 +363,8 @@ class CellCommandArea extends React.Component {
                     }
                 }
                 const { codeEditorProps } = this.state;
-                const keyMap = { runCell: 'ctrl+enter' };
                 mainContent = (
-                    <HotKeys keyMap={keyMap} handlers={handlers}>
+                    <div>
                         <Form>
                             <CodeCell
                                 cursorPosition={codeEditorProps.cursorPosition}
@@ -363,11 +376,12 @@ class CellCommandArea extends React.Component {
                                 onChange={this.handleFormValueChange}
                                 onCursor={this.handleCursorChange}
                                 onFocus={this.handleActivateCell}
+                                readOnly={onSubmit == null}
                                 value={formValues[paraCode.id]}
                             />
                         </Form>
-                        { codeSnippetPanel }
-                    </HotKeys>
+                    { codeSnippetPanel }
+                    </div>
                 );
                 // The snippet toggle button text depends on whether the snippet
                 // selector is vizible or not
@@ -382,23 +396,20 @@ class CellCommandArea extends React.Component {
                     />
                 );
             } else if (isActiveCell) {
-                const keyMap = { runCell: 'ctrl+enter', dismiss: 'esc' };
                 const errorCss = (hasErrors) ? ' error' : '';
                 mainContent = (
-                    <HotKeys keyMap={keyMap} handlers={handlers}>
-                        <div className={'module-form' + errorCss}>
-                            <p className={'module-form-header' + errorCss}>
-                                {selectedCommand.name}
-                            </p>
-                            <ModuleInputForm
-                                datasets={datasets}
-                                onChange={this.handleFormValueChange}
-                                selectedCommand={selectedCommand}
-                                serviceProperties={apiEngine.serviceProperties}
-                                values={formValues}
-                            />
-                        </div>
-                    </HotKeys>
+                    <div className={'module-form' + errorCss}>
+                        <p className={'module-form-header' + errorCss}>
+                            {selectedCommand.name}
+                        </p>
+                        <ModuleInputForm
+                            datasets={datasets}
+                            onChange={this.handleFormValueChange}
+                            selectedCommand={selectedCommand}
+                            serviceProperties={apiEngine.serviceProperties}
+                            values={formValues}
+                        />
+                    </div>
                 );
             } else if ((cell.isNewCell())  && (selectedCommand != null)) {
                 mainContent = (
@@ -416,6 +427,25 @@ class CellCommandArea extends React.Component {
                     </pre>
                 );
             }
+        }
+        // Wrap main content in hotkey handler if submission of the form is
+        // allowed
+        let wrappedContent = null;
+        if (onSubmit != null) {
+            // Set hotkey handler to submit and dismiss a shown command input
+            // form.
+            const handlers = {
+              'runCell': this.handleSubmitForm,
+              'dismiss': this.handleDismiss
+            };
+            const keyMap = { runCell: 'ctrl+enter', dismiss: 'esc' };
+            wrappedContent = (
+                <HotKeys keyMap={keyMap} handlers={handlers}>
+                    { mainContent }
+                </HotKeys>
+            );
+        } else {
+            wrappedContent = mainContent;
         }
         // Add a list of action buttons if the cell is the active cell.
         let buttons = null;
@@ -440,6 +470,7 @@ class CellCommandArea extends React.Component {
                     />
                     <Button
                         content='Submit'
+                        disabled={onSubmit == null}
                         icon='paper plane outline'
                         labelPosition='left'
                         positive
@@ -451,7 +482,7 @@ class CellCommandArea extends React.Component {
         return (
             <div className='cell-command-area'>
                 { errorMessage }
-                { mainContent }
+                { wrappedContent }
                 { buttons }
             </div>
         );
