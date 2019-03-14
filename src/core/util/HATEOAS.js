@@ -42,11 +42,17 @@ export const HATEOAS_PROJECTS_DELETE = 'project.delete';
 export const HATEOAS_PROJECTS_LIST = 'project.list';
 export const HATEOAS_PROJECT_UPDATE_PROPERTY = 'project.update';
 
+// Project
+export const HATEOAS_PROJECT_FILE_UPLOAD = 'file.upload';
+
 // Workflow
 export const HATEOAS_WORKFLOW_CANCEL = 'workflow.cancel';
 
 // Module
+export const HATEOAS_MODULE_APPEND = 'workflow.append';
 export const HATEOAS_MODULE_DELETE = 'module.delete';
+export const HATEOAS_MODULE_INSERT = 'module.insert';
+export const HATEOAS_MODULE_REPLACE = 'module.replace';
 
 
 /**

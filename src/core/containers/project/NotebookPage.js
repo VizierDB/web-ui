@@ -21,10 +21,11 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { addFilteredCommand, copyCell, removeFilteredCommand } from '../../actions/main/App';
 import { createBranch, deleteBranch } from '../../actions/project/Branch';
-import { cancelWorkflowExecution, checkModuleStatus, deleteNotebookCell,
-    dismissCellChanges, fetchAnnotations, fetchWorkflow, hideCellOutput,
-    insertNotebookCell, showCellChart, selectNotebookCell, showCellDataset,
-    showCellStdout, showCellTimestamps } from '../../actions/project/Notebook';
+import { cancelWorkflowExecution, checkModuleStatus, createtNotebookCell,
+    deleteNotebookCell, dismissCellChanges, fetchAnnotations, fetchWorkflow,
+    hideCellOutput, insertNotebookCell, replaceNotebookCell, showCellChart,
+    selectNotebookCell, showCellDataset, showCellStdout,
+    showCellTimestamps, updateNotebookCellWithUpload } from '../../actions/project/Notebook';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import { fetchProjects } from '../../actions/project/ProjectListing';
 import { LargeMessageButton } from '../../components/Button';
@@ -36,9 +37,10 @@ import Notebook from '../../components/notebook/Notebook';
 import ResourcePage from '../../components/ResourcePage';
 import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
     CONTENT_TIMESTAMPS } from '../../resources/Outputs';
-import { NotebookResource } from '../../util/App';
-import { branchPageUrl, isNotEmptyString, notebookPageUrl } from '../../util/App';
-
+import { branchPageUrl, isNotEmptyString, notebookPageUrl,
+    NotebookResource } from '../../util/App';
+import { HATEOAS_MODULE_APPEND, HATEOAS_MODULE_INSERT,
+    HATEOAS_MODULE_REPLACE, HATEOAS_PROJECT_FILE_UPLOAD } from '../../util/HATEOAS';
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
 import '../../../css/Chart.css';
@@ -226,7 +228,7 @@ class NotebookPage extends Component {
         // Cell has to be an existing workflow module cell. This should be
         // ensured by the child component (not validated here).
         const { dispatch, notebook } = this.props;
-        dispatch(insertNotebookCell(notebook, cell, position));
+        dispatch(createtNotebookCell(notebook, cell, position));
     }
     /**
      * Dispatch a command specification object for a command that the user
@@ -282,11 +284,75 @@ class NotebookPage extends Component {
         history.push(notebookPageUrl(project.id, branch.id));
     }
     handleSubmitCell = (cell, commandSpec, data) => {
-        const { dispatch, notebook } = this.props;
-        console.log(cell);
-        console.log(commandSpec);
-        console.log(data);
-        alert('Submit');
+        const { dispatch, notebook, project } = this.props;
+        // Create the request object containing the package and command
+        // identifier together with the form data
+        const req = {
+            packageId: commandSpec.packageId,
+            commandId: commandSpec.id,
+            arguments: data
+        };
+        // The fileArg value will determine whether we need to upload a file
+        // first or not.
+        let fileArg = null;
+        if (commandSpec.fileParameter != null) {
+            fileArg = data.find((arg) => (
+                arg.id === commandSpec.fileParameter.id)
+            );
+        }
+        if (cell.isNewCell()) {
+            // Insert a new cell. The URL depends on whether the cell is the
+            // last cell in the notebook or not.
+            let url = null;
+            if (notebook.lastCell().id === cell.id) {
+                url = notebook.workflow.links.get(HATEOAS_MODULE_APPEND);
+            } else {
+                for (let i = 0; i < notebook.cells.length; i++) {
+                    if (notebook.cells[i].id === cell.id) {
+                        for (let j = i + 1; j < notebook.cells.length; j++) {
+                            const c = notebook.cells[j];
+                            if (!c.isNewCell()) {
+                                url = c.module.links.get(HATEOAS_MODULE_INSERT);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            // If the file argument is not null we need to upload the file first
+            if ((fileArg != null) && (fileArg.value.file != null)) {
+                // Need to upload file first
+                dispatch(updateNotebookCellWithUpload(
+                    notebook,
+                    url,
+                    req,
+                    insertNotebookCell,
+                    cell.id,
+                    project.links.get(HATEOAS_PROJECT_FILE_UPLOAD),
+                    fileArg
+                ));
+            } else {
+                dispatch(insertNotebookCell(notebook, url, req, cell.id));
+            }
+        } else {
+            // Replace an existing cell
+            const url = cell.module.links.get(HATEOAS_MODULE_REPLACE);
+            // If the file argument is not null we need to upload the file first
+            if ((fileArg != null) && (fileArg.value.file != null)) {
+                // Need to yupload file first
+                dispatch(updateNotebookCellWithUpload(
+                    notebook,
+                    url,
+                    req,
+                    replaceNotebookCell,
+                    cell.id,
+                    project.links.get(HATEOAS_PROJECT_FILE_UPLOAD),
+                    fileArg
+                ));
+            } else {
+                dispatch(replaceNotebookCell(notebook, url, req, cell.id));
+            }
+        }
     }
     /**
      * Dispatch action to switch to a given branch and retrieve the workflow at

@@ -289,7 +289,7 @@ export class Notebook {
         let index = 0;
         while (index < size) {
             const cell = this.cells[index];
-            if (cell.isNewCell()) {
+            if ((cell.isNewCell()) && (cell.id !== modifiedCellId)) {
                 modifiedCells.push(cell);
             } else {
                 const module = new ModuleHandle().fromJson(

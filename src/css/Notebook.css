@@ -250,6 +250,9 @@ div.output-content {
 div.output-error {
     padding-left: 10px;
     margin-top: 10px;
+    overflow: auto;
+    overflow-y: scroll;
+    white-space: nowrap;
 }
 
 div.output-content-html {
@@ -290,4 +293,5 @@ pre.error-text {
     color: #912d2b;
     padding: 10px 10px 0px 0px;
     margin: 0px;
+    max-width: 1000px;
 }

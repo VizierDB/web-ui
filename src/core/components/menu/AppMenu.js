@@ -32,7 +32,7 @@ import { isNotEmptyString, notebookPageUrl } from '../../util/App';
 import '../../../css/ResourceListing.css';
 import '../../../css/ProjectPage.css';
 
-import logo from '../../../img/logo_small.png';
+import logo from '../../../img/logo_small_tiny.png';
 
 /**
  * Component that allows to select the current branch. In addition to switching
@@ -136,9 +136,15 @@ class AppMenu extends React.Component {
         // Show the project logo as the first element. If not on the main page
         // have the logo be clickable to get to the homepage.
         if (!resource.isMainPage()) {
-            menuItems.push(<Menu.Item key='logo' icon='vimeo v' header onClick={onGoHome} />);
+            menuItems.push(
+                <Menu.Item key='logo' header onClick={onGoHome}>
+                    <Image src={logo} />
+                </Menu.Item>
+            );
         } else {
-            menuItems.push(<Menu.Item key='logo'  icon='vimeo v' header />);
+            menuItems.push(
+                <Menu.Item key='logo' header><Image src={logo} /></Menu.Item>
+            );
         }
         // Show the project name if the project is set
         if (project != null) {

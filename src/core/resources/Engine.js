@@ -83,6 +83,8 @@ class CommandDeclaration {
         // Set the code parameter property for faster access when rendering
         // notebook cells
         this.codeParameter = this.parameters.find((p) => (p.datatype === DT_CODE));
+        // Do the same for the file id property
+        this.fileParameter = this.parameters.find((p) => (p.datatype === DT_FILE_ID));
         return this;
     }
 }
@@ -159,43 +161,55 @@ export class PackageRegistry {
 
 /**
  * Convert form values for the gien command specification into a format that is
- * expected by the API. Returns an object that contains the request and a
+ * expected by the API.
+ *
+ * The API expects a list of arguments that are id-value pairs. For rows and
+ * lists the argument value may be nested.
+ *
+ * Returns an object that contains the request and a
  * potentially empty list of error messages for form values that failed to
  * validate.
  */
 export const formValuesToRequestData = (values, parameters) => {
-    const result = {data: {}, errors: []};
+    const result = {data: [], errors: []};
     for (let i = 0; i < parameters.length; i++) {
         const para = parameters[i];
-        const val = values[para.id];
+        let val = values[para.id];
         if (para.datatype === DT_RECORD) {
             if (val != null) {
                 const recordResult = formValuesToRequestData(
                     val,
                     para.parameters
                 );
-                result.data[para.id] = recordResult.data;
+                result.data.push({id: para.id, value: recordResult.data});
                 recordResult.errors.forEach((err) => (result.errors.push(err)))
             } else if (para.required) {
                 result.errors.push('Missing value for ' + para.name);
             }
         } else if (para.datatype === DT_LIST) {
             if ((val != null) && (val.length > 0)) {
-                result.data[para.id] = [];
+                const rows = [];
                 for (let r = 0; r < val.length; r++) {
                     const rowResult = formValuesToRequestData(
                         val[r],
                         para.parameters
                     );
-                    result.data[para.id].push(rowResult.data);
+                    rows.push(rowResult.data);
                     rowResult.errors.forEach((err) => (result.errors.push(err)))
                 }
+                result.data.push({id: para.id, value: rows});
             } else if (para.required) {
                 result.errors.push('Missing value for ' + para.name);
             }
         } else {
+            const dt = para.datatype;
+            if ((dt === DT_INT) || (dt === DT_ROW_ID)) {
+                val = parseInt(val);
+            } else if (dt === DT_DECIMAL) {
+                val = parseFloat(val);
+            }
             validateArgument(val, para, result.errors);
-            result.data[para.id] = val;
+            result.data.push({id: para.id, value: val});
         }
     }
     return result;
