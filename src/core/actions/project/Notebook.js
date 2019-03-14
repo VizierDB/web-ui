@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-import { NO_OP } from '../main/App';
-import { fetchAuthed, requestAuth } from '../main/Service';
+import { fetchAuthed, requestAuth, serviceError } from '../main/Service';
 import { projectActionError, projectFetchError, requestProjectAction } from './Project';
 import { AnnotationList } from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
@@ -112,42 +111,35 @@ const workflowFetchError = (message, status) => (
 // Notebooks
 // -----------------------------------------------------------------------------
 
+const getJson = (response, success) => {
+    if (response.status === success) {
+        return response.json();
+    } else {
+        return response.json().then(err => {throw err;});
+    }
+}
 /**
  * Check the status of an active notebook cell. If the status of the associated
  * module has changed we fetch the update version of the workflow and update
  * the notebook accordingly.
  */
 export const checkModuleStatus = (notebook, cell) => (dispatch) => (
-    dispatch(
-        fetchResource(
-            cell.module.links.getSelf(),
-            (json) => {
-                if (json.state !== cell.module.state) {
-                    // If the state of the module has changes update the given
-                    // notebook after fetching the head of the workflow that is
-                    // represented by that notebook
-                    dispatch(
-                        fetchResource(
-                            notebook.workflow.links.get(HATEOAS_BRANCH_HEAD),
-                            (json) => {
-                                // Get the new workflow handle
-                                const wf = new WorkflowHandle(
-                                    notebook.workflow.engine
-                                ).fromJson(json);
-                                return {
-                                    type: UPDATE_NOTEBOOK,
-                                    notebook: notebook.updateWorkflow(wf, cell.id)
-                                };
-                            },
-                            workflowFetchError
-                    ));
-                }
-                return dispatch({type: NO_OP});
-            },
-            (message) => (
-                setNotebookCellError(notebook, cell.module, 'module status', message)
-            )
-        )
+    fetch(cell.module.links.getSelf()).then(
+        response => getJson(response, 200),
+        error => dispatch(serviceError(error.message))
+    ).then(
+        json => {
+            if (json.state !== cell.module.state) {
+                return fetch(notebook.workflow.links.get(HATEOAS_BRANCH_HEAD)).then(
+                    response => getJson(response, 200),
+                    error => dispatch(serviceError(error.message))
+                ).then(
+                    json => (dispatch(updateNotebookHandler(json, notebook, cell.id))),
+                    error => dispatch(workflowFetchError(error.message))
+                )
+            }
+        },
+        error => dispatch(setNotebookCellError(notebook, cell.module, 'module status', error.message))
     )
 )
 
@@ -439,16 +431,7 @@ export const deleteNotebookCell = (notebook, cell) => (dispatch) => {
     )(dispatch).then(function(response) {
         if (response.status === 200) {
             // SUCCESS: Dispatch modified workflow handle
-            response.json().then(json => {
-                // Get the new workflow handle
-                const wf = new WorkflowHandle(
-                    notebook.workflow.engine
-                ).fromJson(json);
-                dispatch({
-                    type: UPDATE_NOTEBOOK,
-                    notebook: notebook.updateWorkflow(wf)
-                });
-            });
+            response.json().then(json => dispatch(updateNotebookHandler(json, notebook)));
         } else if(response.status === 401) {
         	// UNAUTHORIZED: re-request auth
         	dispatch(requestAuth())
@@ -625,4 +608,22 @@ export const updateNotebookCellWithUpload = (modifyUrl, data, notebookModifier, 
     } else {
         return dispatch(notebookModifier(modifyUrl, data));
     }
+}
+
+
+/**
+ * Callback handler when a new workflow handle is received for a notebook. The
+ * json object contains the workflow handle response from the API. The notebook
+ * is the current notebook resource. The optional modifiedCellId identifies the
+ * notebook cell that triggered the update.
+ */
+const updateNotebookHandler = (json, notebook, modifiedCellId) => {
+    // Get the new workflow handle
+    const wf = new WorkflowHandle(
+        notebook.workflow.engine
+    ).fromJson(json);
+    return {
+        type: UPDATE_NOTEBOOK,
+        notebook: notebook.updateWorkflow(wf, modifiedCellId)
+    };
 }

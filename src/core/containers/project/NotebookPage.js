@@ -229,6 +229,13 @@ class NotebookPage extends Component {
         dispatch(insertNotebookCell(notebook, cell, position));
     }
     /**
+     * Dispatch a command specification object for a command that the user
+     * wants to remove from the list of hidden commands.
+     */
+    handleRemoveFilteredCommand = (command) => {
+        this.props.dispatch(removeFilteredCommand(command));
+    }
+    /**
      * Dispatch an action to load the resource that is being shown as output
      * for the notebook cell that displays the given workflow module.
      */
@@ -242,8 +249,8 @@ class NotebookPage extends Component {
                 module,
                 notebook.getDatasetForModule(module, resourceName),
                 0,
-                userSettings.cellRowLimit())
-            );
+                userSettings.cellRowLimit()
+            ));
         } else if (resourceType === CONTENT_HIDE) {
             dispatch(hideCellOutput(notebook, module));
         } else if (resourceType === CONTENT_TEXT) {
@@ -251,13 +258,6 @@ class NotebookPage extends Component {
         } else if (resourceType === CONTENT_TIMESTAMPS) {
             dispatch(showCellTimestamps(notebook, module));
         }
-    }
-    /**
-     * Dispatch a command specification object for a command that the user
-     * wants to remove from the list of hidden commands.
-     */
-    handleRemoveFilteredCommand = (command) => {
-        this.props.dispatch(removeFilteredCommand(command));
     }
     /**
      * Dispatch action to set the given cell as the new active cell of the

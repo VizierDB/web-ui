@@ -61,7 +61,7 @@ const receiveService = (json) => ({
 /**
  * Error handler for service descriptor retrieval.
  */
-const serviceError = (error) => ({
+export const serviceError = (error) => ({
     type: SERVICE_ERROR,
     error
 })
