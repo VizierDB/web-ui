@@ -155,7 +155,7 @@ td.cell-index.pending-cell {
 
 p.cell-index.pending-cell {
     /*color: #ffa000;*/
-    color: #888;
+    color: #3b4151;
 }
 
 /*
@@ -163,7 +163,7 @@ p.cell-index.pending-cell {
  */
 table.cell.inactive-cell.running-cell {
     /*border-left: solid 3px #43a047;*/
-    border-left: solid 3px #cecece;
+    border-left: solid 3px #3b4151;
 }
 
 td.cell-index.running-cell {
@@ -173,7 +173,7 @@ td.cell-index.running-cell {
 
 p.cell-index.running-cell {
     /*color: #00a007;*/
-    color: #888;
+    color: #3b4151;
 }
 
 /* Command text */

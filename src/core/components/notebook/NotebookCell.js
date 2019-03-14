@@ -139,14 +139,6 @@ class NotebookCell extends React.Component {
             onSelect(cell);
         }
     }
-    /**
-     * Submit the given form data as the command for the associated notebook
-     * cell.
-     */
-    handleSubmitCell = (data) => {
-        const { cell, onSubmitCell } = this.props;
-        onSubmitCell(cell, data);
-    }
     render() {
         const {
             apiEngine,
@@ -160,8 +152,9 @@ class NotebookCell extends React.Component {
             onCancelExec,
             onCheckStatus,
             onDismissCell,
-            onOutputSelect,
             onFetchAnnotations,
+            onOutputSelect,
+            onSubmitCell,
             userSettings
         } = this.props;
         // The main components of a notebook cell are the cell index, the cell
@@ -245,7 +238,7 @@ class NotebookCell extends React.Component {
                 onClick={this.handleSelectCell}
                 onDismiss={onDismissCell}
                 onSelectCell={this.handleSelectCell}
-                onSubmit={this.handleSubmitCell}
+                onSubmit={onSubmitCell}
                 userSettings={userSettings}
             />
         );

@@ -250,14 +250,14 @@ class CellCommandArea extends React.Component {
         this.setState({showCommandsListing: true});
     }
     handleSubmitForm = () => {
-        const { onSubmit } = this.props;
+        const { cell, onSubmit } = this.props;
         const { formValues, selectedCommand } = this.state;
         const req = formValuesToRequestData(formValues, selectedCommand.parameters);
         if (req.errors.length > 0) {
             this.setState({errors: req.errors, hasErrors: true});
         } else {
             this.setState({errors: null, hasErrors: false});
-            onSubmit(req.data);
+            onSubmit(cell, selectedCommand, req.data);
         }
     }
     /**

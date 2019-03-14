@@ -281,8 +281,10 @@ class NotebookPage extends Component {
         const { branch, history, project } = this.props;
         history.push(notebookPageUrl(project.id, branch.id));
     }
-    handleSubmitCell = (cell, data) => {
-        console.log(cell.id);
+    handleSubmitCell = (cell, commandSpec, data) => {
+        const { dispatch, notebook } = this.props;
+        console.log(cell);
+        console.log(commandSpec);
         console.log(data);
         alert('Submit');
     }
