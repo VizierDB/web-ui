@@ -103,26 +103,31 @@ export const authHeader = (dispatch) => {
  * try to get the auth data saved in local storage.
  */
 export const fetchAuthed = (url, fetchProps) => (dispatch) => {
-    const authHead = authHeader(dispatch);
-    if(authHead){
-	    let newFetchProps = fetchProps;
-	    if(fetchProps && fetchProps.headers){
-	    	Object.assign(newFetchProps.headers, authHead);
-		}
-		else if(fetchProps){
-			newFetchProps.headers = authHead;
-		}
-		else {
-			newFetchProps = {
-				method : 'GET',
-				headers: authHead
-			};
-		}
-	    return fetch(url, newFetchProps)
+	if(window.env.API_BASIC_AUTH){
+		const authHead = authHeader(dispatch);
+		if(authHead){
+		    let newFetchProps = fetchProps;
+		    if(fetchProps && fetchProps.headers){
+		    	Object.assign(newFetchProps.headers, authHead);
+			}
+			else if(fetchProps){
+				newFetchProps.headers = authHead;
+			}
+			else {
+				newFetchProps = {
+					method : 'GET',
+					headers: authHead
+				};
+			}
+		    return fetch(url, newFetchProps)
+	    }
+	    else return new Promise(function(resolve, reject){
+	    	 reject({message:"No saved credentials.  Please enter credentials."})
+	    	})
+	}
+    else {
+    	return fetch(url, fetchProps)
     }
-    else return new Promise(function(resolve, reject){
-    	 reject({message:"No saved credentials.  Please enter credentials."})
-    	})
 }
 
 /**

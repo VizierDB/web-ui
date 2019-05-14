@@ -13,6 +13,7 @@
 window.env = {
   // This option can be retrieved in "src/index.js" with "window.env.API_URL".
   API_URL: 'http://localhost:5000/vizier-db/api/v1/',
+  API_BASIC_AUTH: false,
   APP_TITLE: 'Development Server',
   ANALYTICS_URL: 'https://analytics.vizier.app/',
   ANALYTICS_SITE_ID: '12a12e629ffb388167c2c3e560bbc8e1'
