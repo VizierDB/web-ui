@@ -80,7 +80,7 @@ To run an instance of VizierDB using docker save the following script as run-con
 
 	#proxy
 	sudo docker run -d -p 80:80 -p 443:443 -p 9001:9001 -h vizier-proxy --name vizier-proxy --network spark-net -e VIZIER_CONFIG="vizier_k8s.conf" \
-	-e VIZIER_API_APP_PATH="/api/" -e VIZIER_DOMAIN="$VIZIER_DOMAIN" docker.mimirdb.info/vizier-proxy
+	-e VIZIER_API_APP_PATH="/api/" -e VIZIER_DOMAIN="$VIZIER_DOMAIN" -e VIZIER_API_PROXY_PATH="/" docker.mimirdb.info/vizier-proxy
 
  
 - update the VIZIER_DOMAIN variable for the vizier-proxy deployment to the domain you will use to access Vizier.  You can use a real domain and DNS entries or the hosts file of a client.  (Line 35)
