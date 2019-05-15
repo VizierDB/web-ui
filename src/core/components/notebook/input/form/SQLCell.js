@@ -54,26 +54,30 @@ export class SQLCodeSnippetsSelector extends React.Component {
      * lines.
      */
     handleSelect = (e, { value }) => {
-    	const { datasetValue, onSelect } = this.props;
-    	const { secondaryDatasetValue } = this.state
+    	const { onSelect } = this.props;
+    	const { secondaryDatasetValue, primaryDatasetValue } = this.state
     	let lines = [];
         if (value === SELECT_TABLE) {
-            lines.push('SELECT * FROM '+datasetValue);
+            lines.push('SELECT * FROM '+primaryDatasetValue);
         } else if (value === JOIN_TABLES) {
-        	lines.push('SELECT * FROM '+datasetValue+' JOIN '+secondaryDatasetValue);
+        	lines.push('SELECT * FROM '+primaryDatasetValue+' JOIN '+secondaryDatasetValue);
         } else if (value === UNION_TABLES) {
-        	lines.push('(SELECT * FROM '+datasetValue+') UNION ALL (SELECT * FROM '+secondaryDatasetValue+')');
+        	lines.push('(SELECT * FROM '+primaryDatasetValue+') UNION ALL (SELECT * FROM '+secondaryDatasetValue+')');
         } else if (value === DATASET) {
-            lines.push(' '+datasetValue+' ');
+            lines.push(' '+primaryDatasetValue+' ');
         }
         onSelect(lines);
     }
     handleSecondaryDatasetChange = (value) => {
         this.setState({secondaryDatasetValue: value});
     }
+    handlePrimaryDatasetChange = (value) => {
+        this.setState({primaryDatasetValue: value});
+    }
+    
     render() {
-    	const { id, datasets, datasetValue, onDatasetChange } = this.props;
-    	const { secondaryDatasetValue } = this.state;
+    	const { id, datasets } = this.props;
+    	const { secondaryDatasetValue, primaryDatasetValue } = this.state;
     	return (
             <div className='snippet-selector'>
                 <Grid columns={4} divided>
@@ -93,9 +97,9 @@ export class SQLCodeSnippetsSelector extends React.Component {
 		                		                isRequired={false}
 		                		                name={id}
 		                		                datasets={datasets}
-		                		                value={datasetValue}
+		                		                value={primaryDatasetValue}
 		                		                onChange={(dsselector, value) => {
-		                		                	onDatasetChange(value)
+		                		                	this.handlePrimaryDatasetChange(value)
 		                                        }}
 		                		        	/>
 		                                </div>
@@ -111,9 +115,9 @@ export class SQLCodeSnippetsSelector extends React.Component {
 		                		                isRequired={false}
 		                		                name={id}
 		                		                datasets={datasets}
-		                		                value={datasetValue}
+		                		                value={primaryDatasetValue}
 		                		                onChange={(dsselector, value) => {
-		                		                	onDatasetChange(value)
+		                		                	this.handlePrimaryDatasetChange(value)
 		                                        }}
 		                		        	/>
 		                		        </div>
@@ -143,9 +147,9 @@ export class SQLCodeSnippetsSelector extends React.Component {
 	                		                isRequired={false}
 	                		                name={id}
 	                		                datasets={datasets}
-	                		                value={datasetValue}
+	                		                value={primaryDatasetValue}
 	                		                onChange={(dsselector, value) => {
-	                		                	onDatasetChange(value)
+	                		                	this.handlePrimaryDatasetChange(value)
 	                                        }}
 	                		        	/>
 	                		        </div>
@@ -183,9 +187,9 @@ export class SQLCodeSnippetsSelector extends React.Component {
 		                		                isRequired={false}
 		                		                name={id}
 		                		                datasets={datasets}
-		                		                value={datasetValue}
+		                		                value={primaryDatasetValue}
 		                		                onChange={(dsselector, value) => {
-		                		                	onDatasetChange(value)
+		                		                	this.handlePrimaryDatasetChange(value)
 		                                        }}
 		                		        	/>
 		                                </div>
@@ -360,7 +364,7 @@ class SQLCell extends React.Component {
         let examplePanel = null;
         if (snippetSelectorVisible) {
             headerCss = ' expanded';
-            selectorPanel = <SQLCodeSnippetsSelector datasets={datasets} datasetValue={datasetValue} onDatasetChange={this.handleDatasetChange} onSelect={this.appendCode}/>
+            selectorPanel = <SQLCodeSnippetsSelector datasets={datasets} onDatasetChange={this.handleDatasetChange} onSelect={this.appendCode}/>
         }
         if (editing) {
             examplePanel =

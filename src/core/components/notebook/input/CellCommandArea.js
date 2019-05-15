@@ -22,15 +22,16 @@ import { HotKeys } from 'react-hotkeys';
 import { Button, Form } from 'semantic-ui-react';
 import CommandsListing from './CommandsListing';
 import CodeCell from './form/CodeCell'
+import TextControl from './form/TextControl';
 import { ErrorListMessage } from '../../Message';
 import ModuleInputForm from './ModuleInputForm';
 import { CodeSnippetsSelector as PythonSnippets } from './form/PythonCell';
 import { ScalaCodeSnippetsSelector as ScalaSnippets } from './form/ScalaCell';
+import { SQLCodeSnippetsSelector as SQLSnippets } from './form/SQLCell';
 import { DT_DATASET_ID, formValuesToRequestData, toFormValues,
     resetColumnIds } from '../../../resources/Engine';
 import '../../../../css/App.css';
 import '../../../../css/ModuleForm.css';
-
 
 /**
  * The moule input area is divided into three parts: (i) a header that contains
@@ -318,6 +319,8 @@ class CellCommandArea extends React.Component {
         // The main content depends on whether a command specification is
         // defined for the associated notebook cell or not.
         let mainContent = null;
+        // For code cells with additional parameters
+        let additionalParams = null;
         // For code cells an additional button is shown to toggle vizibility of
         // a code snippet selector.
         let codeSnippetButton = null;
@@ -360,9 +363,36 @@ class CellCommandArea extends React.Component {
                         codeSnippetPanel = (
                             <ScalaSnippets onSelect={this.handleAppendCode}/>
                         );
+                    } else if (paraCode.language === 'sql') {
+                        let outputDataset = formValues['output_dataset'];
+                    	codeSnippetPanel = (
+                                <SQLSnippets datasets={datasets} onSelect={this.handleAppendCode}/>
+                            );
                     }
+                    
                 }
                 const { codeEditorProps } = this.state;
+                if((isActiveCell) && (paraCode.language === 'sql')) {
+                	let outputDataset = formValues['output_dataset'];
+                	additionalParams = ( 
+                    		<div class="ui labeled input">
+				                <div class="ui label">
+				                	Output Dataset
+				                </div>
+			                    <TextControl
+				                    key={paraCode.id}
+				                    id={paraCode.id}
+				                    name={'Output Dataset'}
+				                    placeholder={'Output Dataset (optional)'}
+				                    isRequired={false}
+				                    value={outputDataset}
+				                    onChange={(dstext, value) => {
+				                    	this.handleFormValueChange('output_dataset', value, codeEditorProps.cursorPosition)
+				                    }}
+				                />
+				            </div> 
+	                    );
+                }
                 mainContent = (
                     <div>
                         <Form>
@@ -380,6 +410,7 @@ class CellCommandArea extends React.Component {
                                 value={formValues[paraCode.id]}
                             />
                         </Form>
+                    { additionalParams }
                     { codeSnippetPanel }
                     </div>
                 );
