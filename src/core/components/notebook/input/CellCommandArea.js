@@ -103,7 +103,7 @@ class CellCommandArea extends React.Component {
     handleAppendCode = (lines) => {
         const  { codeEditorProps, formValues, selectedCommand } = this.state;
         const paraCode = selectedCommand.codeParameter;
-        const editorValue = formValues[paraCode.id];
+        const editorValue = formValues[paraCode.id] == null ? '' : formValues[paraCode.id];
         const cursorPosition = codeEditorProps.cursorPosition;
         // Get the current indent from the last line of the editor value
         let indent = '';
