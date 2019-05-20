@@ -48,11 +48,17 @@ class ControlGroup extends React.Component {
         serviceProperties: PropTypes.object.isRequired,
         value: PropTypes.array.isRequired
     }
+    constructor(props) {
+        super(props);
+        const { id, controlSpec, datasets, onChange } = this.props;
+        const newRow = toFormValues(controlSpec.parameters, datasets, null, id)
+        this.state = ({addTuple: newRow});
+    }
     /**
      * Add the current values in the form controls as a tuple to the list of
      * argument values.
      */
-    handleAdd = () => {
+    handleAdd = (childId, childValue) => {
         const { id, controlSpec, datasets, onChange } = this.props;
         const formValue = this.props.value;
         // Make a copy of the current form value
@@ -61,7 +67,11 @@ class ControlGroup extends React.Component {
             rows.push(formValue[i])
         }
         // Add a new row of default values to the modified row list
-        rows.push(toFormValues(controlSpec.parameters, datasets, null, id));
+        let newRow = toFormValues(controlSpec.parameters, datasets, null, id)
+        let blankRow = toFormValues(controlSpec.parameters, datasets, null, id)
+        this.setState({addTuple: blankRow});
+        newRow[childId] = childValue
+        rows.push(newRow);
         onChange(id, rows);
     }
     /**
@@ -96,6 +106,9 @@ class ControlGroup extends React.Component {
         for (let i = 0; i < formValue.length; i++) {
             if (i !== value) {
                 rows.push(formValue[i])
+            }
+            else {
+            	this.setState({addTuple: formValue[i]});
             }
         }
         onChange(id, rows);
@@ -225,20 +238,30 @@ class ControlGroup extends React.Component {
             );
             rows.push(<tr key={key}>{rowControls}</tr>);
         }
+        const lastRowControls = [];
+        const { addTuple } = this.state
+        const key = 'r_' + (value.length+1) + '_' + id;
+        for (let c = 0; c < controlSpec.parameters.length; c++) {
+            const child = controlSpec.parameters[c]
+            lastRowControls.push(
+                <td key={key + '_ctrl_' + child.id} className='inner-form-control'>
+                    <ModuleFormControl
+                        key={child.id}
+                        controlSpec={child}
+                        datasets={datasets}
+                        onChange={(name, value) => (this.handleAdd(child.id, value))}
+                        selectedDataset={selectedDataset}
+                        serviceProperties={serviceProperties}
+                        value={addTuple[child.id]}
+                    />
+                </td>
+            );
+        }
+        const lastRow = <tr key={key}>{lastRowControls}</tr>
         // Add another row that contains the add button.
         return (
             <div>
-                <table className='inner-form'><tbody>{rows}</tbody></table>
-                <div className='form-add-button'>
-                    <Button
-                        content='Add Row'
-                        icon='plus'
-                        labelPosition='left'
-                        positive
-                        onClick={this.handleAdd}
-                        title='Add a new row to the list'
-                    />
-                </div>
+                <table className='inner-form'><tbody>{rows}{lastRow}</tbody></table>
             </div>
         );
     }
