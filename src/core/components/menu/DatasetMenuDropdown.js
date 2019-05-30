@@ -36,11 +36,9 @@ class DatasetMenuDropdown extends React.Component {
      */
     handleSelect = (e, { value }) => {
         const { datasets, onSelect } = this.props;
-        const datasetIds = Object.keys(datasets)
-        const datasetCount = datasetIds.length;
-        for (let i = 0; i < datasetCount; i++) {
-            const ds = datasets[datasetIds[i]];
-            if (ds.id === value) {
+        for (let i = 0; i < datasets.length; i++) {
+            const ds = datasets[i];
+            if (ds.name === value) {
                 onSelect(ds);
                 break;
             }
@@ -48,13 +46,11 @@ class DatasetMenuDropdown extends React.Component {
     }
     render() {
         const { datasets, resource } = this.props;
-        const datasetIds = Object.keys(datasets)
-        const datasetCount = datasetIds.length;
         // Show nothing if the list of datasets is empty
-        if (datasetCount === 0) {
+        if (datasets.length === 0) {
             return null;
-        } else if (datasetCount === 1) {
-            const ds = datasets[datasetIds[0]];
+        } else if (datasets.length === 1) {
+            const ds = datasets[0];
             const disabled = resource.isDataset();
             // Set onClick handler to null if disabled
             let onClickHandler = null;
@@ -63,10 +59,10 @@ class DatasetMenuDropdown extends React.Component {
             }
             return (
                 <Menu.Item
-                    key={ds.id}
+                    key={ds.name}
                     icon='table'
                     name={ds.name}
-                    value={ds.id}
+                    value={ds.name}
                     disabled={disabled}
                     onClick={onClickHandler}
                 />
@@ -76,8 +72,8 @@ class DatasetMenuDropdown extends React.Component {
             // items. Otherwise, disable the menu entry.
             let hasSelectableItems = false;
             let menuItems = [];
-            for (let i = 0; i < datasetCount; i++) {
-                const ds = datasets[datasetIds[i]];
+            for (let i = 0; i < datasets.length; i++) {
+                const ds = datasets[i];
                 let disabled = false;
                 if (resource.isDataset()) {
                     disabled = resource.content.name === ds.name;
@@ -87,10 +83,10 @@ class DatasetMenuDropdown extends React.Component {
                 }
                 menuItems.push(
                     <Dropdown.Item
-                        key={ds.id}
+                        key={ds.name}
                         icon='table'
                         text={ds.name}
-                        value={ds.id}
+                        value={ds.name}
                         disabled={disabled}
                         onClick={this.handleSelect}
                     />

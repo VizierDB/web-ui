@@ -20,15 +20,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Dimmer, Icon, Loader } from 'semantic-ui-react';
-import { insertNotebookCell, updateNotebookCellWithUpload } from '../../actions/notebook/Notebook';
+import { insertNotebookCell, updateNotebookCellWithUpload } from '../../actions/project/Notebook';
 import {
     clearAnnotations, deleteAnnotations, fetchAnnotations, showSpreadsheet,
     submitUpdate, updateAnnotations
-} from '../../actions/spreadsheet/Spreadsheet';
+} from '../../actions/project/Spreadsheet';
 import { CloseButton } from '../../components/Button'
 import AnnotationObject from '../../components/annotation/AnnotationObject';
 import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
-import CellInputArea  from '../../components/notebook/input/CellInputArea';
 import GridCell from '../../components/spreadsheet/grid/GridCell';
 import HeaderCell from '../../components/spreadsheet/grid/HeaderCell';
 import RowIndexCell from '../../components/spreadsheet/grid/RowIndexCell';
@@ -450,11 +449,7 @@ class Spreadsheet extends React.Component {
                             </td>
                             <td className='cell-cmd'>
                                 <div className='cell-form'>
-                                    <CellInputArea
-                                        datasets={[dataset]}
-                                        env={project.environment}
-                                        onSubmit={this.appendModule}
-                                    />
+                                    
                                 </div>
                             </td>
                         </tr>

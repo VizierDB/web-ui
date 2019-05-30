@@ -28,7 +28,7 @@ import { createProject, deleteProject } from '../actions/project/ProjectListing'
 import { showSpreadsheet, showDatasetError, repairDatasetError } from '../actions/project/Spreadsheet';
 import AppMenu from './menu/AppMenu';
 import { ErrorMessage } from './Message';
-import { baseHref, branchPageUrl, notebookPageUrl, valueOrDefault } from '../util/App';
+import { baseHref, branchPageUrl, notebookPageUrl, spreadsheetPageUrl, errorListPageUrl, valueOrDefault } from '../util/App';
 import { HATEOAS_PROJECTS_CREATE }  from '../util/HATEOAS';
 
 
@@ -128,16 +128,19 @@ class ResourcePage extends Component {
      * Switch to spreadsheet view and load the selected dataset.
      */
     loadDataset = (dataset) => {
-        const { dispatch } = this.props;
-        dispatch(showSpreadsheet(dataset));
+        const { dispatch, history, notebook, branch, project } = this.props;
+        notebook.datasets[dataset.id].name = dataset.name
+        dispatch(showSpreadsheet(notebook.datasets[dataset.id]));
+        history.push(spreadsheetPageUrl(project.id, branch.id, dataset.id));
     }
     /**
      * Switch to error view and load the selected dataset.
      */
     loadDatasetError = (dataset) => {
-        const { dispatch } = this.props;
+        const { dispatch, history, branch, project } = this.props;
         dispatch(showDatasetError(dataset, dataset.links.self+'/annotations'));
         //dispatch(fetchAnnotations(dataset));
+        history.push(errorListPageUrl(project.id, branch.id, dataset.id));
     }
     /**
      * Switch to spreadsheet view and load the selected to the page

@@ -199,35 +199,37 @@ class AppMenu extends React.Component {
                         onClick={onShowNotebook}
                     />
                 );
-                const modulesCount = notebook.workflow.modules.length;
-                if (modulesCount > 0 && notebook.workflow.modules[modulesCount-1].datasets) {
-                    menuItems.push(
-	                    <DatasetMenuDropdown
-	                        key='datasets'
-	                        datasets={notebook.workflow.modules[modulesCount-1].datasets}
-	                        onSelect={onShowDataset}
-	                        resource={resource}
-	                    />
-	                );
-	                menuItems.push(
-	                    <DatasetErrorMenuDropdown
-	                        key='datasets'
-	                        datasets={notebook.workflow.modules[modulesCount-1].datasets}
-	                        onSelect={onShowDatasetError}
-	                        resource={resource}
-	                    />
-	                );
-                }
-                if (notebook.workflow.charts) {
-	                menuItems.push(
-	                    <ChartMenuDropdown
-	                        key='charts'
-	                        charts={notebook.workflow.charts}
-	                        onSelect={onShowChart}
-	                        resource={resource}
-	                    />
-	                );
-                }
+                if(notebook){
+                	const modulesCount = notebook.workflow.modules.length;
+	                if (modulesCount > 0 && notebook.workflow.modules[modulesCount-1].datasets) {
+	                    menuItems.push(
+		                    <DatasetMenuDropdown
+		                        key='datasets'
+		                        datasets={notebook.workflow.modules[modulesCount-1].datasets}
+		                        onSelect={onShowDataset}
+		                        resource={resource}
+		                    />
+		                );
+		                menuItems.push(
+		                    <DatasetErrorMenuDropdown
+		                        key='errors'
+		                        datasets={notebook.workflow.modules[modulesCount-1].datasets}
+		                        onSelect={onShowDatasetError}
+		                        resource={resource}
+		                    />
+		                );
+	                }
+	                if (notebook.workflow.charts) {
+		                menuItems.push(
+		                    <ChartMenuDropdown
+		                        key='charts'
+		                        charts={notebook.workflow.charts}
+		                        onSelect={onShowChart}
+		                        resource={resource}
+		                    />
+		                );
+	                }
+	            }
             }
         }
         // Menu options to modify global user settings

@@ -21,6 +21,8 @@ import { routerReducer } from 'react-router-redux';
 import { app } from './main/App';
 import { mainPage } from './main/MainPage';
 import { branchPage } from './project/BranchPage';
+import { spreadsheetPage } from './project/SpreadsheetPage';
+import { datasetErrorsPage } from './project/DatasetErrorsPage';
 import { notebookPage } from './project/NotebookPage';
 import { projectListing } from './project/ProjectListing';
 import { projectPage} from './project/ProjectPage';
@@ -32,6 +34,8 @@ const rootReducer = combineReducers({
     branchPage,
     mainPage,
     notebookPage,
+    spreadsheetPage,
+    datasetErrorsPage,
     projectListing,
     projectPage,
     serviceApi,

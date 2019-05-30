@@ -28,10 +28,12 @@ import { ErrorMessage } from '../../components/Message';
 import MainPage from './MainPage'
 import BranchPage from '../project/BranchPage';
 import NotebookPage from '../project/NotebookPage'
+import SpreadsheetPage from '../project/SpreadsheetPage'
+import DatasetErrorsPage from '../project/DatasetErrorsPage'
 import AuthModal from '../../components/modals/AuthModal';
 import {
     baseHref, branchHistoryHref, notebookHeadHref, notebookVersionHref,
-    isNotEmptyString
+    isNotEmptyString, spreadsheetHref, errorListHref
 } from '../../util/App';
 
 import '../../../css/App.css'
@@ -126,6 +128,8 @@ class App extends Component {
                             <Route path={branchHistoryHref} component={BranchPage} />
                             <Route path={notebookHeadHref} component={NotebookPage} />
                             <Route path={notebookVersionHref} component={NotebookPage} />
+                            <Route path={spreadsheetHref} component={SpreadsheetPage} />
+                            <Route path={errorListHref} component={DatasetErrorsPage} />
                         </Switch>
                     </Router>
                 </MuiThemeProvider>

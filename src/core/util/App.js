@@ -33,7 +33,8 @@ export const branchHref = projectHref + '/branches/:branch_id';
 export const branchHistoryHref = branchHref + '/history';
 export const notebookHeadHref = branchHref + '/head';
 export const notebookVersionHref = branchHref + '/workflows/:workflow_id';
-
+export const spreadsheetHref = branchHref + '/spreadsheet/:dataset_id';
+export const errorListHref = branchHref + '/errors/:dataset_id';
 
 /**
  * Key codes
@@ -117,6 +118,31 @@ export const notebookPageUrl = (projectId, branchId, workflowId) => {
     return link;
 }
 
+/**
+ * Generate url to show a particular workflow version spreadsheet in the app.
+ */
+export const spreadsheetPageUrl = (projectId, branchId, datasetId, workflowId) => {
+    let link = baseHref + 'projects/' + projectId + '/branches/' + branchId;
+    if (workflowId != null) {
+        link += '/workflows/' + workflowId + '/spreadsheet/' + datasetId;
+    } else {
+        link += '/head' + '/spreadsheet/' + datasetId;
+    }
+    return link;
+}
+
+/**
+ * Generate url to show a particular workflow version error list in the app.
+ */
+export const errorListPageUrl = (projectId, branchId, datasetId, workflowId) => {
+    let link = baseHref + 'projects/' + projectId + '/branches/' + branchId;
+    if (workflowId != null) {
+        link += '/workflows/' + workflowId + '/errors/' + datasetId;
+    } else {
+        link += '/head' + '/errors/' + datasetId;
+    }
+    return link;
+}
 
 /**
  * Return given value or default value if value is null or undefined.
