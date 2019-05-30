@@ -22,7 +22,7 @@ import { HATEOASReferences } from '../util/HATEOAS';
 import { sortByName } from '../util/Sort';
 import { utc2LocalTime } from '../util/Timestamp';
 import { VIZUAL, VIZUAL_OP } from '../util/Vizual';
-
+import { CONTENT_CHART, CONTENT_DATASET, CONTENT_ERROR } from './Outputs';
 
 /**
  * Descriptor for a project in the project listing. Contains the information
@@ -171,30 +171,6 @@ export class ProjectHandle {
 }
 
 
-// -----------------------------------------------------------------------------
-// Project page resource
-// -----------------------------------------------------------------------------
-
-/**
- * Wrapper for the project resource. The resource captures one of the following
- * content types: Notebook, Branch History, Spreadsheet, Chart view, or Error.
- * The .type property contains the type information while the .content contains
- * the type specific content.
- */
-export class ProjectResource {
-    /**
-     * Constructor expects the content type information and a type-specific
-     * content object.
-     */
-    constructor(resourceType) {
-        this.resourceType = resourceType;
-    }
-}
-
-export const ChartResource = () => (new ProjectResource(-1));
-export const DatasetErrorResource = () => (new ProjectResource(-1));
-export const ErrorResource = () => (new ProjectResource(-1));
-export const SpreadsheetResource = () => (new ProjectResource(-1));
 
 // -----------------------------------------------------------------------------
 // Functions

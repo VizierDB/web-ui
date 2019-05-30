@@ -25,7 +25,7 @@ import {
 } from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
 import { Notebook } from '../../resources/Notebook';
-import { ErrorResource, SpreadsheetResource, DatasetErrorResource } from '../../resources/Project'
+import { ErrorResource, SpreadsheetResource, DatasetErrorResource } from '../../util/App'
 import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource, postResourceData } from '../../util/Api';
 import { fetchAuthed, requestAuth } from '../main/Service';
@@ -50,10 +50,10 @@ export const UPDATE_DATASET_ANNOTATIONS = 'UPDATE_DATASET_ANNOTATIONS'
  */
 export const showSpreadsheet = (dataset, url) => (dispatch) => {
     let fetchUrl = null;
-    if (url != null) {
+    if (url) {
         fetchUrl = url;
     } else {
-        fetchUrl = dataset.links.self;
+        fetchUrl = dataset.links.getDatasetUrl(0, 25);
     }
     dispatch(
         fetchResource(

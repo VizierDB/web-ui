@@ -19,7 +19,7 @@
 import {
     projectActionError, requestProjectAction, updateResource
 } from '../project/Project';
-import { ChartResource } from '../../resources/Project';
+import { ChartResource } from '../../util/App';
 import { fetchResource } from '../../util/Api';
 
 /**

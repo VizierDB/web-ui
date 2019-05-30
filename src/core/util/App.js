@@ -20,6 +20,8 @@
  * Set application routes. The baseHref points to the application home. Route
  * projectHref points to the web page for individual projects.
  */
+import { CONTENT_CHART, CONTENT_DATASET, CONTENT_ERROR } from '../resources/Outputs';
+
 let href = '';
 if (process.env.NODE_ENV === 'production') {
     href = href + 'vizier-db';
@@ -129,6 +131,7 @@ export const valueOrDefault = (val, defaultValue) => ((val != null) ? val : defa
 const RESOURCE_BRANCH = 'RESOURCE_BRANCH';
 const RESOURCE_MAIN_PAGE = 'RESOURCE_MAIN_PAGE';
 const RESOURCE_NOTEBOOK = 'RESOURCE_NOTEBOOK';
+const RESOURCE_DATASET_ERROR = 'RESOURCE_DATASET_ERROR';
 
 
 /**
@@ -141,8 +144,10 @@ export class AppResource {
      * Constructor expects the content type information and a type-specific
      * content object.
      */
-    constructor(resourceType) {
+    constructor(resourceType, content) {
         this.resourceType = resourceType;
+        this.type = resourceType;
+        this.content = content; 
     }
     /**
      * Various flags to check the type of the content.
@@ -150,9 +155,20 @@ export class AppResource {
     isBranch = () => (this.resourceType === RESOURCE_BRANCH);
     isMainPage = () => (this.resourceType === RESOURCE_MAIN_PAGE);
     isNotebook = () => (this.resourceType === RESOURCE_NOTEBOOK);
+    isError = () => (this.type === CONTENT_ERROR);
+    isChart = () => (this.type === CONTENT_CHART);
+    isDataset = () => (this.type === CONTENT_DATASET);
+    isDatasetError = () => (this.type === RESOURCE_DATASET_ERROR);
+    
 }
+
 
 // Shortcuts for different content types
 export const BranchResource = () => (new AppResource(RESOURCE_BRANCH));
 export const MainPageResource = (notebook) => (new AppResource(RESOURCE_MAIN_PAGE));
 export const NotebookResource = (notebook) => (new AppResource(RESOURCE_NOTEBOOK));
+export const ErrorResource = (title, module) => (new AppResource(CONTENT_ERROR, {title, module}));
+export const ChartResource = (name, dataset) => (new AppResource(CONTENT_CHART, {name, dataset}));
+export const DatasetErrorResource = (dataset, annotations) => (new AppResource(RESOURCE_DATASET_ERROR, {dataset, annotations}));
+export const SpreadsheetResource = (dataset) => (new AppResource(CONTENT_DATASET, dataset));
+
