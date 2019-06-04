@@ -33,7 +33,7 @@ import DatasetErrorsPage from '../project/DatasetErrorsPage'
 import AuthModal from '../../components/modals/AuthModal';
 import {
     baseHref, branchHistoryHref, notebookHeadHref, notebookVersionHref,
-    isNotEmptyString, spreadsheetHref, errorListHref
+    isNotEmptyString, spreadsheetHref, errorListHref, spreadsheetVersionHref, errorListVersionHref
 } from '../../util/App';
 
 import '../../../css/App.css'
@@ -125,6 +125,10 @@ class App extends Component {
                     <Router>
                         <Switch>
                             <Route exact path={baseHref} component={MainPage} />
+                            <Route path={spreadsheetHref} component={SpreadsheetPage} />
+                            <Route path={errorListHref} component={DatasetErrorsPage} />
+                            <Route path={spreadsheetVersionHref} component={SpreadsheetPage} />
+                            <Route path={errorListVersionHref} component={DatasetErrorsPage} />
                             <Route path={branchHistoryHref} component={BranchPage} />
                             <Route path={notebookHeadHref} component={NotebookPage} />
                             <Route path={notebookVersionHref} component={NotebookPage} />

@@ -28,7 +28,7 @@ import { FetchError } from '../../components/Message';
 import ResourcePage from '../../components/ResourcePage';
 import { DatasetErrorResource } from '../../util/App';
 import { branchPageUrl, notebookPageUrl } from '../../util/App.js';
-import { showSpreadsheet, repairDatasetError } from '../../actions/project/Spreadsheet';
+import { showSpreadsheet, showDatasetError, repairDatasetError } from '../../actions/project/Spreadsheet';
 
 import DatasetError from '../../components/project/DatasetError';
 import '../../../css/App.css';
@@ -55,7 +55,9 @@ class DatasetErrorsPage extends Component {
         projectList: PropTypes.array,
         serviceApi: PropTypes.object,
         userSettings: PropTypes.object.isRequired,
-        workflows: PropTypes.array
+        workflows: PropTypes.array,
+        dataset: PropTypes.object,
+        resource: PropTypes.object
     }
     /**
      * Fetch project information when page is loaded.
@@ -139,7 +141,8 @@ class DatasetErrorsPage extends Component {
             projectList,
             serviceApi,
             userSettings,
-            workflows
+            workflows,
+            resource
         } = this.props;
         // The main content of the page depends on the error and fetching state.
         let content = null;
@@ -151,13 +154,13 @@ class DatasetErrorsPage extends Component {
                     <FetchError error={fetchError} />
                 </div>
             );
-        } else if ((project == null) || (branch == null) || (workflows == null) || (isFetching)) {
+        } else if ((project == null) || (branch == null) || (workflows == null) || (resource == null) || (isFetching)) {
             // Show a spinner while the project information is being fetched.
             // There is nothing else to show yet.
             content = <ContentSpinner text='Loading History ...' />;
-        } else if (workflows != null) {
-        	const dataset = null;//resource.content.dataset;
-        	const annotations = null;//resource.content.annotations;
+        } else if (resource != null) {
+        	const dataset = resource.content.dataset;
+        	const annotations = resource.content.annotations;
         	const pageContent = (
                     <div className='dataset-error-view'>
                         <DatasetError
@@ -204,7 +207,9 @@ const mapStateToProps = state => {
         projectList: state.projectListing.projects,
         serviceApi: state.serviceApi,
         userSettings: state.app.userSettings,
-        workflows: state.branchPage.workflows
+        workflows: state.branchPage.workflows,
+        dataset: state.datasetErrorsPage.dataset,
+        resource: state.datasetErrorsPage.resource,
     }
 }
 

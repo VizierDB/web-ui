@@ -17,7 +17,9 @@
  */
 
 import { RECEIVE_BRANCH_HISTORY, REQUEST_BRANCH } from '../../actions/project/Branch';
-import { PROJECT_FETCH_ERROR, RECEIVE_PROJECT, REQUEST_PROJECT } from '../../actions/project/Project';
+import { PROJECT_FETCH_ERROR, RECEIVE_PROJECT, REQUEST_PROJECT, RECEIVE_PROJECT_RESOURCE } from '../../actions/project/Project';
+import { RESOURCE_DATASET_ERROR } from '../../util/App';
+import { CONTENT_DATASET } from '../../resources/Outputs';
 
 /**
 * Reducer for actions that affect the branch history page.
@@ -61,6 +63,19 @@ export const datasetErrorsPage = (state = INITIAL_STATE, action) => {
                 ...state,
                 isFetching: true,
             };
+        case RECEIVE_PROJECT_RESOURCE:
+        	switch (action.resource.type) {
+        		case RESOURCE_DATASET_ERROR:
+	        	    return {
+		        	    ...state,
+		        	    resource: action.resource
+		            };
+        		case CONTENT_DATASET:
+	        	    return {
+		        	    ...state,
+		        	    dataset: action.resource
+		            };
+        	};
         default:
             return state
     }

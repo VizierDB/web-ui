@@ -33,8 +33,10 @@ export const branchHref = projectHref + '/branches/:branch_id';
 export const branchHistoryHref = branchHref + '/history';
 export const notebookHeadHref = branchHref + '/head';
 export const notebookVersionHref = branchHref + '/workflows/:workflow_id';
-export const spreadsheetHref = branchHref + '/spreadsheet/:dataset_id';
-export const errorListHref = branchHref + '/errors/:dataset_id';
+export const spreadsheetHref = notebookHeadHref + '/spreadsheet/:dataset_id';
+export const errorListHref = notebookHeadHref + '/errors/:dataset_id';
+export const spreadsheetVersionHref = notebookVersionHref + '/spreadsheet/:dataset_id';
+export const errorListVersionHref = notebookVersionHref + '/errors/:dataset_id';
 
 /**
  * Key codes
@@ -157,7 +159,7 @@ export const valueOrDefault = (val, defaultValue) => ((val != null) ? val : defa
 const RESOURCE_BRANCH = 'RESOURCE_BRANCH';
 const RESOURCE_MAIN_PAGE = 'RESOURCE_MAIN_PAGE';
 const RESOURCE_NOTEBOOK = 'RESOURCE_NOTEBOOK';
-const RESOURCE_DATASET_ERROR = 'RESOURCE_DATASET_ERROR';
+export const RESOURCE_DATASET_ERROR = 'RESOURCE_DATASET_ERROR';
 
 
 /**

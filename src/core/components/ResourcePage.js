@@ -130,16 +130,18 @@ class ResourcePage extends Component {
     loadDataset = (dataset) => {
         const { dispatch, history, notebook, branch, project } = this.props;
         notebook.datasets[dataset.id].name = dataset.name
-        dispatch(showSpreadsheet(notebook.datasets[dataset.id]));
+        dispatch(showSpreadsheet(notebook.datasets[dataset.id]));  
         history.push(spreadsheetPageUrl(project.id, branch.id, dataset.id));
     }
     /**
      * Switch to error view and load the selected dataset.
      */
     loadDatasetError = (dataset) => {
-        const { dispatch, history, branch, project } = this.props;
-        dispatch(showDatasetError(dataset, dataset.links.self+'/annotations'));
-        //dispatch(fetchAnnotations(dataset));
+        const { dispatch, history, notebook, branch, project } = this.props;
+        const datasetAnnoUrl = notebook.datasets[dataset.id].links.getSelf()+'/annotations';
+        notebook.datasets[dataset.id].name = dataset.name
+         //dispatch(fetchAnnotations(dataset));
+        dispatch(showDatasetError(notebook.datasets[dataset.id], datasetAnnoUrl));
         history.push(errorListPageUrl(project.id, branch.id, dataset.id));
     }
     /**

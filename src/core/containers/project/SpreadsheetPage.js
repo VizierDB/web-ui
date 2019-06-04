@@ -63,7 +63,8 @@ class SpreadsheetPage extends Component {
         projectList: PropTypes.array,
         reversed: PropTypes.bool.isRequired,
         serviceApi: PropTypes.object,
-        userSettings: PropTypes.object.isRequired
+        userSettings: PropTypes.object.isRequired,
+        dataset: PropTypes.object
     }
     /**
      * Fetch project information when page is loaded.
@@ -157,7 +158,8 @@ class SpreadsheetPage extends Component {
             projectList,
             reversed,
             serviceApi,
-            userSettings
+            userSettings, 
+            dataset
         } = this.props;
         // The main content of the page depends on the error and fetching state.
         let content = null;
@@ -169,11 +171,11 @@ class SpreadsheetPage extends Component {
                     <FetchError error={fetchError} />
                 </div>
             );
-        } else if ((project == null) || (branch == null) || (notebook == null) || (isFetching)) {
+        } else if ((project == null) || (branch == null) || (notebook == null) || (dataset == null) || (isFetching)) {
             // Show a spinner while the project information is being fetched.
             // There is nothing else to show yet.
             content = <ContentSpinner text='Loading Notebook ...' />;
-        } else if (notebook != null) {
+        } else if (dataset != null) {
             
             // Layout has reverse button at top followed by list of notebook cells
             const pageContent = (
@@ -192,7 +194,7 @@ class SpreadsheetPage extends Component {
                     notebook={notebook}
                     project={project}
                     projectList={projectList}
-                    resource={new SpreadsheetResource()}
+                    resource={new SpreadsheetResource(dataset)}
                     serviceApi={serviceApi}
                     userSettings={userSettings}
                 />
@@ -217,7 +219,8 @@ const mapStateToProps = state => {
         projectList: state.projectListing.projects,
         reversed: state.notebookPage.reversed,
         serviceApi: state.serviceApi,
-        userSettings: state.app.userSettings
+        userSettings: state.app.userSettings,
+        dataset: state.datasetErrorsPage.dataset
     }
 }
 
