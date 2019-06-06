@@ -174,7 +174,7 @@ class SpreadsheetPage extends Component {
         } else if ((project == null) || (branch == null) || (notebook == null) || (dataset == null) || (isFetching)) {
             // Show a spinner while the project information is being fetched.
             // There is nothing else to show yet.
-            content = <ContentSpinner text='Loading Notebook ...' />;
+            content = <ContentSpinner text='Loading Spreadsheet...' />;
         } else if (dataset != null) {
             
             // Layout has reverse button at top followed by list of notebook cells

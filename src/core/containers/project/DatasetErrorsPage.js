@@ -157,7 +157,7 @@ class DatasetErrorsPage extends Component {
         } else if ((project == null) || (branch == null) || (workflows == null) || (resource == null) || (isFetching)) {
             // Show a spinner while the project information is being fetched.
             // There is nothing else to show yet.
-            content = <ContentSpinner text='Loading History ...' />;
+            content = <ContentSpinner text='Loading Dataset Error List ...' />;
         } else if (resource != null) {
         	const dataset = resource.content.dataset;
         	const annotations = resource.content.annotations;
