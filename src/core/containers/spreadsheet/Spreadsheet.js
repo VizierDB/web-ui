@@ -632,7 +632,7 @@ const mapStateToProps = state => {
         opError: state.spreadsheet.opError,
         project: state.projectPage.project,
         serviceApi: state.serviceApi,
-        workflow: state.projectPage.workflow
+        workflow: state.notebookPage.notebook.workflow
     }
 }
 
