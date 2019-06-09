@@ -105,3 +105,15 @@ render(
     </Provider>,
     document.getElementById('root')
 )
+
+
+// Set up Bokeh
+const bokeh_css = document.createElement('link');
+bokeh_css.rel = 'stylesheet'
+bokeh_css.href = 'https://cdn.pydata.org/bokeh/release/bokeh-1.2.0.min.css'
+bokeh_css.type = 'text/css'
+document.head.appendChild(bokeh_css)
+
+const bokeh_js = document.createElement('script')
+bokeh_js.src = 'https://cdn.pydata.org/bokeh/release/bokeh-1.2.0.min.js'
+document.head.appendChild(bokeh_js)
