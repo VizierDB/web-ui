@@ -124,13 +124,13 @@ const getJson = (response, success) => {
  * the notebook accordingly.
  */
 export const checkModuleStatus = (notebook, cell) => (dispatch) => (
-    fetch(cell.module.links.getSelf()).then(
+    fetchAuthed(cell.module.links.getSelf())(dispatch).then(
         response => getJson(response, 200),
         error => dispatch(serviceError(error.message))
     ).then(
         json => {
             if (json.state !== cell.module.state) {
-                return fetch(notebook.workflow.links.get(HATEOAS_BRANCH_HEAD)).then(
+                return fetchAuthed(notebook.workflow.links.get(HATEOAS_BRANCH_HEAD))(dispatch).then(
                     response => getJson(response, 200),
                     error => dispatch(serviceError(error.message))
                 ).then(
