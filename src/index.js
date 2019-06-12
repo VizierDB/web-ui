@@ -114,6 +114,21 @@ bokeh_css.href = 'https://cdn.pydata.org/bokeh/release/bokeh-1.2.0.min.css'
 bokeh_css.type = 'text/css'
 document.head.appendChild(bokeh_css)
 
+const bokeh_widget_css = document.createElement('link');
+bokeh_widget_css.rel = 'stylesheet'
+bokeh_widget_css.href = 'https://cdn.pydata.org/bokeh/release/bokeh-widgets-1.2.0.min.css'
+bokeh_widget_css.type = 'text/css'
+document.head.appendChild(bokeh_widget_css)
+
 const bokeh_js = document.createElement('script')
 bokeh_js.src = 'https://cdn.pydata.org/bokeh/release/bokeh-1.2.0.min.js'
+bokeh_js.onload = function(){
+	const bokeh_api_js = document.createElement('script')
+	bokeh_api_js.src = 'https://cdn.pydata.org/bokeh/release/bokeh-api-1.2.0.min.js'
+	document.head.appendChild(bokeh_api_js)
+	const bokeh_widget_js = document.createElement('script')
+	bokeh_widget_js.src = 'https://cdn.pydata.org/bokeh/release/bokeh-widgets-1.2.0.min.js'
+	document.head.appendChild(bokeh_widget_js)
+}
 document.head.appendChild(bokeh_js)
+
