@@ -38,9 +38,9 @@ class CommandsListing extends React.Component {
         // Get a list of command types
         const gridColumns = [];
         // Get list of packages. The list is sorted by package name by default.
-        const packages = apiEngine.packages.toList();
+        const packages = apiEngine.packages.toList().sort((c1, c2) => (c2.name.localeCompare(c1.name)));
         //max number of items pre col
-        const fullCol = 9.5;
+        const fullCol = 7.5;
         // Further group modules by name
         let curCol = 0.0;
         let listItems = [];
