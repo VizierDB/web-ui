@@ -31,7 +31,7 @@ import EditResourceNameModal from '../../components/modals/EditResourceNameModal
 import { CONTENT_CHART, CONTENT_DATASET, CONTENT_TEXT } from '../../resources/Notebook';
 import { isNotEmptyString } from '../../util/App';
 import '../../../css/Notebook.css';
-
+import { HATEOAS_MODULE_APPEND } from '../../util/HATEOAS';
 /**
  * Notebook component that displays a data curation workflow. Allows to view
  * datasets for individual workflow modules.
@@ -115,7 +115,7 @@ class Notebook extends React.Component {
         if (module != null) {
             url = module.links.insert;
         } else {
-            url = workflow.links.append;
+            url = workflow.links.get(HATEOAS_MODULE_APPEND);
         }
         dispatch(
             updateNotebookCellWithUpload(

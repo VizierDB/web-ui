@@ -39,7 +39,7 @@ import {
 import '../../../css/App.css';
 import '../../../css/Notebook.css';
 import '../../../css/Spreadsheet.css';
-
+import { HATEOAS_MODULE_APPEND } from '../../util/HATEOAS';
 
 /**
  * Component to display a dataset in spreadsheet format. Spreadsheets are
@@ -105,12 +105,12 @@ class Spreadsheet extends React.Component {
             (command.type === VIZUAL_OP) &&
             ((command.id === VIZUAL.DROP_DATASET) || (command.id === VIZUAL.RENAME_DATASET))
         ) {
-            dispatch(insertNotebookCell(workflow.links.append, reqData));
+            dispatch(insertNotebookCell(workflow.links.get(HATEOAS_MODULE_APPEND), reqData));
         } else if ((command.type === VIZUAL_OP) && (command.id === VIZUAL.LOAD)) {
             const name = data.name;
             dispatch(
                 updateNotebookCellWithUpload(
-                    workflow.links.append,
+                    workflow.links.get(HATEOAS_MODULE_APPEND),
                     reqData,
                     (url, data) => (submitUpdate(workflow, {name: name, offset:0}, data)),
                     serviceApi.links.upload

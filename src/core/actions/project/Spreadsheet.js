@@ -29,6 +29,7 @@ import { ErrorResource, SpreadsheetResource, DatasetErrorResource } from '../../
 import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource, postResourceData } from '../../util/Api';
 import { fetchAuthed, requestAuth } from '../main/Service';
+import { HATEOAS_MODULE_APPEND } from '../../util/HATEOAS';
 
 // Actions to indicate that the spreadsheet is currently being updated
 export const SUBMIT_UPDATE_REQUEST = 'SUBMIT_UPDATE_REQUEST';
@@ -144,10 +145,10 @@ export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
     const { name, offset } = dataset;
     dispatch(submitUpdateRequest());
     return fetchAuthed(
-            workflow.links.append,
+            workflow.links.get(HATEOAS_MODULE_APPEND),
             {
                 method: 'POST',
-                body: JSON.stringify({...cmd, includeDataset: {name, offset}}),
+                body: JSON.stringify({...cmd}),
                 headers: {
                   'Accept': 'application/json',
                   'Content-Type': 'application/json'

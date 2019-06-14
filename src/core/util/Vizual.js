@@ -37,7 +37,7 @@ export const VIZUAL = {
     RENAME_COLUMN: 'RENAME_COLUMN',
     RENAME_DATASET: 'RENAME_DATASET',
     SORT: 'SORT_DATASET',
-    UPDATE_CELL: 'UPDATE_CELL'
+    UPDATE_CELL: 'updateCell'
 }
 
 export const VIZUAL_OP = 'vizual';
@@ -163,12 +163,12 @@ export const sortDataset = (dataset, column, sortOrder) => ({
  * UPDATE CELL operation request body
  */
 export const updateCell = (dataset, column, row, value) => ({
-    type: VIZUAL_OP,
-    id: VIZUAL.UPDATE_CELL,
-    arguments: {
-        dataset,
-        column,
-        row,
-        value
-    }
+	packageId: VIZUAL_OP,
+	commandId: VIZUAL.UPDATE_CELL,
+    arguments: [
+        {id:'dataset',value:dataset},
+        {id:'column',value:column},
+        {id:'row',value:row},
+        {id:'value',value:value}
+    ]
 })
