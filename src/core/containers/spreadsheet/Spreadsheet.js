@@ -31,6 +31,7 @@ import EditResourceNameModal from '../../components/modals/EditResourceNameModal
 import GridCell from '../../components/spreadsheet/grid/GridCell';
 import HeaderCell from '../../components/spreadsheet/grid/HeaderCell';
 import RowIndexCell from '../../components/spreadsheet/grid/RowIndexCell';
+import SpreadsheetScrollbar from '../../components/spreadsheet/SpreadsheetScrollbar';
 import { MOVE, isNotEmptyString, isNonNegativeInt } from '../../util/App';
 import {
     VIZUAL, VIZUAL_OP, deleteColumn, deleteRow, insertColumn, insertRow, moveColumn,
@@ -52,7 +53,8 @@ class Spreadsheet extends React.Component {
         isUpdating: PropTypes.bool.isRequired,
         project: PropTypes.object.isRequired,
         serviceApi: PropTypes.object.isRequired,
-        workflow: PropTypes.object.isRequired
+        notebook: PropTypes.object.isRequired,
+        userSettings: PropTypes.object.isRequired
     }
     constructor(props) {
         super(props);
@@ -94,9 +96,10 @@ class Spreadsheet extends React.Component {
      * Append a module to the current workflow.
      */
     appendModule = (command, data) => {
-        const { dispatch, dataset, serviceApi, workflow } = this.props;
+        const { dispatch, dataset, serviceApi, notebook } = this.props;
         // Create data object for request.
         const reqData = {type: command.type, id: command.id, arguments: data};
+        notebook.workflow
         // Hide notebook cell
         this.toggleNotebookCell();
         // Dispatch update request. If the current dataset is being renamed or
@@ -105,19 +108,19 @@ class Spreadsheet extends React.Component {
             (command.type === VIZUAL_OP) &&
             ((command.id === VIZUAL.DROP_DATASET) || (command.id === VIZUAL.RENAME_DATASET))
         ) {
-            dispatch(insertNotebookCell(workflow.links.get(HATEOAS_MODULE_APPEND), reqData));
+            dispatch(insertNotebookCell(notebook.workflow.links.get(HATEOAS_MODULE_APPEND), reqData));
         } else if ((command.type === VIZUAL_OP) && (command.id === VIZUAL.LOAD)) {
             const name = data.name;
             dispatch(
                 updateNotebookCellWithUpload(
-                    workflow.links.get(HATEOAS_MODULE_APPEND),
+                    notebook.workflow.links.get(HATEOAS_MODULE_APPEND),
                     reqData,
-                    (url, data) => (submitUpdate(workflow, {name: name, offset:0}, data)),
+                    (url, data) => (submitUpdate(notebook.workflow, {name: name, offset:0}, data)),
                     serviceApi.links.upload
                 )
             );
         } else {
-            dispatch(submitUpdate(workflow, dataset, reqData))
+            dispatch(submitUpdate(notebook.workflow, dataset, reqData))
         }
     }
     /**
@@ -236,12 +239,13 @@ class Spreadsheet extends React.Component {
     /**
      * Navigate to a different block of the underlying dataset.
      */
-    handleNavigate = (url) => {
+    handleNavigate = (dataseti, offset, limit) => {
         // Clear active cell. Will submit any changes that were made to the
         // value of the current active cell.
-        this.clearActiveCell();
+    	this.clearActiveCell();
         // Dispatch navitation request
         const { dispatch, dataset } = this.props;
+        let url = dataset.links.getDatasetUrl(offset, limit);
         dispatch(showSpreadsheet(dataset, url));
     }
     /**
@@ -249,8 +253,8 @@ class Spreadsheet extends React.Component {
      */
     handleSelectCell = (columnId, rowId, columnIndex, rowIndex) => {
         // Ignore event while updating
-        const { isUpdating, workflow } = this.props;
-        if ((isUpdating)  || (workflow.readOnly)) {
+        const { isUpdating, notebook } = this.props;
+        if ((isUpdating)  || (notebook.workflow.readOnly)) {
             return;
         }
         // Submit any changes to the current active cell
@@ -337,7 +341,8 @@ class Spreadsheet extends React.Component {
             dataset,
             isUpdating,
             project,
-            workflow
+            notebook,
+            userSettings
         } = this.props;
         const {
             activeColumnId,
@@ -373,7 +378,7 @@ class Spreadsheet extends React.Component {
                     key={column.id}
                     column={column}
                     columnIndex={cidx}
-                    disabled={isUpdating || workflow.readOnly}
+                    disabled={isUpdating || notebook.workflow.readOnly}
                     isActive={(!isUpdating) && (isActive)}
                     isUpdating={isBlocked}
                     value={columnName}
@@ -394,7 +399,7 @@ class Spreadsheet extends React.Component {
             const cells = [
                 <RowIndexCell
                     key={row.id}
-                    disabled={isUpdating || workflow.readOnly}
+                    disabled={isUpdating || notebook.workflow.readOnly}
                     rowIndex={row.index}
                     value={row.index}
                     onAction={this.handleVizualAction}
@@ -463,7 +468,7 @@ class Spreadsheet extends React.Component {
             annoButtonCss = 'icon-button';
         }
         let notebookCellButton = null;
-        if (!workflow.readOnly) {
+        if (!notebook.workflow.readOnly) {
             let cellIcon = 'plus square outline';
             if (showNotebookCell) {
                 cellIcon = 'minus square outline';
@@ -503,10 +508,19 @@ class Spreadsheet extends React.Component {
                 <Dimmer.Dimmable dimmed={isUpdating}>
                     <Loader active={isUpdating}/>
                     { notebookCell }
-                    <table className='spreadsheet'>
-                        <thead>{header}</thead>
-                        <tbody>{rows}</tbody>
-                    </table>
+                    <div className='spreadsheet-container'>
+	                    <div className='spreadsheet-table-container'>
+	                    <table className='spreadsheet'>
+	                        <thead>{header}</thead>
+	                        <tbody>{rows}</tbody>
+	                    </table>
+	                    </div>
+	                    <SpreadsheetScrollbar
+		                    dataset={dataset}
+		                    onNavigate={this.handleNavigate}
+	                    	userSettings={userSettings}
+		                />
+	                </div>
                 </Dimmer.Dimmable>
                 {this.showModal()}
             </div>
@@ -574,7 +588,7 @@ class Spreadsheet extends React.Component {
             updatedCellValue
         } = this.state;
         if (activeColumnId !== -1) {
-            const { dispatch, dataset, workflow } = this.props;
+            const { dispatch, dataset, notebook } = this.props;
             if (originalCellValue !== updatedCellValue) {
                 this.setState({
                     updatingColumnId: activeColumnId,
@@ -596,7 +610,7 @@ class Spreadsheet extends React.Component {
                         updatedCellValue
                     );
                 }
-                dispatch(submitUpdate(workflow, dataset, cmd));
+                dispatch(submitUpdate(notebook.workflow, dataset, cmd));
             }
         }
     }
@@ -606,7 +620,7 @@ class Spreadsheet extends React.Component {
         dispatch(updateAnnotations(dataset, column, row, key, value));
     }
     submitVizualCommand = (cmd) => {
-        const { dispatch, dataset, workflow } = this.props;
+        const { dispatch, dataset, notebook } = this.props;
         // Clear any active cells without submitting potential changes
         this.setState({
             activeColumnId: -1,
@@ -619,7 +633,7 @@ class Spreadsheet extends React.Component {
             updatingRowId: -1,
             updatingValue: null
         });
-        dispatch(submitUpdate(workflow, dataset, cmd));
+        dispatch(submitUpdate(notebook.workflow, dataset, cmd));
     }
 }
 
@@ -632,7 +646,8 @@ const mapStateToProps = state => {
         opError: state.spreadsheet.opError,
         project: state.projectPage.project,
         serviceApi: state.serviceApi,
-        workflow: state.notebookPage.notebook.workflow
+        notebook: state.notebookPage.notebook,
+        userSettings: state.app.userSettings
     }
 }
 

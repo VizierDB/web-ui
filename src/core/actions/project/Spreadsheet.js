@@ -50,11 +50,16 @@ export const UPDATE_DATASET_ANNOTATIONS = 'UPDATE_DATASET_ANNOTATIONS'
  *
  */
 export const showSpreadsheet = (dataset, url) => (dispatch) => {
-    let fetchUrl = null;
-    if (url) {
+	const { id, name, offset } = dataset;
+	let fetchUrl = null;
+	let dsoffset = 0;
+    if(offset){
+    	dsoffset = offset;
+    }	
+	if (url) {
         fetchUrl = url;
     } else {
-        fetchUrl = dataset.links.getDatasetUrl(0, 25);
+        fetchUrl = dataset.links.getDatasetUrl(dsoffset, 25);
     }
     dispatch(
         fetchResource(
@@ -62,7 +67,7 @@ export const showSpreadsheet = (dataset, url) => (dispatch) => {
             (json) => (dispatch) => {
                 return dispatch(receiveProjectResource(
                     new SpreadsheetResource(
-                        new DatasetHandle(dataset.id, dataset.name)
+                        new DatasetHandle(id, name)
                             .fromJson(json)
                     )
                 ));
@@ -88,7 +93,7 @@ export const showSpreadsheet = (dataset, url) => (dispatch) => {
  */
 export const showDatasetError = (dataset, url) => (dispatch) => {
     let fetchUrl = null;
-    if (url != null) {
+    if (url) {
         fetchUrl = url;
     } else {
         fetchUrl = dataset.links.self +'/annotations';
@@ -162,30 +167,7 @@ export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
                 // SUCCESS: Pass the JSON result to the respective callback
                 // handler
                 response.json().then(json => {
-                    const wf = new WorkflowHandle().fromJson(json.workflow);
-                    let resource = null;
-                    const includedDataset = json['dataset'];
-                    if (includedDataset !== undefined) {
-                        const ds = new DatasetHandle(
-                            includedDataset.id,
-                            dataset.name
-                        ).fromJson(includedDataset);
-                        resource = new SpreadsheetResource(ds);
-                    } else {
-                        // Find the first module containing an error
-                        let module = null;
-                        const cells = new Notebook().fromJson(json).cells;
-                        for (let i = 0; i < cells.length; i++) {
-                            const cell = cells[i];
-                            if (cell.hasError()) {
-                                module = cell.module;
-                                break;
-                            }
-                        }
-                        const title = 'Error updating dataset ' + dataset.name;
-                        resource = new ErrorResource(title, module);
-                    }
-                    return dispatch(updateWorkflowResource(wf, resource));
+                	dispatch(showSpreadsheet(dataset));
                 });
             } else if(response.status === 401) {
             	// UNAUTHORIZED: re-request auth
