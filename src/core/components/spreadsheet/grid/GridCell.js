@@ -29,7 +29,7 @@ class GridCell extends React.Component {
         isActive: PropTypes.bool.isRequired,
         isUpdating: PropTypes.bool.isRequired,
         rowId: PropTypes.number.isRequired,
-        rowIndex: PropTypes.number.isRequired,
+        rowIndex: PropTypes.number,
         value: PropTypes.oneOfType([
              PropTypes.string,
              PropTypes.number,

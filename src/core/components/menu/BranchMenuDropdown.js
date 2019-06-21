@@ -33,7 +33,7 @@ class BranchMenuDropdown extends React.Component {
         onDelete: PropTypes.func.isRequired,
         onEdit: PropTypes.func.isRequired,
         onGoLive: PropTypes.func.isRequired,
-        onSelect: PropTypes.func.isRequired,
+        onSelect: PropTypes.func,
         onShowHistory: PropTypes.func.isRequired,
         resource: PropTypes.object.isRequired,
         selectedBranch: PropTypes.object.isRequired
