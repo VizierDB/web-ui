@@ -19,28 +19,30 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { addFilteredCommand, copyCell, removeFilteredCommand } from '../../actions/main/App';
-import { createBranch, deleteBranch } from '../../actions/project/Branch';
-import { cancelWorkflowExecution, checkModuleStatus, createtNotebookCell,
-    deleteNotebookCell, dismissCellChanges, fetchAnnotations, fetchWorkflow,
-    hideCellOutput, insertNotebookCell, replaceNotebookCell, showCellChart,
-    selectNotebookCell, showCellDataset, showCellStdout,
-    showCellTimestamps, updateNotebookCellWithUpload } from '../../actions/project/Notebook';
+// import { addFilteredCommand, copyCell, removeFilteredCommand } from '../../actions/main/App';
+// import { createBranch, deleteBranch } from '../../actions/project/Branch';
+import { fetchWorkflow } from '../../actions/project/Notebook';
+// import { cancelWorkflowExecution, checkModuleStatus, createtNotebookCell,
+//     deleteNotebookCell, dismissCellChanges, fetchAnnotations, fetchWorkflow,
+//     hideCellOutput, insertNotebookCell, replaceNotebookCell, showCellChart,
+//     selectNotebookCell, showCellDataset, showCellStdout,
+//     showCellTimestamps, updateNotebookCellWithUpload } from '../../actions/project/Notebook';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import { fetchProjects } from '../../actions/project/ProjectListing';
-import { LargeMessageButton } from '../../components/Button';
+// import { LargeMessageButton } from '../../components/Button';
 import ContentSpinner from '../../components/ContentSpinner';
 import { FetchError } from '../../components/Message';
-import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
-import NotebookStatusHeader from '../../components/notebook/NotebookStatusHeader';
-import Notebook from '../../components/notebook/Notebook';
+// import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
+// import NotebookStatusHeader from '../../components/notebook/NotebookStatusHeader';
+// import Notebook from '../../components/notebook/Notebook';
 import ResourcePage from '../../components/ResourcePage';
-import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
-    CONTENT_TIMESTAMPS } from '../../resources/Outputs';
-import { branchPageUrl, isNotEmptyString, notebookPageUrl,
-    SpreadsheetResource } from '../../util/App';
-import { HATEOAS_MODULE_APPEND, HATEOAS_MODULE_INSERT,
-    HATEOAS_MODULE_REPLACE, HATEOAS_PROJECT_FILE_UPLOAD } from '../../util/HATEOAS';
+// import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
+//     CONTENT_TIMESTAMPS } from '../../resources/Outputs';
+import { notebookPageUrl, SpreadsheetResource } from '../../util/App';
+// import { branchPageUrl, isNotEmptyString, notebookPageUrl,
+//     SpreadsheetResource } from '../../util/App';
+// import { HATEOAS_MODULE_APPEND, HATEOAS_MODULE_INSERT,
+//     HATEOAS_MODULE_REPLACE, HATEOAS_PROJECT_FILE_UPLOAD } from '../../util/HATEOAS';
 import Spreadsheet from '../spreadsheet/Spreadsheet';
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
@@ -107,7 +109,7 @@ class SpreadsheetPage extends Component {
      * pathname we need to ensure that the resources that are referenced in
      * the path match those that are in the current state.
      */
-    componentDidUpdate(prevProps, prevState, snapshot) {
+    componentDidUpdate(prevProps) {
         // Check if the location path has changed. The change may either be
         // the result from an update operation (create branch, delete branch),
         // a switch between notebook versions or the result of the user using
@@ -155,7 +157,6 @@ class SpreadsheetPage extends Component {
     render() {
         const {
             actionError,
-            activeCell,
             branch,
             dispatch,
             fetchError,
@@ -164,7 +165,6 @@ class SpreadsheetPage extends Component {
             notebook,
             project,
             projectList,
-            reversed,
             serviceApi,
             userSettings, 
             dataset
