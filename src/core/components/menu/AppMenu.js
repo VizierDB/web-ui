@@ -18,17 +18,17 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Icon, Image, Menu } from 'semantic-ui-react';
+import { Image, Menu } from 'semantic-ui-react';
 import BranchMenuDropdown from './BranchMenuDropdown';
 import ChartMenuDropdown from './ChartMenuDropdown';
 import DatasetMenuDropdown from './DatasetMenuDropdown';
 import DatasetErrorMenuDropdown from './DatasetErrorMenuDropdown';
-import NotebookMenuDropdown from './NotebookMenuDropdown';
+// import NotebookMenuDropdown from './NotebookMenuDropdown';
 import ProjectMenuDropdown from './ProjectMenuDropdown';
 import DeleteResourceModal from '../modals/DeleteResourceModal';
 import EditResourceNameModal from '../modals/EditResourceNameModal';
 import SettingsMenuDropdown from './SettingsMenuDropdown';
-import { isNotEmptyString, notebookPageUrl } from '../../util/App';
+import { isNotEmptyString } from '../../util/App';
 import '../../../css/ResourceListing.css';
 import '../../../css/ProjectPage.css';
 
@@ -67,7 +67,7 @@ class AppMenu extends React.Component {
         onShowChart: PropTypes.func.isRequired,
         onShowDataset: PropTypes.func.isRequired,
         onShowHistory: PropTypes.func.isRequired,
-        onShowNotebook: PropTypes.func.isRequired,
+        onShowNotebook: PropTypes.func,
         onShowProject: PropTypes.func.isRequired,
         onSwitchBranch: PropTypes.func,
         project: PropTypes.object,
@@ -193,7 +193,7 @@ class AppMenu extends React.Component {
                     menuItems.push(
                         <Menu.Item
                             key='notebook'
-                            icon='file alternate outline'
+                            icon='file alternate outline' 
                             name='Notebook'
                             disabled={resource.isNotebook()}
                             onClick={onShowNotebook}
