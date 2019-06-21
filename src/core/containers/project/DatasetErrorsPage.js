@@ -19,16 +19,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import {  Icon } from 'semantic-ui-react';
-import { deleteBranch, fetchBranch } from '../../actions/project/Branch';
-import { fetchProject, setBranch } from '../../actions/project/Project';
+// import {  Icon } from 'semantic-ui-react';
+import { fetchBranch } from '../../actions/project/Branch';
+import { fetchProject } from '../../actions/project/Project';
 import { fetchProjects } from '../../actions/project/ProjectListing';
 import ContentSpinner from '../../components/ContentSpinner';
 import { FetchError } from '../../components/Message';
 import ResourcePage from '../../components/ResourcePage';
 import { DatasetErrorResource } from '../../util/App';
-import { branchPageUrl, notebookPageUrl } from '../../util/App.js';
-import { showSpreadsheet, showDatasetError, repairDatasetError } from '../../actions/project/Spreadsheet';
+import { notebookPageUrl } from '../../util/App.js';
+import { showSpreadsheet, repairDatasetError } from '../../actions/project/Spreadsheet';
 
 import DatasetError from '../../components/project/DatasetError';
 import '../../../css/App.css';

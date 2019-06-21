@@ -18,7 +18,7 @@
 
 import { fetchAuthed, requestAuth, serviceError } from '../main/Service';
 import { projectActionError, projectFetchError, requestProjectAction } from './Project';
-import { AnnotationList } from '../../resources/Annotation';
+// import { AnnotationList } from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
 import { getNewCellId } from '../../resources/Notebook';
 import { OutputChart, OutputDataset, OutputError, OutputHidden,
@@ -28,7 +28,7 @@ import { fetchResource, postResourceData } from '../../util/Api';
 import { ErrorObject } from '../../util/Error';
 import { HATEOASReferences, HATEOAS_BRANCH_HEAD, HATEOAS_MODULE_DELETE,
     HATEOAS_WORKFLOW_CANCEL } from '../../util/HATEOAS';
-import { VIZUAL, VIZUAL_OP } from '../../util/Vizual';
+// import { VIZUAL, VIZUAL_OP } from '../../util/Vizual';
 
 
 /**
@@ -217,7 +217,7 @@ export const fetchAnnotations = (notebook, module, dataset, columnId, rowId) => 
         fetchResource(
             dataset.links.getAnnotations(columnId, rowId),
             (json) => {
-                const annotations = new AnnotationList(json['annotations'])
+                // const annotations = new AnnotationList(json['annotations'])
                 return setActiveDatasetCell(
                     notebook,
                     module
@@ -534,7 +534,7 @@ export const updateNotebookCell = (notebook, url, action, data, modifiedCellId) 
  *
  */
 export const updateNotebookCellWithUpload = (notebook, modifyUrl, data, notebookModifier, modifiedCellId, uploadUrl, fileArg) => (dispatch) => {
-    const { filename, file } = fileArg.value;
+    const { file } = fileArg.value;
     const uploadReqData = new FormData();
     uploadReqData.append('file', file);
     const req = {

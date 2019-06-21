@@ -351,7 +351,7 @@ class SQLCell extends React.Component {
      */
     render() {
         const  {
-            datasetValue,
+            // datasetValue,
             editorValue,
             snippetSelectorVisible,
             outputDataset,

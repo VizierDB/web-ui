@@ -364,7 +364,7 @@ class CellCommandArea extends React.Component {
                             <ScalaSnippets onSelect={this.handleAppendCode}/>
                         );
                     } else if (paraCode.language === 'sql') {
-                        let outputDataset = formValues['output_dataset'];
+                        // let outputDataset = formValues['output_dataset'];
                     	codeSnippetPanel = (
                                 <SQLSnippets datasets={datasets} onSelect={this.handleAppendCode}/>
                             );

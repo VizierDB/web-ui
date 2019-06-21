@@ -50,7 +50,7 @@ class ControlGroup extends React.Component {
     }
     constructor(props) {
         super(props);
-        const { id, controlSpec, datasets, onChange } = this.props;
+        const { id, controlSpec, datasets } = this.props;
         const newRow = toFormValues(controlSpec.parameters, datasets, null, id)
         this.state = ({addTuple: newRow});
     }

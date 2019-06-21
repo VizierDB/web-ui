@@ -340,7 +340,6 @@ class Spreadsheet extends React.Component {
             annotations,
             dataset,
             isUpdating,
-            project,
             notebook,
             userSettings
         } = this.props;

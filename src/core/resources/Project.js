@@ -22,7 +22,7 @@ import { HATEOASReferences } from '../util/HATEOAS';
 import { sortByName } from '../util/Sort';
 import { utc2LocalTime } from '../util/Timestamp';
 import { VIZUAL, VIZUAL_OP } from '../util/Vizual';
-import { CONTENT_CHART, CONTENT_DATASET, CONTENT_ERROR } from './Outputs';
+// import { CONTENT_CHART, CONTENT_DATASET, CONTENT_ERROR } from './Outputs';
 
 /**
  * Descriptor for a project in the project listing. Contains the information

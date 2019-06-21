@@ -17,16 +17,14 @@
  */
 
 import {
-    projectActionError, receiveProjectResource, requestProjectAction,
-    updateWorkflowResource
-} from './Project';
+    projectActionError, receiveProjectResource, requestProjectAction } from './Project';
 import {
     CellAnnotation, NoAnnotation, IsFetching, FetchError, AnnotationList
 } from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
-import { Notebook } from '../../resources/Notebook';
-import { ErrorResource, SpreadsheetResource, DatasetErrorResource } from '../../util/App'
-import { WorkflowHandle } from '../../resources/Workflow';
+// import { Notebook } from '../../resources/Notebook';
+import { SpreadsheetResource, DatasetErrorResource } from '../../util/App'
+// import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource, postResourceData } from '../../util/Api';
 import { fetchAuthed, requestAuth } from '../main/Service';
 import { HATEOAS_MODULE_APPEND } from '../../util/HATEOAS';
@@ -147,7 +145,7 @@ export const repairDatasetError = (dataset, url, reason, repair, acknowledge) =>
     }
 
 export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
-    const { name, offset } = dataset;
+    // const { name, offset } = dataset;
     dispatch(submitUpdateRequest());
     return fetchAuthed(
             workflow.links.get(HATEOAS_MODULE_APPEND),
