@@ -104,6 +104,14 @@ class DatasetErrorsPage extends Component {
         }
     }
     /**
+     * Dispatch action to load the workflow at the head of the current branch.
+     */
+    handleShowBranchHead = () => {
+        const { branch, history, project } = this.props;
+        history.push(notebookPageUrl(project.id, branch.id));
+    }
+
+    /**
      * Switch to spreadsheet view and load the selected to the page
      * that has the source of a specific error.
      */
@@ -188,6 +196,7 @@ class DatasetErrorsPage extends Component {
                     resource={new DatasetErrorResource()}
                     serviceApi={serviceApi}
                     userSettings={userSettings}
+                    onShowNotebook={this.handleShowBranchHead}
                 />
             );
         }

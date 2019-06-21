@@ -139,6 +139,14 @@ class SpreadsheetPage extends Component {
             }
         }
     }
+
+    /**
+     * Dispatch action to load the workflow at the head of the current branch.
+     */
+    handleShowBranchHead = () => {
+        const { branch, history, project } = this.props;
+        history.push(notebookPageUrl(project.id, branch.id));
+    }
    
     /**
      * The content of the notebook page depends on the type of resource that
@@ -197,6 +205,7 @@ class SpreadsheetPage extends Component {
                     resource={new SpreadsheetResource(dataset)}
                     serviceApi={serviceApi}
                     userSettings={userSettings}
+                    onShowNotebook={this.handleShowBranchHead}
                 />
             );
         }

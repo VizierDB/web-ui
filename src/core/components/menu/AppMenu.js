@@ -67,7 +67,7 @@ class AppMenu extends React.Component {
         onShowChart: PropTypes.func.isRequired,
         onShowDataset: PropTypes.func.isRequired,
         onShowHistory: PropTypes.func.isRequired,
-        onShowNotebook: PropTypes.func,
+        onShowNotebook: PropTypes.func.isRequired,
         onShowProject: PropTypes.func.isRequired,
         onSwitchBranch: PropTypes.func,
         project: PropTypes.object,
@@ -190,15 +190,16 @@ class AppMenu extends React.Component {
             // resource is a notebook the menu is a dropdown that allows th user
             // to select properties of how the notebook is displayed.
             if (!resource.isMainPage()) {
-                menuItems.push(
-                    <Menu.Item
-                        key='notebook'
-                        icon='file alternate outline'
-                        name='Notebook'
-                        disabled={resource.isNotebook()}
-                        onClick={onShowNotebook}
-                    />
-                );
+                    menuItems.push(
+                        <Menu.Item
+                            key='notebook'
+                            icon='file alternate outline'
+                            name='Notebook'
+                            disabled={resource.isNotebook()}
+                            onClick={onShowNotebook}
+                        />
+                    );
+                
                 if(notebook){
                 	const modulesCount = notebook.workflow.modules.length;
 	                if (modulesCount > 0 && notebook.workflow.modules[modulesCount-1].datasets) {
