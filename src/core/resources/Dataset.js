@@ -74,7 +74,7 @@ export class DatasetHandle {
         return this;
     }
     hasAnnotations(columnId, rowId) {
-        return false;
+        return this.rows[rowId] && this.rows[rowId].rowAnnotationFlags && (this.rows[rowId].rowAnnotationFlags[columnId] === false);
     }
     /**
      * Get the dataset row at with the given index position. Note that the
