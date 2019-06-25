@@ -81,7 +81,7 @@ export class DatasetHandle {
      * row index position is not the same as the index in the row array.
      */
     rowAtIndex(index) {
-        return this.rows.find((row) => (row.index === index));
+        return this.rows[index];//this.rows.find((row) => (row.index === index));
     }
     /**
      * Create an updated copy of the dataset where annotation information for

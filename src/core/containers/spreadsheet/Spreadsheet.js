@@ -424,7 +424,7 @@ class Spreadsheet extends React.Component {
                         isActive={(!isUpdating) && (isActive)}
                         isUpdating={isBlocked}
                         rowId={row.id}
-                        rowIndex={row.index}
+                        rowIndex={ridx}
                         value={value}
                         onClick={this.handleSelectCell}
                         onMove={this.handleMoveCell}

@@ -165,7 +165,12 @@ export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
                 // SUCCESS: Pass the JSON result to the respective callback
                 // handler
                 response.json().then(json => {
-                	dispatch(showSpreadsheet(dataset));
+                	let upds = dataset
+                	if(cmd.packageId == "vizual" && cmd.commandId == "updateCell"){
+                		upds.rows[cmd.arguments[2].value].values[cmd.arguments[1].value] = cmd.arguments[3].value
+                	}
+                	dispatch(receiveProjectResource(
+                            new SpreadsheetResource(upds)));
                 });
             } else if(response.status === 401) {
             	// UNAUTHORIZED: re-request auth
