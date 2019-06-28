@@ -115,6 +115,7 @@ class AppMenu extends React.Component {
             notebook,
             onCreateBranch,
             onCreateProject,
+            onImportProject,
             onGoHome,
             onHideCells,
             onReverse,
