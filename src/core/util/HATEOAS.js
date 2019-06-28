@@ -38,6 +38,7 @@ export const HATEOAS_DATASET_GET_ANNOTATIONS = 'annotations.get';
 
 // Projects
 export const HATEOAS_PROJECTS_CREATE = 'project.create';
+export const HATEOAS_PROJECTS_IMPORT = 'project.import';
 export const HATEOAS_PROJECTS_DELETE = 'project.delete';
 export const HATEOAS_PROJECTS_LIST = 'project.list';
 export const HATEOAS_PROJECT_UPDATE_PROPERTY = 'project.update';

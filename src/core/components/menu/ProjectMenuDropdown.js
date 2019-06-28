@@ -27,15 +27,23 @@ import { Dropdown } from 'semantic-ui-react';
 class ProjectMenuDropdown extends React.Component {
     static propTypes = {
         onCreate: PropTypes.func.isRequired,
+        onImport: PropTypes.func.isRequired,
         onDelete: PropTypes.func,
         onEdit: PropTypes.func.isRequired,
         onSelect: PropTypes.func.isRequired,
         project: PropTypes.object,
         projectList: PropTypes.array,
     }
+    /**
+     * handle project export
+     */
+    handleExportProject = (project) => () => {
+    	window.open(project.links.self + "/export")
+    }
     render() {
         const {
             onCreate,
+            onImport,
             onDelete,
             onEdit,
             onSelect,
@@ -99,6 +107,23 @@ class ProjectMenuDropdown extends React.Component {
             title='Create a new project'
             onClick={onCreate}
         />);
+        menuItems.push(<Dropdown.Item
+            key='import'
+            icon='plus'
+            text='Import Project ...'
+            title='Import a project from a export file'
+            onClick={onImport}
+        />);
+        if ( project != null ){
+        	menuItems.push(<Dropdown.Item
+                    key='export'
+                    disabled={(project == null)}
+                    icon='database'
+                    text={'Export Project'}
+                    title={'Export current project'}
+                    onClick={this.handleExportProject(project)}
+                />);
+        }
         return (
             <Dropdown item text='Projects'>
                 <Dropdown.Menu>
