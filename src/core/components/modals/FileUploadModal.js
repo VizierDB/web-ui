@@ -47,7 +47,7 @@ class FileUploadModal extends React.Component {
      */
     handleCancel = () => {
         const { onCancel } = this.props;
-        this.setState({user: ''});
+        this.setState({file: null});
         onCancel();
     }
     onChange = (e) => {
@@ -58,7 +58,7 @@ class FileUploadModal extends React.Component {
      * isValid function to check if the entered value is valid or not.
      */
     handleSubmit = (event) => {
-        const { isValid, onSubmit } = this.props;
+        const { onSubmit } = this.props;
         const { file } = this.state
         // Return without submit if invalid value is given.
         if (file != null) {
@@ -71,16 +71,14 @@ class FileUploadModal extends React.Component {
      * Show simple modal with input text box.
      */
     render() {
-        const { isValid, prompt, open, title } = this.props;
+        const { prompt, open, title } = this.props;
         const { file } = this.state;
         let message = null;
         if (prompt != null) {
             message = (<p>{prompt}</p>);
         }
-        let validName = true;
-        if (isValid != null) {
-            validName = isValid(user);
-        }
+        let validFile = file == null;
+        
         return (
             <Modal open={open} size={'small'}>
                 <Modal.Header>{title}</Modal.Header>
@@ -99,7 +97,7 @@ class FileUploadModal extends React.Component {
                         icon='checkmark'
                         labelPosition='right'
                         content="Done"
-                        disabled={!validName}
+                        disabled={!validFile}
                         onClick={this.handleSubmit}
                     />
                 </Modal.Actions>
