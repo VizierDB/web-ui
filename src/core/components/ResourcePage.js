@@ -65,9 +65,9 @@ class ResourcePage extends Component {
         dispatch(createProject(url, name, history));
     }
     handleImportProject = (file) => {
-        const { dispatch, serviceApi } = this.props;
+        const { dispatch, history, serviceApi } = this.props;
         const url = serviceApi.links.get(HATEOAS_PROJECTS_IMPORT);
-        dispatch(uploadProject(url, file));
+        dispatch(uploadProject(url, file, history));
     }
     /**
      * Handle the deletion of the given project and switch to the home page.

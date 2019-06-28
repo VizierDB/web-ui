@@ -134,7 +134,7 @@ export const fetchProjects = () => (dispatch, getState) => {
  * uploadUrl: string
  *
  */
-export const uploadProject = (uploadUrl, fileArg) => (dispatch) => {
+export const uploadProject = (uploadUrl, fileArg, history) => (dispatch) => {
     const { file } = fileArg.value;
     const uploadReqData = new FormData();
     uploadReqData.append('file', file);
