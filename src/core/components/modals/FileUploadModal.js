@@ -77,7 +77,7 @@ class FileUploadModal extends React.Component {
         if (prompt != null) {
             message = (<p>{prompt}</p>);
         }
-        let validFile = file == null;
+        let validFile = file != null;
         
         return (
             <Modal open={open} size={'small'}>

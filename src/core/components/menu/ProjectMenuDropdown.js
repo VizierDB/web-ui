@@ -38,7 +38,7 @@ class ProjectMenuDropdown extends React.Component {
      * handle project export
      */
     handleExportProject = (project) => () => {
-    	window.open(project.links.self + "/export")
+    	window.open(project.links.getSelf() + "/export")
     }
     render() {
         const {
