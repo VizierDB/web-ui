@@ -34,7 +34,7 @@ export const RECEIVE_PROJECTS = 'RECEIVE_PROJECTS'
 export const SET_PROJECT_CREATE_ERROR = 'SET_PROJECT_CREATE_ERROR'
 export const SET_PROJECT_DELETE_ERROR = 'SET_PROJECT_DELETE_ERROR'
 export const SET_PROJECTS_FETCH_ERROR = 'SET_PROJECTS_FETCH_ERROR'
-
+export const SET_PROJECTS_UPLOAD_ERROR = 'SET_PROJECTS_UPLOAD_ERROR'
 
 
 
@@ -126,6 +126,62 @@ export const fetchProjects = () => (dispatch, getState) => {
     }
 }
 
+/**
+ * upload a project export
+ *
+ * Parameters:
+ *
+ * uploadUrl: string
+ *
+ */
+export const uploadProject = (uploadUrl, fileArg, history) => (dispatch) => {
+    const file = fileArg;
+    const uploadReqData = new FormData();
+    uploadReqData.append('file', file);
+    const req = {
+        method: 'POST',
+        body: uploadReqData
+    }
+    return fetchAuthed(
+            uploadUrl,
+            req
+        )(dispatch)
+        // Check the response. Assume that eveything is all right if status
+        // code below 400
+        .then(function(response) {
+            if (response.status >= 200 && response.status < 400) {
+                // SUCCESS: Fetch updated file identifier and modify the
+                // request body to update the notebook.
+                response.json().then(json => {
+                    console.log('FILE RESPONSE');
+                    console.log(json);
+                    history.push(notebookPageUrl(json.id, json.defaultBranch));
+                    // Avoid action undefined error
+                    return ({type: NO_OP});
+                });
+            } else if(response.status === 401) {
+            	// UNAUTHORIZED: re-request auth
+            	dispatch(requestAuth())
+            } else {
+                // ERROR: The API is expected to return a JSON object in case
+                // of an error that contains an error message. For some response
+                // codes, however, this is not true (e.g. 413).
+                // TODO: Catch the cases where there is no Json response
+                response.json().then(json => dispatch(
+                		projectsUploadError('Error updating workflow', json.message))
+                )
+            }
+        })
+        .catch(err => {
+            let msg = err.message;
+            if (msg === 'NetworkError when attempting to fetch resource.') {
+                msg = 'Connection closed by server. The file size may exceed the server\'s upload limit.'
+            }
+            dispatch(projectsUploadError('Error updating workflow', msg))
+        });
+}
+
+
 
 /**
  * Handle errors when retrieving the project listing.
@@ -144,6 +200,14 @@ const projectDeleteError = (error) => ({
     error
 })
 
+
+/**
+ * Handle errors when retrieving the project listing.
+ */
+const projectsUploadError = (error) => ({
+    type: SET_PROJECTS_UPLOAD_ERROR,
+    error
+})
 
 /**
  * Handle errors when retrieving the project listing.

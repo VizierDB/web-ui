@@ -27,6 +27,7 @@ import DatasetErrorMenuDropdown from './DatasetErrorMenuDropdown';
 import ProjectMenuDropdown from './ProjectMenuDropdown';
 import DeleteResourceModal from '../modals/DeleteResourceModal';
 import EditResourceNameModal from '../modals/EditResourceNameModal';
+import FileUploadModal from '../modals/FileUploadModal';
 import SettingsMenuDropdown from './SettingsMenuDropdown';
 import { isNotEmptyString } from '../../util/App';
 import '../../../css/ResourceListing.css';
@@ -44,11 +45,11 @@ import logo from '../../../img/logo_small_tiny.png';
  * Identify the different types of modals that may be displayed.
  */
 const MODAL_CREATE_PROJECT = 'MODAL_CREATE_PROJECT';
+const MODAL_IMPORT_PROJECT = 'MODAL_IMPORT_PROJECT';
 const MODAL_DELETE_BRANCH = 'MODAL_DELETE_BRANCH';
 const MODAL_DELETE_PROJECT = 'MODAL_DELETE_PROJECT';
 const MODAL_EDIT_BRANCH_NAME = 'MODAL_EDIT_BRANCH_NAME';
 const MODAL_EDIT_PROJECT_NAME = 'MODAL_EDIT_PROJECT_NAME';
-
 
 class AppMenu extends React.Component {
     static propTypes = {
@@ -56,6 +57,7 @@ class AppMenu extends React.Component {
         notebook: PropTypes.object,
         onCreateBranch: PropTypes.func,
         onCreateProject: PropTypes.func.isRequired,
+        onImportProject: PropTypes.func.isRequired,
         onDeleteBranch: PropTypes.func,
         onDeleteProject: PropTypes.func.isRequired,
         onEditBranch: PropTypes.func.isRequired,
@@ -113,6 +115,7 @@ class AppMenu extends React.Component {
             notebook,
             onCreateBranch,
             onCreateProject,
+            onImportProject,
             onGoHome,
             onHideCells,
             onReverse,
@@ -154,7 +157,8 @@ class AppMenu extends React.Component {
             <ProjectMenuDropdown
                 key='project'
                 onCreate={this.showCreateProjecthModal}
-                onDelete={this.showDeleteProjectModal}
+            	onImport={this.showImportProjecthModal}
+            	onDelete={this.showDeleteProjectModal}
                 onEdit={this.showEditProjectNameModal}
                 onSelect={onShowProject}
                 project={project}
@@ -260,6 +264,14 @@ class AppMenu extends React.Component {
                     onCancel={this.hideModal}
                     onSubmit={onCreateProject}
                 />);
+            } else if (modal === MODAL_IMPORT_PROJECT) {
+                optionalModalOrMessage = (<FileUploadModal
+                        open={true}
+                        prompt='Select a project export file to import'
+                        title={'Import project'}
+                        onCancel={this.hideModal}
+                        onSubmit={onImportProject}
+                    />);
             } else if ((modal === MODAL_DELETE_BRANCH) && (branch != null)) {
                 optionalModalOrMessage = (<DeleteResourceModal
                     open={true}
@@ -309,6 +321,10 @@ class AppMenu extends React.Component {
      * Show modal dialog to enter a new project name.
      */
     showCreateProjecthModal = () => (this.setState({modal: MODAL_CREATE_PROJECT }));
+    /**
+     * Show modal dialog to upload a project export.
+     */
+    showImportProjecthModal = () => (this.setState({modal: MODAL_IMPORT_PROJECT }));
     /**
      * Show modal dialog to confirm branch delete.
      */

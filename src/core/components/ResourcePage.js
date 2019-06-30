@@ -24,12 +24,12 @@ import { showChartView } from '../actions/chart/Chart';
 import { reverseOrder, setModuleFilter, toggleHideCells } from '../actions/main/App';
 import { updateBranch } from '../actions/project/Branch';
 import { dismissProjectActionError, updateProject } from '../actions/project/Project';
-import { createProject, deleteProject } from '../actions/project/ProjectListing';
+import { createProject, deleteProject, uploadProject } from '../actions/project/ProjectListing';
 import { showSpreadsheet, showDatasetError, repairDatasetError } from '../actions/project/Spreadsheet';
 import AppMenu from './menu/AppMenu';
 import { ErrorMessage } from './Message';
 import { baseHref, branchPageUrl, notebookPageUrl, spreadsheetPageUrl, errorListPageUrl, valueOrDefault } from '../util/App';
-import { HATEOAS_PROJECTS_CREATE }  from '../util/HATEOAS';
+import { HATEOAS_PROJECTS_CREATE, HATEOAS_PROJECTS_IMPORT }  from '../util/HATEOAS';
 
 
 class ResourcePage extends Component {
@@ -63,6 +63,11 @@ class ResourcePage extends Component {
         const { dispatch, history, serviceApi } = this.props;
         const url = serviceApi.links.get(HATEOAS_PROJECTS_CREATE);
         dispatch(createProject(url, name, history));
+    }
+    handleImportProject = (file) => {
+        const { dispatch, history, serviceApi } = this.props;
+        const url = serviceApi.links.get(HATEOAS_PROJECTS_IMPORT);
+        dispatch(uploadProject(url, file, history));
     }
     /**
      * Handle the deletion of the given project and switch to the home page.
@@ -217,7 +222,8 @@ class ResourcePage extends Component {
                             notebook={notebook}
                             onCreateBranch={onCreateBranch}
                             onCreateProject={this.handleCreateProject}
-                            onDeleteBranch={onDeleteBranch}
+                        	onImportProject={this.handleImportProject}
+                        	onDeleteBranch={onDeleteBranch}
                             onDeleteProject={this.handleDeleteProject}
                             onEditBranch={this.submitEditBranch}
                             onEditProject={this.submitEditProject}

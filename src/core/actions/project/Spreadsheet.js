@@ -146,6 +146,7 @@ export const repairDatasetError = (dataset, url, reason, repair, acknowledge) =>
 
 export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
     // const { name, offset } = dataset;
+	const upcmd = cmd;
     dispatch(submitUpdateRequest());
     return fetchAuthed(
             workflow.links.get(HATEOAS_MODULE_APPEND),
@@ -166,8 +167,8 @@ export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
                 // handler
                 response.json().then(json => {
                 	let upds = dataset
-                	if(cmd.packageId == "vizual" && cmd.commandId == "updateCell"){
-                		upds.rows[cmd.arguments[2].value].values[cmd.arguments[1].value] = cmd.arguments[3].value
+                	if(upcmd.packageId === "vizual" && upcmd.commandId === "updateCell"){
+                		upds.rows.find((row) => (row.id === upcmd.arguments[2].value)).values[upcmd.arguments[1].value] = upcmd.arguments[3].value
                 	}
                 	dispatch(receiveProjectResource(
                             new SpreadsheetResource(upds)));
