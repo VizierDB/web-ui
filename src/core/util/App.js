@@ -22,12 +22,12 @@
  */
 import { CONTENT_CHART, CONTENT_DATASET, CONTENT_ERROR } from '../resources/Outputs';
 
-let href = '';
+let href = process.env.PUBLIC_URL;
 if (process.env.NODE_ENV === 'production') {
-    href = href + 'vizier-db';
+    href = href + '/vizier-db';
 }
 
-export const baseHref = '/' + href;
+export const baseHref = href;
 export const projectHref = baseHref + 'projects/:project_id';
 export const branchHref = projectHref + '/branches/:branch_id';
 export const branchHistoryHref = branchHref + '/history';

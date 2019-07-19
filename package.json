@@ -2,6 +2,7 @@
   "name": "playground",
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://localhost:5000/vizier-db/api/v1/web-ui/",
   "dependencies": {
     "codemirror": "^5.38.0",
     "config": "^1.28.1",
