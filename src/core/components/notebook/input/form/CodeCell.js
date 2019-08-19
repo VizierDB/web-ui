@@ -96,9 +96,12 @@ class CodeCell extends React.Component {
             mode = 'text/x-scala';
         } else if (language === 'sql') {
             mode = 'text/x-sql';
+        } else if (language === 'markdown') {
+            mode = 'markdown';
         }
-        return (
-            <div className='editor-container'>
+        let codeEditor = null;
+        if(!(language === 'markdown' && !isActiveCell)){
+        	codeEditor = <div className='editor-container'>
                 <CodeMirror
                     value={value}
                     cursor={cursorPosition}
@@ -118,7 +121,8 @@ class CodeCell extends React.Component {
                     onFocus={onFocus}
                 />
             </div>
-        );
+        }
+        return (codeEditor);
     }
 }
 

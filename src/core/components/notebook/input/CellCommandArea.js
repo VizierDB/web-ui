@@ -28,6 +28,7 @@ import ModuleInputForm from './ModuleInputForm';
 import { CodeSnippetsSelector as PythonSnippets } from './form/PythonCell';
 import { ScalaCodeSnippetsSelector as ScalaSnippets } from './form/ScalaCell';
 import { SQLCodeSnippetsSelector as SQLSnippets } from './form/SQLCell';
+import { MarkdownCodeSnippetsSelector as MarkdownSnippets } from './form/MarkdownCell';
 import { DT_DATASET_ID, formValuesToRequestData, toFormValues,
     resetColumnIds } from '../../../resources/Engine';
 import '../../../../css/App.css';
@@ -367,6 +368,11 @@ class CellCommandArea extends React.Component {
                         // let outputDataset = formValues['output_dataset'];
                     	codeSnippetPanel = (
                                 <SQLSnippets datasets={datasets} onSelect={this.handleAppendCode}/>
+                            );
+                    }
+                    else if (paraCode.language === 'markdown') {
+                        codeSnippetPanel = (
+                                <MarkdownSnippets onSelect={this.handleAppendCode}/>
                             );
                     }
                     

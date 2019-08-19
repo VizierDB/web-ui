@@ -27,6 +27,7 @@ export const CONTENT_CHART = 'CONTENT_CHART';
 export const CONTENT_DATASET = 'CONTENT_DATASET';
 export const CONTENT_ERROR = 'CONTENT_ERROR';
 export const CONTENT_HTML = 'CONTENT_HTML';
+export const CONTENT_MARKDOWN = 'CONTENT_MARKDOWN';
 export const CONTENT_HIDE = 'CONTENT_HIDE';
 export const CONTENT_TEXT = 'CONTENT_TEXT';
 export const CONTENT_TIMESTAMPS = 'CONTENT_TIMESTAMPS';
@@ -45,6 +46,7 @@ class OutputResource {
     isError = () => (this.type === CONTENT_ERROR);
     isHidden = () => (this.type === CONTENT_HIDE);
     isHtml = () => (this.type === CONTENT_HTML);
+    isMarkdown = () => (this.type === CONTENT_MARKDOWN);
     isText = () => (this.type === CONTENT_TEXT);
     isTimestamps = () => (this.type === CONTENT_TIMESTAMPS);
 }
@@ -149,6 +151,33 @@ export class OutputHtml extends OutputResource {
     }
 }
 
+
+/**
+ * Output resource for showing content of the module standard output as Markdown
+ * in the output area of a notebook cell.
+ */
+export class OutputMarkdown extends OutputResource {
+    constructor(outputObjects, isFetching) {
+        super(CONTENT_MARKDOWN, isFetching);
+        this.lines  = [];
+        for (let j = 0; j < outputObjects.length; j++) {
+            const out = outputObjects[j];
+            if (out.type != null) {
+                if (out.type === 'text/markdown') {
+                    this.lines.push(out.value);
+                }
+            } else {
+                this.lines.push(out);
+            }
+        }
+    }
+    /**
+     * Return a copy of the resource where the isFetching flag is true.
+     */
+    setFetching() {
+        return new OutputMarkdown(this.lines, true);
+    }
+}
 
 /**
  * Output resource for showing content of the module standard output as plain

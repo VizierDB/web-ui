@@ -20,6 +20,7 @@ import React from 'react';
 import createReactClass from 'create-react-class';
 import { PropTypes } from 'prop-types';
 import { Dimmer, Loader } from 'semantic-ui-react';
+import ReactMarkdown from 'react-markdown'
 import { ApiPolling } from '../../Api';
 import DatasetChart from '../../plot/DatasetChart';
 import DatasetView from '../../spreadsheet/DatasetView';
@@ -184,6 +185,16 @@ class CellOutputArea extends React.Component {
                     <Response />
                 </div>
             );
+        } else if (output.isMarkdown()) {
+        	outputContent = (
+                <div className='output-content'>
+                    <span className='output-content-header'>
+                        {output.name}
+                    </span>
+                    <ReactMarkdown
+                        source={output.lines.join('\n')} />
+                </div>
+            );
         } else if ((output.isText()) && (!cell.isCanceled())) {
             outputContent = (
                 <pre className='plain-text' onClick={onSelectCell}>
@@ -216,7 +227,7 @@ class CellOutputArea extends React.Component {
         // error then we show those lines in an error box. We only show the
         // error messages if the displayed output is console (i.e., either
         // text or html)
-        if ((cell.isError()) && ((output.isHtml()) || (output.isText()))) {
+        if ((cell.isError()) && ((output.isMarkdown()) || (output.isHtml()) || (output.isText()))) {
             const stderr = cell.module.outputs.stderr;
             if (stderr.length > 0) {
                 const errorOut = new OutputText(stderr);
