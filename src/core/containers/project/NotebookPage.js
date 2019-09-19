@@ -338,7 +338,7 @@ class NotebookPage extends Component {
             // Replace an existing cell
             const url = cell.module.links.get(HATEOAS_MODULE_REPLACE);
             // If the file argument is not null we need to upload the file first
-            if ((fileArg != null) && (fileArg.value.file != null)) {
+            if ((fileArg != null) && (fileArg.value.fileid == null) && (fileArg.value.file != null)) {
                 // Need to yupload file first
                 dispatch(updateNotebookCellWithUpload(
                     notebook,
