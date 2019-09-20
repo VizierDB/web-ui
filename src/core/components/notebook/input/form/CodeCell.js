@@ -23,6 +23,7 @@ import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/clike/clike';
 import 'codemirror/mode/python/python';
 import 'codemirror/mode/sql/sql';
+import 'codemirror/mode/r/r';
 import '../../../../../css/App.css';
 import '../../../../../css/ModuleForm.css';
 
@@ -94,6 +95,8 @@ class CodeCell extends React.Component {
             mode = 'python';
         } else if (language === 'scala') {
             mode = 'text/x-scala';
+        } else if (language === 'r') {
+            mode = 'text/x-rsrc';
         } else if (language === 'sql') {
             mode = 'text/x-sql';
         } else if (language === 'markdown') {

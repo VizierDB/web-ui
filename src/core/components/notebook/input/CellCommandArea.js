@@ -27,6 +27,7 @@ import { ErrorListMessage } from '../../Message';
 import ModuleInputForm from './ModuleInputForm';
 import { CodeSnippetsSelector as PythonSnippets } from './form/PythonCell';
 import { ScalaCodeSnippetsSelector as ScalaSnippets } from './form/ScalaCell';
+import { RCodeSnippetsSelector as RSnippets } from './form/RCell';
 import { SQLCodeSnippetsSelector as SQLSnippets } from './form/SQLCell';
 import { MarkdownCodeSnippetsSelector as MarkdownSnippets } from './form/MarkdownCell';
 import { DT_DATASET_ID, formValuesToRequestData, toFormValues,
@@ -363,6 +364,10 @@ class CellCommandArea extends React.Component {
                     } else if (paraCode.language === 'scala') {
                         codeSnippetPanel = (
                             <ScalaSnippets onSelect={this.handleAppendCode}/>
+                        );
+                    } else if (paraCode.language === 'r') {
+                    	codeSnippetPanel = (
+                            <RSnippets onSelect={this.handleAppendCode}/>
                         );
                     } else if (paraCode.language === 'sql') {
                         // let outputDataset = formValues['output_dataset'];
