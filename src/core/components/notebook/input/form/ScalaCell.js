@@ -52,9 +52,9 @@ export class ScalaCodeSnippetsSelector extends React.Component {
         let lines = [];
         if (value === WITH_DATASET) {
             lines.push('// do something with a dataset with given name.');
-            lines.push('vizierdb.withDataset("unique-ds-name", ds => { //do things with ds here })');
+            lines.push('VizierDB.withDataset("unique-ds-name", ds => { //do things with ds here })');
         } else if (value === OUTPUT_ANNOTATIONS) {
-            lines.push('vizierdb.outputAnnotations("unique-ds-name")');
+            lines.push('VizierDB.outputAnnotations("unique-ds-name")');
         } else if (value === OUTPUT_COLUMN_NAMES) {
             lines.push('//Iterate over list of dataset columns and print column name');
             lines.push('ds.schema.map(se => se._1).mkString("<br>")');
