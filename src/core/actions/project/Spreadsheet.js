@@ -23,7 +23,7 @@ import {
 } from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
 // import { Notebook } from '../../resources/Notebook';
-import { SpreadsheetResource, DatasetErrorResource } from '../../util/App'
+import { SpreadsheetResource, DatasetCaveatResource } from '../../util/App'
 // import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource, postResourceData } from '../../util/Api';
 import { fetchAuthed, requestAuth } from '../main/Service';
@@ -89,7 +89,7 @@ export const showSpreadsheet = (dataset, url) => (dispatch) => {
  * dataset: DatasetDescriptor
  *
  */
-export const showDatasetError = (dataset, url) => (dispatch) => {
+export const showDatasetCaveat = (dataset, url) => (dispatch) => {
     let fetchUrl = null;
     if (url) {
         fetchUrl = url;
@@ -101,7 +101,7 @@ export const showDatasetError = (dataset, url) => (dispatch) => {
             fetchUrl,
             (json) => (dispatch) => {
                 return dispatch(receiveProjectResource(
-                    new DatasetErrorResource(
+                    new DatasetCaveatResource(
                         new DatasetHandle(dataset.id, dataset.name),
                         new AnnotationList(json['annotations'])
                     )
@@ -115,7 +115,7 @@ export const showDatasetError = (dataset, url) => (dispatch) => {
     )
 }
 
-export const repairDatasetError = (dataset, url, reason, repair, acknowledge) => (dispatch) => {
+export const repairDatasetCaveat = (dataset, url, reason, repair, acknowledge) => (dispatch) => {
     const data = {
     		reason,
             repair,
@@ -129,7 +129,7 @@ export const repairDatasetError = (dataset, url, reason, repair, acknowledge) =>
             data,
             (json) => (dispatch) => {
                 return dispatch(receiveProjectResource(
-                    new DatasetErrorResource(
+                    new DatasetCaveatResource(
                         new DatasetHandle(dataset.id, dataset.name),
                         new AnnotationList(json['annotations'])
                     )

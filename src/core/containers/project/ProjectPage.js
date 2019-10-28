@@ -29,11 +29,11 @@ import {
 import {
     dismissProjectActionError, fetchProject, updateProjectName
 } from '../../actions/project/Project';
-import { showSpreadsheet, showDatasetError, repairDatasetError } from '../../actions/project/Spreadsheet';
+import { showSpreadsheet, showDatasetCaveat, repairDatasetCaveat } from '../../actions/project/Spreadsheet';
 import { ConnectionInfo } from '../../components/Api'
 import ContentSpinner from '../../components/ContentSpinner';
 import { ErrorMessage, NotFoundMessage } from '../../components/Message';
-import DatasetError from '../../components/project/DatasetError';
+import DatasetCaveat from '../../components/project/DatasetCaveat';
 import DatasetChart from '../../components/plot/DatasetChart';
 import ModuleError from '../../components/project/ModuleError';
 import MainProjectMenu from '../../components/menu/MainProjectMenu';
@@ -158,9 +158,9 @@ class ProjectPage extends Component {
     /**
      * Switch to error view and load the selected dataset.
      */
-    loadDatasetError = (dataset) => {
+    loadDatasetCaveat = (dataset) => {
         const { dispatch } = this.props;
-        dispatch(showDatasetError(dataset, dataset.links.self+'/annotations'));
+        dispatch(showDatasetCaveat(dataset, dataset.links.self+'/annotations'));
         //dispatch(fetchAnnotations(dataset));
     }
     /**
@@ -178,7 +178,7 @@ class ProjectPage extends Component {
     loadDatasetRepair = (dataset) => (reason, repair, acknowledge) => {
         const { dispatch, serviceApi } = this.props;
         const url = serviceApi.serviceUrl + '/datasets/' + dataset.id + '/feedback'
-        dispatch(repairDatasetError(dataset, url, reason, repair, acknowledge));
+        dispatch(repairDatasetCaveat(dataset, url, reason, repair, acknowledge));
     }
     /**
      * Switch the project resource to show the notebook for the current
@@ -261,12 +261,12 @@ class ProjectPage extends Component {
                 } else if (resource.isDataset()) {
                     pageContent = <Spreadsheet />;
                     contentCss += ' wide';
-                } else if (resource.isDatasetError()) {
+                } else if (resource.isDatasetCaveat()) {
                 	const dataset = resource.content.dataset;
                 	const annotations = resource.content.annotations;
                 	pageContent = (
-                            <div className='dataset-error-view'>
-                                <DatasetError
+                            <div className='dataset-caveat-view'>
+                                <DatasetCaveat
                                     dataset={dataset}
                                     annotations={annotations}
                                 	onGotoError={this.loadDatasetToError}
@@ -331,7 +331,7 @@ class ProjectPage extends Component {
                                 onReverse={this.handleNotebookReverse}
                                 onShowChart={this.loadChartView}
                                 onShowDataset={this.loadDataset}
-	                            onShowDatasetError={this.loadDatasetError}
+	                            onShowDatasetCaveat={this.loadDatasetCaveat}
 	                            onShowHistory={this.loadBranchHistory}
                                 onShowNotebook={this.loadNotebook}
                                 project={project}

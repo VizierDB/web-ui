@@ -22,7 +22,7 @@ import { app } from './main/App';
 import { mainPage } from './main/MainPage';
 import { branchPage } from './project/BranchPage';
 import { spreadsheetPage } from './project/SpreadsheetPage';
-import { datasetErrorsPage } from './project/DatasetErrorsPage';
+import { datasetErrorsPage } from './project/DatasetCaveatsPage';
 import { notebookPage } from './project/NotebookPage';
 import { projectListing } from './project/ProjectListing';
 import { projectPage} from './project/ProjectPage';

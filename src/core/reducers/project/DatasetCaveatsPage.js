@@ -18,7 +18,7 @@
 
 import { RECEIVE_BRANCH_HISTORY, REQUEST_BRANCH } from '../../actions/project/Branch';
 import { PROJECT_FETCH_ERROR, RECEIVE_PROJECT, REQUEST_PROJECT, RECEIVE_PROJECT_RESOURCE } from '../../actions/project/Project';
-import { RESOURCE_DATASET_ERROR } from '../../util/App';
+import { RESOURCE_DATASET_CAVEAT } from '../../util/App';
 import { CONTENT_DATASET } from '../../resources/Outputs';
 
 /**
@@ -65,7 +65,7 @@ export const datasetErrorsPage = (state = INITIAL_STATE, action) => {
             };
         case RECEIVE_PROJECT_RESOURCE:
         	switch (action.resource.type) {
-        		case RESOURCE_DATASET_ERROR:
+        		case RESOURCE_DATASET_CAVEAT:
 	        	    return {
 		        	    ...state,
 		        	    resource: action.resource

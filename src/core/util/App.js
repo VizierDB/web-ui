@@ -159,7 +159,7 @@ export const valueOrDefault = (val, defaultValue) => ((val != null) ? val : defa
 const RESOURCE_BRANCH = 'RESOURCE_BRANCH';
 const RESOURCE_MAIN_PAGE = 'RESOURCE_MAIN_PAGE';
 const RESOURCE_NOTEBOOK = 'RESOURCE_NOTEBOOK';
-export const RESOURCE_DATASET_ERROR = 'RESOURCE_DATASET_ERROR';
+export const RESOURCE_DATASET_CAVEAT = 'RESOURCE_DATASET_CAVEAT';
 
 
 /**
@@ -186,7 +186,7 @@ export class AppResource {
     isError = () => (this.type === CONTENT_ERROR);
     isChart = () => (this.type === CONTENT_CHART);
     isDataset = () => (this.type === CONTENT_DATASET);
-    isDatasetError = () => (this.type === RESOURCE_DATASET_ERROR);
+    isDatasetCaveat = () => (this.type === RESOURCE_DATASET_CAVEAT);
     
 }
 
@@ -197,6 +197,6 @@ export const MainPageResource = (notebook) => (new AppResource(RESOURCE_MAIN_PAG
 export const NotebookResource = (notebook) => (new AppResource(RESOURCE_NOTEBOOK));
 export const ErrorResource = (title, module) => (new AppResource(CONTENT_ERROR, {title, module}));
 export const ChartResource = (name, dataset) => (new AppResource(CONTENT_CHART, {name, dataset}));
-export const DatasetErrorResource = (dataset, annotations) => (new AppResource(RESOURCE_DATASET_ERROR, {dataset, annotations}));
+export const DatasetCaveatResource = (dataset, annotations) => (new AppResource(RESOURCE_DATASET_CAVEAT, {dataset, annotations}));
 export const SpreadsheetResource = (dataset) => (new AppResource(CONTENT_DATASET, dataset));
 

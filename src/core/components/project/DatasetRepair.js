@@ -19,7 +19,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Dropdown, Form, Button } from 'semantic-ui-react';
-import '../../../css/DatasetError.css'
+import '../../../css/DatasetCaveat.css'
 
 /**
  * Display a list of dataset errors detected by mimir

@@ -1,4 +1,4 @@
-div.dataset-error-view {
+div.dataset-caveat-view {
     background: #fff;
     border-radius: .28571429rem;
     border: 1px solid rgba(34,36,38,.15);
@@ -6,11 +6,11 @@ div.dataset-error-view {
     padding: 20px 10px;
 }
 
-div.dataset-error {
+div.dataset-caveat {
     margin: 0px 20px;
 }
 
-h1.dataset-error {
+h1.dataset-caveat {
     font-weight: normal;
     font-size: 1.5em;
 }

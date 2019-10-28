@@ -26,11 +26,11 @@ import { fetchProjects } from '../../actions/project/ProjectListing';
 import ContentSpinner from '../../components/ContentSpinner';
 import { FetchError } from '../../components/Message';
 import ResourcePage from '../../components/ResourcePage';
-import { DatasetErrorResource } from '../../util/App';
+import { DatasetCaveatResource } from '../../util/App';
 import { notebookPageUrl } from '../../util/App.js';
-import { showSpreadsheet, repairDatasetError } from '../../actions/project/Spreadsheet';
+import { showSpreadsheet, repairDatasetCaveat } from '../../actions/project/Spreadsheet';
 
-import DatasetError from '../../components/project/DatasetError';
+import DatasetCaveat from '../../components/project/DatasetCaveat';
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
 import '../../../css/BranchHistory.css';
@@ -44,7 +44,7 @@ import '../../../css/BranchHistory.css';
  *
  */
 
-class DatasetErrorsPage extends Component {
+class DatasetCaveatsPage extends Component {
     static propTypes = {
         actionError: PropTypes.object,
         branch: PropTypes.object,
@@ -126,7 +126,7 @@ class DatasetErrorsPage extends Component {
     loadDatasetRepair = (dataset) => (reason, repair, acknowledge) => {
         const { dispatch, serviceApi } = this.props;
         const url = serviceApi.serviceUrl + '/datasets/' + dataset.id + '/feedback'
-        dispatch(repairDatasetError(dataset, url, reason, repair, acknowledge));
+        dispatch(repairDatasetCaveat(dataset, url, reason, repair, acknowledge));
     }
     /**
      * The branch history is rendered as a table with five columns: (1) the
@@ -165,13 +165,13 @@ class DatasetErrorsPage extends Component {
         } else if ((project == null) || (branch == null) || (workflows == null) || (resource == null) || (isFetching)) {
             // Show a spinner while the project information is being fetched.
             // There is nothing else to show yet.
-            content = <ContentSpinner text='Loading Dataset Error List ...' />;
+            content = <ContentSpinner text='Loading Dataset Caveat List ...' />;
         } else if (resource != null) {
         	const dataset = resource.content.dataset;
         	const annotations = resource.content.annotations;
         	const pageContent = (
-                    <div className='dataset-error-view'>
-                        <DatasetError
+                    <div className='dataset-caveat-view'>
+                        <DatasetCaveat
                             dataset={dataset}
                             annotations={annotations}
                         	onGotoError={this.loadDatasetToError}
@@ -193,7 +193,7 @@ class DatasetErrorsPage extends Component {
                     isActive={isActive}
                     project={project}
                     projectList={projectList}
-                    resource={new DatasetErrorResource()}
+                    resource={new DatasetCaveatResource()}
                     serviceApi={serviceApi}
                     userSettings={userSettings}
                     onShowNotebook={this.handleShowBranchHead}
@@ -223,4 +223,4 @@ const mapStateToProps = state => {
 }
 
 
-export default connect(mapStateToProps)(DatasetErrorsPage)
+export default connect(mapStateToProps)(DatasetCaveatsPage)

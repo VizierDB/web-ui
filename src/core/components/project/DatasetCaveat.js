@@ -19,12 +19,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import DatasetReason from './DatasetReason';
-import '../../../css/DatasetError.css';
+import '../../../css/DatasetCaveat.css';
 
 /**
  * Display a list of dataset errors detected by mimir
  */
-class DatasetError extends React.Component {
+class DatasetCaveat extends React.Component {
     static propTypes = {
         dataset: PropTypes.object.isRequired,
         annotations: PropTypes.object.isRequired,
@@ -60,9 +60,9 @@ class DatasetError extends React.Component {
             }
         }
         return (
-            <div className='dataset-errors'>
-                <h3 className='dataset-errors'>
-                    {'Dataset Error List: '}
+            <div className='dataset-caveats'>
+                <h3 className='dataset-caveats'>
+                    {'Dataset Caveat List: '}
                     <span className='error-highlight'>{dataset.name}</span>
                 </h3>
                 {errors}
@@ -72,4 +72,4 @@ class DatasetError extends React.Component {
     }
 }
 
-export default DatasetError;
+export default DatasetCaveat;

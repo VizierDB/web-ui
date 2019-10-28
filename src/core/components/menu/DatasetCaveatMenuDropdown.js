@@ -25,7 +25,7 @@ import { Dropdown, Menu } from 'semantic-ui-react';
  * workflow version.
  */
 
-class DatasetErrorMenuDropdown extends React.Component {
+class DatasetCaveatMenuDropdown extends React.Component {
     static propTypes = {
         datasets: PropTypes.array.isRequired,
         onSelect: PropTypes.func.isRequired,
@@ -51,7 +51,7 @@ class DatasetErrorMenuDropdown extends React.Component {
             return null;
         } else if (datasets.length === 1) {
             const ds = datasets[0];
-            const disabled = resource.isDatasetError();
+            const disabled = resource.isDatasetCaveat();
             // Set onClick handler to null if disabled
             let onClickHandler = null;
             if (!disabled) {
@@ -75,7 +75,7 @@ class DatasetErrorMenuDropdown extends React.Component {
             for (let i = 0; i < datasets.length; i++) {
                 const ds = datasets[i];
                 let disabled = false;
-                if (resource.isDatasetError()) {
+                if (resource.isDatasetCaveat()) {
                     disabled = resource.content.name === ds.name;
                 }
                 if (!disabled) {
@@ -93,7 +93,7 @@ class DatasetErrorMenuDropdown extends React.Component {
                 );
             }
             return (
-                <Dropdown item text='Errors' disabled={!hasSelectableItems}>
+                <Dropdown item text='Caveats' disabled={!hasSelectableItems}>
                     <Dropdown.Menu>
                         { menuItems }
                     </Dropdown.Menu>
@@ -103,4 +103,4 @@ class DatasetErrorMenuDropdown extends React.Component {
     }
 }
 
-export default DatasetErrorMenuDropdown;
+export default DatasetCaveatMenuDropdown;

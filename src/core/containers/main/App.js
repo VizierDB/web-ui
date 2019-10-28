@@ -29,7 +29,7 @@ import MainPage from './MainPage'
 import BranchPage from '../project/BranchPage';
 import NotebookPage from '../project/NotebookPage'
 import SpreadsheetPage from '../project/SpreadsheetPage'
-import DatasetErrorsPage from '../project/DatasetErrorsPage'
+import DatasetCaveatsPage from '../project/DatasetCaveatsPage'
 import AuthModal from '../../components/modals/AuthModal';
 import {
     baseHref, branchHistoryHref, notebookHeadHref, notebookVersionHref,
@@ -126,14 +126,14 @@ class App extends Component {
                         <Switch>
                             <Route exact path={baseHref} component={MainPage} />
                             <Route path={spreadsheetHref} component={SpreadsheetPage} />
-                            <Route path={errorListHref} component={DatasetErrorsPage} />
+                            <Route path={errorListHref} component={DatasetCaveatsPage} />
                             <Route path={spreadsheetVersionHref} component={SpreadsheetPage} />
-                            <Route path={errorListVersionHref} component={DatasetErrorsPage} />
+                            <Route path={errorListVersionHref} component={DatasetCaveatsPage} />
                             <Route path={branchHistoryHref} component={BranchPage} />
                             <Route path={notebookHeadHref} component={NotebookPage} />
                             <Route path={notebookVersionHref} component={NotebookPage} />
                             <Route path={spreadsheetHref} component={SpreadsheetPage} />
-                            <Route path={errorListHref} component={DatasetErrorsPage} />
+                            <Route path={errorListHref} component={DatasetCaveatsPage} />
                         </Switch>
                     </Router>
                 </MuiThemeProvider>

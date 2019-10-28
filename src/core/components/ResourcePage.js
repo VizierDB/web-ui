@@ -25,7 +25,7 @@ import { reverseOrder, setModuleFilter, toggleHideCells } from '../actions/main/
 import { updateBranch } from '../actions/project/Branch';
 import { dismissProjectActionError, updateProject } from '../actions/project/Project';
 import { createProject, deleteProject, uploadProject } from '../actions/project/ProjectListing';
-import { showSpreadsheet, showDatasetError, repairDatasetError } from '../actions/project/Spreadsheet';
+import { showSpreadsheet, showDatasetCaveat, repairDatasetCaveat } from '../actions/project/Spreadsheet';
 import AppMenu from './menu/AppMenu';
 import { ErrorMessage } from './Message';
 import { baseHref, branchPageUrl, notebookPageUrl, spreadsheetPageUrl, errorListPageUrl, valueOrDefault } from '../util/App';
@@ -141,12 +141,12 @@ class ResourcePage extends Component {
     /**
      * Switch to error view and load the selected dataset.
      */
-    loadDatasetError = (dataset) => {
+    loadDatasetCaveat = (dataset) => {
         const { dispatch, history, notebook, branch, project } = this.props;
         const datasetAnnoUrl = notebook.datasets[dataset.id].links.getSelf()+'/annotations';
         notebook.datasets[dataset.id].name = dataset.name
          //dispatch(fetchAnnotations(dataset));
-        dispatch(showDatasetError(notebook.datasets[dataset.id], datasetAnnoUrl));
+        dispatch(showDatasetCaveat(notebook.datasets[dataset.id], datasetAnnoUrl));
         history.push(errorListPageUrl(project.id, branch.id, dataset.id));
     }
     /**
@@ -164,7 +164,7 @@ class ResourcePage extends Component {
     loadDatasetRepair = (dataset) => (reason, repair, acknowledge) => {
         const { dispatch, serviceApi } = this.props;
         const url = serviceApi.serviceUrl + '/datasets/' + dataset.id + '/feedback'
-        dispatch(repairDatasetError(dataset, url, reason, repair, acknowledge));
+        dispatch(repairDatasetCaveat(dataset, url, reason, repair, acknowledge));
     }
     render() {
         const {
@@ -233,7 +233,7 @@ class ResourcePage extends Component {
                             onSetFilter={this.handleSetFilter}
                             onShowChart={this.loadChartView}
                             onShowDataset={this.loadDataset}
-                            onShowDatasetError={this.loadDatasetError}
+                            onShowDatasetCaveat={this.loadDatasetCaveat}
                             onShowHistory={this.handleShowBranch}
                             onShowNotebook={onShowNotebook}
                             onShowProject={this.handleShowProject}
