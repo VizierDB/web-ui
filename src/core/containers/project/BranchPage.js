@@ -66,9 +66,8 @@ class BranchPage extends Component {
         const branchId = this.props.match.params.branch_id;
         // Fetch any resources that are currently missing. It is assumed that
         // the branch is set if the project is set.
-        if ((project == null) || (project.id !== projectId)) {
-            dispatch(fetchProject(projectId, branchId, fetchBranch));
-        } else if ((branch == null) || (branch.id !== branchId)) {
+        dispatch(fetchProject(projectId, branchId, fetchBranch));
+        if ((branch == null) || (branch.id !== branchId)) {
             dispatch(fetchBranch(project, project.findBranch(branchId)));
         } else if (workflows == null) {
             dispatch(fetchBranch(project, project.findBranch(branchId)));
