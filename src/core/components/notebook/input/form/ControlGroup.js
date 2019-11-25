@@ -108,7 +108,7 @@ class ControlGroup extends React.Component {
                 rows.push(formValue[i])
             }
             else {
-            	this.setState({addTuple: formValue[i]});
+            	this.setState({addTuple: ''});//formValue[i]});
             }
         }
         onChange(id, rows);

@@ -27,7 +27,7 @@ div.spreadsheet-container {
 
 div.spreadsheet-table-container {
     background: #e8e8e8;
-    overflow-x: hidden;
+    overflow-x: auto;
 }
 
 table.spreadsheet {
@@ -36,9 +36,9 @@ table.spreadsheet {
     color: #3b4151;
     font-size: 12px;
     table-layout: fixed;
-    width: 100%;
-    max-width: 1025px;
-    display: block;
+    min-width: 100%;
+    /*max-width: 1025px;
+    display: block;*/
     overflow-x: auto;
     white-space: nowrap;
 }
@@ -86,7 +86,7 @@ th.grid-header {
     border: 2px solid transparent;
     max-width: 100%;
     white-space: nowrap;
-    overflow: hidden;
+    overflow: visible;
 }
 
 th.grid-header.active {
@@ -120,10 +120,11 @@ div.cell-value {
     border-radius: 0;
     font-size: 12px;
     outline: none;
-    overflow: auto;
+    /*overflow: auto;*/
     font-family: Arial;
     background: transparent;
     text-overflow: ellipsis;
+    max-width: fit-content;
 }
 
 

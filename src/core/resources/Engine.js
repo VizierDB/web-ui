@@ -98,6 +98,7 @@ class PackageDeclaration {
     fromJson(json) {
         this.id = json.id;
         this.name = json.name;
+        this.category = json.category;
         // Maintain a list of all commands sorted by their name
         this.elements = [];
         this.commands = {};
