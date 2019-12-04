@@ -28,7 +28,12 @@ import { HATEOAS_DATASET_DOWNLOAD } from '../../../util/HATEOAS'
 
 class SpreadsheetDropDown extends React.Component {
     static propTypes = {
-        dataset: PropTypes.object.isRequired
+        dataset: PropTypes.object.isRequired,
+        onEditSpreadsheet: PropTypes.func.isRequired,
+        cell: PropTypes.object.isRequired
+    }
+    constructor(props) {
+        super(props);
     }
     /**
      * Copy dataset download URL to the clipboard.
@@ -52,8 +57,12 @@ class SpreadsheetDropDown extends React.Component {
         const downloadUrl = dataset.links.get(HATEOAS_DATASET_DOWNLOAD)
         window.open(downloadUrl);
     }
+    handleEditSpreadsheet = () => {
+    	const { dataset, onEditSpreadsheet, cell } = this.props
+    	onEditSpreadsheet(dataset, cell)
+    }
     render() {
-        return (
+    	return (
             <Dropdown icon='download' title='Download dataset'>
                 <Dropdown.Menu>
                     <Dropdown.Item
@@ -70,6 +79,13 @@ class SpreadsheetDropDown extends React.Component {
                         title='Copy shareable dataset URL to clipboard'
                         onClick={this.handleCopy}
                     />
+	                    <Dropdown.Item
+	                    key={'edit'}
+	                    icon='edit'
+	                    text='Edit as Spreadsheet'
+	                    title='Open spreadsheet view to edit the dataset'
+	                    onClick={this.handleEditSpreadsheet}
+	                />
                 </Dropdown.Menu>
             </Dropdown>
         );

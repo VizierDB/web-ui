@@ -19,6 +19,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom'
 import {
     deleteNotebookCell, insertNotebookCell, replaceNotebookCell, showCellChart,
     showCellAnnotations, showCellDataset, showCellStdout,
@@ -257,4 +258,4 @@ const mapStateToProps = state => {
 }
 
 
-export default connect(mapStateToProps)(Notebook);
+export default withRouter(connect(mapStateToProps)(Notebook));

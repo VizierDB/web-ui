@@ -19,6 +19,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom'
 // import {  Icon } from 'semantic-ui-react';
 import { fetchBranch } from '../../actions/project/Branch';
 import { fetchProject } from '../../actions/project/Project';
@@ -223,4 +224,4 @@ const mapStateToProps = state => {
 }
 
 
-export default connect(mapStateToProps)(DatasetCaveatsPage)
+export default withRouter(connect(mapStateToProps)(DatasetCaveatsPage))

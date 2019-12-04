@@ -45,7 +45,8 @@ class Notebook extends React.Component {
         onRemoveFilteredCommand: PropTypes.func.isRequired,
         onSubmitCell: PropTypes.func.isRequired,
         onSelectNotebookCell: PropTypes.func.isRequired,
-        userSettings: PropTypes.object.isRequired
+        userSettings: PropTypes.object.isRequired,
+        onEditSpreadsheet: PropTypes.func.isRequired
     }
     /**
      * Append a new cell to the current notebook.
@@ -78,7 +79,8 @@ class Notebook extends React.Component {
             onRemoveFilteredCommand,
             onSelectNotebookCell,
             onSubmitCell,
-            userSettings
+            userSettings,
+            onEditSpreadsheet
         } = this.props;
         // For empty notebooks a message is shown that contains a button to
         // add the first notebook cell.
@@ -152,6 +154,7 @@ class Notebook extends React.Component {
                     onSelect={onSelectNotebookCell}
                     onSubmitCell={submitHandler}
                     userSettings={userSettings}
+                    onEditSpreadsheet={onEditSpreadsheet}
                 />
             );
             if (!cell.isNewCell()) {

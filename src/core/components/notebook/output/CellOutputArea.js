@@ -45,7 +45,8 @@ class CellOutputArea extends React.Component {
         onNavigateDataset: PropTypes.func.isRequired,
         onOutputSelect: PropTypes.func.isRequired,
         onSelectCell: PropTypes.func.isRequired,
-        userSettings: PropTypes.object.isRequired
+        userSettings: PropTypes.object.isRequired,
+        onEditSpreadsheet: PropTypes.func.isRequired
     };
     /**
      * Discard a displayed annotation (by clearing the selected cell
@@ -77,7 +78,8 @@ class CellOutputArea extends React.Component {
             onCheckStatus,
             onNavigateDataset,
             onSelectCell,
-            userSettings
+            userSettings,
+            onEditSpreadsheet
         } = this.props;
         const { output } = cell;
         // The output content depends on the status of the cell. For running and
@@ -152,6 +154,8 @@ class CellOutputArea extends React.Component {
                         onFetchAnnotations={this.handleFetchAnnotations}
                         onSelectCell={onSelectCell}
                         userSettings={userSettings}
+                        onEditSpreadsheet={onEditSpreadsheet}
+                        cell={cell}
                     />
                 </div>
             );

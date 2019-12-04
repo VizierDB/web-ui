@@ -19,6 +19,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom'
 import {  Icon } from 'semantic-ui-react';
 import { deleteBranch, fetchBranch } from '../../actions/project/Branch';
 import { fetchProject, setBranch } from '../../actions/project/Project';
@@ -274,4 +275,4 @@ const mapStateToProps = state => {
 }
 
 
-export default connect(mapStateToProps)(BranchPage)
+export default withRouter(connect(mapStateToProps)(BranchPage))

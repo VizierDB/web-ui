@@ -19,6 +19,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom'
 import { addFilteredCommand, copyCell, removeFilteredCommand } from '../../actions/main/App';
 import { createBranch, deleteBranch } from '../../actions/project/Branch';
 import { cancelWorkflowExecution, checkModuleStatus, createtNotebookCell,
@@ -26,6 +27,7 @@ import { cancelWorkflowExecution, checkModuleStatus, createtNotebookCell,
     hideCellOutput, insertNotebookCell, replaceNotebookCell, showCellChart,
     selectNotebookCell, showCellDataset, showCellStdout,
     showCellTimestamps, updateNotebookCellWithUpload } from '../../actions/project/Notebook';
+import { showModuleSpreadsheet  } from '../../actions/project/Spreadsheet';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import { fetchProjects } from '../../actions/project/ProjectListing';
 import { LargeMessageButton } from '../../components/Button';
@@ -38,9 +40,9 @@ import ResourcePage from '../../components/ResourcePage';
 import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
     CONTENT_TIMESTAMPS } from '../../resources/Outputs';
 import { branchPageUrl, isNotEmptyString, notebookPageUrl,
-    NotebookResource } from '../../util/App';
+    NotebookResource, spreadsheetPageUrl } from '../../util/App';
 import { HATEOAS_MODULE_APPEND, HATEOAS_MODULE_INSERT,
-    HATEOAS_MODULE_REPLACE, HATEOAS_PROJECT_FILE_UPLOAD } from '../../util/HATEOAS';
+    HATEOAS_MODULE_REPLACE, HATEOAS_PROJECT_FILE_UPLOAD, HATEOAS_DATASET_DOWNLOAD } from '../../util/HATEOAS';
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
 import '../../../css/Chart.css';
@@ -369,6 +371,19 @@ class NotebookPage extends Component {
         this.setState({modalOpen: false, moduleId: null});
     }
     /**
+     * Switch to spreadsheet view and load the selected dataset for module.
+     */
+    handleEditSpreadsheet = (dataset, cell) => {
+        const { dispatch, history, branch } = this.props;
+        const downloadUrl = dataset.links.get(HATEOAS_DATASET_DOWNLOAD)
+        const regexp = /projects\/([a-z0-9]+)\/datasets\/([a-z0-9]+)/g;
+        const matches = Array.from(downloadUrl.matchAll(regexp));
+        const projectId = matches[0][1];
+        const datasetId = matches[0][2];
+        dispatch(showModuleSpreadsheet(dataset, 0, 25, cell));  
+        history.push(spreadsheetPageUrl(projectId, branch.id, datasetId));
+    }
+    /**
      * The content of the notebook page depends on the type of resource that
      * is being shown.
      */
@@ -428,6 +443,7 @@ class NotebookPage extends Component {
                     onSelectNotebookCell={this.handleSelectActiveCell}
                     onSubmitCell={this.handleSubmitCell}
                     userSettings={userSettings}
+                	onEditSpreadsheet={this.handleEditSpreadsheet}
                 />
             );
             // Add modal form for user to enter branch name when creating a new
@@ -552,4 +568,4 @@ const mapStateToProps = state => {
 }
 
 
-export default connect(mapStateToProps)(NotebookPage);
+export default withRouter(connect(mapStateToProps)(NotebookPage));

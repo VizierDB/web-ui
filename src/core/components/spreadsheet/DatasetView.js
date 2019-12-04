@@ -39,7 +39,9 @@ class DatasetView extends React.Component {
         onFetchAnnotations: PropTypes.func.isRequired,
         onNavigate: PropTypes.func.isRequired,
         onSelectCell: PropTypes.func.isRequired,
-        userSettings: PropTypes.object.isRequired
+        userSettings: PropTypes.object.isRequired,
+        onEditSpreadsheet: PropTypes.func.isRequired,
+        cell: PropTypes.object.isRequired
     }
     constructor(props) {
         super(props);
@@ -66,7 +68,7 @@ class DatasetView extends React.Component {
         this.setState({column: columnId, row: rowId});
     }
     render() {
-        const { dataset, onNavigate, onSelectCell, userSettings } = this.props;
+        const { dataset, onNavigate, onSelectCell, userSettings, onEditSpreadsheet, cell } = this.props;
         const activeCell = this.state;
         // Content header
         const contentHeader = (
@@ -75,7 +77,10 @@ class DatasetView extends React.Component {
                 <span> (</span>
                 <span className='number-highlight'>{dataset.rowCount}</span>
                 <span className='right-padding-md'> rows)</span>
-                <SpreadsheetDropDown dataset={dataset} />
+                <SpreadsheetDropDown 
+                	dataset={dataset}
+                    onEditSpreadsheet={onEditSpreadsheet}
+                    cell={cell} />
             </div>
         );
         const columns = dataset.columns;

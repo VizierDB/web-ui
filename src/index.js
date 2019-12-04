@@ -48,7 +48,7 @@ if (process.env.NODE_ENV !== 'production') {
     if (typeof devToolsExtension === 'function') {
         enhancers.push(devToolsExtension())
     }
-} else {
+} else if(window.env.ANALYTICS_URL !== '') {
     // Add Open Web Analytics if the app is running in production mode
     const injectOWA = () => {
     	if (typeof window === 'undefined') {

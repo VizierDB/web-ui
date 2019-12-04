@@ -20,6 +20,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { connect } from 'react-redux'
+import { withRouter } from 'react-router-dom'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import { fetchService, receiveAuth } from '../../actions/main/Service'
 import { ConnectionInfo } from '../../components/Api';
@@ -181,4 +182,4 @@ const mapStateToProps = state => {
     }
 }
 
-export default connect(mapStateToProps)(App);
+export default withRouter(connect(mapStateToProps)(App));

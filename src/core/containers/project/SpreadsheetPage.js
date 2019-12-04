@@ -19,6 +19,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom'
 // import { addFilteredCommand, copyCell, removeFilteredCommand } from '../../actions/main/App';
 // import { createBranch, deleteBranch } from '../../actions/project/Branch';
 import { fetchWorkflow } from '../../actions/project/Notebook';
@@ -234,4 +235,4 @@ const mapStateToProps = state => {
 }
 
 
-export default connect(mapStateToProps)(SpreadsheetPage);
+export default withRouter(connect(mapStateToProps)(SpreadsheetPage));

@@ -27,7 +27,7 @@ import { SpreadsheetResource, DatasetCaveatResource } from '../../util/App'
 // import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource, postResourceData } from '../../util/Api';
 import { fetchAuthed, requestAuth } from '../main/Service';
-import { HATEOAS_MODULE_APPEND } from '../../util/HATEOAS';
+import { HATEOAS_MODULE_APPEND, HATEOAS_MODULE_INSERT } from '../../util/HATEOAS';
 
 // Actions to indicate that the spreadsheet is currently being updated
 export const SUBMIT_UPDATE_REQUEST = 'SUBMIT_UPDATE_REQUEST';
@@ -78,6 +78,34 @@ export const showSpreadsheet = (dataset, url) => (dispatch) => {
     )
 }
 
+/**
+ * Show (a subset of rows for) a given dataset in the output area of a notebook
+ * cell. The data is fetched from the Web API. The url to fetch the dataset is
+ * constructed using the  given offset and limit values.
+ */
+export const showModuleSpreadsheet = (dataset, offset, limit, cell) => (dispatch) => {
+    // Use dataset self reference to create fect URL
+    let url = dataset.links.getDatasetUrl(offset, limit);
+    dispatch(
+        fetchResource(
+            url,
+            (json) => (dispatch) => {
+            	json.cell = cell;
+                return dispatch(receiveProjectResource(
+                    new SpreadsheetResource(
+                        new DatasetHandle(
+                            json.id,
+                            dataset.name
+                        ).fromJson(json)
+                    )
+                ));
+            },
+            (message) => (
+            		projectActionError('Error loading spreadsheet', message)
+            )
+        )
+    )
+}
 
 /**
  * Show a dataset errors as the content of the project page. The url parameter is
@@ -144,21 +172,32 @@ export const repairDatasetCaveat = (dataset, url, reason, repair, acknowledge) =
         );
     }
 
-export const submitUpdate = (workflow, dataset, cmd) => (dispatch) => {
+export const submitUpdate = (workflow, dataset, cmd, cell) => (dispatch) => {
     // const { name, offset } = dataset;
 	const upcmd = cmd;
     dispatch(submitUpdateRequest());
-    return fetchAuthed(
-            workflow.links.get(HATEOAS_MODULE_APPEND),
-            {
-                method: 'POST',
-                body: JSON.stringify({...cmd}),
-                headers: {
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json'
-                },
-            }
-        )(dispatch)
+    const updateBody = {
+            method: 'POST',
+            body: JSON.stringify({...cmd}),
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+        };
+    let update = null;
+    if(cell){
+    	update = fetchAuthed(
+                cell.module.links.get(HATEOAS_MODULE_INSERT),
+                updateBody
+            );
+    }
+    else {
+    	update = fetchAuthed(
+                workflow.links.get(HATEOAS_MODULE_APPEND),
+                updateBody
+            );
+    }
+    return update(dispatch)
         // Check the response. Assume that eveything is all right if status
         // code below 400
         .then(function(response) {

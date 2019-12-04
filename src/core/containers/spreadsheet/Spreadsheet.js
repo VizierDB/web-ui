@@ -19,6 +19,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom'
 import { Dimmer, Icon, Loader } from 'semantic-ui-react';
 import { insertNotebookCell, updateNotebookCellWithUpload } from '../../actions/project/Notebook';
 import {
@@ -584,10 +585,16 @@ class Spreadsheet extends React.Component {
             activeColumnId,
             activeRowId,
             originalCellValue,
-            updatedCellValue
+            updatedCellValue,
         } = this.state;
         if (activeColumnId !== -1) {
             const { dispatch, dataset, notebook } = this.props;
+            let cell = null;
+            if(dataset.cell){
+	            const findCellById = (icell) => icell.id == dataset.cell.id;
+	            const cellIndex = notebook.cells.findIndex( findCellById)+1;
+	            cell = notebook.cells[cellIndex];
+            }
             if (originalCellValue !== updatedCellValue) {
                 this.setState({
                     updatingColumnId: activeColumnId,
@@ -609,7 +616,7 @@ class Spreadsheet extends React.Component {
                         updatedCellValue
                     );
                 }
-                dispatch(submitUpdate(notebook.workflow, dataset, cmd));
+                dispatch(submitUpdate(notebook.workflow, dataset, cmd, cell));
             }
         }
     }
@@ -620,6 +627,12 @@ class Spreadsheet extends React.Component {
     }
     submitVizualCommand = (cmd) => {
         const { dispatch, dataset, notebook } = this.props;
+        let cell = null;
+        if(dataset.cell){
+            const findCellById = (icell) => icell.id == dataset.cell.id;
+            const cellIndex = notebook.cells.findIndex( findCellById)+1;
+            cell = notebook.cells[cellIndex];
+        }
         // Clear any active cells without submitting potential changes
         this.setState({
             activeColumnId: -1,
@@ -632,7 +645,7 @@ class Spreadsheet extends React.Component {
             updatingRowId: -1,
             updatingValue: null
         });
-        dispatch(submitUpdate(notebook.workflow, dataset, cmd));
+        dispatch(submitUpdate(notebook.workflow, dataset, cmd, cell));
     }
 }
 
@@ -650,4 +663,4 @@ const mapStateToProps = state => {
     }
 }
 
-export default connect(mapStateToProps)(Spreadsheet)
+export default withRouter(connect(mapStateToProps)(Spreadsheet))
