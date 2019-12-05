@@ -598,18 +598,13 @@ class Spreadsheet extends React.Component {
             }
             let moduleIndex = null;
             if(dataset.moduleId){
-            	console.log("------------------spreadsheet modules");
-                console.log(workflow.modules);
-                if(dataset.moduleIndex){
+            	if(dataset.moduleIndex){
                 	moduleIndex = dataset.moduleIndex+1;
                 }
                 else {
                 	const findModuleById = (imodule) => imodule.id == dataset.moduleId;
                 	moduleIndex = workflow.modules.findIndex( findModuleById)+1;
                 }
-                	
-                console.log("-----module index for insert: " + moduleIndex);
-            	
             }
             if (originalCellValue !== updatedCellValue) {
                 this.setState({
