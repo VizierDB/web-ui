@@ -18,6 +18,7 @@
 
 import {
     projectActionError, receiveProjectResource, requestProjectAction } from './Project';
+import { UPDATE_NOTEBOOK } from './Notebook';
 import {
     CellAnnotation, NoAnnotation, IsFetching, FetchError, AnnotationList
 } from '../../resources/Annotation';
@@ -83,14 +84,14 @@ export const showSpreadsheet = (dataset, url) => (dispatch) => {
  * cell. The data is fetched from the Web API. The url to fetch the dataset is
  * constructed using the  given offset and limit values.
  */
-export const showModuleSpreadsheet = (dataset, offset, limit, cell) => (dispatch) => {
+export const showModuleSpreadsheet = (dataset, offset, limit, moduleId) => (dispatch) => {
     // Use dataset self reference to create fect URL
     let url = dataset.links.getDatasetUrl(offset, limit);
     dispatch(
         fetchResource(
             url,
             (json) => (dispatch) => {
-            	json.cell = cell;
+            	json.moduleId = moduleId;
                 return dispatch(receiveProjectResource(
                     new SpreadsheetResource(
                         new DatasetHandle(
@@ -172,7 +173,7 @@ export const repairDatasetCaveat = (dataset, url, reason, repair, acknowledge) =
         );
     }
 
-export const submitUpdate = (workflow, dataset, cmd, cell) => (dispatch) => {
+export const submitUpdate = (workflow, dataset, cmd, moduleIndex) => (dispatch) => {
     // const { name, offset } = dataset;
 	const upcmd = cmd;
     dispatch(submitUpdateRequest());
@@ -185,15 +186,16 @@ export const submitUpdate = (workflow, dataset, cmd, cell) => (dispatch) => {
             },
         };
     let update = null;
-    if(cell){
+    if(moduleIndex){
+    	const url = workflow.modules[moduleIndex].links[0].href;
     	update = fetchAuthed(
-                cell.module.links.get(HATEOAS_MODULE_INSERT),
+    			url,
                 updateBody
             );
     }
     else {
     	update = fetchAuthed(
-                workflow.links.get(HATEOAS_MODULE_APPEND),
+    			workflow.links.get(HATEOAS_MODULE_APPEND),
                 updateBody
             );
     }
@@ -206,11 +208,22 @@ export const submitUpdate = (workflow, dataset, cmd, cell) => (dispatch) => {
                 // handler
                 response.json().then(json => {
                 	let upds = dataset
+                	const newModuleId = json.modules[moduleIndex].id;
+                	upds.moduleId = newModuleId;
+                	upds.moduleIndex = moduleIndex;
+                	upds.workflow = json;
                 	if(upcmd.packageId === "vizual" && upcmd.commandId === "updateCell"){
                 		upds.rows.find((row) => (row.id === upcmd.arguments[2].value)).values[upcmd.arguments[1].value] = upcmd.arguments[3].value
                 	}
+                	/*dispatch(() => {
+                		return {
+                			type: UPDATE_NOTEBOOK,
+                			notebook: notebook.updateWorkflow(json, newModuleId)
+                		};
+                    });*/
                 	dispatch(receiveProjectResource(
                             new SpreadsheetResource(upds)));
+                	
                 });
             } else if(response.status === 401) {
             	// UNAUTHORIZED: re-request auth

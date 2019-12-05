@@ -41,7 +41,7 @@ class DatasetView extends React.Component {
         onSelectCell: PropTypes.func.isRequired,
         userSettings: PropTypes.object.isRequired,
         onEditSpreadsheet: PropTypes.func.isRequired,
-        cell: PropTypes.object.isRequired
+        moduleId: PropTypes.string.isRequired
     }
     constructor(props) {
         super(props);
@@ -68,7 +68,7 @@ class DatasetView extends React.Component {
         this.setState({column: columnId, row: rowId});
     }
     render() {
-        const { dataset, onNavigate, onSelectCell, userSettings, onEditSpreadsheet, cell } = this.props;
+        const { dataset, onNavigate, onSelectCell, userSettings, onEditSpreadsheet, moduleId } = this.props;
         const activeCell = this.state;
         // Content header
         const contentHeader = (
@@ -80,7 +80,7 @@ class DatasetView extends React.Component {
                 <SpreadsheetDropDown 
                 	dataset={dataset}
                     onEditSpreadsheet={onEditSpreadsheet}
-                    cell={cell} />
+                    moduleId={moduleId} />
             </div>
         );
         const columns = dataset.columns;

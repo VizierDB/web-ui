@@ -30,7 +30,7 @@ class SpreadsheetDropDown extends React.Component {
     static propTypes = {
         dataset: PropTypes.object.isRequired,
         onEditSpreadsheet: PropTypes.func.isRequired,
-        cell: PropTypes.object.isRequired
+        moduleId: PropTypes.string.isRequired
     }
     constructor(props) {
         super(props);
@@ -58,8 +58,8 @@ class SpreadsheetDropDown extends React.Component {
         window.open(downloadUrl);
     }
     handleEditSpreadsheet = () => {
-    	const { dataset, onEditSpreadsheet, cell } = this.props
-    	onEditSpreadsheet(dataset, cell)
+    	const { dataset, onEditSpreadsheet, moduleId } = this.props
+    	onEditSpreadsheet(dataset, moduleId)
     }
     render() {
     	return (

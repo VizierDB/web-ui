@@ -589,11 +589,27 @@ class Spreadsheet extends React.Component {
         } = this.state;
         if (activeColumnId !== -1) {
             const { dispatch, dataset, notebook } = this.props;
-            let cell = null;
-            if(dataset.cell){
-	            const findCellById = (icell) => icell.id == dataset.cell.id;
-	            const cellIndex = notebook.cells.findIndex( findCellById)+1;
-	            cell = notebook.cells[cellIndex];
+            let workflow = null;
+            if(dataset.workflow){
+            	workflow = dataset.workflow;
+            }
+            else {
+            	workflow = notebook.workflow;
+            }
+            let moduleIndex = null;
+            if(dataset.moduleId){
+            	console.log("------------------spreadsheet modules");
+                console.log(workflow.modules);
+                if(dataset.moduleIndex){
+                	moduleIndex = dataset.moduleIndex+1;
+                }
+                else {
+                	const findModuleById = (imodule) => imodule.id == dataset.moduleId;
+                	moduleIndex = workflow.modules.findIndex( findModuleById)+1;
+                }
+                	
+                console.log("-----module index for insert: " + moduleIndex);
+            	
             }
             if (originalCellValue !== updatedCellValue) {
                 this.setState({
@@ -616,7 +632,7 @@ class Spreadsheet extends React.Component {
                         updatedCellValue
                     );
                 }
-                dispatch(submitUpdate(notebook.workflow, dataset, cmd, cell));
+                dispatch(submitUpdate(workflow, dataset, cmd, moduleIndex));
             }
         }
     }
@@ -627,11 +643,22 @@ class Spreadsheet extends React.Component {
     }
     submitVizualCommand = (cmd) => {
         const { dispatch, dataset, notebook } = this.props;
-        let cell = null;
-        if(dataset.cell){
-            const findCellById = (icell) => icell.id == dataset.cell.id;
-            const cellIndex = notebook.cells.findIndex( findCellById)+1;
-            cell = notebook.cells[cellIndex];
+        let workflow = null;
+        if(dataset.workflow){
+        	workflow = dataset.workflow;
+        }
+        else {
+        	workflow = notebook.workflow;
+        }
+        let moduleIndex = null;
+        if(dataset.moduleId){
+        	if(dataset.moduleIndex){
+            	moduleIndex = dataset.moduleIndex+1;
+            }
+            else {
+            	const findModuleById = (imodule) => imodule.id == dataset.moduleId;
+            	moduleIndex = workflow.modules.findIndex( findModuleById)+1;
+            }
         }
         // Clear any active cells without submitting potential changes
         this.setState({
@@ -645,7 +672,7 @@ class Spreadsheet extends React.Component {
             updatingRowId: -1,
             updatingValue: null
         });
-        dispatch(submitUpdate(notebook.workflow, dataset, cmd, cell));
+        dispatch(submitUpdate(workflow, dataset, cmd, moduleIndex));
     }
 }
 

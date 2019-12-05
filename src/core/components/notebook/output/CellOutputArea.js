@@ -155,7 +155,7 @@ class CellOutputArea extends React.Component {
                         onSelectCell={onSelectCell}
                         userSettings={userSettings}
                         onEditSpreadsheet={onEditSpreadsheet}
-                        cell={cell}
+                        moduleId={cell.id}
                     />
                 </div>
             );
