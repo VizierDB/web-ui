@@ -219,6 +219,7 @@ pre.cell-vizual-error {
 
 div.cell-command-area {
     padding-left: 10px;
+    max-width: 1050px;
 }
 
 div.module-form-buttons {
@@ -245,6 +246,7 @@ span.header-name {
 div.output-content {
     padding-left: 10px;
     margin-top: 10px;
+    max-width: 1050px;
 }
 
 div.output-error {

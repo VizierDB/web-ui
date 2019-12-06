@@ -18,9 +18,9 @@
 
 import { DatasetDescriptor } from './Dataset';
 import { HATEOASReferences } from '../util/HATEOAS';
-import { OutputChart, OutputHtml, OutputText, OutputMarkdown } from './Outputs';
+import { OutputChart, OutputHtml, OutputText, OutputMarkdown, OutputDataset } from './Outputs';
+import { DatasetHandle } from './Dataset';
 import { utc2LocalTime } from '../util/Timestamp';
-
 
 // Workflow and module states
 const STATE_PENDING = 0;
@@ -440,6 +440,8 @@ const getModuleDefaultOutput = (module) => {
         const out = stdout[0];
         if (out.type === 'chart/view') {
             outputResource = new OutputChart(out.value.data.name, out.value.result);
+        } else if (out.type === 'dataset/view') {
+            outputResource = new OutputDataset(new DatasetHandle(out.value.id, out.value.name).fromJson(out.value), false);
         } else if (out.type === 'text/html') {
             outputResource = new OutputHtml(stdout);
         } else if (out.type === 'text/markdown') {
