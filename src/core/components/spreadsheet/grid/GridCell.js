@@ -19,7 +19,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import GridInput from './GridInput';
-
+import { Icon } from 'semantic-ui-react';
 
 class GridCell extends React.Component {
     static propTypes = {
@@ -37,7 +37,8 @@ class GridCell extends React.Component {
          ]),
          onClick: PropTypes.func,
          onMove: PropTypes.func,
-         onUpdate: PropTypes.func
+         onUpdate: PropTypes.func,
+         onFetchAnnotations: PropTypes.func
     }
     /**
      * Submit changes to the cell value if a onUpdate handler is given.
@@ -67,10 +68,21 @@ class GridCell extends React.Component {
             onMove(direction);
         }
     }
+    /**
+     * Cell info click handler. Check if a onFetchAnnotations handler was provided from the
+     * parent. Call it with the cell id and coordinates.
+     */
+    handleFetchAnnotations = () => {
+        const { columnIndex, rowId, onFetchAnnotations } = this.props;
+        if (onFetchAnnotations != null) {
+        	onFetchAnnotations(columnIndex, rowId);
+        }
+    }
     render() {
         const { hasAnnotations, isActive, isUpdating, value, onUpdate } = this.props;
         // The cell style depends on whether the column is active or not.
         let cellCss = 'grid-cell';
+        let annoIcon = null;
         if (isActive) {
             cellCss += ' active';
         } else if (isUpdating) {
@@ -78,6 +90,12 @@ class GridCell extends React.Component {
         }
         if ((hasAnnotations) && ((!isActive) || (onUpdate == null))) {
             cellCss += ' highlight';
+            annoIcon = ( <Icon
+	            className='icon-button annotations-icon'
+	            title='Caveats'
+	            name='question circle outline'
+	            onClick={this.handleFetchAnnotations}
+	        />);
         }
         // The cell value depends on whether the cell is active and updatable
         let cellValue = null;
@@ -101,7 +119,7 @@ class GridCell extends React.Component {
             if (value == null) {
                 cellCss += '  is-null';
             }
-            cellValue = (<div className='cell-value'>{strValue}</div>);
+            cellValue = (<div className='cell-value'>{strValue}{annoIcon}</div>);
         }
         return (
             <td className={cellCss} onClick={this.handleClick}>

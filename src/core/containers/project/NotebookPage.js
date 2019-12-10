@@ -23,16 +23,17 @@ import { withRouter } from 'react-router-dom'
 import { addFilteredCommand, copyCell, removeFilteredCommand } from '../../actions/main/App';
 import { createBranch, deleteBranch } from '../../actions/project/Branch';
 import { cancelWorkflowExecution, checkModuleStatus, createtNotebookCell,
-    deleteNotebookCell, dismissCellChanges, fetchAnnotations, fetchWorkflow,
+    deleteNotebookCell, dismissCellChanges, fetchWorkflow,
     hideCellOutput, insertNotebookCell, replaceNotebookCell, showCellChart,
     selectNotebookCell, showCellDataset, showCellStdout,
     showCellTimestamps, updateNotebookCellWithUpload } from '../../actions/project/Notebook';
-import { showModuleSpreadsheet  } from '../../actions/project/Spreadsheet';
+import { showModuleSpreadsheet, fetchAnnotations, clearAnnotations } from '../../actions/project/Spreadsheet';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import { fetchProjects } from '../../actions/project/ProjectListing';
 import { LargeMessageButton } from '../../components/Button';
 import ContentSpinner from '../../components/ContentSpinner';
 import { FetchError } from '../../components/Message';
+import AnnotationObject from '../../components/annotation/AnnotationObject';
 import EditResourceNameModal from '../../components/modals/EditResourceNameModal';
 import NotebookStatusHeader from '../../components/notebook/NotebookStatusHeader';
 import Notebook from '../../components/notebook/Notebook';
@@ -64,7 +65,8 @@ class NotebookPage extends Component {
         projectList: PropTypes.array,
         reversed: PropTypes.bool.isRequired,
         serviceApi: PropTypes.object,
-        userSettings: PropTypes.object.isRequired
+        userSettings: PropTypes.object.isRequired,
+        annotations: PropTypes.object
     }
     /**
      * Fetch project information when page is loaded.
@@ -217,8 +219,15 @@ class NotebookPage extends Component {
         dispatch(dismissCellChanges(notebook, cell));
     }
     handleFetchDatasetCellAnnotations = (module, dataset, columnId, rowId) => {
-        const { dispatch, notebook } = this.props;
-        dispatch(fetchAnnotations(notebook, module, dataset, columnId, rowId));
+        const { dispatch } = this.props;
+        dispatch(fetchAnnotations(dataset, columnId, rowId));
+    }
+    /**
+     * Dismiss an open cell annotations modal.
+     */
+    dismissAnnotationModal = () => {
+        const { dispatch } = this.props;
+        dispatch(clearAnnotations());
     }
     /**
      * Event handler when the user wants to insert a new cell. The new cell is
@@ -401,7 +410,8 @@ class NotebookPage extends Component {
             projectList,
             reversed,
             serviceApi,
-            userSettings
+            userSettings,
+            annotations
         } = this.props;
         // The main content of the page depends on the error and fetching state.
         let content = null;
@@ -471,6 +481,12 @@ class NotebookPage extends Component {
                     </div>
                 );
             }
+            const annotationsObject = (
+            		<AnnotationObject
+			            annotation={annotations}
+            		    onDiscard={this.dismissAnnotationModal}
+			        />
+	        );
             // Layout has reverse button at top followed by list of notebook cells
             const pageContent = (
                 <div className="notebook">
@@ -483,6 +499,7 @@ class NotebookPage extends Component {
                     />
                     { notebookCells }
                     { notebookFooter }
+                    { annotationsObject }
                 </div>
             );
             content = (
@@ -563,7 +580,8 @@ const mapStateToProps = state => {
         projectList: state.projectListing.projects,
         reversed: state.notebookPage.reversed,
         serviceApi: state.serviceApi,
-        userSettings: state.app.userSettings
+        userSettings: state.app.userSettings,
+        annotations: state.spreadsheet.annotations
     }
 }
 

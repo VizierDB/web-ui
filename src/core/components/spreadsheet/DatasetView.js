@@ -67,8 +67,9 @@ class DatasetView extends React.Component {
     handleSelectCell = (columnId, rowId) => {
         this.setState({column: columnId, row: rowId});
     }
+    
     render() {
-        const { dataset, onNavigate, onSelectCell, userSettings, onEditSpreadsheet, moduleId } = this.props;
+        const { dataset, onFetchAnnotations, onNavigate, onSelectCell, userSettings, onEditSpreadsheet, moduleId } = this.props;
         const activeCell = this.state;
         // Content header
         const contentHeader = (
@@ -117,6 +118,7 @@ class DatasetView extends React.Component {
                         rowIndex={ridx}
                         value={row.values[cidx]}
                         onClick={() => (this.handleSelectCell(column.id, row.id))}
+                        onFetchAnnotations={onFetchAnnotations}
                     />
                 );
             }

@@ -297,3 +297,7 @@ pre.error-text {
     margin: 0px;
     max-width: 1000px;
 }
+
+i.annotations-icon {
+	float: right;
+}
