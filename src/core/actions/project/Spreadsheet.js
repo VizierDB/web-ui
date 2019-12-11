@@ -23,6 +23,7 @@ import {
     CellAnnotation, NoAnnotation, IsFetching, FetchError, AnnotationList
 } from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
+import { WorkflowHandle } from '../../resources/Workflow';
 // import { Notebook } from '../../resources/Notebook';
 import { SpreadsheetResource, DatasetCaveatResource } from '../../util/App'
 // import { WorkflowHandle } from '../../resources/Workflow';
@@ -208,10 +209,14 @@ export const submitUpdate = (workflow, dataset, cmd, moduleIndex) => (dispatch) 
                 // handler
                 response.json().then(json => {
                 	let upds = dataset
-                	const newModuleId = json.modules[moduleIndex].id;
+                	let newModuleIndex = 1;
+                	if(moduleIndex){
+                		newModuleIndex = moduleIndex;
+                	}
+                	const newModuleId = json.modules[newModuleIndex].id;
                 	upds.moduleId = newModuleId;
-                	upds.moduleIndex = moduleIndex;
-                	upds.workflow = json;
+                	upds.moduleIndex = newModuleIndex;
+                	upds.workflow = new WorkflowHandle(workflow.engine).fromJson(json);
                 	if(upcmd.packageId === "vizual" && upcmd.commandId === "updateCell"){
                 		upds.rows.find((row) => (row.id === upcmd.arguments[2].value)).values[upcmd.arguments[1].value] = upcmd.arguments[3].value
                 	}

@@ -204,7 +204,7 @@ export const formValuesToRequestData = (values, parameters) => {
             }
         } else {
             const dt = para.datatype;
-            if ((dt === DT_INT) || (dt === DT_ROW_ID)) {
+            if ((dt === DT_INT)) {
                 val = parseInt(val, 10);
             } else if (dt === DT_DECIMAL) {
                 val = parseFloat(val);

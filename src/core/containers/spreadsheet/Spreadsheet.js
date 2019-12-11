@@ -599,12 +599,18 @@ class Spreadsheet extends React.Component {
             let moduleIndex = null;
             if(dataset.moduleId){
             	if(dataset.moduleIndex){
+            		//there is a pending vizual insert so we want to insert after that (+1)
                 	moduleIndex = dataset.moduleIndex+1;
                 }
                 else {
                 	const findModuleById = (imodule) => imodule.id == dataset.moduleId;
                 	moduleIndex = workflow.modules.findIndex( findModuleById)+1;
                 }
+            	const lastModule = ( moduleIndex == workflow.modules.length );
+            	if(lastModule){
+            		//we are on the last module so we can just append
+            		moduleIndex = null;
+            	}
             }
             if (originalCellValue !== updatedCellValue) {
                 this.setState({
