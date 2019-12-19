@@ -18,7 +18,7 @@
 
 import {
     projectActionError, receiveProjectResource, requestProjectAction } from './Project';
-import { UPDATE_NOTEBOOK } from './Notebook';
+import { UPDATE_NOTEBOOK, updateNotebook } from './Notebook';
 import {
     CellAnnotation, NoAnnotation, IsFetching, FetchError, AnnotationList
 } from '../../resources/Annotation';
@@ -174,7 +174,7 @@ export const repairDatasetCaveat = (dataset, url, reason, repair, acknowledge) =
         );
     }
 
-export const submitUpdate = (workflow, dataset, cmd, moduleIndex) => (dispatch) => {
+export const submitUpdate = (notebook, dataset, cmd, moduleIndex) => (dispatch) => {
     // const { name, offset } = dataset;
 	const upcmd = cmd;
     dispatch(submitUpdateRequest());
@@ -188,7 +188,7 @@ export const submitUpdate = (workflow, dataset, cmd, moduleIndex) => (dispatch) 
         };
     let update = null;
     if(moduleIndex){
-    	const url = workflow.modules[moduleIndex].links[0].href;
+    	const url = notebook.workflow.modules[moduleIndex].links[0].href;
     	update = fetchAuthed(
     			url,
                 updateBody
@@ -196,10 +196,11 @@ export const submitUpdate = (workflow, dataset, cmd, moduleIndex) => (dispatch) 
     }
     else {
     	update = fetchAuthed(
-    			workflow.links.get(HATEOAS_MODULE_APPEND),
+    			notebook.workflow.links.get(HATEOAS_MODULE_APPEND),
                 updateBody
             );
     }
+    
     return update(dispatch)
         // Check the response. Assume that eveything is all right if status
         // code below 400
@@ -209,23 +210,28 @@ export const submitUpdate = (workflow, dataset, cmd, moduleIndex) => (dispatch) 
                 // handler
                 response.json().then(json => {
                 	let upds = dataset
-                	let newModuleIndex = 1;
+                	let moduleId = "__0__";
                 	if(moduleIndex){
-                		newModuleIndex = moduleIndex;
+                		let newModuleIndex = moduleIndex;
+                		const newModuleId = json.modules[newModuleIndex].id;
+                		moduleId = json.modules[moduleIndex-1].id;
+                    	upds.moduleId = newModuleId;
+                    	upds.moduleIndex = newModuleIndex;
                 	}
-                	const newModuleId = json.modules[newModuleIndex].id;
-                	upds.moduleId = newModuleId;
-                	upds.moduleIndex = newModuleIndex;
-                	upds.workflow = new WorkflowHandle(workflow.engine).fromJson(json);
+                	//add updates to current dataset -- trick to make not need to wait for dataset fetch
                 	if(upcmd.packageId === "vizual" && upcmd.commandId === "updateCell"){
                 		upds.rows.find((row) => (row.id === upcmd.arguments[2].value)).values[upcmd.arguments[1].value] = upcmd.arguments[3].value
                 	}
-                	/*dispatch(() => {
-                		return {
-                			type: UPDATE_NOTEBOOK,
-                			notebook: notebook.updateWorkflow(json, newModuleId)
-                		};
-                    });*/
+                	else if(upcmd.packageId === "mimir" && upcmd.commandId === "comment"){
+                		const colName = upcmd.arguments[1].value[0][0].value;
+                		const nameEquals = (col) => col.name === colName;
+                		const columnId = upds.columns.findIndex(nameEquals); 
+                		upds.rows.find((row) => (row.id === upcmd.arguments[1].value[0][2].value)).rowAnnotationFlags[columnId] = false
+                	}
+                	//we shoule also fire off a fetch of the new dataset here or something more clever that needs to be designed 
+                	// like partial spreadsheet fetch like above but the right way. 
+                	const wf = new WorkflowHandle(notebook.workflow.engine).fromJson(json);
+                	dispatch(updateNotebook(notebook, json, moduleId));
                 	dispatch(receiveProjectResource(
                             new SpreadsheetResource(upds)));
                 	
@@ -312,8 +318,7 @@ export const fetchAnnotations = (dataset, columnId, rowId) => (dispatch) => {
 
 
 const postUpdateRequest = (dispatch, url, data, dataset, columnId, rowId) => {
-    return postResourceData(
-        dispatch,
+    return dispatch(postResourceData(
         url,
         data,
         (json) => {
@@ -332,7 +337,7 @@ const postUpdateRequest = (dispatch, url, data, dataset, columnId, rowId) => {
             return setAnnotations(annotation);
         },
         () => (setAnnotations(new CellAnnotation(columnId, rowId, new IsFetching())))
-    );
+    ));
 }
 
 export const setAnnotations = (annotations) => ({
@@ -341,15 +346,25 @@ export const setAnnotations = (annotations) => ({
 })
 
 export const updateAnnotations = (dataset, columnId, rowId, key, value) => (dispatch) => {
-    const data = {
+    const oldValue = ''
+    const newValue = value
+	const data = {
         columnId,
         rowId,
         key,
-        value
+        oldValue,
+        newValue
+    }
+    let annoLink = '';
+    if(dataset.links.annotations){
+    	annoLink = dataset.links.annotations;
+    }
+    else{
+    	annoLink = dataset.links.links[4].href;
     }
     return postUpdateRequest(
         dispatch,
-        dataset.links.annotations,
+        annoLink,
         data,
         dataset,
         columnId,

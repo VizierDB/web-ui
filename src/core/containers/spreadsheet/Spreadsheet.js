@@ -36,7 +36,7 @@ import SpreadsheetScrollbar from '../../components/spreadsheet/SpreadsheetScroll
 import { MOVE, isNotEmptyString, isNonNegativeInt } from '../../util/App';
 import {
     VIZUAL, VIZUAL_OP, deleteColumn, deleteRow, insertColumn, insertRow, moveColumn,
-    moveRow,  renameColumn, sortDataset, updateCell
+    moveRow,  renameColumn, sortDataset, updateCell, updateAnnotation
 } from '../../util/Vizual';
 import '../../../css/App.css';
 import '../../../css/Notebook.css';
@@ -580,6 +580,26 @@ class Spreadsheet extends React.Component {
         }
         return content;
     }
+    getInsertModuleIndex = () => {
+    	const { dataset, notebook } = this.props;
+    	let moduleIndex = null;
+        if(dataset.moduleId){
+        	if(dataset.moduleIndex){
+        		//there is a pending vizual insert so we want to insert after that (+1)
+            	moduleIndex = dataset.moduleIndex+1;
+            }
+            else {
+            	const findModuleById = (imodule) => imodule.id == dataset.moduleId;
+            	moduleIndex = notebook.workflow.modules.findIndex( findModuleById)+1;
+            }
+        	const lastModule = ( moduleIndex == notebook.workflow.modules.length );
+        	if(lastModule){
+        		//we are on the last module so we can just append
+        		moduleIndex = null;
+        	}
+        }
+        return moduleIndex;
+    }
     submitPendingUpdate = () => {
         const {
             activeColumnId,
@@ -589,29 +609,7 @@ class Spreadsheet extends React.Component {
         } = this.state;
         if (activeColumnId !== -1) {
             const { dispatch, dataset, notebook } = this.props;
-            let workflow = null;
-            if(dataset.workflow){
-            	workflow = dataset.workflow;
-            }
-            else {
-            	workflow = notebook.workflow;
-            }
-            let moduleIndex = null;
-            if(dataset.moduleId){
-            	if(dataset.moduleIndex){
-            		//there is a pending vizual insert so we want to insert after that (+1)
-                	moduleIndex = dataset.moduleIndex+1;
-                }
-                else {
-                	const findModuleById = (imodule) => imodule.id == dataset.moduleId;
-                	moduleIndex = workflow.modules.findIndex( findModuleById)+1;
-                }
-            	const lastModule = ( moduleIndex == workflow.modules.length );
-            	if(lastModule){
-            		//we are on the last module so we can just append
-            		moduleIndex = null;
-            	}
-            }
+            const moduleIndex = this.getInsertModuleIndex();
             if (originalCellValue !== updatedCellValue) {
                 this.setState({
                     updatingColumnId: activeColumnId,
@@ -633,34 +631,21 @@ class Spreadsheet extends React.Component {
                         updatedCellValue
                     );
                 }
-                dispatch(submitUpdate(workflow, dataset, cmd, moduleIndex));
+                dispatch(submitUpdate(notebook, dataset, cmd, moduleIndex));
             }
         }
     }
+    
     submitUserAnnotation = (annotation, key, value) => {
-        const { dispatch, dataset } = this.props;
+        const { dispatch, dataset, notebook } = this.props;
         const { column, row } = annotation;
-        dispatch(updateAnnotations(dataset, column, row, key, value));
+        //dispatch(updateAnnotations(dataset, column, row, key, value));
+        const moduleIndex = this.getInsertModuleIndex();
+        dispatch(submitUpdate(notebook, dataset, updateAnnotation(dataset, column, value, row), moduleIndex))
     }
     submitVizualCommand = (cmd) => {
         const { dispatch, dataset, notebook } = this.props;
-        let workflow = null;
-        if(dataset.workflow){
-        	workflow = dataset.workflow;
-        }
-        else {
-        	workflow = notebook.workflow;
-        }
-        let moduleIndex = null;
-        if(dataset.moduleId){
-        	if(dataset.moduleIndex){
-            	moduleIndex = dataset.moduleIndex+1;
-            }
-            else {
-            	const findModuleById = (imodule) => imodule.id == dataset.moduleId;
-            	moduleIndex = workflow.modules.findIndex( findModuleById)+1;
-            }
-        }
+        const moduleIndex = this.getInsertModuleIndex();
         // Clear any active cells without submitting potential changes
         this.setState({
             activeColumnId: -1,
@@ -673,7 +658,7 @@ class Spreadsheet extends React.Component {
             updatingRowId: -1,
             updatingValue: null
         });
-        dispatch(submitUpdate(workflow, dataset, cmd, moduleIndex));
+        dispatch(submitUpdate(notebook, dataset, cmd, moduleIndex));
     }
 }
 

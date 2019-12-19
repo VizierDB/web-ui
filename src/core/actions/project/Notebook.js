@@ -593,7 +593,7 @@ export const updateNotebookCellWithUpload = (notebook, modifyUrl, data, notebook
  * optional modified cell identifier is the identifier of the cell that
  * triggered the update.
  */
-const updateNotebook = (notebook, json, modifiedCellId) => {
+export const updateNotebook = (notebook, json, modifiedCellId) => {
     // Create an updated notebook resource if the workflow handle is given
     if (json != null) {
         const wf = new WorkflowHandle(notebook.workflow.engine).fromJson(json);
