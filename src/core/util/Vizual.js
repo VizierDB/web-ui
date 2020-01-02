@@ -25,18 +25,18 @@
  */
 
 export const VIZUAL = {
-    DELETE_COLUMN: 'DELETE_COLUMN',
-    DELETE_ROW: 'DELETE_ROW',
-    DROP_DATASET: 'DROP_DATASET',
-    INSERT_COLUMN: 'INSERT_COLUMN',
-    INSERT_ROW: 'INSERT_ROW',
-    LOAD: 'LOAD',
-    MOVE_COLUMN: 'MOVE_COLUMN',
-    MOVE_ROW: 'MOVE_ROW',
-    PROJECTION: 'PROJECTION',
-    RENAME_COLUMN: 'RENAME_COLUMN',
-    RENAME_DATASET: 'RENAME_DATASET',
-    SORT: 'SORT_DATASET',
+    DELETE_COLUMN: 'deleteColumn',
+    DELETE_ROW: 'deleteRow',
+    DROP_DATASET: 'dropDataset',
+    INSERT_COLUMN: 'insertColumn',
+    INSERT_ROW: 'insertRow',
+    LOAD: 'load',
+    MOVE_COLUMN: 'moveColumn',
+    MOVE_ROW: 'moveRow',
+    PROJECTION: 'projection',
+    RENAME_COLUMN: 'renameColumn',
+    RENAME_DATASET: 'renameDataset',
+    SORT: 'sortDataset',
     UPDATE_CELL: 'updateCell'
 }
 
@@ -134,13 +134,13 @@ export const moveRow = (dataset, row, position) => ({
  * RENAME COLUMN operation request body
  */
 export const renameColumn = (dataset, column, name) => ({
-    type: VIZUAL_OP,
-    id: VIZUAL.RENAME_COLUMN,
-    arguments: {
-        dataset,
-        column,
-        name
-    }
+	packageId: VIZUAL_OP,
+	commandId: VIZUAL.RENAME_COLUMN,
+    arguments: [
+    	{id:'dataset',value:dataset},
+        {id:'column',value:column},
+        {id:'name',value:name}
+    ]
 })
 
 
@@ -148,15 +148,13 @@ export const renameColumn = (dataset, column, name) => ({
  * SORT A DATASET based on the values int he given column.
  */
 export const sortDataset = (dataset, column, sortOrder) => ({
-    type: VIZUAL_OP,
-    id: VIZUAL.SORT,
-    arguments: {
-        dataset,
-        columns: [{
-            columns_column: column,
-            columns_order: sortOrder
-        }]
-    }
+	packageId: VIZUAL_OP,
+	commandId: VIZUAL.SORT,
+    arguments: [
+    	{id:'dataset',value:dataset},
+        {id:'column',value:column},
+        {id:'columns_order',value:sortOrder}
+    ]
 })
 
 /**

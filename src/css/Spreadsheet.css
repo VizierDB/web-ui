@@ -115,7 +115,7 @@ div.cell-value {
 .spreadsheet-input {
     resize: none;
     height: 100%;
-    width: 100%;
+    /*width: 100%;*/
     border: 0px;
     border-radius: 0;
     font-size: 12px;
