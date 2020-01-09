@@ -210,9 +210,9 @@ const mapStateToProps = state => {
     return {
         actionError: state.projectPage.actionError,
         branch: state.projectPage.branch,
-        fetchError: state.branchPage.fetchError,
+        fetchError: state.datasetErrorsPage.fetchError,
         isActive: state.projectPage.isActive,
-        isFetching: state.branchPage.isFetching,
+        isFetching: state.datasetErrorsPage.isFetching,
         project: state.projectPage.project,
         projectList: state.projectListing.projects,
         serviceApi: state.serviceApi,

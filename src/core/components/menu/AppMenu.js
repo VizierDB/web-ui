@@ -68,6 +68,7 @@ class AppMenu extends React.Component {
         onSetFilter: PropTypes.func.isRequired,
         onShowChart: PropTypes.func.isRequired,
         onShowDataset: PropTypes.func.isRequired,
+        onShowDatasetCaveat: PropTypes.func.isRequired,
         onShowHistory: PropTypes.func.isRequired,
         onShowNotebook: PropTypes.func,
         onShowProject: PropTypes.func.isRequired,

@@ -17,6 +17,7 @@
  */
 
 import { RECEIVE_BRANCH_HISTORY, REQUEST_BRANCH } from '../../actions/project/Branch';
+import { REQUEST_CAVEATS } from '../../actions/project/Spreadsheet';
 import { PROJECT_FETCH_ERROR, RECEIVE_PROJECT, REQUEST_PROJECT, RECEIVE_PROJECT_RESOURCE } from '../../actions/project/Project';
 import { RESOURCE_DATASET_CAVEAT } from '../../util/App';
 import { CONTENT_DATASET } from '../../resources/Outputs';
@@ -48,17 +49,10 @@ export const datasetErrorsPage = (state = INITIAL_STATE, action) => {
                 isFetching: false,
                 fetchError: action.error
             };
-        case RECEIVE_BRANCH_HISTORY:
-            return {
-                ...state,
-                workflows: action.workflows,
-                isFetching: false,
-                fetchError: null
-            };
         case RECEIVE_PROJECT:
             return {...state, workflows: null};
         case REQUEST_PROJECT:
-        case REQUEST_BRANCH:
+        case REQUEST_CAVEATS:
             return {
                 ...state,
                 isFetching: true,
@@ -68,7 +62,8 @@ export const datasetErrorsPage = (state = INITIAL_STATE, action) => {
         		case RESOURCE_DATASET_CAVEAT:
 	        	    return {
 		        	    ...state,
-		        	    resource: action.resource
+		        	    isFetching: false,
+		                resource: action.resource
 		            };
         		case CONTENT_DATASET:
 	        	    return {

@@ -33,6 +33,8 @@ import { HATEOAS_MODULE_APPEND, HATEOAS_MODULE_INSERT } from '../../util/HATEOAS
 
 // Actions to indicate that the spreadsheet is currently being updated
 export const SUBMIT_UPDATE_REQUEST = 'SUBMIT_UPDATE_REQUEST';
+//Actions to indicate that the dataset caveats are currently being updated
+export const REQUEST_CAVEATS = 'REQUEST_CAVEATS';
 // Set the cell annotation object for a selected dataset cell
 export const SET_ANNOTATIONS = 'SET_ANNOTATIONS';
 // Signal an update to the datasets annotations
@@ -126,6 +128,7 @@ export const showDatasetCaveat = (dataset, url) => (dispatch) => {
     } else {
         fetchUrl = dataset.links.self +'/annotations';
     }
+    dispatch(submitCaveatRequest());
     dispatch(
         fetchResource(
             fetchUrl,
@@ -258,6 +261,13 @@ export const submitUpdate = (notebook, dataset, cmd, moduleIndex) => (dispatch) 
  */
 export const submitUpdateRequest = () => ({
     type: SUBMIT_UPDATE_REQUEST
+})
+
+/**
+ * Signal that the dataset caveats are currently being updated.
+ */
+export const submitCaveatRequest = () => ({
+    type: REQUEST_CAVEATS
 })
 
 // -----------------------------------------------------------------------------
