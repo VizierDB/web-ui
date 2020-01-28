@@ -58,7 +58,7 @@ class TextSelector extends React.Component {
                 }
                 listItems.push({
                     key: entryKey,
-                    text: entry.value,
+                    text: entry.text,
                     value: entryKey
                 })
             } else {
