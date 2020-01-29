@@ -30,7 +30,7 @@ import { SpreadsheetResource, DatasetCaveatResource } from '../../util/App'
 import { fetchResource, postResourceData } from '../../util/Api';
 import { fetchAuthed, requestAuth } from '../main/Service';
 import { HATEOAS_MODULE_APPEND, HATEOAS_MODULE_INSERT } from '../../util/HATEOAS';
-
+import { VIZUAL_OP, VIZUAL } from '../../util/Vizual'
 // Actions to indicate that the spreadsheet is currently being updated
 export const SUBMIT_UPDATE_REQUEST = 'SUBMIT_UPDATE_REQUEST';
 //Actions to indicate that the dataset caveats are currently being updated
@@ -222,9 +222,13 @@ export const submitUpdate = (notebook, dataset, cmd, moduleIndex) => (dispatch) 
                     	upds.moduleIndex = newModuleIndex;
                 	}
                 	//add updates to current dataset -- trick to make not need to wait for dataset fetch
-                	if(upcmd.packageId === "vizual" && upcmd.commandId === "updateCell"){
+                	if(upcmd.packageId === VIZUAL_OP && upcmd.commandId === VIZUAL.UPDATE_CELL){
                 		upds.rows.find((row) => (row.id === upcmd.arguments[2].value)).values[upcmd.arguments[1].value] = upcmd.arguments[3].value
                 	}
+                	if(upcmd.packageId === VIZUAL_OP && upcmd.commandId === VIZUAL.RENAME_COLUMN){
+                		upds.columns.find((col) => (col.id === upcmd.arguments[1].value)).name = upcmd.arguments[2].value
+                	}
+                	
                 	else if(upcmd.packageId === "mimir" && upcmd.commandId === "comment"){
                 		const colName = upcmd.arguments[1].value[0][0].value;
                 		const nameEquals = (col) => col.name === colName;

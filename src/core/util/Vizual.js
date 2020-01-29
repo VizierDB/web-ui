@@ -53,12 +53,12 @@ export const SORT = {
  * DELETE COLUMN operation request body
  */
 export const deleteColumn = (dataset, column) => ({
-    type: VIZUAL_OP,
-    id: VIZUAL.DELETE_COLUMN,
-    arguments: {
-        dataset,
-        column
-    }
+	packageId: VIZUAL_OP,
+	commandId: VIZUAL.DELETE_COLUMN,
+	arguments: [
+    	{id:'dataset',value:dataset},
+    	{id:'column',value:column}
+    ]
 })
 
 
@@ -66,12 +66,12 @@ export const deleteColumn = (dataset, column) => ({
  * DELETE ROW operation request body
  */
 export const deleteRow = (dataset, row) => ({
-    type: VIZUAL_OP,
-    id: VIZUAL.DELETE_ROW,
-    arguments: {
-        dataset,
-        row
-    }
+	packageId: VIZUAL_OP,
+	commandId: VIZUAL.DELETE_ROW,
+	arguments: [
+    	{id:'dataset',value:dataset},
+    	{id:'row',value:row}
+    ]
 })
 
 
@@ -79,13 +79,13 @@ export const deleteRow = (dataset, row) => ({
  * INSERT COLUMN operation request body
  */
 export const insertColumn = (dataset, name, position) => ({
-    type: VIZUAL_OP,
-    id: VIZUAL.INSERT_COLUMN,
-    arguments: {
-        dataset,
-        name,
-        position
-    }
+	packageId: VIZUAL_OP,
+	commandId: VIZUAL.INSERT_COLUMN,
+	arguments: [
+    	{id:'dataset',value:dataset},
+    	{id:'name',value:name},
+    	{id:'position',value:position}
+    ]
 })
 
 
@@ -93,12 +93,12 @@ export const insertColumn = (dataset, name, position) => ({
  * INSERT ROW operation request body
  */
 export const insertRow = (dataset, position) => ({
-    type: VIZUAL_OP,
-    id: VIZUAL.INSERT_ROW,
-    arguments: {
-        dataset,
-        position
-    }
+	packageId: VIZUAL_OP,
+	commandId: VIZUAL.INSERT_ROW,
+	arguments: [
+    	{id:'dataset',value:dataset},
+    	{id:'position',value:position}
+    ]
 })
 
 
@@ -106,13 +106,13 @@ export const insertRow = (dataset, position) => ({
  * MOVE COLUMN operation request body
  */
 export const moveColumn = (dataset, column, position) => ({
-    type: VIZUAL_OP,
-    id: VIZUAL.MOVE_COLUMN,
-    arguments: {
-        dataset,
-        column,
-        position
-    }
+	packageId: VIZUAL_OP,
+	commandId: VIZUAL.MOVE_COLUMN,
+	arguments: [
+    	{id:'dataset',value:dataset},
+    	{id:'column',value:column},
+    	{id:'position',value:position}
+    ]
 })
 
 
@@ -120,13 +120,13 @@ export const moveColumn = (dataset, column, position) => ({
  * MOVE ROW operation request body
  */
 export const moveRow = (dataset, row, position) => ({
-    type: VIZUAL_OP,
-    id: VIZUAL.MOVE_ROW,
-    arguments: {
-        dataset,
-        row,
-        position
-    }
+	packageId: VIZUAL_OP,
+	commandId: VIZUAL.MOVE_ROW,
+	arguments: [
+    	{id:'dataset',value:dataset},
+    	{id:'row',value:row},
+    	{id:'position',value:position}
+    ]
 })
 
 
