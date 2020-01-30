@@ -131,6 +131,21 @@ export const fetchAuthed = (url, fetchProps) => (dispatch) => {
 }
 
 /**
+ * Checks a fetch response to determine if an authorization timeout has occured 
+ * and since fetch can not handle redirects we may need to trigger browser GET
+ * to perform the renewal.  Right now this is specifically for ub shibboleth; 
+ * we can generalize it more in the future.  
+ *
+ */
+export const checkResponseJsonForReAuth = (response) => {
+	try {
+		return response.text().then(JSON.parse);
+    } catch(err) {
+    	window.location.reload(false); 
+    }
+}
+
+/**
  * Action to retrieve API service descriptor. Expects that the Web Service Url
  * has been set during App initialization.
  *
@@ -148,14 +163,14 @@ export const fetchService = () => (dispatch, getState) =>  {
         if (response.status >= 200 && response.status < 400) {
             // SUCCESS: Pass the JSON result to the respective callback
             // handler
-            response.json().then(json => dispatch(receiveService(json)));
+            checkResponseJsonForReAuth(response).then(json => dispatch(receiveService(json)));
         } else if(response.status === 401) {
         	// UNAUTHORIZED: re-request auth
         	dispatch(requestAuth())
         } else {
             // ERROR: The API is expected to return a JSON object in case
             // of an error that contains an error message
-            response.json().then(json => dispatch(serviceError(json.message)));
+            checkResponseJsonForReAuth(response).then(json => dispatch(serviceError(json.message)));
         }
     })
     .catch(err => dispatch(serviceError(err.message)))

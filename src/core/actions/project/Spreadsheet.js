@@ -28,7 +28,7 @@ import { WorkflowHandle } from '../../resources/Workflow';
 import { SpreadsheetResource, DatasetCaveatResource } from '../../util/App'
 // import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource, postResourceData } from '../../util/Api';
-import { fetchAuthed, requestAuth } from '../main/Service';
+import { fetchAuthed, checkResponseJsonForReAuth, requestAuth } from '../main/Service';
 import { HATEOAS_MODULE_APPEND, HATEOAS_MODULE_INSERT } from '../../util/HATEOAS';
 import { VIZUAL_OP, VIZUAL } from '../../util/Vizual'
 // Actions to indicate that the spreadsheet is currently being updated
@@ -211,7 +211,7 @@ export const submitUpdate = (notebook, dataset, cmd, moduleIndex) => (dispatch) 
             if (response.status >= 200 && response.status < 400) {
                 // SUCCESS: Pass the JSON result to the respective callback
                 // handler
-                response.json().then(json => {
+                checkResponseJsonForReAuth(response).then(json => {
                 	let upds = dataset
                 	let moduleId = "__0__";
                 	if(moduleIndex){
@@ -249,7 +249,7 @@ export const submitUpdate = (notebook, dataset, cmd, moduleIndex) => (dispatch) 
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message
-                response.json().then(json => dispatch(
+                checkResponseJsonForReAuth(response).then(json => dispatch(
                     projectActionError('Error updating spreadsheet', json.message))
                 );
             }

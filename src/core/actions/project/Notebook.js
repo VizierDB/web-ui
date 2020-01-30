@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { fetchAuthed, requestAuth, serviceError } from '../main/Service';
+import { fetchAuthed, checkResponseJsonForReAuth, requestAuth, serviceError } from '../main/Service';
 import { projectActionError, projectFetchError, requestProjectAction } from './Project';
 // import { AnnotationList } from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
@@ -72,7 +72,7 @@ export const fetchWorkflow = (project, branch, workflowId) => (dispatch, getStat
                 // the project handle (.project), workflow handle (.workflow),
                 //  workflow modules (.modules), and all dataset descriptors
                 // (.datasets). The last two are used to generate the notebook.
-                response.json().then(json => (
+                checkResponseJsonForReAuth(response).then(json => (
                     dispatch({
                         type: RECEIVE_WORKFLOW,
                         workflow: new WorkflowHandle(api.engine).fromJson(json)
@@ -83,13 +83,13 @@ export const fetchWorkflow = (project, branch, workflowId) => (dispatch, getStat
             	dispatch(requestAuth())
             } else if (response.status === 404) {
                 // The requested project, branch, or workflow does not exist.
-                response.json().then(json => (dispatch(
+                checkResponseJsonForReAuth(response).then(json => (dispatch(
                     workflowFetchError(json.message, 404)
                 )));
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message
-                response.json().then(json => dispatch(
+                checkResponseJsonForReAuth(response).then(json => dispatch(
                     workflowFetchError(json.message, response.status)
                 ));
             }
@@ -113,9 +113,9 @@ const workflowFetchError = (message, status) => (
 
 const getJson = (response, success) => {
     if (response.status === success) {
-        return response.json();
+        return checkResponseJsonForReAuth(response);
     } else {
-        return response.json().then(err => {throw err;});
+        return checkResponseJsonForReAuth(response).then(err => {throw err;});
     }
 }
 /**
@@ -419,14 +419,14 @@ export const deleteNotebookCell = (notebook, cell) => (dispatch) => {
     )(dispatch).then(function(response) {
         if (response.status === 200) {
             // SUCCESS: Dispatch updated notebook for new workflow handle
-            response.json().then(json => dispatch(updateNotebook(notebook, json)));
+            checkResponseJsonForReAuth(response).then(json => dispatch(updateNotebook(notebook, json)));
         } else if(response.status === 401) {
         	// UNAUTHORIZED: re-request auth
         	dispatch(requestAuth())
         } else {
             // ERROR: The API is expected to return a JSON object in case
             // of an error that contains an error message
-            response.json().then(json => dispatch(
+            checkResponseJsonForReAuth(response).then(json => dispatch(
                 projectActionError('Error deleting module', json.message)
             ))
         }
@@ -498,7 +498,7 @@ export const updateNotebookCell = (notebook, url, action, data, modifiedCellId) 
             // SUCCESS: Dispatch modified notebook resource. The result is
             // expected to be a Json object with WorkflowHandle (.workflow)
             // and the new nootebook information (.modules and .datasets)
-            response.json().then(json => (
+            checkResponseJsonForReAuth(response).then(json => (
                 dispatch(updateNotebook(notebook, json, modifiedCellId)))
             );
         } else if(response.status === 401) {
@@ -507,7 +507,7 @@ export const updateNotebookCell = (notebook, url, action, data, modifiedCellId) 
         } else {
             // ERROR: The API is expected to return a JSON object in case
             // of an error that contains an error message
-            response.json().then(json => (dispatch(
+            checkResponseJsonForReAuth(response).then(json => (dispatch(
                 projectActionError('Error updating notebook', json.message)
             )));
         }
@@ -551,7 +551,7 @@ export const updateNotebookCellWithUpload = (notebook, modifyUrl, data, notebook
             if (response.status >= 200 && response.status < 400) {
                 // SUCCESS: Fetch updated file identifier and modify the
                 // request body to update the notebook.
-                response.json().then(json => {
+                checkResponseJsonForReAuth(response).then(json => {
                     console.log('FILE RESPONSE');
                     console.log(json);
                     fileArg.value.fileid = json.id;
@@ -567,7 +567,7 @@ export const updateNotebookCellWithUpload = (notebook, modifyUrl, data, notebook
                 // of an error that contains an error message. For some response
                 // codes, however, this is not true (e.g. 413).
                 // TODO: Catch the cases where there is no Json response
-                response.json().then(json => dispatch(
+                checkResponseJsonForReAuth(response).then(json => dispatch(
                     projectActionError('Error updating workflow', json.message))
                 )
             }

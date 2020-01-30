@@ -20,7 +20,7 @@ import { ProjectHandle } from '../../resources/Project';
 import { getProperty, updateResourceProperty } from '../../util/Api';
 import { ErrorObject } from '../../util/Error';
 import { HATEOAS_PROJECT_UPDATE_PROPERTY } from '../../util/HATEOAS';
-import { fetchAuthed, requestAuth } from '../main/Service';
+import { fetchAuthed, checkResponseJsonForReAuth, requestAuth } from '../main/Service';
 
 // Actions for fetching project information from Web API.
 export const PROJECT_FETCH_ERROR = 'PROJECT_FETCH_ERROR';
@@ -55,7 +55,7 @@ export const fetchProject = (projectId, branchId, resultFunc) => (dispatch, getS
                 // the project handle (.project), workflow handle (.workflow),
                 //  workflow modules (.modules), and all dataset descriptors
                 // (.datasets). The last two are used to generate the notebook.
-                response.json().then(json => {
+                checkResponseJsonForReAuth(response).then(json => {
                     const project = new ProjectHandle().fromJson(json);
                     let branch = null;
                     if (branchId != null) {
@@ -75,13 +75,13 @@ export const fetchProject = (projectId, branchId, resultFunc) => (dispatch, getS
             	dispatch(requestAuth())
             } else if (response.status === 404) {
                 // The requested project, branch, or workflow does not exist.
-                response.json().then(json => (dispatch(
+                checkResponseJsonForReAuth(response).then(json => (dispatch(
                     projectFetchError(json.message, 404)
                 )));
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message
-                response.json().then(json => dispatch(
+                checkResponseJsonForReAuth(response).then(json => dispatch(
                     projectFetchError(json.message, response.status)
                 ));
             }

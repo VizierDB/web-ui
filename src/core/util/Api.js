@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { fetchAuthed, requestAuth } from '../actions/main/Service';
+import { fetchAuthed, checkResponseJsonForReAuth, requestAuth } from '../actions/main/Service';
 
 
 /**
@@ -70,7 +70,7 @@ export const deleteResource = (url, successHandler, errorHandler, signalStartHan
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message
-                response.json().then(json => dispatch(errorHandler(json.message)));
+                checkResponseJsonForReAuth(response).then(json => dispatch(errorHandler(json.message)));
             }
         })
         .catch(err => dispatch(errorHandler(err.message)))
@@ -96,14 +96,14 @@ export const fetchResource = (url, successHandler, errorHandler, signalStartHand
             if (response.status >= 200 && response.status < 400) {
                 // SUCCESS: Pass the JSON result to the respective callback
                 // handler
-                response.json().then(json => dispatch(successHandler(json)));
+                checkResponseJsonForReAuth(response).then(json => dispatch(successHandler(json)));
             } else if(response.status === 401) {
             	// UNAUTHORIZED: re-request auth
             	dispatch(requestAuth())
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message
-                response.json().then(json => dispatch(errorHandler(json.message)));
+                checkResponseJsonForReAuth(response).then(json => dispatch(errorHandler(json.message)));
             }
         })
         .catch(err => dispatch(errorHandler(err.message)))
@@ -154,14 +154,14 @@ export const postResourceData = (url, data, successHandler, errorHandler, signal
             if (response.status >= 200 && response.status < 400) {
                 // SUCCESS: Pass the JSON result to the respective callback
                 // handler
-                response.json().then(json => dispatch(successHandler(json)));
+                checkResponseJsonForReAuth(response).then(json => dispatch(successHandler(json)));
             } else if(response.status === 401) {
             	// UNAUTHORIZED: re-request auth
             	dispatch(requestAuth())
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message
-                response.json().then(json => dispatch(errorHandler(json.message)));
+                checkResponseJsonForReAuth(response).then(json => dispatch(errorHandler(json.message)));
             }
         })
         .catch(err => dispatch(errorHandler(err.message)))
@@ -197,14 +197,14 @@ export const putResourceData = (dispatch, url, data, successHandler, errorHandle
             if (response.status >= 200 && response.status < 400) {
                 // SUCCESS: Pass the JSON result to the respective callback
                 // handler
-                response.json().then(json => dispatch(successHandler(json)));
+                checkResponseJsonForReAuth(response).then(json => dispatch(successHandler(json)));
             } else if(response.status === 401) {
             	// UNAUTHORIZED: re-request auth
             	dispatch(requestAuth())
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message
-                response.json().then(json => dispatch(errorHandler(json.message)));
+                checkResponseJsonForReAuth(response).then(json => dispatch(errorHandler(json.message)));
             }
         })
         .catch(err => dispatch(errorHandler(err.message)))

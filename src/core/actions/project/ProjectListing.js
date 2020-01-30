@@ -17,7 +17,7 @@
  */
 
 import { NO_OP } from '../main/App';
-import { fetchAuthed, requestAuth } from '../main/Service';
+import { fetchAuthed, checkResponseJsonForReAuth, requestAuth } from '../main/Service';
 import { ProjectDescriptor } from '../../resources/Project';
 import { HATEOASReferences, HATEOAS_PROJECTS_DELETE, HATEOAS_PROJECTS_LIST } from '../../util/HATEOAS';
 import { createResource, deleteResource } from '../../util/Api'
@@ -112,14 +112,14 @@ export const fetchProjects = () => (dispatch, getState) => {
             if (response.status >= 200 && response.status < 400) {
                 // SUCCESS: Pass the JSON result to the respective callback
                 // handler
-                response.json().then(json => dispatch(receiveProjects(json)));
+                checkResponseJsonForReAuth(response).then(json => dispatch(receiveProjects(json)));
             } else if(response.status === 401) {
             	// UNAUTHORIZED: re-request auth
             	dispatch(requestAuth());
             } else {
                 // ERROR: The API is expected to return a JSON object in case
                 // of an error that contains an error message
-                response.json().then(json => dispatch(projectsFetchError(json.message)));
+                checkResponseJsonForReAuth(response).then(json => dispatch(projectsFetchError(json.message)));
             }
         })
         .catch(err => dispatch(projectsFetchError(err.message)))
@@ -152,7 +152,7 @@ export const uploadProject = (uploadUrl, fileArg, history) => (dispatch) => {
             if (response.status >= 200 && response.status < 400) {
                 // SUCCESS: Fetch updated file identifier and modify the
                 // request body to update the notebook.
-                response.json().then(json => {
+                checkResponseJsonForReAuth(response).then(json => {
                     console.log('FILE RESPONSE');
                     console.log(json);
                     history.push(notebookPageUrl(json.id, json.defaultBranch));
@@ -167,7 +167,7 @@ export const uploadProject = (uploadUrl, fileArg, history) => (dispatch) => {
                 // of an error that contains an error message. For some response
                 // codes, however, this is not true (e.g. 413).
                 // TODO: Catch the cases where there is no Json response
-                response.json().then(json => dispatch(
+                checkResponseJsonForReAuth(response).then(json => dispatch(
                 		projectsUploadError('Error updating workflow', json.message))
                 )
             }
