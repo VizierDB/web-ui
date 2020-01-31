@@ -138,11 +138,19 @@ export const fetchAuthed = (url, fetchProps) => (dispatch) => {
  *
  */
 export const checkResponseJsonForReAuth = (response) => {
-	try {
-		return response.text().then(JSON.parse);
-    } catch(err) {
-    	window.location.reload(false); 
-    }
+	return response.text().then(text => {
+		try {
+			const jsonObj = JSON.parse(text)
+			return Promise.resolve(jsonObj)
+		} catch(err) {
+			const r = window.confirm("Your session has timed out.  Do you want to renew your session?");
+			if (r == true) {
+				window.location.reload(false); 
+			} else {
+				return Promise.resolve(JSON.parse("{}"))
+			}
+	    }
+	});
 }
 
 /**
