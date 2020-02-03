@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Vizier",
+  "name": "Vizier, Data Exploration Redefined",
   "icons": [
     {
       "src": "favicon.ico",
