@@ -143,10 +143,16 @@ export const checkResponseJsonForReAuth = (response) => {
 			const jsonObj = JSON.parse(text)
 			return Promise.resolve(jsonObj)
 		} catch(err) {
-			const r = window.confirm("Your session has timed out.  Do you want to renew your session?");
-			if (r == true) {
-				window.location.reload(false); 
-			} else {
+			if(text && text.startsWith("<!DOCTYPE html>") && text.includes("SAMLRequest")){
+				const r = window.confirm("Your session has timed out.  Do you want to renew your session?");
+				if (r == true) {
+					//window.location.reload(false); 
+					window.open(process.env.PUBLIC_URL + "/reauth");
+				} else {
+					return Promise.resolve(JSON.parse("{}"))
+				}
+		    }
+			else {
 				return Promise.resolve(JSON.parse("{}"))
 			}
 	    }
