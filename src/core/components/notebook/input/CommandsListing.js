@@ -33,65 +33,60 @@ class CommandsListing extends React.Component {
         onPaste: PropTypes.func,
         onSelect: PropTypes.func.isRequired
     }
+    
+    groupBy = (arr, property)  => {
+    	  return arr.reduce((cat, x) => {
+    	    if (!cat[x[property]]) { cat[x[property]] = []; }
+    	    cat[x[property]].push(x);
+    	    return cat;
+    	  }, {});
+    	}
+
+    	
     render() {
         const { apiEngine, onDismiss, onPaste, onSelect } = this.props;
         // Get a list of command types
         const gridColumns = [];
         // Get list of packages. The list is sorted by package name by default.
-        const knownCategories = ['data_v','data_m','code','vizualization','default']
-        const packages = apiEngine.packages.toList().sort((c1, c2) => (knownCategories.indexOf(c1.category)-knownCategories.indexOf(c2.category)));
-        //max number of items pre col
-        const fullCol = 9.5;
-        // Further group modules by name
-        let curCol = 0.0;
+        const knownCategories = ['data_m','code','data_v','vizualization','default']
+        const packages = apiEngine.packages.toList();//.sort((c1, c2) => (knownCategories.indexOf(c1.category)-knownCategories.indexOf(c2.category)));
+        const groupedPackages = this.groupBy(packages, 'category');
+        const sortedKeys = Object.keys(groupedPackages).sort((c1, c2) => (knownCategories.indexOf(c1)-knownCategories.indexOf(c2)))
+        //groupedPackages[knownCategories[i]]
         let listItems = [];
-        for (let pckg of packages) {
-            // Get list of package commands. Elements in the list are sorted by
-            // the command name by default.
-            const commands = pckg.toList();
-            // add 1.25 for package and 1.0 for each command
-            curCol += 1.25 + commands.length;
-            if (curCol >= fullCol) {
-                if (listItems.length > 0) {
-                    gridColumns.push(
-                        <Grid.Column width={4} key={gridColumns.length}>
-                            <List link>
-                                { listItems }
-                            </List>
-                        </Grid.Column>
-                    );
-                    listItems = [];
-                    curCol = 1.25 + commands.length;
-                }
-
-            }
-            listItems.push(
-                <List.Item key={pckg.id}>
-                    <List.Header>{pckg.name.toUpperCase()}</List.Header>
-                </List.Item>
-            );
-            for (let i = 0; i < commands.length; i++) {
-                const cmd = commands[i]
-                listItems.push(
-                    <List.Item
-                        key={listItems.length}
-                        onClick={() => (onSelect(pckg.id, cmd.id))}
-                    >
-                        <List.Content>
-                            <List.Header as='a'>{cmd.name}</List.Header>
-                        </List.Content>
-                    </List.Item>
-                )
-            }
-        }
-        if (listItems.length > 0) {
-            gridColumns.push(
-                <Grid.Column width={4} key={gridColumns.length}>
-                    <List link>
-                        { listItems }
-                    </List>
-                </Grid.Column>
-            );
+        for (const packageCategory of sortedKeys) {
+        	listItems = [];
+        	const catPackages = groupedPackages[packageCategory];
+	        for (let pckg of catPackages) {
+	            // Get list of package commands. Elements in the list are sorted by
+	            // the command name by default.
+	            const commands = pckg.toList();
+	            listItems.push(
+	                <List.Item key={pckg.id}>
+	                    <List.Header>{pckg.name.toUpperCase()}</List.Header>
+	                </List.Item>
+	            );
+	            for (let i = 0; i < commands.length; i++) {
+	                const cmd = commands[i]
+	                listItems.push(
+	                    <List.Item
+	                        key={listItems.length}
+	                        onClick={() => (onSelect(pckg.id, cmd.id))}
+	                    >
+	                        <List.Content>
+	                            <List.Header as='a'>{cmd.name}</List.Header>
+	                        </List.Content>
+	                    </List.Item>
+	                )
+	            }
+	        }
+	        gridColumns.push(
+                    <Grid.Column width={4} key={gridColumns.length}>
+                        <List link>
+                            { listItems }
+                        </List>
+                    </Grid.Column>
+                );
         }
         // Show a paste command button in the title if the onPaste callback is
         // given.
