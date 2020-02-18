@@ -20,8 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Dropdown, Icon } from 'semantic-ui-react';
 import { INSERT_AFTER, INSERT_BEFORE } from '../../resources/Notebook';
-import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
-    CONTENT_TIMESTAMPS } from '../../resources/Outputs';
+import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE } from '../../resources/Outputs';
 import '../../../css/Notebook.css'
 
 
@@ -205,32 +204,12 @@ class CellDropDownMenu extends React.Component {
         let outputItems = [];
         outputItems.push(
             <Dropdown.Item
-                key='console'
-                icon='desktop'
-                text='Console'
-                title='Show standard output'
-                disabled={selectedKey === 'console'}
-                onClick={() => (onOutputSelect(module, CONTENT_TEXT))}
-            />
-        );
-        outputItems.push(
-            <Dropdown.Item
                 key='hide'
                 icon='hide'
                 text='Hide'
                 title='Hide output for this cell'
                 disabled={selectedKey === null}
                 onClick={() => (onOutputSelect(module, CONTENT_HIDE))}
-            />
-        );
-        outputItems.push(
-            <Dropdown.Item
-                key='timestamps'
-                icon='clock outline'
-                text='Timing'
-                title='Show module execution times'
-                disabled={selectedKey === 'timestamps'}
-                onClick={() => (onOutputSelect(module, CONTENT_TIMESTAMPS))}
             />
         );
         // Show dataset options if datasets are present in output
