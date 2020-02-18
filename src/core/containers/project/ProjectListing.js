@@ -29,6 +29,7 @@ import { notebookPageUrl } from '../../util/App.js';
 // for all components (?).
 // https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/withRouter.md
 import { withRouter } from 'react-router';
+import SearchBar from "../../components/SearchBar";
 
 import '../../../css/ResourceListing.css'
 
@@ -161,9 +162,16 @@ class ProjectListing extends Component {
                     onDismiss={this.clearActionError}
                 />)
             }
+            const searchBar = (
+                    <SearchBar
+                        projects={projects}
+                        handleShowProjectPage={this.handleShowProjectPage}
+                    />)
+
             content = (
                 <div>
                     { projectActionErrorMessage }
+                    { searchBar }
                     <Table singleLine>
                         <Table.Header>{tabHead}</Table.Header>
                         <Table.Body>{rows}</Table.Body>
