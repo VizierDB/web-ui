@@ -289,6 +289,15 @@ class CellCommandArea extends React.Component {
         const { snippetSelectorVisible } = this.state;
         this.setState({snippetSelectorVisible: !snippetSelectorVisible});
     }
+
+    /**
+     * Catches F5 (page refresh) and executes the cell
+     */
+    handleF5Press = (event) => {
+        event.preventDefault()
+        this.handleSubmitForm()
+    }
+
     render() {
         const {
             apiEngine,
@@ -478,9 +487,10 @@ class CellCommandArea extends React.Component {
             // form.
             const handlers = {
               'runCell': this.handleSubmitForm,
-              'dismiss': this.handleDismiss
+              'dismiss': this.handleDismiss,
+              'catchF5': this.handleF5Press
             };
-            const keyMap = { runCell: 'ctrl+enter', dismiss: 'esc' };
+            const keyMap = { runCell: 'ctrl+enter', dismiss: 'esc', catchF5: 'f5' };
             wrappedContent = (
                 <HotKeys keyMap={keyMap} handlers={handlers}>
                     { mainContent }

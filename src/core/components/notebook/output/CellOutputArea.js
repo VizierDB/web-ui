@@ -19,7 +19,7 @@
 import React from 'react';
 import createReactClass from 'create-react-class';
 import { PropTypes } from 'prop-types';
-import { Dimmer, Loader } from 'semantic-ui-react';
+import { Dimmer, Loader, Tab } from 'semantic-ui-react';
 import ReactMarkdown from 'react-markdown'
 import { ApiPolling } from '../../Api';
 import DatasetChart from '../../plot/DatasetChart';
@@ -205,27 +205,6 @@ class CellOutputArea extends React.Component {
                     {output.lines.join('\n')}
                 </pre>
             );
-        } else if (output.isTimestamps()) {
-            // Depending on whether the module completed successfully or not
-            // the label for the finished at timestamp changes.
-            let finishedType = '';
-            if (cell.isErrorOrCanceled()) {
-                finishedType = 'Canceled at';
-            } else {
-                finishedType = 'Finished at';
-            }
-            outputContent = (
-                <div className='module-timings' onClick={onSelectCell}>
-                    <p className='output-info-headline'>
-                        <span className='output-info-headline'>
-                            Module timings
-                        </span>
-                    </p>
-                    <TimestampOutput label='Created at' time={output.createdAt} />
-                    <TimestampOutput label='Started at' time={output.startedAt} />
-                    <TimestampOutput label={finishedType} time={output.finishedAt} />
-                </div>
-            );
         }
         // If the cell is in error state and it has output written to standard
         // error then we show those lines in an error box. We only show the
@@ -247,12 +226,38 @@ class CellOutputArea extends React.Component {
                 );
             }
         }
+        // Depending on whether the module completed successfully or not
+        // the label for the finished at timestamp changes.
+        let finishedType = '';
+        if (cell.isErrorOrCanceled()) {
+            finishedType = 'Canceled at';
+        } else {
+            finishedType = 'Finished at';
+        }
+        let timingContent = (
+            <div className='module-timings' onClick={onSelectCell}>
+                <p className='output-info-headline'>
+                    <span className='output-info-headline'>
+                        Module timings
+                    </span>
+                </p>
+                <TimestampOutput label='Created at' time={cell.module.timestamps.createdAt} />
+                <TimestampOutput label='Started at' time={cell.module.timestamps.startedAt} />
+                <TimestampOutput label={finishedType} time={cell.module.timestamps.finishedAt} />
+            </div>
+        );
+
+        let panes = [
+            { menuItem: 'Console', render: () => <Tab.Pane>{outputContent}</Tab.Pane> },
+            { menuItem: 'Timing', render: () => <Tab.Pane>{timingContent}</Tab.Pane> },
+        ]
+
         // Show spinner while fetching the output
         return  (
             <div className='output-area'>
                 <Dimmer.Dimmable dimmed={output.isFetching}>
                     <Loader active={output.isFetching}/>
-                    {outputContent}
+                    <Tab menu={{fluid: true}} panes={panes} />
                 </Dimmer.Dimmable>
             </div>
         );

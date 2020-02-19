@@ -169,19 +169,19 @@ class AppMenu extends React.Component {
         if (resource != null) {
             // Show the branch menu if the branch is given
             if (branch != null) {
-                let isLiveEnabled = false;
+                let isMostRecentEnabled = false;
                 if (notebook != null) {
-                    isLiveEnabled = notebook.readOnly;
+                    isMostRecentEnabled = notebook.readOnly;
                 }
                 menuItems.push(
                     <BranchMenuDropdown
                         key='branches'
                         branches={project.branches}
-                        isLive={!isLiveEnabled}
+                        isMostRecent={!isMostRecentEnabled}
                         onCreateBranch={onCreateBranch}
                         onDelete={this.showDeleteBranchModal}
                         onEdit={this.showEditBranchNameModal}
-                        onGoLive={this.switchToBranchHead}
+                        onGetMostRecent={this.switchToBranchHead}
                         onSelect={onSwitchBranch}
                         onShowHistory={onShowHistory}
                         resource={resource}
@@ -363,7 +363,7 @@ class AppMenu extends React.Component {
         }
     }
     /**
-     * Show workflow at branch head when user wants to 'Go Live'
+     * Show workflow at branch head when user wants to return to the head - previously 'Go Live'
      */
     switchToBranchHead = () => {
         const { onShowNotebook } = this.props;
