@@ -56,7 +56,7 @@ export const DT_ROW_INDEX = 'rowidx';
 export const DT_ROW_ID = 'rowid';
 export const DT_SCALAR = 'scalar';
 export const DT_STRING = 'string';
-
+export const DT_URL = 'url'
 
 /**
  * Declaration of a command in a workflow package. The command maintains a

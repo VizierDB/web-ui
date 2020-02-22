@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 import ModuleFormControl from './form/ModuleFormControl';
 import { DT_CODE, DT_FILE_ID, getSelectedDataset } from '../../../resources/Engine';
 import '../../../../css/ModuleForm.css';
+import ModuleInputFormDecorator from "./ModuleInputFormDecorator";
 
 
 class ModuleInputForm extends React.Component {
@@ -78,11 +79,16 @@ class ModuleInputForm extends React.Component {
             }
         }
         return (
-            <table className={cssTable}>
-                <tbody>
-                    { components }
-                </tbody>
-            </table>
+            <ModuleInputFormDecorator
+                components={ components }
+                selectedCommand={ selectedCommand }
+                cssTable = {cssTable}
+                datasets = { datasets }
+                selectedDataset = { selectedDataset }
+                serviceProperties = { serviceProperties }
+                values = { values }
+                onChange = { onChange }
+            />
         );
     }
 }
