@@ -50,13 +50,17 @@ const requestService = () => ({
 /**
  * Handler for successful retrieval of service descriptor.
  */
-const receiveService = (json) => ({
-    type: RECEIVE_SERVICE,
-    name: json.name,
-    properties: json.defaults,
-    environment: json.environment,
-    links: json.links
-})
+const receiveService = (json) => {
+    if(json.defaults && json.defaults.profile)
+    	localStorage.setItem('profile', JSON.stringify(json.defaults.profile)); 	
+    return ({
+        type: RECEIVE_SERVICE,
+        name: json.name,
+        properties: json.defaults,
+        environment: json.environment,
+        links: json.links
+    })
+}
 
 /**
  * Error handler for service descriptor retrieval.
@@ -147,7 +151,13 @@ export const checkResponseJsonForReAuth = (response) => {
 				const r = window.confirm("Your session has timed out.  Do you want to renew your session?");
 				if (r == true) {
 					//window.location.reload(false); 
-					window.open(process.env.PUBLIC_URL + "/reauth");
+					//stored from serviceApi.properties.profile
+					const profile = JSON.parse(localStorage.getItem('profile'));
+					let reauthClient = "default";
+					if (profile && profile.client) {
+						reauthClient = profile.client
+					}
+					window.open(process.env.PUBLIC_URL + "/reauth?client=" + reauthClient);
 				} else {
 					return Promise.resolve(JSON.parse("{}"))
 				}
