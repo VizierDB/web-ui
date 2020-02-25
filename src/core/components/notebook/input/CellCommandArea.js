@@ -144,11 +144,15 @@ class CellCommandArea extends React.Component {
         this.handleToggleSnippetSelector();
     }
     /**
-     * Handle change in on of the elements in a displayed module input form.
+     * Handle change in one of the elements in a displayed module input form.
      * If the cell displays a code editor the optional cursorPosition specifies
      * the new position of the cursor in the editor.
      */
     handleFormValueChange = (id, value, cursorPosition) => {
+        if(id==="bulk"){
+            this.handleBulkFormValueChange(value)
+            return
+        }
         const { codeEditorProps, formValues, selectedCommand } = this.state;
         const modifiedValues = {...formValues};
         modifiedValues[id] = value;
@@ -168,6 +172,19 @@ class CellCommandArea extends React.Component {
             formValues: modifiedValues,
             codeEditorProps: modifiedEditorProps
         });
+    }
+
+    /**
+    * Bulk update the cell state - necessary when multiple values need to be updated quickly in succession
+    * (e.g. when changing tabs in the load dataset form, all properties will be updated). Individually updating
+    * each attribute in a loop does not guarantee a synchronous operation as calls maybe batched for for performance
+    * gains. Read More: https://reactjs.org/docs/react-component.html#setstate
+    */
+    handleBulkFormValueChange = (values) => {
+        const modifiedValues = {...values}
+        this.setState({
+            formValues: modifiedValues
+        })
     }
     /**
      * Keep track of the cursor position of a displayed code cell.

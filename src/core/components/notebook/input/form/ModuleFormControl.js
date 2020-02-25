@@ -28,8 +28,9 @@ import TextControl from './TextControl';
 import TextSelector from './TextSelector';
 import {
     DT_BOOL, DT_COLUMN_ID, DT_DATASET_ID, DT_DECIMAL, DT_FILE_ID, DT_INT,
-    DT_LIST, DT_RECORD, DT_ROW_ID, DT_ROW_INDEX, DT_SCALAR, DT_STRING
+    DT_LIST, DT_RECORD, DT_ROW_ID, DT_ROW_INDEX, DT_SCALAR, DT_STRING, DT_URL
 } from '../../../../resources/Engine';
+import URLSelector from "./URLSelector";
 
 
 /**
@@ -127,6 +128,18 @@ class ModuleFormControl extends React.Component {
         } else if (controlSpec.datatype === DT_FILE_ID) {
             return (
                 <FileSelector
+                    key={controlSpec.id}
+                    id={controlSpec.id}
+                    isRequired={controlSpec.required ? true : false}
+                    name={controlSpec.id}
+                    serviceProperties={serviceProperties}
+                    value={value}
+                    onChange={onChange}
+                />
+            )
+        } else if (controlSpec.datatype === DT_URL) {
+            return (
+                <URLSelector
                     key={controlSpec.id}
                     id={controlSpec.id}
                     isRequired={controlSpec.required ? true : false}
