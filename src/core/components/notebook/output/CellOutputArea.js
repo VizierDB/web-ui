@@ -29,6 +29,7 @@ import TimestampOutput from './TimestampOutput';
 import { CONTENT_TEXT, OutputText } from '../../../resources/Outputs';
 import '../../../../css/App.css';
 import '../../../../css/Notebook.css';
+import {TextButton} from "../../Button";
 
 
 
@@ -70,6 +71,18 @@ class CellOutputArea extends React.Component {
         const { output, module } = cell;
         const dataset = output.dataset;
         onFetchAnnotations(module, dataset, columnId, rowId);
+    }
+    /**
+     * Download the output in the console as a text file
+     */
+    handleConsoleDownload = () => {
+        const {cell} = this.props
+        const element = document.createElement("a");
+        const file = new Blob([JSON.stringify(cell.module.outputs.stdout[0].value)], {type: 'text/plain'});
+        element.href = URL.createObjectURL(file);
+        element.download = cell.id;
+        document.body.appendChild(element); // Required for this to work in FireFox
+        element.click();
     }
     render() {
         const {
@@ -206,6 +219,17 @@ class CellOutputArea extends React.Component {
                 </pre>
             );
         }
+        outputContent = (
+            <div>
+                {outputContent}
+                <div className='horizontal-divider'>
+                    <TextButton
+                        text={'download'}
+                        title='Download console output'
+                        onClick={this.handleConsoleDownload}
+                    />
+                </div>
+            </div>)
         // If the cell is in error state and it has output written to standard
         // error then we show those lines in an error box. We only show the
         // error messages if the displayed output is console (i.e., either
