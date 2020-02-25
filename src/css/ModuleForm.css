@@ -80,6 +80,15 @@ table.form-table.wide {
     width: 100%;
 }
 
+tr.form-options {
+    width: 100%;
+}
+
+tr.form-options-advanced {
+    display: none;
+    width: 100%;
+}
+
 td.form-label {
     font-weight: bold;
     padding-top: 1em;
