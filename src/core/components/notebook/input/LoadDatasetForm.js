@@ -2,7 +2,7 @@ import React, {useState, useEffect} from "react"
 import {Tab, Button, Label} from "semantic-ui-react";
 import ModuleFormControl from "./form/ModuleFormControl";
 import {DT_CODE, DT_FILE_ID} from "../../../resources/Engine";
-import PropTypes from 'prop-types'
+import PropTypes from 'prop-types';
 
 LoadDatasetForm.propTypes = {
     selectedCommand: PropTypes.object.isRequired,
@@ -11,13 +11,13 @@ LoadDatasetForm.propTypes = {
     serviceProperties: PropTypes.object.isRequired,
     values: PropTypes.object.isRequired,
     onChange: PropTypes.func.isRequired
-}
+};
 
 /**
  * Creates a Load Dataset Form with internal state management per tab/source type
  */
 export default function LoadDatasetForm(props) {
-    const {selectedCommand, datasets, selectedDataset, serviceProperties, values, onChange} = props
+    const {selectedCommand, datasets, selectedDataset, serviceProperties, values, onChange} = props;
 
     const initialState = {
         "name":null,
@@ -27,27 +27,27 @@ export default function LoadDatasetForm(props) {
         "loadDetectHeaders":false,
         "loadDataSourceErrors":false,
         "loadOptions":[]
-    }
+    };
 
     const [localSourceState, setLocalSourceState] = useState(initialState);
     const [remoteSourceState, setRemoteSourceState] = useState(initialState);
-    const [activeIndexValue,setActiveIndex] = useState(0)
+    const [activeIndexValue,setActiveIndex] = useState(null);
 
-    const state = [localSourceState, remoteSourceState]
-    const setState = [setLocalSourceState, setRemoteSourceState]
+    const state = [localSourceState, remoteSourceState];
+    const setState = [setLocalSourceState, setRemoteSourceState];
 
     /**
      * Load cell state values into the form when rendering an existing cell
      */
     useEffect(()=> {
         if(values["file"]["url"]===null){
-            setState[0](values)
-            setActiveIndex(0)
+            setState[0](values);
+            setActiveIndex(0);
         }else{
-            setState[1](values)
-            setActiveIndex(1)
+            setState[1](values);
+            setActiveIndex(1);
         }
-    },[])
+    },[]);
 
     /**
      * Update local tab state and cell state on form update
@@ -56,16 +56,16 @@ export default function LoadDatasetForm(props) {
         setState[activeIndexValue]({
             ...state[activeIndexValue],
             [id]:value,
-        })
+        });
         onChange(id, value)
-    }
+    };
 
     /**
      * Overwrite cell state with new tab state when tab switched
      */
     useEffect(()=>{
         onChange("bulk", state[activeIndexValue])
-    },[activeIndexValue])
+    },[activeIndexValue]);
 
     const panes = [
         { menuItem:<Label size="large" content="From Local Machine" icon='computer' />, render: ()=> <Tab.Pane>{
@@ -88,7 +88,7 @@ export default function LoadDatasetForm(props) {
                     isUrlPane={true}
                     onChange={handleValueChange}
                 />}</Tab.Pane>}
-    ]
+    ];
 
     return <Tab
         activeIndex={activeIndexValue}
@@ -106,20 +106,20 @@ const LoadFormPane = (props) => {
         selectedCommand,
         tabState,
         isUrlPane,
-        onChange} = props
+        onChange} = props;
 
     let cssTable = 'form-table wide';
     let components = [];
 
-    const [showingAdvancedOptions, setShowingAdvancedOptions] = useState(false)
+    const [showingAdvancedOptions, setShowingAdvancedOptions] = useState(false);
 
-    const toggleAdvanced = () => setShowingAdvancedOptions(prevState => !prevState)
+    const toggleAdvanced = () => setShowingAdvancedOptions(prevState => !prevState);
 
     const toggleAdvancedOptionsButton = () => <Button
         onClick={toggleAdvanced}
         basic
         content={`${showingAdvancedOptions?'Hide':'Show'} Advanced Options`}
-    />
+    />;
 
     for (let i = 0; i < selectedCommand.parameters.length; i++) {
         let para = selectedCommand.parameters[i];
@@ -129,9 +129,10 @@ const LoadFormPane = (props) => {
             para = { "datatype": "url", "hidden": false, "id": "file", "index": 1, "name": "URL","required": true }
         }
 
-        let cssAdvancedOption = 'form-options'
-        if(!(['name','file','loadFormat'].includes(para.id)) && !(showingAdvancedOptions))
-            cssAdvancedOption += '-advanced'
+        let cssAdvancedOption = 'form-options';
+        if(!(['name','file','loadFormat'].includes(para.id))){
+            !showingAdvancedOptions ? cssAdvancedOption += '-advanced-hidden':cssAdvancedOption += '-advanced'
+        }
 
         if ((para.parent == null) && (para.hidden !== true) && (para.datatype !== DT_CODE)) {
             components.push(
@@ -158,4 +159,4 @@ const LoadFormPane = (props) => {
     </table>
         <div className="form-add-button">{toggleAdvancedOptionsButton()}</div>
     </React.Fragment>
-}
+};
