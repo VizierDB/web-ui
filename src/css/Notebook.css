@@ -185,6 +185,12 @@ pre.cell-cmd-text {
     color: #303f9f;
     cursor: pointer;
     margin: 0px;
+    max-width: 1050px;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
 }
 
 pre.cell-cmd-error {
