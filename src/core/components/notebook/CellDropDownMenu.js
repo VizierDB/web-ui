@@ -20,7 +20,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Dropdown, Icon } from 'semantic-ui-react';
 import { INSERT_AFTER, INSERT_BEFORE } from '../../resources/Notebook';
-import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE } from '../../resources/Outputs';
 import '../../../css/Notebook.css'
 
 
@@ -71,10 +70,8 @@ class CellDropDownMenu extends React.Component {
             onCopyCell,
             onCreateBranch,
             onDeleteCell,
-            onOutputSelect,
             onSelectCell
         } = this.props;
-        const { module, output } = cell;
         // If the cell is in pending or running state no menu is displayed. We
         // only show an icon that depicts the cell status.
         if (cell.isActive()) {
@@ -181,73 +178,6 @@ class CellDropDownMenu extends React.Component {
                 onClick={onAddFilteredCommand}
             />
         );
-        // The second section of the menu contains the available outputs. The
-        // console output and the module timestamps are always available.
-        // Datasets and views are optional.
-        // Determine the key of the selected output to disable the respective
-        // menu entry.
-        let selectedKey = null;
-        let selectedIcon = 'hide';
-        if ((output.isText()) || (output.isHtml())) {
-            selectedKey = 'console';
-            selectedIcon = 'desktop';
-        } else if (output.isTimestamps()) {
-            selectedKey = 'timestamps';
-            selectedIcon = 'clock outline';
-        } else if (output.isDataset()) {
-            selectedKey = 'ds-' + output.dataset.name;
-            selectedIcon = 'table';
-        } else if (output.isChart()) {
-            selectedKey = 'vw-' + output.name;
-            selectedIcon = 'bar chart';
-        }
-        let outputItems = [];
-        outputItems.push(
-            <Dropdown.Item
-                key='hide'
-                icon='hide'
-                text='Hide'
-                title='Hide output for this cell'
-                disabled={selectedKey === null}
-                onClick={() => (onOutputSelect(module, CONTENT_HIDE))}
-            />
-        );
-        // Show dataset options if datasets are present in output
-        if (module.datasets.length > 0) {
-            outputItems.push(<Dropdown.Divider key='div-ds'/>);
-            outputItems.push(<Dropdown.Header key='header-ds' content="Datasets"/>);
-            for (let i = 0; i < module.datasets.length; i++) {
-                const ds = module.datasets[i];
-                outputItems.push(
-                    <Dropdown.Item
-                        key={'ds-' + ds.name}
-                        icon='table'
-                        text={ds.name}
-                        title={'Show dataset ' + ds.name}
-                        disabled={selectedKey === 'ds-' + ds.name}
-                        onClick={() => (onOutputSelect(module, CONTENT_DATASET, ds.name))}
-                    />
-                );
-            }
-        }
-        // Show chart options if chart views are present in output
-        if (module.charts.length > 0) {
-            outputItems.push(<Dropdown.Divider key='div-vw'/>);
-            outputItems.push(<Dropdown.Header key='header-vw' content="Charts"/>);
-            for (let i = 0; i < module.charts.length; i++) {
-                const chart = module.charts[i];
-                outputItems.push(
-                    <Dropdown.Item
-                        key={'vw-' + chart.name}
-                        icon='bar chart'
-                        text={chart.name}
-                        title={'Show chart ' + chart.name}
-                        disabled={selectedKey === 'vw-' + chart.name}
-                        onClick={() => (onOutputSelect(module, CONTENT_CHART, chart.name))}
-                    />
-                );
-            }
-        }
         // If the cell is in an error state we show an additional icon that
         // depicts the cell status
         let cellStatusIcon = null;
@@ -266,9 +196,6 @@ class CellDropDownMenu extends React.Component {
                 <div className='cell-menu'>
                     <Dropdown icon='bars' title='Cell actions'>
                         <Dropdown.Menu>{dropdownItems}</Dropdown.Menu>
-                    </Dropdown>
-                    <Dropdown icon={selectedIcon} title='Cell output'>
-                        <Dropdown.Menu>{outputItems}</Dropdown.Menu>
                     </Dropdown>
                 </div>
                 { cellStatusIcon }

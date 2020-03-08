@@ -267,6 +267,11 @@ div.module-timings {
     margin-top: 10px;
 }
 
+div.output-loading {
+    padding-left: 10px;
+    margin-top: 10px;
+    text-align: center;
+}
 p.output-info-headline {
     border-bottom: solid 1px #3b4151;
     padding-bottom: 5px;
