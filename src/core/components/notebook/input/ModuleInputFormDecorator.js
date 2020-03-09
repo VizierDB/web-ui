@@ -31,12 +31,7 @@ export default function ModuleInputFormDecorator(props) {
         </table>);
 
     switch (selectedCommand.id) {
-        case "load": return createLoadDatasetForm(selectedCommand)
-        default: return undecorated
-    }
-
-    function createLoadDatasetForm(selectedCommand){
-        return <LoadDatasetForm
+        case "load": return <LoadDatasetForm
             selectedCommand={selectedCommand}
             datasets={datasets}
             selectedDataset={selectedDataset}
@@ -44,6 +39,7 @@ export default function ModuleInputFormDecorator(props) {
             values = {values}
             onChange = {onChange}
         />
+        default: return undecorated
     }
 
 }

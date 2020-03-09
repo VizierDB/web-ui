@@ -84,8 +84,12 @@ tr.form-options {
     width: 100%;
 }
 
-tr.form-options-advanced {
+tr.form-options-advanced-hidden {
     display: none;
+    width: 100%;
+}
+
+tr.form-options-advanced {
     width: 100%;
 }
 
