@@ -130,7 +130,7 @@ class HeaderCell extends React.Component {
             }
             cellValue = (
                 <span className='header-value'>
-                    {columnName}
+                    {`${columnName} (${column["type"]})`}
                 </span>
             );
         }
