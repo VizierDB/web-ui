@@ -3,8 +3,9 @@ import React from 'react'
 import { Search } from 'semantic-ui-react'
 import PropTypes from 'prop-types';
 
-const initialState = { isLoading: false, results: [], value: ''}
-
+/**
+ * To return a search bar that filters results on the calling component
+ * */
 export default class SearchBar extends React.Component {
     static defaultProps = {
         aligned: 'right'
@@ -13,17 +14,18 @@ export default class SearchBar extends React.Component {
     static propTypes = {
         aligned: PropTypes.string,
         projects: PropTypes.array.isRequired,
-        handleShowProjectPage: PropTypes.func.isRequired,
+        filterProjectListing: PropTypes.func.isRequired
     }
 
     constructor(props) {
         super(props);
-        this.state = initialState
+        this.initialState = { isLoading: false, results: [], value: ''}
+        this.state = this.initialState
         this.projects = this.addTitleFieldToProjects(this.props.projects)
     }
 
     addTitleFieldToProjects = (projects) => {
-        if(projects != null && projects.length>0){
+        if(projects !== null && projects.length > 0){
             const projectsClone = [...projects]
             for (let i = 0; i < projectsClone.length; i++) {
                 projectsClone[i]["title"] = projectsClone[i]["name"]
@@ -33,24 +35,21 @@ export default class SearchBar extends React.Component {
         return []
     }
 
-    handleResultSelect = (e, { result }) => {
-        this.setState({ value: result.title })
-        this.props.handleShowProjectPage(result)
-    }
-
     handleSearchChange = (e, { value }) => {
         this.setState({ isLoading: true, value })
 
         setTimeout(() => {
-            if (this.state.value.length < 1) return this.setState(initialState)
+            if (this.state.value.length < 1) {
+                this.setState(this.initialState)
+                return this.props.filterProjectListing(this.projects, value)
+            }
 
             const re = new RegExp(_.escapeRegExp(this.state.value), 'i')
             const isMatch = (result) => re.test(result.title)
-
             this.setState({
                 isLoading: false,
                 results: _.filter(this.projects, isMatch),
-            })
+            }, ()=> this.props.filterProjectListing(this.state.results))
         }, 300)
     }
 
@@ -62,10 +61,10 @@ export default class SearchBar extends React.Component {
                 <Search
                     aligned={this.props.aligned}
                     loading={isLoading}
-                    onResultSelect={this.handleResultSelect}
                     onSearchChange={this.handleSearchChange}
                     results={results}
                     value={value}
+                    open={false}
                     />
             </div>)
     }

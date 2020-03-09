@@ -39,7 +39,7 @@ import NotebookStatusHeader from '../../components/notebook/NotebookStatusHeader
 import Notebook from '../../components/notebook/Notebook';
 import ResourcePage from '../../components/ResourcePage';
 import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
-    CONTENT_TIMESTAMPS } from '../../resources/Outputs';
+    CONTENT_TIMESTAMPS, CONTENT_MULTIPLE } from '../../resources/Outputs';
 import { branchPageUrl, isNotEmptyString, notebookPageUrl,
     NotebookResource, spreadsheetPageUrl } from '../../util/App';
 import { HATEOAS_MODULE_APPEND, HATEOAS_MODULE_INSERT,
@@ -270,6 +270,8 @@ class NotebookPage extends Component {
             dispatch(showCellStdout(notebook, module));
         } else if (resourceType === CONTENT_TIMESTAMPS) {
             dispatch(showCellTimestamps(notebook, module));
+        } else if (resourceType === CONTENT_MULTIPLE){
+            dispatch(showCellStdout(notebook, module));
         }
     }
     /**

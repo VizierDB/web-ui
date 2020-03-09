@@ -31,6 +31,7 @@ export const CONTENT_MARKDOWN = 'CONTENT_MARKDOWN';
 export const CONTENT_HIDE = 'CONTENT_HIDE';
 export const CONTENT_TEXT = 'CONTENT_TEXT';
 export const CONTENT_TIMESTAMPS = 'CONTENT_TIMESTAMPS';
+export const CONTENT_MULTIPLE = 'CONTENT_MULTIPLE';
 
 /**
  * Output resource content. Contains functionality to determine content type
@@ -49,6 +50,7 @@ class OutputResource {
     isMarkdown = () => (this.type === CONTENT_MARKDOWN);
     isText = () => (this.type === CONTENT_TEXT);
     isTimestamps = () => (this.type === CONTENT_TIMESTAMPS);
+    isMultiple = () => (this.type === CONTENT_MULTIPLE);
 }
 
 // Extended output resources for the different types of output.
@@ -206,6 +208,32 @@ export class OutputText extends OutputResource {
     }
 }
 
+/**
+ * Output resource for showing content of the module standard output as an array of multiple resources
+ * in the output area of a notebook cell.
+ */
+export class OutputMultiple extends OutputResource {
+    constructor(outputObjects, isFetching) {
+        super(CONTENT_MULTIPLE, isFetching);
+        this.lines = []
+        for (let j = 0; j < outputObjects.length; j++) {
+            const out = outputObjects[j];
+            if (out.type != null) {
+                switch (out.type) {
+                    case 'text/html': this.lines.push(new OutputHtml(out));
+                    case 'text/markdown': this.lines.push(new OutputMarkdown(out));
+                    case 'text/plain': this.lines.push(new OutputText(out));
+                }
+            }
+        }
+    }
+    /**
+     * Return a copy of the resource where the isFetching flag is true.
+     */
+    setFetching() {
+        return new OutputText(this.lines, true);
+    }
+}
 
 /**
  * Output resource for showing the timestamps for different stages of module
@@ -232,22 +260,20 @@ export class OutputTimestamps extends OutputResource {
 }
 
 // Shortcut to show text output for all lines in standard output. Depending on
-// whether the output is plai/text of html a different output resource is
+// whether the output is plain/text of html a different output resource is
 // returned.
 export const StandardOutput = (module) => {
     const stdout = module.outputs.stdout;
     let outputResource = null;
     if (stdout.length === 1) {
-        // If the output is a chart view it is expected to be the only
-        // output element
         const out = stdout[0];
         if (out.type === 'text/html') {
             outputResource = new OutputHtml(stdout);
         } else  {
             outputResource = new OutputText(stdout);
         }
-    } else {
-        outputResource = new OutputText(stdout);
+    } else if (stdout.length > 1) {
+        outputResource = new OutputMultiple(stdout);
     }
     // Make sure that there is some output
     if (outputResource === null) {
