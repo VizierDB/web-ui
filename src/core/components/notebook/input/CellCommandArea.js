@@ -278,7 +278,7 @@ class CellCommandArea extends React.Component {
      * shown instead.
      */
     handleSubmitForm = () => {
-        const { cell, onSubmit } = this.props;
+        const { cell, onSubmit, apiEngine } = this.props;
         // The onSubmit function may be none if submission is not permitted for
         // an active notebook. Show an alert for the user.
         if (onSubmit == null) {
@@ -288,7 +288,7 @@ class CellCommandArea extends React.Component {
         const { formValues, selectedCommand } = this.state;
         // Convert form values into format expected by the API. During the
         // conversion validate the form values.
-        const req = formValuesToRequestData(formValues, selectedCommand.parameters);
+        const req = formValuesToRequestData(formValues, selectedCommand.parameters, apiEngine.serviceProperties);
         if (req.errors.length > 0) {
             // Show list of error messages if validation of form values failed
             this.setState({errors: req.errors, hasErrors: true});
