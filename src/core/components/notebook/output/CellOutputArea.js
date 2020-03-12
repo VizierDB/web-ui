@@ -176,7 +176,8 @@ class CellOutputArea extends React.Component {
     handleOutputHide = () => {
         this.setState({
             hide: true,
-            activeTab: null
+            activeTab: null,
+            resourceName: null
         })
     }
     /**

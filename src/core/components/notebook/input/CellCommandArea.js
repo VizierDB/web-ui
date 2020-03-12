@@ -489,9 +489,19 @@ class CellCommandArea extends React.Component {
                 // If the cell is not a code cell, it is not being edited, and
                 // it is not a new cell then the cell has to have an associated
                 // workflow module. In this case we show the command text.
+                let mainContentText;
+                // display extra information for a load cell
+                if(cell.module.command.commandId === "load"){
+                    const file = cell.module.command.arguments.find(element => element.id === "file")
+                    const filename = file.value.filename
+                    const loadFormat = cell.module.command.arguments.find(element => element.id === "loadFormat")
+                    mainContentText = `${cell.module.text} ${filename!==null?filename:""} (load format: ${loadFormat["value"]})`
+                }else{
+                    mainContentText = `${cell.module.text} `
+                }
                 mainContent = (
                     <pre className='cell-cmd-text' onClick={onClick}>
-                        {cell.module.text}
+                        {mainContentText}
                     </pre>
                 );
             }

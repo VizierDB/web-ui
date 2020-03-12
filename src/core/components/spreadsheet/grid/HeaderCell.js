@@ -21,6 +21,7 @@ import PropTypes from 'prop-types'
 import GridInput from './GridInput';
 import ColumnDropDown from '../menu/ColumnDropDown';
 import { MOVE } from '../../../util/App';
+import { Label } from "semantic-ui-react";
 
 
 /**
@@ -128,11 +129,12 @@ class HeaderCell extends React.Component {
             if (isUpdating) {
                 cellCss += ' updating';
             }
-            cellValue = (
-                <span className='header-value'>
-                    {columnName}
-                </span>
-            );
+            cellValue =(<span className='header-value'>
+                {`${columnName}`}
+                <Label size='mini'>
+                    {`(${column["type"]})`}
+                </Label>
+            </span>)
         }
         return (
             <th className={cellCss} onClick={this.handleClick}>
