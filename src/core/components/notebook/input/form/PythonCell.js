@@ -120,17 +120,17 @@ export class CodeSnippetsSelector extends React.Component {
             lines.push('    annos = ds.annotations.for_cell(col.identifier, row.identifier)');
             lines.push('    for key in annos.keys():');
             lines.push('        for a in annos.find_all(key):');
-            lines.push('            print a.key + \' = \' + str(a.value)');
+            lines.push('            print(a.key + \' = \' + str(a.value))');
         } else if (value === OUTPUT_COLUMN_NAMES) {
             lines.push('# Iterate over list of dataset columns and print column name');
             lines.push('for col in ds.columns:');
-            lines.push('    print col.name');
+            lines.push('    print(col.name)');
         } else if (value === OUTPUT_CELL_VALUES) {
             lines.push('# Iterate over list of dataset rows and print cell value.')
             lines.push('# Reference column by name, label (\'A\', \'B\', ...), or');
             lines.push('# column index (0, 1, ...).');
             lines.push('for row in ds.rows:');
-            lines.push('    print row.get_value(\'name-label-or-index\')');
+            lines.push('    print(row.get_value(\'name-label-or-index\'))');
         } else if (value === OUTPUT_D3_PLOT) {
             lines.push('# Generate a plot using Vizier\'s internal D3-based engine.')
             lines.push('# (Expects a dataset named `ds`)')
@@ -161,7 +161,7 @@ export class CodeSnippetsSelector extends React.Component {
             lines.push('ds.show_map(')
             lines.push('  lat_col = \'LATITUDE-COLUMN-NAME\',')
             lines.push('  lon_col = \'LONGITUDE-COLUMN-NAME\',')
-            lines.push('  label_col = \'LABEL-COLUMN-NAME\' # Optional') 
+            lines.push('  label_col = \'LABEL-COLUMN-NAME\' # Optional')
             lines.push(')')
         } else if (value === RENAME_DATASET) {
             lines.push('# Rename given dataset to a new (unique) name.');
