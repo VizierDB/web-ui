@@ -42,7 +42,6 @@ class CellDropDownMenu extends React.Component {
         onCreateBranch: PropTypes.func.isRequired,
         onDeleteCell: PropTypes.func.isRequired,
         onInsertCell: PropTypes.func.isRequired,
-        onOutputSelect: PropTypes.func.isRequired,
         onSelectCell: PropTypes.func.isRequired
     }
     /**

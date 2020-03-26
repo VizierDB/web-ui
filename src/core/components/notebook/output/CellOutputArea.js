@@ -19,18 +19,26 @@
 import React from 'react';
 import createReactClass from 'create-react-class';
 import { PropTypes } from 'prop-types';
-import {Loader, Menu, Dropdown} from 'semantic-ui-react';
+import {Loader, Menu, Dropdown, Segment} from 'semantic-ui-react';
 import ReactMarkdown from 'react-markdown'
 import { ApiPolling } from '../../Api';
 import DatasetChart from '../../plot/DatasetChart';
 import DatasetView from '../../spreadsheet/DatasetView';
 import { ErrorMessage } from '../../Message';
 import TimestampOutput from './TimestampOutput';
-import {CONTENT_CHART, CONTENT_DATASET, CONTENT_TEXT, OutputText} from '../../../resources/Outputs';
+import {
+    CONTENT_CHART,
+    CONTENT_DATASET,
+    CONTENT_TEXT,
+    CONTENT_HIDE,
+    OutputText,
+    CONTENT_TIMESTAMPS, CONTENT_MULTIPLE, CONTENT_MARKDOWN, CONTENT_HTML
+} from '../../../resources/Outputs';
 import '../../../../css/App.css';
 import '../../../../css/Notebook.css';
 import {TextButton} from "../../Button";
-
+import Divider from "semantic-ui-react/dist/commonjs/elements/Divider";
+import Header from "semantic-ui-react/dist/commonjs/elements/Header";
 
 
 /**
@@ -49,66 +57,43 @@ class CellOutputArea extends React.Component {
         userSettings: PropTypes.object.isRequired,
         onEditSpreadsheet: PropTypes.func.isRequired
     };
-    static TAB_CONSOLE = 'console';
-    static TAB_TIMING = 'timing';
-    static TAB_DATASETS = 'datasets';
-    static TAB_CHARTS = 'charts';
     state = {
         activeTab: null,
-        resourceName:null,
+        resourceName: null,
         isFetching: false,
-        cellDefaultConsoleOutput: null,
         hide: false
     };
     /**
      * Toggle cell fetching state or update the default output
      */
-    static getDerivedStateFromProps(nextProps, prevState) {
+    static getDerivedStateFromProps(nextProps, prevState){
         const newOutput = nextProps.cell.output;
-        let newState = {};
-        // ensure that an empty CONTENT_TEXT response is not cached as the default
-        if(prevState.cellDefaultConsoleOutput !== null
-            && typeof prevState.cellDefaultConsoleOutput.lines !== "undefined"
-            && prevState.cellDefaultConsoleOutput.lines.length === 0){
-            newState = {
-                ...newState,
-                cellDefaultConsoleOutput : newOutput
+        if(prevState.isFetching && prevState.activeTab === newOutput.type){
+            if(prevState.activeTab === CONTENT_CHART ||
+                prevState.activeTab === CONTENT_DATASET){
+                if (prevState.resourceName === newOutput.dataset.name || prevState.resourceName === newOutput.name){
+                    return {
+                        isFetching: false
+                    }
+                }
+            } else if(prevState.activeTab === CONTENT_TEXT ||
+                prevState.activeTab === CONTENT_MULTIPLE ||
+                prevState.activeTab === CONTENT_HIDE ||
+                prevState.activeTab === CONTENT_TIMESTAMPS){
+                return {
+                    isFetching: false
+                }
             }
         }
-        if(prevState.isFetching &&
-            (newOutput.isDataset() && newOutput.dataset.name === prevState.resourceName) ||
-            (newOutput.isChart() && newOutput.name === prevState.resourceName)){
-            newState = {
-                ...newState,
-                isFetching: false
-            }
-        }
-        return newState
+        return {}
     }
     /**
      * Update the cell output state from cell type
      */
     componentDidMount() {
-        const { cell } = this.props;
-        // select default tab
-        let activeTab = CellOutputArea.TAB_CONSOLE;
-        if (['load','query'].includes(cell.module.command.commandId)){
-            activeTab = CellOutputArea.TAB_DATASETS;
-        }else if((['chart'].includes(cell.module.command.commandId))){
-            activeTab = CellOutputArea.TAB_CHARTS ;
-        }
-
-        let resourceName = null;
-        if(activeTab === CellOutputArea.TAB_DATASETS && cell.output.isDataset()){
-            resourceName = cell.output.dataset.name
-        }else if(activeTab === CellOutputArea.TAB_CHARTS && cell.output.isChart()){
-            resourceName = cell.output.name
-        }
         this.setState({
-            activeTab: activeTab,
-            resourceName: resourceName,
-            // cache the default console output to avoid fetching again
-            cellDefaultConsoleOutput: cell.output
+            activeTab: CONTENT_TEXT,
+            resourceName: 'All',
         });
     }
     /**
@@ -139,8 +124,10 @@ class CellOutputArea extends React.Component {
      */
     handleConsoleDownload = () => {
         const {cell} = this.props;
+        const {resourceName} = this.state;
         const element = document.createElement("a");
-        const file = new Blob([JSON.stringify(cell.module.outputs.stdout[0].value, null, 4)], {type: 'text/plain'});
+        const {outputs} = this.getConsoleOutputs(cell.module.outputs.stdout);
+        const file = new Blob([JSON.stringify(outputs[resourceName],null,2)], {type: 'text/plain'});
         element.href = URL.createObjectURL(file);
         element.download = cell.id;
         document.body.appendChild(element); // Required for this to work in FireFox
@@ -152,12 +139,7 @@ class CellOutputArea extends React.Component {
     fetchData = () => {
         const { cell, onOutputSelect } = this.props;
         const { activeTab, resourceName } = this.state;
-        if(resourceName !== null){
-            switch(activeTab){
-                case CellOutputArea.TAB_DATASETS: onOutputSelect(cell.module, CONTENT_DATASET, resourceName);
-                case CellOutputArea.TAB_CHARTS: onOutputSelect(cell.module, CONTENT_CHART, resourceName);
-            }
-        }
+        onOutputSelect(cell.module, activeTab, resourceName)
     };
     /**
      * Tracks tab menu selection
@@ -167,26 +149,118 @@ class CellOutputArea extends React.Component {
             isFetching: isFetching,
             resourceName: resourceName,
             activeTab: activeTab,
-            hide: false
+            hide: activeTab === CONTENT_HIDE
         },() => this.fetchData());
     };
     /**
-     * Hide cell output
+     * use cell module output to create console outputs
      */
-    handleOutputHide = () => {
-        this.setState({
-            hide: true,
-            activeTab: null,
-            resourceName: null
-        })
-    }
+    getConsoleOutputs = (stdout) => {
+        let outputs = {};
+        let renders = {};
+        const {cell, onSelectCell} = this.props;
+        outputs = {};
+        if(!stdout.isMultiple()){
+            switch (stdout.type) {
+                case CONTENT_TEXT: outputs['text/plain']  = stdout.lines.join("\n"); break;
+                case CONTENT_HTML: outputs['text/html']  = stdout.lines.join("\n"); break;
+                case CONTENT_MARKDOWN: outputs['text/markdown']  = stdout.lines.join("\n"); break;
+            }
+        }else{
+            outputs = cell.output.outputs;
+        }
+        for (let out in outputs){
+            if (out === "text/html"){
+                const Response = createReactClass({
+                    render: function () {
+                        return (
+                            <div
+                                className='output-content-html'
+                                dangerouslySetInnerHTML={{__html: outputs[out]}}
+                            />
+                        )
+                    }
+                });
+                renders[out] = (
+                    <div className='output-content'>
+                        <Response/>
+                    </div>
+                );
+            } else if (out === "text/markdown"){
+                renders[out] = (
+                    <div className='output-content'>
+                        <ReactMarkdown
+                            source={outputs[out]}/>
+                    </div>
+                );
+            } else if (out === "text/plain"){
+                renders[out] = (
+                    <pre className='plain-text' onClick={onSelectCell}>
+                            {outputs[out]}
+                        </pre>
+                )
+            } else if (out === "dataset/view"){
+                renders[out] = this.getDatasetView(cell.id, outputs[out])
+            } else if (out === "chart/view"){
+                renders[out] = this.getChartView(outputs[out].data.name, outputs[out].result)
+            } else {
+                renders[out] = (
+                    <pre className='plain-text' onClick={onSelectCell}>
+                            {JSON.stringify(outputs[out],null,2)}
+                        </pre>
+                )
+            }
+        }
+        return {outputs, renders}
+    };
+    /**
+     * Returns a dataset view
+     */
+    getDatasetView = (id, dataset) => {
+        const {onSelectCell, onNavigateDataset, userSettings, onEditSpreadsheet} = this.props;
+        return (
+            <div className='output-content'>
+                <DatasetView
+                    dataset={dataset}
+                    onNavigate={onNavigateDataset}
+                    onFetchAnnotations={this.handleFetchAnnotations}
+                    onSelectCell={onSelectCell}
+                    userSettings={userSettings}
+                    onEditSpreadsheet={onEditSpreadsheet}
+                    moduleId={id}
+                />
+            </div>
+        )
+    };
+    /**
+     * Returns a chart view
+     */
+    getChartView = (name, dataset) => {
+        const {onSelectCell} = this.props;
+        return <div className='output-content'>
+            <DatasetChart
+                identifier={name}
+                dataset={dataset}
+                onSelectCell={onSelectCell}
+            />
+        </div>
+    };
     /**
      * Return Output content depending on Cell menu selection
      */
     getOutputContent = () => {
-        const { cell, onSelectCell, onNavigateDataset, userSettings, onEditSpreadsheet } = this.props;
-        const { activeTab, cellDefaultConsoleOutput } = this.state
-        if(activeTab === CellOutputArea.TAB_TIMING){
+        const { cell, onSelectCell } = this.props;
+        const { resourceName } = this.state;
+        let output = cell.output;
+        // For cells that are in success or an error state the output depends
+        // on the type of the output resource handle.
+        // messages
+        if (output.isHidden() && !cell.isCanceled()){
+            return (
+                <pre className='plain-text' onClick={onSelectCell}/>
+            );
+        }
+        if (output.isTimestamps()){
             // Depending on whether the module completed successfully or not
             // the label for the finished at timestamp changes.
             let finishedType = '';
@@ -195,143 +269,79 @@ class CellOutputArea extends React.Component {
             } else {
                 finishedType = 'Finished at';
             }
-            let timingContent = (
+            return (
                 <div className='module-timings' onClick={onSelectCell}>
                     <p className='output-info-headline'>
                         <span className='output-info-headline'>
                             Module timings
                         </span>
                     </p>
-                    <TimestampOutput label='Created at' time={cell.module.timestamps.createdAt} />
-                    <TimestampOutput label='Started at' time={cell.module.timestamps.startedAt} />
-                    <TimestampOutput label={finishedType} time={cell.module.timestamps.finishedAt} />
+                    <TimestampOutput label='Created at' time={output.createdAt} />
+                    <TimestampOutput label='Started at' time={output.startedAt} />
+                    <TimestampOutput label={finishedType} time={output.finishedAt} />
                 </div>
             );
-            return timingContent
         }
-        // For cells that are in success or an error state the output depends
-        // on the type of the output resource handle.
-        // messages
+        if (output.isDataset()) {
+            return this.getDatasetView(cell.id, output.dataset);
+        }
+        if (output.isChart()) {
+            return this.getChartView(output.name, output.dataset);
+        }
+        if (output.isError()) {
+            const fetchError = output.error;
+            return <ErrorMessage
+                title={fetchError.title}
+                message={fetchError.message}
+                onDismiss={this.handleOutputDismiss}
+            />;
+        }
+        // If the cell is in error state and it has output written to standard
+        // error then we show those lines in an error box. We only show the
+        // error messages if the displayed output is console (i.e., either
+        // text or html)
+        if ((cell.isError())) {
+            const {stderr} = cell.module.outputs;
+            if (stderr.length > 0) {
+                const errorOut = new OutputText(stderr);
+                return(
+                    <div>
+                        <div className='output-error'>
+                            <pre className='error-text' onClick={onSelectCell}>
+                                {errorOut.lines.join('\n')}
+                            </pre>
+                        </div>
+                    </div>
+                );
+            }
+        }
+        const {renders} = this.getConsoleOutputs(cell.output);
         let outputContent = null;
-        if (activeTab === CellOutputArea.TAB_CONSOLE){
-            let output = cellDefaultConsoleOutput ; // use default cached output response
-            if (output.isError()) {
-                const fetchError = output.error;
-                outputContent = <ErrorMessage
-                    title={fetchError.title}
-                    message={fetchError.message}
-                    onDismiss={this.handleOutputDismiss}
-                />;
-            } else if ((output.isHidden()) && (!cell.isCanceled())) {
-                outputContent = (
-                    <pre className='plain-text' onClick={onSelectCell}/>
-                );
-            } else if (output.isMultiple()) {
-                // todo: read objects in output array
-            } else {
-                const {stdout} = cell.module.outputs;
-                if (stdout !== null && stdout.length > 0) {
-                    const out = stdout[0]
-                    if (out["type"] === "text/html") {
-                        const Response = createReactClass({
-                            render: function () {
-                                return (
-                                    <div
-                                        className='output-content-html'
-                                        dangerouslySetInnerHTML={{__html: out["value"]}}
-                                    />
-                                )
-                            }
-                        });
-                        outputContent = (
-                            <div className='output-content'>
-                            <span className='output-content-header'>
-                                {stdout["name"]}
-                            </span>
-                                <Response/>
-                            </div>
-                        );
-                    } else if (out["type"] === "text/markdown") {
-                        outputContent = (
-                            <div className='output-content'>
-                                <span className='output-content-header'>
-                                    {out["name"]}
-                                </span>
-                                <ReactMarkdown
-                                    source={out["value"]}/>
-                            </div>
-                        );
-                    } else if ((out["type"] === "text/plain") && (!cell.isCanceled())) {
-                        outputContent = (
-                            <pre className='plain-text' onClick={onSelectCell}>
-                            {out["value"]}
-                        </pre>
-                        )
-                    }
-                }
-                // If the cell is in error state and it has output written to standard
-                // error then we show those lines in an error box. We only show the
-                // error messages if the displayed output is console (i.e., either
-                // text or html)
-                if ((cell.isError())) {
-                    const stderr = cell.module.outputs.stderr;
-                    if (stderr.length > 0) {
-                        const errorOut = new OutputText(stderr);
-                        outputContent = (
-                            <div>
-                                {outputContent}
-                                <div className='output-error'>
-                                <pre className='error-text' onClick={onSelectCell}>
-                                    {errorOut.lines.join('\n')}
-                                </pre>
-                                </div>
-                            </div>
-                        );
-                    }
-                }
-            }
-        }else if (activeTab === CellOutputArea.TAB_DATASETS) {
-            if (cell.output.isDataset()) {
-                const dataset = cell.output.dataset;
-                outputContent = (
-                    <div className='output-content'>
-                        <DatasetView
-                            dataset={dataset}
-                            onNavigate={onNavigateDataset}
-                            onFetchAnnotations={this.handleFetchAnnotations}
-                            onSelectCell={onSelectCell}
-                            userSettings={userSettings}
-                            onEditSpreadsheet={onEditSpreadsheet}
-                            moduleId={cell.id}
-                        />
-                    </div>
-                );
-            }
-        }else if (activeTab === CellOutputArea.TAB_CHARTS){
-            if (cell.output.isChart()) {
-                outputContent = (
-                    <div className='output-content'>
-                        <DatasetChart
-                            identifier={cell.output.name}
-                            dataset={cell.output.dataset}
-                            onSelectCell={onSelectCell}
-                        />
-                    </div>
-                );
+        for( let out in renders ) {
+            if((resourceName===out || resourceName==='All') && !cell.isCanceled()){
+                outputContent = <div>
+                    { outputContent }
+                    <Divider horizontal>
+                        <Header as='h4'>
+                            { out }
+                        </Header>
+                    </Divider>
+                    { renders[out] }
+                </div>
             }
         }
-        outputContent = (
+        // add download link
+        return (
             <div className="cell-command-area">
                 {outputContent}
-                <div className='horizontal-divider'>
+                {resourceName !== 'All' && <div className='horizontal-divider'>
                     <TextButton
                         text={'download'}
                         title='Download console output'
                         onClick={this.handleConsoleDownload}
                     />
-                </div>
+                </div>}
             </div>);
-        return outputContent;
     };
     render() {
         const {
@@ -399,7 +409,7 @@ class CellOutputArea extends React.Component {
                         text={ds.name}
                         title={ds.name}
                         disabled={this.state.resourceName===ds.name && cell.output.isDataset()}
-                        onClick={() => this.handleItemClick({}, CellOutputArea.TAB_DATASETS, ds.name, true)}
+                        onClick={() => this.handleItemClick({}, CONTENT_DATASET, ds.name, true)}
                     />
                 );
             }
@@ -415,36 +425,46 @@ class CellOutputArea extends React.Component {
                         text={chart.name}
                         title={chart.name}
                         disabled={this.state.resourceName===chart.name && cell.output.isChart()}
-                        onClick={() => this.handleItemClick({}, CellOutputArea.TAB_CHARTS, chart.name, true)}
+                        onClick={() => this.handleItemClick({}, CONTENT_CHART, chart.name, true)}
                     />
                 );
             }
+        }
+        let consoleItems = cell.module.outputs.stdout.map(x => x.type).filter((v, i, a) => a.indexOf(v) === i);
+        let consoleList = [];
+        consoleItems.unshift('All')
+        for (let type = 0; type < consoleItems.length; type++){
+            // rendered from cell.module.outputs right now, not cell.output so not fetched every time
+            consoleList.push(
+                <Dropdown.Item
+                    key={'cl-' + consoleItems[type]}
+                    icon='circle'
+                    text={consoleItems[type]}
+                    title={consoleItems[type]}
+                    disabled={this.state.resourceName === consoleItems[type] && this.state.activeTab === CONTENT_TEXT}
+                    onClick={() => this.handleItemClick({}, CONTENT_TEXT, consoleItems[type], false)}
+                />
+            )
         }
 
         const { activeTab, isFetching } = this.state;
         const menu = <Menu>
             <Menu.Item
                 icon='hide'
-                key='hide'
-                text='Hide'
                 title='Hide output for this cell'
                 disabled={this.state.hide}
-                onClick={this.handleOutputHide} />
+                onClick={(e) => this.handleItemClick(e, CONTENT_HIDE, null, true)} />
+            <Dropdown disabled={consoleList.length===0} pointing text = 'Console' className = 'link item'>
+                <Dropdown.Menu>{ consoleList }</Dropdown.Menu>
+            </Dropdown>
             <Menu.Item
-                name={CellOutputArea.TAB_CONSOLE}
-                active={activeTab === CellOutputArea.TAB_CONSOLE}
-                content='Console'
-                disabled={this.state.activeTab===CellOutputArea.TAB_CONSOLE}
-                onClick={(e, {name}) => this.handleItemClick(e, name)}
-            />
-            <Menu.Item
-                name={CellOutputArea.TAB_TIMING}
-                active={activeTab === CellOutputArea.TAB_TIMING}
+                name={CONTENT_TIMESTAMPS}
+                active={activeTab === CONTENT_TIMESTAMPS}
                 content='Timing'
-                disabled={this.state.activeTab===CellOutputArea.TAB_TIMING}
-                onClick={(e, {name}) => this.handleItemClick(e, name)}
+                disabled={this.state.activeTab===CONTENT_TIMESTAMPS}
+                onClick={(e) => this.handleItemClick(e, CONTENT_TIMESTAMPS, null, true)}
             />
-            <Dropdown disabled={datasetList.length===0} pointing text = 'Datasets' className = 'link item'>
+            <Dropdown disabled={ datasetList.length===0 } pointing text = 'Datasets' className = 'link item'>
                 <Dropdown.Menu>{ datasetList }</Dropdown.Menu>
             </Dropdown>
             <Dropdown disabled={chartList.length===0} pointing text = 'Charts' className = 'link item'>
@@ -458,7 +478,9 @@ class CellOutputArea extends React.Component {
                 <div className='output-loading'>
                     <Loader active={ isFetching } inline indeterminate/>
                 </div>
-                { this.getOutputContent() }
+                {!this.state.hide && <Segment style={{overflow: 'auto', maxHeight: 500 }}>
+                    { !isFetching && this.getOutputContent() }
+                </Segment>}
             </div>
         );
     }
