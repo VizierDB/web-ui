@@ -38,7 +38,6 @@ import '../../../../css/App.css';
 import '../../../../css/Notebook.css';
 import {TextButton} from "../../Button";
 import Divider from "semantic-ui-react/dist/commonjs/elements/Divider";
-import Header from "semantic-ui-react/dist/commonjs/elements/Header";
 
 
 /**
@@ -108,7 +107,7 @@ class CellOutputArea extends React.Component {
      */
     handleOutputDismiss = () => {
         const { cell, onOutputSelect } = this.props;
-        onOutputSelect(cell.module, CONTENT_TEXT);
+        onOutputSelect(cell.module, this.state.activeTab, this.state.resourceName);
     }
     /**
      * Show spreadsteeh cell annotations when the user clicks on a table cell.
@@ -321,11 +320,7 @@ class CellOutputArea extends React.Component {
             if((resourceName===out || resourceName==='All') && !cell.isCanceled()){
                 outputContent = <div>
                     { outputContent }
-                    <Divider horizontal>
-                        <Header as='h4'>
-                            { out }
-                        </Header>
-                    </Divider>
+                    { outputContent !== null && <Divider horizontal /> }
                     { renders[out] }
                 </div>
             }
@@ -434,7 +429,6 @@ class CellOutputArea extends React.Component {
         let consoleList = [];
         consoleItems.unshift('All')
         for (let type = 0; type < consoleItems.length; type++){
-            // rendered from cell.module.outputs right now, not cell.output so not fetched every time
             consoleList.push(
                 <Dropdown.Item
                     key={'cl-' + consoleItems[type]}
