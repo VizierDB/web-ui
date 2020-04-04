@@ -159,7 +159,7 @@ class CellOutputArea extends React.Component {
         let renders = {};
         const {cell, onSelectCell} = this.props;
         outputs = {};
-        if(!stdout.isMultiple()){
+        if(stdout.hasOwnProperty('isMultiple') && !stdout.isMultiple()){
             switch (stdout.type) {
                 case CONTENT_TEXT: outputs['text/plain']  = stdout.lines.join("\n"); break;
                 case CONTENT_HTML: outputs['text/html']  = stdout.lines.join("\n"); break;
