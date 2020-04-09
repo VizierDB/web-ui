@@ -219,7 +219,6 @@ class NotebookCell extends React.Component {
                     onCreateBranch={this.handleCreateBranch}
                     onDeleteCell={this.handleDeleteCell}
                     onInsertCell={this.handleInsertCell}
-                    onOutputSelect={onOutputSelect}
                     onSelectCell={this.handleSelectCell}
                 />
             );

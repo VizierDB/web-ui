@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+import {groupBy} from "lodash";
+import {DatasetHandle} from "./Dataset";
 /**
  * Defintion of objects that represent the different types of output that
  * are associated with a notebook cell.
@@ -215,15 +217,17 @@ export class OutputText extends OutputResource {
 export class OutputMultiple extends OutputResource {
     constructor(outputObjects, isFetching) {
         super(CONTENT_MULTIPLE, isFetching);
-        this.lines = []
-        for (let j = 0; j < outputObjects.length; j++) {
-            const out = outputObjects[j];
-            if (out.type != null) {
-                switch (out.type) {
-                    case 'text/html': this.lines.push(new OutputHtml(out));
-                    case 'text/markdown': this.lines.push(new OutputMarkdown(out));
-                    case 'text/plain': this.lines.push(new OutputText(out));
-                }
+        this.outputs = {};
+        let stdoutGrouped = groupBy(outputObjects, 'type');
+        for (let out in stdoutGrouped) {
+            // assuming only one dataset or chart object can exist per output
+            switch (out) {
+                case 'text/plain': this.outputs[out] = stdoutGrouped[out].map(x => x.value).join("\n"); break;
+                case 'text/markdown' : this.outputs[out] = stdoutGrouped[out].map(x => x.value).join("\n"); break;
+                case 'text/html': this.outputs[out] = stdoutGrouped[out].map(x => x.value).join("\n"); break;
+                case 'dataset/view': this.outputs[out] = new DatasetHandle().fromJson(stdoutGrouped[out][0].value); break;
+                case 'chart/view': this.outputs[out] = stdoutGrouped[out][0].value; break;
+                default: this.outputs[out] = stdoutGrouped[out][0]; break;
             }
         }
     }
@@ -231,7 +235,7 @@ export class OutputMultiple extends OutputResource {
      * Return a copy of the resource where the isFetching flag is true.
      */
     setFetching() {
-        return new OutputText(this.lines, true);
+        return new OutputMultiple(this.outputs, true);
     }
 }
 
@@ -269,7 +273,13 @@ export const StandardOutput = (module) => {
         const out = stdout[0];
         if (out.type === 'text/html') {
             outputResource = new OutputHtml(stdout);
-        } else  {
+        } else if (out.type === 'text/markdown') {
+            outputResource = new OutputMarkdown(stdout);
+        } else if (out.type === 'chart/view') {
+            outputResource = new OutputChart(out.value.data.name, out.value.result);
+        } else if (out.type === 'dataset/view') {
+            outputResource = new OutputDataset(new DatasetHandle(out.value.id, out.value.name).fromJson(out.value), false);
+        } else {
             outputResource = new OutputText(stdout);
         }
     } else if (stdout.length > 1) {

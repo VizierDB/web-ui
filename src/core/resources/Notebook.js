@@ -18,7 +18,7 @@
 
 import { DatasetDescriptor } from './Dataset';
 import { HATEOASReferences } from '../util/HATEOAS';
-import { OutputChart, OutputHtml, OutputText, OutputMarkdown, OutputDataset } from './Outputs';
+import {OutputChart, OutputHtml, OutputText, OutputMarkdown, OutputDataset, OutputMultiple} from './Outputs';
 import { DatasetHandle } from './Dataset';
 import { utc2LocalTime } from '../util/Timestamp';
 
@@ -449,8 +449,8 @@ const getModuleDefaultOutput = (module) => {
         } else  {
             outputResource = new OutputText(stdout);
         }
-    } else {
-        outputResource = new OutputText(stdout);
+    } else if (stdout.length > 1) {
+        outputResource = new OutputMultiple(stdout);
     }
     // Make sure that there is some output
     if (outputResource === null) {
