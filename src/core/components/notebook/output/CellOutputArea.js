@@ -472,7 +472,7 @@ class CellOutputArea extends React.Component {
                 <div className='output-loading'>
                     <Loader active={ isFetching } inline indeterminate/>
                 </div>
-                {!this.state.hide && <Segment style={{overflow: 'auto', maxHeight: 500 }}>
+                {!this.state.hide && <Segment style={{overflow: 'auto', maxHeight: 1000 }}>
                     { !isFetching && this.getOutputContent() }
                 </Segment>}
             </div>
