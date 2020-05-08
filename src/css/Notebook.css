@@ -312,3 +312,21 @@ pre.error-text {
 i.annotations-icon {
 	float: right;
 }
+
+div.cell-output-links {
+	width:100%;
+	display: flex;
+    flex-direction: row-reverse;
+}
+
+.iframe-container {
+	display:inline-block;
+}
+ 
+.iframe-container iframe {
+	border: 0;
+	height: 100%;
+	width: 100%;
+}
+
+ 

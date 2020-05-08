@@ -38,7 +38,7 @@ import '../../../../css/App.css';
 import '../../../../css/Notebook.css';
 import {TextButton} from "../../Button";
 import Divider from "semantic-ui-react/dist/commonjs/elements/Divider";
-
+import { isCellOutputRequest } from '../../../actions/project/Notebook';
 
 /**
  * Output area for notebook cells that have a workflow module associated with
@@ -150,6 +150,44 @@ class CellOutputArea extends React.Component {
             activeTab: activeTab,
             hide: activeTab === CONTENT_HIDE
         },() => this.fetchData());
+    };
+    /**
+     * Copy embed code to clipboard
+     */
+    handleCopyEmbedClick = (e) => {
+    	const { cell } = this.props;
+    	const code = '<iframe width="400" height="400" frameBorder="0" scrolling="no" src="'+window.location+'/?cell-output='+cell.id+'"></iframe>';
+    	var input = document.createElement('textarea');
+        input.innerHTML = code;
+        document.body.appendChild(input);
+        input.select();
+        var result = document.execCommand('copy');
+        document.body.removeChild(input);
+        if(result){
+    		console.log('copied embed code of output for cell ' +cell.id+' to clipboard')
+    	}
+        else {
+    	    console.log('error copying embed code of output for cell ' +cell.id+' to clipboard')
+    	}
+    };
+    /**
+     * Copy embed code to clipboard
+     */
+    handleCopyURLClick = (e) => {
+    	const { cell } = this.props;
+    	const code = window.location+'/?cell-output='+cell.id;
+    	var input = document.createElement('textarea');
+        input.innerHTML = code;
+        document.body.appendChild(input);
+        input.select();
+        var result = document.execCommand('copy');
+        document.body.removeChild(input);
+        if(result){
+    	    console.log('copied url of output for cell ' +cell.id+' to clipboard')
+    	}
+        else{
+    		console.log('error copying url of output for cell ' +cell.id+' to clipboard')
+    	}
     };
     /**
      * use cell module output to create console outputs
@@ -442,29 +480,50 @@ class CellOutputArea extends React.Component {
         }
 
         const { activeTab, isFetching } = this.state;
-        const menu = <Menu>
-            <Menu.Item
-                icon='hide'
-                title='Hide output for this cell'
-                disabled={this.state.hide}
-                onClick={(e) => this.handleItemClick(e, CONTENT_HIDE, null, true)} />
-            <Dropdown disabled={consoleList.length===0} pointing text = 'Console' className = 'link item'>
-                <Dropdown.Menu>{ consoleList }</Dropdown.Menu>
-            </Dropdown>
-            <Menu.Item
-                name={CONTENT_TIMESTAMPS}
-                active={activeTab === CONTENT_TIMESTAMPS}
-                content='Timing'
-                disabled={this.state.activeTab===CONTENT_TIMESTAMPS}
-                onClick={(e) => this.handleItemClick(e, CONTENT_TIMESTAMPS, null, true)}
-            />
-            <Dropdown disabled={ datasetList.length===0 } pointing text = 'Datasets' className = 'link item'>
-                <Dropdown.Menu>{ datasetList }</Dropdown.Menu>
-            </Dropdown>
-            <Dropdown disabled={chartList.length===0} pointing text = 'Charts' className = 'link item'>
-                <Dropdown.Menu>{ chartList }</Dropdown.Menu>
-            </Dropdown>
-        </Menu>;
+        const cellOutput = isCellOutputRequest();
+        let menu = null;
+        if(cellOutput){
+        	menu = null;
+        }
+        else{
+        	menu = (
+	        	<Menu>
+		            <Menu.Item
+		                icon='hide'
+		                title='Hide output for this cell'
+		                disabled={this.state.hide}
+		                onClick={(e) => this.handleItemClick(e, CONTENT_HIDE, null, true)} />
+		            <Dropdown disabled={consoleList.length===0} pointing text = 'Console' className = 'link item'>
+		                <Dropdown.Menu>{ consoleList }</Dropdown.Menu>
+		            </Dropdown>
+		            <Menu.Item
+		                name={CONTENT_TIMESTAMPS}
+		                active={activeTab === CONTENT_TIMESTAMPS}
+		                content='Timing'
+		                disabled={this.state.activeTab===CONTENT_TIMESTAMPS}
+		                onClick={(e) => this.handleItemClick(e, CONTENT_TIMESTAMPS, null, true)}
+		            />
+		            <Dropdown disabled={ datasetList.length===0 } pointing text = 'Datasets' className = 'link item'>
+		                <Dropdown.Menu>{ datasetList }</Dropdown.Menu>
+		            </Dropdown>
+		            <Dropdown disabled={chartList.length===0} pointing text = 'Charts' className = 'link item'>
+		                <Dropdown.Menu>{ chartList }</Dropdown.Menu>
+		            </Dropdown>
+		            <div className='cell-output-links'>
+		                <Menu.Item
+			                icon='copy'
+			                title='Copy Embed Code'
+			                disabled={false}
+			                onClick={(e) => this.handleCopyEmbedClick(e)} />
+			            <Menu.Item 
+			                icon='linkify'
+			                title='Copy Output URL'
+			                disabled={false}
+			                onClick={(e) => this.handleCopyURLClick(e)} />
+			        </div>
+		        </Menu>
+	        );
+        }
         // Show spinner while fetching the output
         return  (
             <div className='output-area'>

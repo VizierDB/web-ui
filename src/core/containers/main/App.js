@@ -41,7 +41,7 @@ import '../../../css/App.css'
 import '../../../css/Connection.css'
 
 import { MODAL_AUTH } from '../../actions/main/Service'
-
+import { isCellOutputRequest } from '../../actions/project/Notebook';
 
 class App extends Component {
     static propTypes = {
@@ -139,12 +139,18 @@ class App extends Component {
                     </Router>
                 </MuiThemeProvider>
             );
-            // Show connection information at the bottom of the page
-            connection = (
-                <div className='connection-info'>
-                    <ConnectionInfo name={name} links={links}/>
-                </div>
-            );
+            const cellOutput = isCellOutputRequest();
+            if(cellOutput){
+            	connection = null;
+            }
+            else{
+            	// Show connection information at the bottom of the page
+                connection = (
+	                <div className='connection-info'>
+	                    <ConnectionInfo name={name} links={links}/>
+	                </div>
+	            );
+            }
         }
         // Add authentication modal
         const modals = (

@@ -30,7 +30,7 @@ import AppMenu from './menu/AppMenu';
 import { ErrorMessage } from './Message';
 import { baseHref, branchPageUrl, notebookPageUrl, spreadsheetPageUrl, errorListPageUrl, valueOrDefault } from '../util/App';
 import { HATEOAS_PROJECTS_CREATE, HATEOAS_PROJECTS_IMPORT }  from '../util/HATEOAS';
-
+import { isCellOutputRequest } from '../actions/project/Notebook';
 
 class ResourcePage extends Component {
     static propTypes = {
@@ -212,41 +212,53 @@ class ResourcePage extends Component {
                 { content }
             </div>
         )
+        let headerContent = null;
+        let contentCssClass = '';
+        const cellOutput = isCellOutputRequest();
+        if(cellOutput){
+        	contentCssClass = '';
+        }
+        else{
+        	contentCssClass = contentCss;
+        	headerContent = (
+        		<Grid>
+		            <Grid.Row>
+		            <Grid.Column className='project-menu-bar'>
+		            <AppMenu
+		                branch={branch}
+		                notebook={notebook}
+		                onCreateBranch={onCreateBranch}
+		                onCreateProject={this.handleCreateProject}
+		            	onImportProject={this.handleImportProject}
+		            	onDeleteBranch={onDeleteBranch}
+		                onDeleteProject={this.handleDeleteProject}
+		                onEditBranch={this.submitEditBranch}
+		                onEditProject={this.submitEditProject}
+		                onGoHome={this.handleGoHome}
+		                onHideCells={this.handleToggleHideCells}
+		                onReverse={this.handleToggleNotebookReverse}
+		                onSetFilter={this.handleSetFilter}
+		                onShowChart={this.loadChartView}
+		                onShowDataset={this.loadDataset}
+		                onShowDatasetCaveat={this.loadDatasetCaveat}
+		                onShowHistory={this.handleShowBranch}
+		                onShowNotebook={onShowNotebook}
+		                onShowProject={this.handleShowProject}
+		                onSwitchBranch={onSwitchBranch}
+		                project={project}
+		                projectList={projectList}
+		                resource={resource}
+		                userSettings={userSettings}
+		            />
+		            </Grid.Column>
+		        </Grid.Row>
+		    </Grid>
+		    );
+        }
         return (
             <div>
-                <Grid>
-                    <Grid.Row>
-                        <Grid.Column className='project-menu-bar'>
-                        <AppMenu
-                            branch={branch}
-                            notebook={notebook}
-                            onCreateBranch={onCreateBranch}
-                            onCreateProject={this.handleCreateProject}
-                        	onImportProject={this.handleImportProject}
-                        	onDeleteBranch={onDeleteBranch}
-                            onDeleteProject={this.handleDeleteProject}
-                            onEditBranch={this.submitEditBranch}
-                            onEditProject={this.submitEditProject}
-                            onGoHome={this.handleGoHome}
-                            onHideCells={this.handleToggleHideCells}
-                            onReverse={this.handleToggleNotebookReverse}
-                            onSetFilter={this.handleSetFilter}
-                            onShowChart={this.loadChartView}
-                            onShowDataset={this.loadDataset}
-                            onShowDatasetCaveat={this.loadDatasetCaveat}
-                            onShowHistory={this.handleShowBranch}
-                            onShowNotebook={onShowNotebook}
-                            onShowProject={this.handleShowProject}
-                            onSwitchBranch={onSwitchBranch}
-                            project={project}
-                            projectList={projectList}
-                            resource={resource}
-                            userSettings={userSettings}
-                        />
-                        </Grid.Column>
-                    </Grid.Row>
-                </Grid>
-                <div className={'page-content ' + contentCss}>
+                { headerContent }
+                <div className={'page-content ' + contentCssClass}>
                     { pageContent }
                 </div>
             </div>

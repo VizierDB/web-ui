@@ -26,7 +26,7 @@ import { cancelWorkflowExecution, checkModuleStatus, createtNotebookCell,
     deleteNotebookCell, dismissCellChanges, fetchWorkflow,
     hideCellOutput, insertNotebookCell, replaceNotebookCell, showCellChart,
     selectNotebookCell, showCellDataset, showCellStdout,
-    showCellTimestamps, updateNotebookCellWithUpload } from '../../actions/project/Notebook';
+    showCellTimestamps, updateNotebookCellWithUpload, isCellOutputRequest } from '../../actions/project/Notebook';
 import { showModuleSpreadsheet, fetchAnnotations, clearAnnotations } from '../../actions/project/Spreadsheet';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import { fetchProjects } from '../../actions/project/ProjectListing';
@@ -47,6 +47,7 @@ import { HATEOAS_MODULE_APPEND, HATEOAS_MODULE_INSERT,
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
 import '../../../css/Chart.css';
+import CellOutputArea from '../../components/notebook/output/CellOutputArea';
 
 /**
  * The notebook page displays workflows as notebooks and resources that are
@@ -490,20 +491,39 @@ class NotebookPage extends Component {
 			        />
 	        );
             // Layout has reverse button at top followed by list of notebook cells
-            const pageContent = (
-                <div className="notebook">
-                    <NotebookStatusHeader
-                        branch={branch}
-                        notebook={notebook}
-                        onShowHistory={this.handleShowBranch}
-                        onSwitchBranch={this.handleSwitchBranch}
-                        project={project}
-                    />
-                    { notebookCells }
-                    { notebookFooter }
-                    { annotationsObject }
-                </div>
-            );
+            let pageContent = null;
+            const cellOutput = isCellOutputRequest();
+            if(cellOutput){
+            	 pageContent = ( 
+	    			 <CellOutputArea
+		                cell={notebook.cells.find(ccell => ccell.id == cellOutput)}
+		                onCancelExec={this.handleCancelWorkflowExec}
+		                onCheckStatus={this.handleCheckWorkflowStatus}
+		                onFetchAnnotations={this.handleFetchDatasetCellAnnotations}
+		                onNavigateDataset={this.handleDatasetNavigate}
+		                onOutputSelect={this.handleSelectOutput}
+		                onSelectCell={this.handleSelectActiveCell}
+		                userSettings={userSettings}
+		                onEditSpreadsheet={this.handleEditSpreadsheet}
+		            />
+	           );
+            }
+            else{
+	            pageContent = (
+	                <div className="notebook">
+	                    <NotebookStatusHeader
+	                        branch={branch}
+	                        notebook={notebook}
+	                        onShowHistory={this.handleShowBranch}
+	                        onSwitchBranch={this.handleSwitchBranch}
+	                        project={project}
+	                    />
+	                    { notebookCells }
+	                    { notebookFooter }
+	                    { annotationsObject }
+	                </div>
+	            );
+            }
             content = (
                 <ResourcePage
                     actionError={actionError}
