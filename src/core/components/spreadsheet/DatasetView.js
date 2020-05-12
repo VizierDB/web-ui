@@ -30,7 +30,7 @@ import '../../../css/Notebook.css'
 import '../../../css/Spreadsheet.css'
 import { Button, Icon, Popup, Label } from 'semantic-ui-react'
 import { each } from 'lodash';
-const Headers = React.lazy(() => import('./Headers')); // Lazy-loaded
+const SummaryPlotHeader = React.lazy(() => import('./SummaryPlotHeader')); // Lazy-loaded
 
 /**
  * Display a dataset in spreadsheet format with minimal functionality for the
@@ -157,7 +157,7 @@ class DatasetView extends React.Component {
                     <thead>{header}</thead>
                     :
                     <Suspense fallback={<thead>{header}</thead>}>
-                        <Headers dataset={dataset}/>
+                        <SummaryPlotHeader dataset={dataset}/>
                     </Suspense>
                 }
                 <tbody>{rows}</tbody>
