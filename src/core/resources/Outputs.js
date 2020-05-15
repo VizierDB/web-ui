@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+import {groupBy} from "lodash";
+import {DatasetHandle} from "./Dataset";
 /**
  * Defintion of objects that represent the different types of output that
  * are associated with a notebook cell.
@@ -31,6 +33,7 @@ export const CONTENT_MARKDOWN = 'CONTENT_MARKDOWN';
 export const CONTENT_HIDE = 'CONTENT_HIDE';
 export const CONTENT_TEXT = 'CONTENT_TEXT';
 export const CONTENT_TIMESTAMPS = 'CONTENT_TIMESTAMPS';
+export const CONTENT_MULTIPLE = 'CONTENT_MULTIPLE';
 
 /**
  * Output resource content. Contains functionality to determine content type
@@ -49,6 +52,7 @@ class OutputResource {
     isMarkdown = () => (this.type === CONTENT_MARKDOWN);
     isText = () => (this.type === CONTENT_TEXT);
     isTimestamps = () => (this.type === CONTENT_TIMESTAMPS);
+    isMultiple = () => (this.type === CONTENT_MULTIPLE);
 }
 
 // Extended output resources for the different types of output.
@@ -206,6 +210,34 @@ export class OutputText extends OutputResource {
     }
 }
 
+/**
+ * Output resource for showing content of the module standard output as an array of multiple resources
+ * in the output area of a notebook cell.
+ */
+export class OutputMultiple extends OutputResource {
+    constructor(outputObjects, isFetching) {
+        super(CONTENT_MULTIPLE, isFetching);
+        this.outputs = {};
+        let stdoutGrouped = groupBy(outputObjects, 'type');
+        for (let out in stdoutGrouped) {
+            // assuming only one dataset or chart object can exist per output
+            switch (out) {
+                case 'text/plain': this.outputs[out] = stdoutGrouped[out].map(x => x.value).join("\n"); break;
+                case 'text/markdown' : this.outputs[out] = stdoutGrouped[out].map(x => x.value).join("\n"); break;
+                case 'text/html': this.outputs[out] = stdoutGrouped[out].map(x => x.value).join("\n"); break;
+                case 'dataset/view': this.outputs[out] = new DatasetHandle().fromJson(stdoutGrouped[out][0].value); break;
+                case 'chart/view': this.outputs[out] = stdoutGrouped[out][0].value; break;
+                default: this.outputs[out] = stdoutGrouped[out][0]; break;
+            }
+        }
+    }
+    /**
+     * Return a copy of the resource where the isFetching flag is true.
+     */
+    setFetching() {
+        return new OutputMultiple(this.outputs, true);
+    }
+}
 
 /**
  * Output resource for showing the timestamps for different stages of module
@@ -232,22 +264,26 @@ export class OutputTimestamps extends OutputResource {
 }
 
 // Shortcut to show text output for all lines in standard output. Depending on
-// whether the output is plai/text of html a different output resource is
+// whether the output is plain/text of html a different output resource is
 // returned.
 export const StandardOutput = (module) => {
     const stdout = module.outputs.stdout;
     let outputResource = null;
     if (stdout.length === 1) {
-        // If the output is a chart view it is expected to be the only
-        // output element
         const out = stdout[0];
         if (out.type === 'text/html') {
             outputResource = new OutputHtml(stdout);
-        } else  {
+        } else if (out.type === 'text/markdown') {
+            outputResource = new OutputMarkdown(stdout);
+        } else if (out.type === 'chart/view') {
+            outputResource = new OutputChart(out.value.data.name, out.value.result);
+        } else if (out.type === 'dataset/view') {
+            outputResource = new OutputDataset(new DatasetHandle(out.value.id, out.value.name).fromJson(out.value), false);
+        } else {
             outputResource = new OutputText(stdout);
         }
-    } else {
-        outputResource = new OutputText(stdout);
+    } else if (stdout.length > 1) {
+        outputResource = new OutputMultiple(stdout);
     }
     // Make sure that there is some output
     if (outputResource === null) {

@@ -74,28 +74,29 @@ class ProjectMenuDropdown extends React.Component {
                 onClick={onDelete}
             />);
         }
+        // todo: add funcationality to display the latest 5 projects (issue 169)
         // Show project listing only if the variable is set and contains more
         // than one project
-        if ((projectList != null) && (projectList.length > 1)) {
-            if (menuItems.length > 0) {
-                menuItems.push(<Dropdown.Divider key='div1'/>);
-                menuItems.push(<Dropdown.Header
-                    key='header2'
-                    content='Projects'
-                />);
-            }
-            for (let i = 0; i < projectList.length; i++) {
-                let pj = projectList[i];
-                menuItems.push(<Dropdown.Item
-                    key={pj.id}
-                    disabled={(project != null) && (pj.id === project.id)}
-                    icon='database'
-                    text={pj.name}
-                    title={'Switch to project ' + pj.name}
-                    onClick={() => (onSelect(pj))}
-                />);
-            }
-        }
+        // if ((projectList != null) && (projectList.length > 1)) {
+        //     if (menuItems.length > 0) {
+        //         menuItems.push(<Dropdown.Divider key='div1'/>);
+        //         menuItems.push(<Dropdown.Header
+        //             key='header2'
+        //             content='Projects'
+        //         />);
+        //     }
+        //     for (let i = 0; i < projectList.length; i++) {
+        //         let pj = projectList[i];
+        //         menuItems.push(<Dropdown.Item
+        //             key={pj.id}
+        //             disabled={(project != null) && (pj.id === project.id)}
+        //             icon='database'
+        //             text={pj.name}
+        //             title={'Switch to project ' + pj.name}
+        //             onClick={() => (onSelect(pj))}
+        //         />);
+        //     }
+        // }
         // Show the add project option at the bottom of the menu
         if (menuItems.length > 0) {
             menuItems.push(<Dropdown.Divider key='div2'/>);

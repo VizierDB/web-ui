@@ -18,7 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types'
-import { Button, Modal } from 'semantic-ui-react'
+import { Button, Modal, Input, Label } from 'semantic-ui-react'
 import '../../../css/Modals.css'
 
 
@@ -31,6 +31,17 @@ class ShareLinkModal extends React.Component {
         open: PropTypes.bool.isRequired,
         url: PropTypes.string.isRequired
     }
+
+    state = {
+        copySuccess: false
+    }
+
+    copyToClipboard = () => {
+        this.textInput.select();
+        document.execCommand('copy');
+        this.setState({copySuccess : true})
+    }
+
     /**
      * Show notebook cell content. There are four different layouts depending on
      * the values of the isExpanded and hasModule flags. The general layout is
@@ -47,9 +58,23 @@ class ShareLinkModal extends React.Component {
                         <p className='share-header'>
                             Copy link below to share this notebook version
                         </p>
-                        <p className='share-link'>
-                            {url}
-                        </p>
+                        { // ensure copying to clipboard is supported by the browser else just display the link
+                            document.queryCommandSupported('copy') ?
+                            <Input
+                                fluid
+                                readOnly
+                                action={{
+                                    icon: "copy",
+                                    onClick: () => this.copyToClipboard(),
+                                    content: this.state.copySuccess ? "Copied!" : "Copy"
+                                }}
+                                value = {url}
+                                ref={ref=>this.textInput=ref}
+                            /> :
+                                <Label readOnly>
+                                    <a href={url} target="_blank">{url}</a>
+                                </Label>
+                        }
                     </div>
                 </Modal.Content>
                 <Modal.Actions>

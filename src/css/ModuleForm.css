@@ -40,6 +40,7 @@ div.file-content {
     border: 1px solid #dedede;
     text-align: center;
     padding: 100px;
+    word-break: break-all;
 }
 
 p.file-name{
@@ -77,6 +78,19 @@ span.upload-size {
 /* Form table layout */
 
 table.form-table.wide {
+    width: 100%;
+}
+
+tr.form-options {
+    width: 100%;
+}
+
+tr.form-options-advanced-hidden {
+    display: none;
+    width: 100%;
+}
+
+tr.form-options-advanced {
     width: 100%;
 }
 

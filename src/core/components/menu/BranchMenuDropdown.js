@@ -28,11 +28,11 @@ import { Dropdown } from 'semantic-ui-react';
 class BranchMenuDropdown extends React.Component {
     static propTypes = {
         branches: PropTypes.array.isRequired,
-        isLive: PropTypes.bool.isRequired,
+        isMostRecent: PropTypes.bool.isRequired,
         onCreateBranch: PropTypes.func,
         onDelete: PropTypes.func.isRequired,
         onEdit: PropTypes.func.isRequired,
-        onGoLive: PropTypes.func.isRequired,
+        onGetMostRecent: PropTypes.func.isRequired,
         onSelect: PropTypes.func,
         onShowHistory: PropTypes.func.isRequired,
         resource: PropTypes.object.isRequired,
@@ -48,11 +48,11 @@ class BranchMenuDropdown extends React.Component {
     render() {
         const {
             branches,
-            isLive,
+            isMostRecent,
             onCreateBranch,
             onDelete,
             onEdit,
-            onGoLive,
+            onGetMostRecent,
             onSelect,
             onShowHistory,
             resource,
@@ -102,11 +102,11 @@ class BranchMenuDropdown extends React.Component {
                 onClick={onShowHistory}
             />);
         branchItems.push(<Dropdown.Item
-                key='live'
+                key='mostRecent'
                 icon='play'
-                disabled={(!resource.isBranch()) && (isLive)}
-                text='Go Live!'
-                onClick={onGoLive}
+                disabled={(!resource.isBranch()) && (isMostRecent)}
+                text='Latest Version'
+                onClick={onGetMostRecent}
             />);
         // Add option to create a new branch from the end of the current
         // notebook (if the onCreateBranch callback is given).

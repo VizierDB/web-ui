@@ -35,6 +35,7 @@
  */
 
 import { sortByName } from '../util/Sort';
+import {formatBytes} from "../util/App";
 
 
 /**
@@ -56,7 +57,7 @@ export const DT_ROW_INDEX = 'rowidx';
 export const DT_ROW_ID = 'rowid';
 export const DT_SCALAR = 'scalar';
 export const DT_STRING = 'string';
-
+export const DT_URL = 'url'
 
 /**
  * Declaration of a command in a workflow package. The command maintains a
@@ -171,7 +172,7 @@ export class PackageRegistry {
  * potentially empty list of error messages for form values that failed to
  * validate.
  */
-export const formValuesToRequestData = (values, parameters) => {
+export const formValuesToRequestData = (values, parameters, serviceProperties) => {
     const result = {data: [], errors: []};
     for (let i = 0; i < parameters.length; i++) {
         const para = parameters[i];
@@ -209,7 +210,7 @@ export const formValuesToRequestData = (values, parameters) => {
             } else if (dt === DT_DECIMAL) {
                 val = parseFloat(val);
             }
-            validateArgument(val, para, result.errors);
+            validateArgument(val, para, result.errors, serviceProperties);
             result.data.push({id: para.id, value: val});
         }
     }
@@ -357,7 +358,7 @@ export const toFormValues = (parameters, datasets, moduleArgs) => {
  * Validate a single argument in a module command specification. Append all
  * error messages to a given list.
  */
-const validateArgument = (value, paraSpec, errors) => {
+const validateArgument = (value, paraSpec, errors, serviceProperties) => {
     const name = paraSpec.name;
     if ((value === null) && (paraSpec.required)) {
         errors.push('Missing value for ' + name);
@@ -366,6 +367,9 @@ const validateArgument = (value, paraSpec, errors) => {
         // url combination.
         const { file, fileid, filename, url } = value;
         if ((file != null) && (filename != null)) {
+            if(file["size"]>serviceProperties.maxFileSize){
+                errors.push('Filesize exceeds maximum limit: ' + formatBytes(serviceProperties.maxFileSize, 2))
+            }
         } else if ((fileid != null) && (filename != null)) {
         } else if (url != null) {
         } else {

@@ -144,11 +144,15 @@ class CellCommandArea extends React.Component {
         this.handleToggleSnippetSelector();
     }
     /**
-     * Handle change in on of the elements in a displayed module input form.
+     * Handle change in one of the elements in a displayed module input form.
      * If the cell displays a code editor the optional cursorPosition specifies
      * the new position of the cursor in the editor.
      */
     handleFormValueChange = (id, value, cursorPosition) => {
+        if(id==="bulk"){
+            this.handleBulkFormValueChange(value)
+            return
+        }
         const { codeEditorProps, formValues, selectedCommand } = this.state;
         const modifiedValues = {...formValues};
         modifiedValues[id] = value;
@@ -168,6 +172,19 @@ class CellCommandArea extends React.Component {
             formValues: modifiedValues,
             codeEditorProps: modifiedEditorProps
         });
+    }
+
+    /**
+    * Bulk update the cell state - necessary when multiple values need to be updated quickly in succession
+    * (e.g. when changing tabs in the load dataset form, all properties will be updated). Individually updating
+    * each attribute in a loop does not guarantee a synchronous operation as calls maybe batched for for performance
+    * gains. Read More: https://reactjs.org/docs/react-component.html#setstate
+    */
+    handleBulkFormValueChange = (values) => {
+        const modifiedValues = {...values}
+        this.setState({
+            formValues: modifiedValues
+        })
     }
     /**
      * Keep track of the cursor position of a displayed code cell.
@@ -261,7 +278,7 @@ class CellCommandArea extends React.Component {
      * shown instead.
      */
     handleSubmitForm = () => {
-        const { cell, onSubmit } = this.props;
+        const { cell, onSubmit, apiEngine } = this.props;
         // The onSubmit function may be none if submission is not permitted for
         // an active notebook. Show an alert for the user.
         if (onSubmit == null) {
@@ -271,7 +288,7 @@ class CellCommandArea extends React.Component {
         const { formValues, selectedCommand } = this.state;
         // Convert form values into format expected by the API. During the
         // conversion validate the form values.
-        const req = formValuesToRequestData(formValues, selectedCommand.parameters);
+        const req = formValuesToRequestData(formValues, selectedCommand.parameters, apiEngine.serviceProperties);
         if (req.errors.length > 0) {
             // Show list of error messages if validation of form values failed
             this.setState({errors: req.errors, hasErrors: true});
@@ -289,6 +306,15 @@ class CellCommandArea extends React.Component {
         const { snippetSelectorVisible } = this.state;
         this.setState({snippetSelectorVisible: !snippetSelectorVisible});
     }
+
+    /**
+     * Catches F5 (page refresh) and executes the cell
+     */
+    handleF5Press = (event) => {
+        event.preventDefault()
+        this.handleSubmitForm()
+    }
+
     render() {
         const {
             apiEngine,
@@ -478,9 +504,10 @@ class CellCommandArea extends React.Component {
             // form.
             const handlers = {
               'runCell': this.handleSubmitForm,
-              'dismiss': this.handleDismiss
+              'dismiss': this.handleDismiss,
+              'catchF5': this.handleF5Press
             };
-            const keyMap = { runCell: 'ctrl+enter', dismiss: 'esc' };
+            const keyMap = { runCell: 'ctrl+enter', dismiss: 'esc', catchF5: 'f5' };
             wrappedContent = (
                 <HotKeys keyMap={keyMap} handlers={handlers}>
                     { mainContent }

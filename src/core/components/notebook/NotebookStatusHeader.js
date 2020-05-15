@@ -68,7 +68,7 @@ class NotebookStatusHeader extends Component {
                         <span className='clickable-icon'>
                             <Icon
                                 name='play'
-                                title='Go Live!'
+                                title='Latest Version'
                                 onClick={() => (onSwitchBranch(branch))}
                             />
                         </span>

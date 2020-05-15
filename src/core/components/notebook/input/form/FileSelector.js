@@ -20,7 +20,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Button, Divider, Icon, Form } from 'semantic-ui-react'
 import Dropzone from 'react-dropzone';
-import { KEY, formatBytes } from '../../../../util/App';
+import { formatBytes } from '../../../../util/App';
 
 /**
  * Dropdown selector for uploaded files. The value is an object that contains
@@ -40,7 +40,6 @@ class FileSelector extends React.Component {
     }
     constructor(props) {
         super(props);
-        this.state = {downloadUrl: ''};
     }
     /**
      * Clear the currently selected source file.
@@ -56,29 +55,13 @@ class FileSelector extends React.Component {
         const { id, onChange } = this.props
         // Submit new value with additional file information
         onChange(id, {fileid: null, filename: files[0].name, file: files[0], url: null});
-        this.setState({downloadUrl: ''});
-    }
-    /**
-     * Handle changes in the Url form control.
-     */
-    handleUrlChange = (event) => {
-        this.setState({downloadUrl: event.target.value});
-    }
-    /**
-     * Detect RETURN key press in the Url control to submit form.
-     */
-    handleUrlKeyDown = (event) => {
-        if (event.keyCode === KEY.ENTER) {
-            this.uploadFromUrl();
-        }
     }
     render() {
         const { serviceProperties } = this.props;
-        const { fileid, filename, url } = this.props.value;
-        const { downloadUrl } = this.state;
+        const { fileid, filename } = this.props.value;
         let content = null;
         let css = null;
-        if ((filename != null) || (url != null)) {
+        if ((filename != null)) {
             let action = null;
             if (fileid != null) {
                 action = 'Uploaded';
@@ -90,9 +73,6 @@ class FileSelector extends React.Component {
             if (filename != null) {
                 text = action + ' file from local disk'
                 name = filename;
-            } else if (url != null) {
-                text = action + 'file from the Internet'
-                name = url;
             } else {
                 name = 'unknown';
             }
@@ -137,22 +117,6 @@ class FileSelector extends React.Component {
                         </div>
                     </div>
                     { uploadInfo }
-                    <Divider />
-                    <p className='info-text'>Upload file from the Internet</p>
-                    <Form.Input
-                        type='text'
-                        value={downloadUrl}
-                        placeholder={'Upload File from Url'}
-                        icon='world'
-                        iconPosition='left'
-                        fluid
-                        action={<Button
-                            icon='upload'
-                            onClick={this.uploadFromUrl}
-                        />}
-                        onChange={this.handleUrlChange}
-                        onKeyDown={this.handleUrlKeyDown}
-                    />
                 </div>
             );
         }
@@ -161,17 +125,6 @@ class FileSelector extends React.Component {
                 {content}
             </div>
         );
-    }
-    /**
-     * Submit upload request from a given Url.
-     */
-    uploadFromUrl = () => {
-        const { id, onChange } = this.props
-        const { downloadUrl } = this.state;
-        if (downloadUrl.trim() !== '') {
-            onChange(id, {fileid: null, filename: null, url: downloadUrl});
-            this.setState({downloadUrl: ''});
-        }
     }
 }
 

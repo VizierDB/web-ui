@@ -29,6 +29,7 @@ import { notebookPageUrl } from '../../util/App.js';
 // for all components (?).
 // https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/withRouter.md
 import { withRouter } from 'react-router';
+import SearchBar from "../../components/SearchBar";
 
 import '../../../css/ResourceListing.css'
 
@@ -47,10 +48,13 @@ class ProjectListing extends Component {
         // The local state keeps track of the project that the user intends to
         // delete. If the value is non-null the delete modal for confirmation
         // is shown.
-        this.state = {deleteProject: null}
+        this.state = {deleteProject: null, filteredProjects: this.props.projects}
         // Load the project listing
         const { dispatch } = this.props;
         dispatch(fetchProjects());
+    }
+    componentWillReceiveProps({projects}){
+        this.setState({filteredProjects:projects})
     }
     /**
      * Clear create or delete project error message.
@@ -81,6 +85,14 @@ class ProjectListing extends Component {
         this.setState({deleteProject: null})
     }
     /**
+     * Display search bar filtered project listing
+     **/
+    filterProjectListing = (results) => {
+        this.setState({
+            filteredProjects: results
+        })
+    }
+    /**
      * Show a list of existing projects and the Create Project form. Optional, a
      * 'Delete Project' dialog is being displayed.
      */
@@ -109,9 +121,10 @@ class ProjectListing extends Component {
                         <Table.HeaderCell className="resource"></Table.HeaderCell>
                     </Table.Row>
             );
+            let {filteredProjects} = this.state;
             let rows = [];
-            for (let i = 0; i < projects.length; i++) {
-                const pj = projects[i];
+            for (let i = 0; i < filteredProjects.length; i++) {
+                const pj = filteredProjects[i];
                 rows.push(<Table.Row key={pj.id}>
                     <Table.Cell className='resource'>
                         <a
@@ -132,6 +145,15 @@ class ProjectListing extends Component {
                         </span>
                     </Table.Cell>
                 </Table.Row>);
+            }
+            const noResults = (
+                <Table.Row>
+                    <Table.Cell className='resource-text'>
+                        No Results Found!
+                    </Table.Cell>
+                </Table.Row>);
+            if (filteredProjects.length < 1){
+                rows.push(noResults)
             }
             // Check if deleteProject is set. In that case display a modal
             // dialog for the user to either confirm (or cancel) project
@@ -161,9 +183,16 @@ class ProjectListing extends Component {
                     onDismiss={this.clearActionError}
                 />)
             }
+            const searchBar = (
+                    <SearchBar
+                        projects={projects}
+                        filterProjectListing={this.filterProjectListing}
+                    />)
+
             content = (
                 <div>
                     { projectActionErrorMessage }
+                    { searchBar }
                     <Table singleLine>
                         <Table.Header>{tabHead}</Table.Header>
                         <Table.Body>{rows}</Table.Body>

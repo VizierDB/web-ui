@@ -155,7 +155,11 @@ export const uploadProject = (uploadUrl, fileArg, history) => (dispatch) => {
                 checkResponseJsonForReAuth(response).then(json => {
                     console.log('FILE RESPONSE');
                     console.log(json);
-                    history.push(notebookPageUrl(json.id, json.defaultBranch));
+                    let defaultBranch = json.defaultBranch;
+                    if(!defaultBranch){
+                    	defaultBranch = json.branches[0].id;
+                    }
+                    history.push(notebookPageUrl(json.id, defaultBranch));
                     // Avoid action undefined error
                     return ({type: NO_OP});
                 });

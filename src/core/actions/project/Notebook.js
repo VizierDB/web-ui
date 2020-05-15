@@ -204,6 +204,17 @@ export const selectNotebookCell = (cell) => {
 }
 
 
+/**
+ * Check the url param cell-output.  if it is present
+ */
+export const isCellOutputRequest = () => {
+	const urlParams = new URLSearchParams(window.location.search);
+	const cellOutput = urlParams.get('cell-output');
+	return cellOutput;
+}
+
+
+
 // -----------------------------------------------------------------------------
 // Update notebook cells
 // -----------------------------------------------------------------------------
