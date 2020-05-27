@@ -86,7 +86,7 @@ class DatasetView extends React.Component {
         );
         const columns = dataset.columns;
         // Grid header
-        let header = [<RowIndexCell key={-1} value=' ' />];
+        let header = [<RowIndexCell key={-1} rowIndex={-1} value={' '} />];
         for (let cidx = 0; cidx < columns.length; cidx++) {
             const column = columns[cidx];
             header.push(
@@ -103,7 +103,7 @@ class DatasetView extends React.Component {
         const rows = [];
         for (let ridx = 0; ridx < dataset.rows.length; ridx++) {
             const row = dataset.rows[ridx];
-            const cells = [<RowIndexCell key={row.id} value={ridx + offset} />];
+            const cells = [<RowIndexCell key={row.id} rowId={row.id} rowIndex={ridx + offset} value={ridx + offset} />];
             for (let cidx = 0; cidx < columns.length; cidx++) {
                 const column = columns[cidx];
                 const isActive = (activeCell.column === column.id) && (activeCell.row === row.id);

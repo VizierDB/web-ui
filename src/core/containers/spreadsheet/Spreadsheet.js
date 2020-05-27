@@ -359,7 +359,8 @@ class Spreadsheet extends React.Component {
         let header = [
             <RowIndexCell
                 key={-1}
-                value=' '
+                rowIndex={-1}
+                value={' '}
                 onClick={this.clearActiveCell}
             />
         ];
@@ -394,14 +395,16 @@ class Spreadsheet extends React.Component {
         // Grid rows
         //
         const rows = [];
+        const offset = dataset.offset
         for (let ridx = 0; ridx < dataset.rows.length; ridx++) {
             const row = dataset.rows[ridx];
             const cells = [
                 <RowIndexCell
                     key={row.id}
+                    rowId={row.id}
                     disabled={isUpdating || notebook.workflow.readOnly}
-                    rowIndex={row.index}
-                    value={row.index}
+                    rowIndex={ridx + offset}
+                    value={ridx + offset}
                     onAction={this.handleVizualAction}
                     onClick={this.clearActiveCell}
                 />
@@ -425,7 +428,7 @@ class Spreadsheet extends React.Component {
                         isActive={(!isUpdating) && (isActive)}
                         isUpdating={isBlocked}
                         rowId={row.id}
-                        rowIndex={ridx}
+                        rowIndex={ridx + offset}
                         value={value}
                         onClick={this.handleSelectCell}
                         onMove={this.handleMoveCell}

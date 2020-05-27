@@ -29,6 +29,8 @@ class RowIndexCell extends React.Component {
     static propTypes = {
         disabled: PropTypes.bool.isRequired,
         rowIndex: PropTypes.number.isRequired,
+        rowId: PropTypes.number.isRequired,
+        key: PropTypes.number.isRequired,
         value: PropTypes.oneOfType([
              PropTypes.string,
              PropTypes.number
@@ -40,13 +42,15 @@ class RowIndexCell extends React.Component {
      * Render grod column as Html table header cell.
      */
     render() {
-        const { disabled, rowIndex, value, onAction, onClick } = this.props;
+        const { disabled, rowIndex, rowId, value, onAction, onClick } = this.props;
         // Show a dropdown menu if onAction method is provided
         let dropdown = null;
         if (onAction != null) {
             dropdown = (
                 <RowDropDown
                     disabled={disabled}
+                    key={rowId}
+                    rowId={rowId}
                     rowIndex={rowIndex}
                     onAction={onAction}
                 />

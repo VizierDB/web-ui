@@ -29,6 +29,7 @@ import { VIZUAL } from '../../../util/Vizual';
 class RowDropDown extends React.Component {
     static propTypes = {
         disabled: PropTypes.bool.isRequired,
+        rowId: PropTypes.number.isRequired,
         rowIndex: PropTypes.number.isRequired,
         onAction: PropTypes.func.isRequired
     }
@@ -36,8 +37,8 @@ class RowDropDown extends React.Component {
      * Call spreadsheet delete row method.
      */
     deleteRow = () => {
-        const { rowIndex, onAction } = this.props
-        onAction(VIZUAL.DELETE_ROW, rowIndex);
+        const { rowId, onAction } = this.props
+        onAction(VIZUAL.DELETE_ROW, rowId);
     }
     /**
      * Call spreadsheet insert row method.
@@ -57,11 +58,13 @@ class RowDropDown extends React.Component {
      * Call spreadsheet move row method.
      */
     moveRow = () => {
-        const { rowIndex, onAction } = this.props
-        onAction(VIZUAL.MOVE_ROW, rowIndex);
+        const { rowId, onAction } = this.props
+        onAction(VIZUAL.MOVE_ROW, rowId);
     }
     render() {
-        const { disabled } = this.props;
+        // rowId = the unique, global identifier for the row
+        // rowIndex = the position of the row in the dataset
+        const { rowId, rowIndex, disabled } = this.props;
         return (
             <Dropdown disabled={disabled} floating>
                 <Dropdown.Menu>
