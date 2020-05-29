@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import React from 'react'
+import React, { PureComponent }  from 'react'
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types'
 import {scaleOrdinal} from 'd3-scale';
@@ -145,6 +145,7 @@ class Plots extends React.Component {
                 const series = dataset.series[j];
                 let nameSerie = series.label.toString();
                 data_i[nameSerie] = series.data[i];
+                data_i[nameSerie+'_caveat'] = series.caveats ? series.caveats[i] : true;
             }
             values.push(data_i);
             //
@@ -189,6 +190,28 @@ class Plots extends React.Component {
                 </GridList>;
         }
     }
+    
+    caveatDot = (props) => {
+    	  const {
+    		    cx, cy, stroke, payload, value, dataKey
+    		  } = props;
+
+    		  if (payload[dataKey + "_caveat"] === false) {
+    		    return (
+    		      /*<svg x={cx - 2} y={cy - 2} width={4} height={4} fill="red" viewBox="0 0 4 4">
+    		        <path d="M 2 2 m -2 0 a 2 2 0 1 0 4 0 a 2 2 0 1 0 -4 0"/> 
+    		      </svg>*/
+		    	  <svg x={cx - 10} y={cy - 10} width={18} height={18} fill="red" viewBox="0 0 18 18">
+		            <text x={0} y={0} dy={18} fontSize={16} >{"*"}</text>
+		          </svg>
+    		    );
+    		  }
+
+    		  return (
+    		    <svg x={cx} y={cy} width={0} height={0} fill="green" viewBox="0 0 0 0">
+    		    </svg>
+    		  );
+    		};
 
     /**
      * Return a function that takes a list of data series and width as parameter
@@ -218,7 +241,7 @@ class Plots extends React.Component {
             );
         } else if (nameChart==='Bar Chart') { // bar chart
           for (i=1; i<labels.length; i++) {
-            list.push(<Bar key={'id_'+i} name={labels[i]} dataKey={labels[i]} fill={this.listColors[i-1]} /> );
+            list.push(<Bar key={'id_'+i} name={labels[i]} dataKey={labels[i]} fill={this.listColors[i-1]} label={<CaveatLabel caveats={data.map(d => d[labels[i] + '_caveat'])} /> } /> );
           }
           return (data, width, grouped, yAxisName) => (
             <BarChart width={width} height={400} data={data} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
@@ -230,14 +253,14 @@ class Plots extends React.Component {
               {
                 grouped ?
                 list
-                : <Bar id='id_' dataKey={yAxisName} fill={this.listColors[0]} />
+                : <Bar id='id_' dataKey={yAxisName} fill={this.listColors[0]} label={<CaveatLabel caveats={data.map(d => d[yAxisName + '_caveat'])} />} />
               }
               <Brush />
             </BarChart>
           );
         } else if (nameChart==='Line Chart') { // line chart
           for (i=1; i<labels.length; i++) {
-            list.push(<Line key={'id_'+i} type="monotone" name={labels[i]} dataKey={labels[i]} stroke={this.listColors[i-1]} />);
+            list.push(<Line key={'id_'+i} type="monotone" name={labels[i]} dataKey={labels[i]} stroke={this.listColors[i-1]} dot={this.caveatDot} />);
           }
           return (data, width, grouped, yAxisName) => (
             <LineChart width={width} height={400} data={data} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
@@ -249,7 +272,7 @@ class Plots extends React.Component {
               {
                 grouped ?
                 list
-                : <Line type="monotone" name={yAxisName} dataKey={yAxisName} stroke={this.listColors[0]} />
+                : <Line type="monotone" name={yAxisName} dataKey={yAxisName} stroke={this.listColors[0]} dot={this.caveatDot} />
               }
               <Brush />
             </LineChart>
@@ -450,6 +473,24 @@ class Plots extends React.Component {
         );
     }
 }
+
+class CaveatLabel extends PureComponent {
+	  render() {
+	    const {
+	      x, y, stroke, value, caveats, index,
+	    } = this.props;
+        if(caveats[index] === false){
+		    return (
+				<svg x={x - 6} y={y - 6} width={14} height={14} fill="red" viewBox="0 0 14 14">
+		          <text x={0} y={0} dy={14} fontSize={16} >{"*"}</text>
+		        </svg>
+		    );
+        }
+        else{
+        	return <text></text>;
+        }
+	  }
+	}
 
 Plots.defaultProps = {
     x:0,
