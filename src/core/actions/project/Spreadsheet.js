@@ -18,18 +18,18 @@
 
 import {
     projectActionError, receiveProjectResource, requestProjectAction } from './Project';
-import { UPDATE_NOTEBOOK, updateNotebook } from './Notebook';
+import { updateNotebook } from './Notebook';
 import {
     CellAnnotation, NoAnnotation, IsFetching, FetchError, AnnotationList
 } from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
-import { WorkflowHandle } from '../../resources/Workflow';
+//import { WorkflowHandle } from '../../resources/Workflow';
 // import { Notebook } from '../../resources/Notebook';
 import { SpreadsheetResource, DatasetCaveatResource } from '../../util/App'
 // import { WorkflowHandle } from '../../resources/Workflow';
 import { fetchResource, postResourceData } from '../../util/Api';
 import { fetchAuthed, checkResponseJsonForReAuth, requestAuth } from '../main/Service';
-import { HATEOAS_MODULE_APPEND, HATEOAS_MODULE_INSERT } from '../../util/HATEOAS';
+import { HATEOAS_MODULE_APPEND } from '../../util/HATEOAS';
 import { VIZUAL_OP, VIZUAL } from '../../util/Vizual'
 // Actions to indicate that the spreadsheet is currently being updated
 export const SUBMIT_UPDATE_REQUEST = 'SUBMIT_UPDATE_REQUEST';
@@ -237,7 +237,7 @@ export const submitUpdate = (notebook, dataset, cmd, moduleIndex) => (dispatch) 
                 	}
                 	//we shoule also fire off a fetch of the new dataset here or something more clever that needs to be designed 
                 	// like partial spreadsheet fetch like above but the right way. 
-                	const wf = new WorkflowHandle(notebook.workflow.engine).fromJson(json);
+                	//const wf = new WorkflowHandle(notebook.workflow.engine).fromJson(json);
                 	dispatch(updateNotebook(notebook, json, moduleId));
                 	dispatch(receiveProjectResource(
                             new SpreadsheetResource(upds)));

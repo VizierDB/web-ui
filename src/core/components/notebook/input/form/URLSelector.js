@@ -1,4 +1,4 @@
-import {Button, Form, Icon} from "semantic-ui-react";
+import {Button, Form} from "semantic-ui-react";
 import React, {useState} from "react";
 import {KEY} from "../../../../util/App";
 import PropTypes from 'prop-types'

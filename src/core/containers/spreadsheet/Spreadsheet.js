@@ -24,7 +24,7 @@ import { Dimmer, Icon, Loader } from 'semantic-ui-react';
 import { insertNotebookCell, updateNotebookCellWithUpload } from '../../actions/project/Notebook';
 import {
     clearAnnotations, deleteAnnotations, fetchAnnotations, showSpreadsheet,
-    submitUpdate, updateAnnotations
+    submitUpdate
 } from '../../actions/project/Spreadsheet';
 import { CloseButton } from '../../components/Button'
 import AnnotationObject from '../../components/annotation/AnnotationObject';
@@ -100,7 +100,7 @@ class Spreadsheet extends React.Component {
         const { dispatch, dataset, serviceApi, notebook } = this.props;
         // Create data object for request.
         const reqData = {type: command.type, id: command.id, arguments: data};
-        notebook.workflow
+        //notebook.workflow
         // Hide notebook cell
         this.toggleNotebookCell();
         // Dispatch update request. If the current dataset is being renamed or
@@ -589,10 +589,10 @@ class Spreadsheet extends React.Component {
             	moduleIndex = dataset.moduleIndex+1;
             }
             else {
-            	const findModuleById = (imodule) => imodule.id == dataset.moduleId;
+            	const findModuleById = (imodule) => imodule.id === dataset.moduleId;
             	moduleIndex = notebook.workflow.modules.findIndex( findModuleById)+1;
             }
-        	const lastModule = ( moduleIndex == notebook.workflow.modules.length );
+        	const lastModule = ( moduleIndex === notebook.workflow.modules.length );
         	if(lastModule){
         		//we are on the last module so we can just append
         		moduleIndex = null;

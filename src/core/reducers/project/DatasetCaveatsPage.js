@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-import { RECEIVE_BRANCH_HISTORY, REQUEST_BRANCH } from '../../actions/project/Branch';
 import { REQUEST_CAVEATS } from '../../actions/project/Spreadsheet';
 import { PROJECT_FETCH_ERROR, RECEIVE_PROJECT, REQUEST_PROJECT, RECEIVE_PROJECT_RESOURCE } from '../../actions/project/Project';
 import { RESOURCE_DATASET_CAVEAT } from '../../util/App';
@@ -70,7 +69,9 @@ export const datasetErrorsPage = (state = INITIAL_STATE, action) => {
 		        	    ...state,
 		        	    dataset: action.resource
 		            };
-        	};
+        		default:
+                    return state
+        	}
         default:
             return state
     }

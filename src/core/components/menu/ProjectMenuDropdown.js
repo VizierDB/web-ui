@@ -46,9 +46,9 @@ class ProjectMenuDropdown extends React.Component {
             onImport,
             onDelete,
             onEdit,
-            onSelect,
+            //onSelect,
             project,
-            projectList
+            //projectList
         } = this.props;
         const menuItems = [];
         // Show the current project name, the rename option and the delete

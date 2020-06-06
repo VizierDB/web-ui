@@ -149,7 +149,7 @@ export const checkResponseJsonForReAuth = (response) => {
 		} catch(err) {
 			if(text && text.startsWith("<!DOCTYPE html>") && text.includes("SAMLRequest")){
 				const r = window.confirm("Your session has timed out.  Do you want to renew your session?");
-				if (r == true) {
+				if (r === true) {
 					//window.location.reload(false); 
 					//stored from serviceApi.properties.profile
 					const profile = JSON.parse(localStorage.getItem('profile'));

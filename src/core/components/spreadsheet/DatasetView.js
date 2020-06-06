@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import React, { lazy, Suspense } from 'react'
+import React, { Suspense } from 'react'
 import PropTypes from 'prop-types'
 import GridCell from './grid/GridCell';
 import HeaderCell from './grid/HeaderCell';
@@ -29,7 +29,7 @@ import '../../../css/App.css'
 import '../../../css/Notebook.css'
 import '../../../css/Spreadsheet.css'
 import { Button, Icon, Popup, Label } from 'semantic-ui-react'
-import { each } from 'lodash';
+//import { each } from 'lodash';
 const SummaryPlotHeader = React.lazy(() => import('./SummaryPlotHeader')); // Lazy-loaded
 
 /**
@@ -146,13 +146,13 @@ class DatasetView extends React.Component {
             rows.push(<tr key={row.id}>{cells}</tr>);
         }
 
-        const returnContent = this.state.typeView != 3
+        const returnContent = this.state.typeView !== 3
         ?
         <div className='spreadsheet-container'>
             <div className='spreadsheet-table-container'>
                 <table className='spreadsheet'>
                 {
-                    this.state.typeView == 1
+                    this.state.typeView === 1
                     ?
                     <thead>{header}</thead>
                     :

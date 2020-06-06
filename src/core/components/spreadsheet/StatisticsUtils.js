@@ -1,6 +1,6 @@
 import { histogram } from 'd3-array';
 
-const TEXT_NUM_TOKENS = 5;
+//const TEXT_NUM_TOKENS = 5;
 const DEFAULT_NUM_BINS = 20;
 const DEFAULT_TICK_PRECISION = 6;
 const numericTypes = new Set(['int', 'real']);
@@ -56,7 +56,7 @@ export function profile (dataset) {
         return prev;
       }, {});
     
-    const dictionaries = {};
+    //const dictionaries = {};
     for (let ridx = 0; ridx < dataset.rows.length; ridx++) {
         const row = dataset.rows[ridx];
         for (let cidx = 0; cidx < columns.length; cidx++) {
@@ -101,7 +101,7 @@ export function profile (dataset) {
             column.values = [];
             column.binSize = 0;
             stats.mean = NaN;
-            return;
+            return null;
           }
 
           // Avoid using the first or last bin to estimate bin size.
@@ -116,6 +116,7 @@ export function profile (dataset) {
           column.values = newValues;
           stats.mean = stats.sum / stats.count;
         }
+        return null;
       });
 
       for (let ridx = 0; ridx < dataset.rows.length; ridx++) {

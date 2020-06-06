@@ -193,7 +193,7 @@ class Plots extends React.Component {
     
     caveatDot = (props) => {
     	  const {
-    		    cx, cy, stroke, payload, value, dataKey
+    		    cx, cy, payload, dataKey
     		  } = props;
 
     		  if (payload[dataKey + "_caveat"] === false) {
@@ -213,6 +213,10 @@ class Plots extends React.Component {
     		  );
     		};
 
+    		
+    caveatLabels = (labels, idx) => { 
+    	return (d) => d[labels[idx] + '_caveat']
+    }
     /**
      * Return a function that takes a list of data series and width as parameter
      * and renders a chart of the type that is specified in chartName.
@@ -241,7 +245,7 @@ class Plots extends React.Component {
             );
         } else if (nameChart==='Bar Chart') { // bar chart
           for (i=1; i<labels.length; i++) {
-            list.push(<Bar key={'id_'+i} name={labels[i]} dataKey={labels[i]} fill={this.listColors[i-1]} label={<CaveatLabel caveats={data.map(d => d[labels[i] + '_caveat'])} /> } /> );
+            list.push(<Bar key={'id_'+i} name={labels[i]} dataKey={labels[i]} fill={this.listColors[i-1]} label={<CaveatLabel caveats={data.map(this.caveatLabels(labels,i))} /> } /> );
           }
           return (data, width, grouped, yAxisName) => (
             <BarChart width={width} height={400} data={data} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
@@ -477,7 +481,7 @@ class Plots extends React.Component {
 class CaveatLabel extends PureComponent {
 	  render() {
 	    const {
-	      x, y, stroke, value, caveats, index,
+	      x, y, caveats, index,
 	    } = this.props;
         if(caveats[index] === false){
 		    return (

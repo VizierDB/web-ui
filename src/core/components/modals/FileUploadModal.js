@@ -18,7 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types'
-import { Button, Input, Modal } from 'semantic-ui-react'
+import { Button, Modal } from 'semantic-ui-react'
 import '../../../css/ResourceListing.css'
 
 /**

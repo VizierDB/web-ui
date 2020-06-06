@@ -496,7 +496,7 @@ class NotebookPage extends Component {
             if(cellOutput){
             	 pageContent = ( 
 	    			 <CellOutputArea
-		                cell={notebook.cells.find(ccell => ccell.id == cellOutput)}
+		                cell={notebook.cells.find(ccell => ccell.id === cellOutput)}
 		                onCancelExec={this.handleCancelWorkflowExec}
 		                onCheckStatus={this.handleCheckWorkflowStatus}
 		                onFetchAnnotations={this.handleFetchDatasetCellAnnotations}
