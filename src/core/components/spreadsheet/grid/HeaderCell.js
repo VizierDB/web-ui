@@ -22,7 +22,7 @@ import GridInput from './GridInput';
 import ColumnDropDown from '../menu/ColumnDropDown';
 import { MOVE } from '../../../util/App';
 import styled from 'styled-components';
-import { Loader } from 'semantic-ui-react'
+import { Loader, Label } from 'semantic-ui-react'
 
 import {
     CartesianGrid,
@@ -148,6 +148,9 @@ class HeaderCell extends React.Component {
                 <span className='header-value'>
                     {columnName}
                 </span>
+                <Label size='mini'>
+                    {`(${column["type"]})`}
+                </Label>
                 <div >
                 {
                 // TODO: Support other type of data like text. Currently. just bar plot are generated for numerical data types.
