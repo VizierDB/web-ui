@@ -100,25 +100,44 @@ class ColumnView extends React.Component {
                   </td>
                   <td key={'rows_' + column.name} style={{width: '35%'}}>
                     {
-                      column.type === 'varchar'
+                      column.type === 'varchar' || column.type === 'categorical' || column.type === 'boolean'
                       ?
                       <div className="row">
-                        <div className="col-xs-6">
-                          <ul style={{listStyle: 'none'}}>
-                            <li><span>Unique</span></li>
-                            <li><span>Most Common</span></li>
-                          </ul>
-                        </div>
-                        <div className="col-xs-6" style={{textAlign: 'right'}}>
-                          <ul style={{listStyle: 'none'}}>
-                            <li><span>{ dataPlot_.values.length}</span></li>
-                          </ul>
-                        </div>
+                        <ul style={{ listStyle: 'none', columnCount: 2, columnGap: 10 }}>
+                          {dataPlot_.values.length && <li>Unique Values</li>}
+                          {dataPlot_.values.length && <li>Most Common</li>}
+
+                          {dataPlot_.values.length && (
+                            <li>{dataPlot_.values.length}</li>
+                          )}
+                          {dataPlot_.values.length && (
+                            <li>{}</li>
+                          )}
+                        </ul>
                       </div>
                       :
                       dataPlot_.stats ?
                       <div className="row">
-                        <div className="col-xs-6">
+                        <ul style={{ listStyle: 'none', columnCount: 2, columnGap: 10 }}>
+                          {dataPlot_.stats.max && <li>Maximun</li>}
+                          {dataPlot_.stats.min && <li>Minimun</li>}
+                          {dataPlot_.stats.mean && <li>Mean</li>}
+                          {dataPlot_.stats.stdDev && <li>Std Deviation</li>}
+
+                          {dataPlot_.stats.max && (
+                            <li>{dataPlot_.stats.max}</li>
+                          )}
+                          {dataPlot_.stats.min && (
+                            <li>{dataPlot_.stats.min}</li>
+                          )}
+                          {dataPlot_.stats.mean && (
+                            <li>{dataPlot_.stats.mean.toFixed(2)}</li>
+                          )}
+                          {dataPlot_.stats.stdDev && (
+                            <li>{dataPlot_.stats.stdDev.toFixed(2)}</li>
+                          )}
+                        </ul>
+                        {/* <div className="col-xs-6">
                           <ul style={{listStyle: 'none'}}>
                             <li><span>Maximun</span></li>
                             <li><span>Minimun </span></li>
@@ -135,7 +154,7 @@ class ColumnView extends React.Component {
                             <li><span>{ dataPlot_.stats.stdDev != null ?
                             dataPlot_.stats.stdDev.toFixed(2) : null}</span></li>
                           </ul>
-                        </div>
+                        </div> */}
                       </div>
                       :
                       <div/>
@@ -146,8 +165,8 @@ class ColumnView extends React.Component {
         }
         header = (<tbody>{header}</tbody>);
         return (
-          <div>
-          <Table style={{height: 200}}>
+          <div style={{maxHeight: 400, minHeight: 400, overflow: 'auto' }}>
+          <Table>
                 {header}
           </Table>
           </div>

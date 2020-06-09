@@ -191,6 +191,7 @@ class DatasetView extends React.Component {
                         <Icon name='columns' />
                     </Button>} />
                 </Button.Group>
+                <br/>
                 {returnContent}
             </div>
         );
