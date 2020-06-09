@@ -64,7 +64,7 @@ class RowDropDown extends React.Component {
     render() {
         // rowId = the unique, global identifier for the row
         // rowIndex = the position of the row in the dataset
-        const { rowId, rowIndex, disabled } = this.props;
+        const { disabled } = this.props;
         return (
             <Dropdown disabled={disabled} floating>
                 <Dropdown.Menu>
