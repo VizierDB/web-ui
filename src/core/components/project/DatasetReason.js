@@ -104,7 +104,7 @@ class DatasetReason extends React.Component {
                 	<td className='dataset-reason-icon'>
                 		<div onClick={this.handleExpand}>{errorIcon}</div>
                 	</td>
-                	<td className='dataset-reason-english'><div onClick={this.handleExpand}>{value.english}</div></td>
+                	<td className='dataset-reason-english'><div onClick={this.handleExpand}>{value.message}</div></td>
                 	<td className='dataset-reason-goto'><div onClick={this.handleGotoError}>{gotoErrorIcon}</div></td>
                 </tr></table>
                 {tableContent}
