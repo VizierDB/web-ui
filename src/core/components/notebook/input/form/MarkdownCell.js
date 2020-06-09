@@ -93,7 +93,7 @@ class MarkdownCell extends React.Component {
         let evalue = value;
         let addLines = false;
         let newCursorPos = cursorPosition;
-        let active = (sequenceIndex==window.activeCodeCell || sequenceIndex == -1);
+        let active = (sequenceIndex === window.activeCodeCell || sequenceIndex === -1);
         if(newLines){
         	addLines = true;
         	evalue = newLines;
@@ -163,18 +163,18 @@ class MarkdownCell extends React.Component {
         let cursorp = editor.getCursor();
         this.setState({editorValue: value, cursorPosition: cursorp});
         if(data.to &&  data.from && data.origin){
-        	if(data.origin == '+input' || data.origin == 'paste'){
+        	if(data.origin === '+input' || data.origin === 'paste'){
         		let newLines = data.text;
         		let newLineCount =  newLines.length -1;
         		let lastLineLength = newLines[newLineCount].length;
         		let newLine = data.from.line + newLineCount;
         	    let newCh = lastLineLength;
-        	    if(newLines.length == 1){
+        	    if(newLines.length === 1){
         	    	newCh = data.from.ch + lastLineLength;
         	    }
         		cursorp = {line:newLine, ch:newCh};
         	}
-        	else if(data.origin == '+delete'){
+        	else if(data.origin === '+delete'){
         		cursorp = {line:data.from.line, ch:data.from.ch};
         	}
         }
@@ -206,7 +206,7 @@ class MarkdownCell extends React.Component {
      * Show the code editor and optionally the code snippet selector.
      */
     render() {
-        const  { editorValue, snippetSelectorVisible, editing, active, cursorPosition, addLines } = this.state;
+        const  { editorValue, snippetSelectorVisible, editing, active, cursorPosition } = this.state;
         let headerCss = '';
         let selectorPanel = null;
         let examplePanel = null;

@@ -202,6 +202,7 @@ class CellOutputArea extends React.Component {
                 case CONTENT_TEXT: outputs['text/plain']  = stdout.lines.join("\n"); break;
                 case CONTENT_HTML: outputs['text/html']  = stdout.lines.join("\n"); break;
                 case CONTENT_MARKDOWN: outputs['text/markdown']  = stdout.lines.join("\n"); break;
+                default: outputs['text/plain']  = stdout.lines.join("\n"); break;
             }
         }else{
             outputs = cell.output.outputs;
@@ -531,7 +532,7 @@ class CellOutputArea extends React.Component {
                 <div className='output-loading'>
                     <Loader active={ isFetching } inline indeterminate/>
                 </div>
-                {!this.state.hide && <Segment style={{overflow: 'auto', maxHeight: 1000 }}>
+                {!this.state.hide && <Segment style={{overflow: 'auto', maxHeight: 2000 }}>
                     { !isFetching && this.getOutputContent() }
                 </Segment>}
             </div>

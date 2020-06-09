@@ -32,9 +32,6 @@ class SpreadsheetDropDown extends React.Component {
         onEditSpreadsheet: PropTypes.func.isRequired,
         moduleId: PropTypes.string.isRequired
     }
-    constructor(props) {
-        super(props);
-    }
     /**
      * Copy dataset download URL to the clipboard.
      */

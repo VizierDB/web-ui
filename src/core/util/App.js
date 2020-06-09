@@ -132,7 +132,7 @@ export const spreadsheetPageUrl = (projectId, branchId, datasetId, workflowId) =
     if (workflowId != null) {
         link += '/workflows/' + workflowId + '/spreadsheet/' + datasetId;
     } else {
-        link += '/head' + '/spreadsheet/' + datasetId;
+        link += '/head/spreadsheet/' + datasetId;
     }
     return link;
 }
@@ -145,7 +145,7 @@ export const errorListPageUrl = (projectId, branchId, datasetId, workflowId) => 
     if (workflowId != null) {
         link += '/workflows/' + workflowId + '/errors/' + datasetId;
     } else {
-        link += '/head' + '/errors/' + datasetId;
+        link += '/head/errors/' + datasetId;
     }
     return link;
 }

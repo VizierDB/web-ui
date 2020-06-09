@@ -21,8 +21,21 @@ import PropTypes from 'prop-types'
 import GridInput from './GridInput';
 import ColumnDropDown from '../menu/ColumnDropDown';
 import { MOVE } from '../../../util/App';
-import { Label } from "semantic-ui-react";
+import styled from 'styled-components';
+import { Loader } from 'semantic-ui-react'
 
+import {
+    CartesianGrid,
+    Tooltip,
+    XAxis,
+    YAxis,
+    BarChart,
+    Bar,
+    Legend,
+  } from 'recharts';
+const Centered = styled.div`
+  text-align: center;
+`;
 
 /**
  * Column header in a spreadsheet grid.
@@ -93,6 +106,7 @@ class HeaderCell extends React.Component {
         // The value is optional (providing a value other than the column name
         // is used to override the column name while updating).
         let columnName = null;
+
         if (value != null) {
             columnName = value;
         } else {
@@ -129,12 +143,48 @@ class HeaderCell extends React.Component {
             if (isUpdating) {
                 cellCss += ' updating';
             }
-            cellValue =(<span className='header-value'>
-                {`${columnName}`}
-                <Label size='mini'>
-                    {`(${column["type"]})`}
-                </Label>
-            </span>)
+            cellValue = (
+                <div>
+                <span className='header-value'>
+                    {columnName}
+                </span>
+                <div >
+                {
+                // TODO: Support other type of data like text. Currently. just bar plot are generated for numerical data types.
+                /* <ColumnDistributionPlot
+                    data={columnDataInfo}
+                    showXLabel={false}
+                    showYLabel={false}
+                    showInfo={false}
+                /> */
+                }
+                {
+                    this.props.dataPlot
+                    ?
+                    <Centered>
+                        <BarChart
+                            width={250}
+                            height={180}
+                            data={this.props.dataPlot.values}
+                        >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="count" fill="steelblue" />
+                        </BarChart>
+                    </Centered>
+                    :
+                    this.props.summaryPlot
+                    ?
+                    <Loader active inline='centered'  content='Loading'  />
+                    :
+                    <p/>
+                }
+                </div>
+                </div>
+            );
         }
         return (
             <th className={cellCss} onClick={this.handleClick}>
@@ -144,7 +194,6 @@ class HeaderCell extends React.Component {
         );
     }
 }
-
 
 HeaderCell.defaultProps = {
     disabled: false,

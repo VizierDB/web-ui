@@ -18,7 +18,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Button, Divider, Icon, Form } from 'semantic-ui-react'
+import { Button, Icon } from 'semantic-ui-react'
 import Dropzone from 'react-dropzone';
 import { formatBytes } from '../../../../util/App';
 
@@ -37,9 +37,6 @@ class FileSelector extends React.Component {
         serviceProperties: PropTypes.object.isRequired,
         value: PropTypes.object.isRequired,
         onChange: PropTypes.func.isRequired
-    }
-    constructor(props) {
-        super(props);
     }
     /**
      * Clear the currently selected source file.

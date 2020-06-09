@@ -16,17 +16,21 @@
  * limitations under the License.
  */
 
-import React from 'react'
+import React, { Suspense } from 'react'
 import PropTypes from 'prop-types'
 import GridCell from './grid/GridCell';
 import HeaderCell from './grid/HeaderCell';
 import RowIndexCell from './grid/RowIndexCell';
 import SpreadsheetDropDown from './menu/SpreadsheetDropDown';
 import SpreadsheetScrollbar from './SpreadsheetScrollbar';
+import ColumnView from './ColumnView';
+
 import '../../../css/App.css'
 import '../../../css/Notebook.css'
 import '../../../css/Spreadsheet.css'
-
+import { Button, Icon, Popup, Label } from 'semantic-ui-react'
+//import { each } from 'lodash';
+const SummaryPlotHeader = React.lazy(() => import('./SummaryPlotHeader')); // Lazy-loaded
 
 /**
  * Display a dataset in spreadsheet format with minimal functionality for the
@@ -45,7 +49,7 @@ class DatasetView extends React.Component {
     }
     constructor(props) {
         super(props);
-        this.state = {column: -1, row: -1};
+        this.state = {column: -1, row: -1,  profiledData: null, typeView: 1};
     }
     /**
      * If the dataset changes we need to reset the active cell coordinates in
@@ -60,12 +64,27 @@ class DatasetView extends React.Component {
                 this.setState({column: -1, row: -1});
             }
         }
+        // TODO: Get a sample of the dataset. Currently, just the data that is showed in the table/spreadsheet
+        // is used to compute the plots.
+        // const asyncRequest = this.profile(this.props.dataset).then(
+        //     result => {
+        //       this.setState({profiledData: result});
+        //     }
+        //   ).catch(e => {
+        //     console.log('There has been a problem with your fetch operation: ' + e.message);
+        //   });
     }
     /**
      * Update the reference to the active cell in the component state.
      */
     handleSelectCell = (columnId, rowId) => {
         this.setState({column: columnId, row: rowId});
+    }
+    /**
+     * Update the reference to the active cell in the component state.
+     */
+    updateTypeView = (value) => {
+        this.setState({typeView: value});
     }
     
     render() {
@@ -84,6 +103,7 @@ class DatasetView extends React.Component {
                     moduleId={moduleId} />
             </div>
         );
+
         const columns = dataset.columns;
         // Grid header
         let header = [<RowIndexCell key={-1} rowIndex={-1} value={' '} />];
@@ -94,6 +114,7 @@ class DatasetView extends React.Component {
                     key={column.id}
                     column={column}
                     columnIndex={cidx}
+                    summaryPlot={this.state.typeView === 2 ? true : false}
                 />
             );
         }
@@ -124,22 +145,53 @@ class DatasetView extends React.Component {
             }
             rows.push(<tr key={row.id}>{cells}</tr>);
         }
+
+        const returnContent = this.state.typeView !== 3
+        ?
+        <div className='spreadsheet-container'>
+            <div className='spreadsheet-table-container'>
+                <table className='spreadsheet'>
+                {
+                    this.state.typeView === 1
+                    ?
+                    <thead>{header}</thead>
+                    :
+                    <Suspense fallback={<thead>{header}</thead>}>
+                        <SummaryPlotHeader dataset={dataset}/>
+                    </Suspense>
+                }
+                <tbody>{rows}</tbody>
+                </table>
+            </div>
+            <SpreadsheetScrollbar
+                dataset={dataset}
+                onNavigate={onNavigate}
+                userSettings={userSettings}
+            />
+        </div>
+        :
+        <ColumnView dataset={dataset}/>;
         return (
             <div>
                 { contentHeader }
-                <div className='spreadsheet-container'>
-                    <div className='spreadsheet-table-container'>
-                    <table className='spreadsheet'>
-                        <thead>{header}</thead>
-                        <tbody>{rows}</tbody>
-                    </table>
-                    </div>
-                    <SpreadsheetScrollbar
-                        dataset={dataset}
-                        onNavigate={onNavigate}
-                        userSettings={userSettings}
-                    />
-                </div>
+                <Button.Group floated='right' size='mini' style={{marginTop:'-20px'}}>
+                    <Label basic  pointing='right' size='mini'>
+                        Views
+                    </Label>
+                    <Popup content='Compact view' trigger={
+                    <Button icon onClick={() => (this.updateTypeView(1))}>
+                        <Icon name='compress' />
+                    </Button>} />
+                    <Popup content='Detail view' trigger={
+                    <Button icon onClick={() => (this.updateTypeView(2))}>
+                        <Icon name='chart bar outline' />
+                    </Button>} />
+                    <Popup content='Column view' trigger={
+                    <Button icon onClick={() => (this.updateTypeView(3))}>
+                        <Icon name='columns' />
+                    </Button>} />
+                </Button.Group>
+                {returnContent}
             </div>
         );
     }

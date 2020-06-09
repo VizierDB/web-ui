@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+  - node
+  
+cache:
+  yarn: true
+  directories:
+    - node_modules
+    
+branches:
+  only:
+  - master
+  
+script:
+  - yarn build
+  - yarn test
