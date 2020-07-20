@@ -66,7 +66,7 @@ export const LargeMessageButton = ({message, icon, css, onClick, title, caption,
     let captionMessage = caption !== null ? <div>
         <Divider horizontal>
             <p className='lg-button'>
-                <Icon size="big" name='arrow up' />
+                <Icon size="big" name={captionIcon} style={{margin:0}}/>
             </p>
         </Divider>
         <p className='lg-message'>{caption}</p>

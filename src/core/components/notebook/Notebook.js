@@ -138,6 +138,7 @@ class Notebook extends React.Component {
                     cellNumber={moduleCount}
                     datasets={datasets}
                     isActiveCell={cell.id === activeNotebookCell}
+                    isFirstCell={notebook.cells.length===1}
                     isNewNext={isNewNext}
                     isNewPrevious={isNewPrevious}
                     notebook={notebook}
