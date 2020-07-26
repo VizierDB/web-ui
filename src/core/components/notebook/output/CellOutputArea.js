@@ -32,7 +32,7 @@ import {
     CONTENT_TEXT,
     CONTENT_HIDE,
     OutputText,
-    CONTENT_TIMESTAMPS, CONTENT_MULTIPLE, CONTENT_MARKDOWN, CONTENT_HTML
+    CONTENT_TIMESTAMPS, CONTENT_MULTIPLE, CONTENT_MARKDOWN, CONTENT_HTML, StandardOutput
 } from '../../../resources/Outputs';
 import '../../../../css/App.css';
 import '../../../../css/Notebook.css';
@@ -196,7 +196,6 @@ class CellOutputArea extends React.Component {
         let outputs = {};
         let renders = {};
         const {cell, onSelectCell} = this.props;
-        outputs = {};
         if(stdout.hasOwnProperty('isMultiple') && !stdout.isMultiple()){
             switch (stdout.type) {
                 case CONTENT_TEXT: outputs['text/plain']  = stdout.lines.join("\n"); break;
@@ -290,6 +289,10 @@ class CellOutputArea extends React.Component {
         const { cell, onSelectCell } = this.props;
         const { resourceName } = this.state;
         let output = cell.output;
+        if (!this.didOutputChange()){
+            output = StandardOutput(cell.module);
+
+        }
         // For cells that are in success or an error state the output depends
         // on the type of the output resource handle.
         // messages
@@ -353,7 +356,7 @@ class CellOutputArea extends React.Component {
                 );
             }
         }
-        const {renders} = this.getConsoleOutputs(cell.output);
+        const {renders} = this.getConsoleOutputs(output);
         let outputContent = null;
         for( let out in renders ) {
             if((resourceName===out || resourceName==='All') && !cell.isCanceled()){
@@ -376,6 +379,21 @@ class CellOutputArea extends React.Component {
                     />
                 </div>}
             </div>);
+    };
+
+    /**
+     * Check if the returned output changed
+     */
+    didOutputChange = () => {
+        const {cell} = this.props;
+        const {output} = cell;
+        if (output.isText() &&
+            output.lines.length === 0 &&
+            cell.module.outputs.stdout.length > 0 &&
+            cell.isSuccess() ) {
+            return false;
+        }
+        return true;
     };
     render() {
         const {
