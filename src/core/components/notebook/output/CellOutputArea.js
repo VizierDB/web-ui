@@ -289,10 +289,6 @@ class CellOutputArea extends React.Component {
         const { cell, onSelectCell } = this.props;
         const { resourceName } = this.state;
         let output = cell.output;
-        if (!this.didOutputChange()){
-            output = StandardOutput(cell.module);
-
-        }
         // For cells that are in success or an error state the output depends
         // on the type of the output resource handle.
         // messages
@@ -381,20 +377,6 @@ class CellOutputArea extends React.Component {
             </div>);
     };
 
-    /**
-     * Check if the returned output changed
-     */
-    didOutputChange = () => {
-        const {cell} = this.props;
-        const {output} = cell;
-        if (output.isText() &&
-            output.lines.length === 0 &&
-            cell.module.outputs.stdout.length > 0 &&
-            cell.isSuccess() ) {
-            return false;
-        }
-        return true;
-    };
     render() {
         const {
             cell,

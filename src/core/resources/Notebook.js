@@ -299,14 +299,8 @@ export class Notebook {
                 if (cell.id === module.id) {
                     // This is a cell that existed in the previous workflow. If
                     // the modified module identifier is given then we need to
-                    // set the cell output to its default value if this is the
-                    // cell for the module whose state may have changed.
-                    let outputResource = null;
-                    if (module.id === modifiedCellId) {
-                        outputResource = getModuleDefaultOutput(module);
-                    } else {
-                        outputResource = cell.output;
-                    }
+                    // set the cell output to its default value
+                    let outputResource = getModuleDefaultOutput(module);
                     modifiedCells.push(
                         new NotebookCell(
                             module.id,
@@ -433,7 +427,7 @@ class NotebookCell {
 const getModuleDefaultOutput = (module) => {
     // Get cell output resource
     const stdout = module.outputs.stdout;
-    let outputResource = null;
+    let outputResource;
     if (stdout.length === 1) {
         // If the output is a chart view it is expected to be the only
         // output element
@@ -451,9 +445,7 @@ const getModuleDefaultOutput = (module) => {
         }
     } else if (stdout.length > 1) {
         outputResource = new OutputMultiple(stdout);
-    }
-    // Make sure that there is some output
-    if (outputResource === null) {
+    } else { // Make sure that there is some output
         outputResource = new OutputText([]);
     }
     return outputResource;
