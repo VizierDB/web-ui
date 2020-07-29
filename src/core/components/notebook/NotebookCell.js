@@ -54,6 +54,7 @@ class NotebookCell extends React.Component {
         isNewNext: PropTypes.bool.isRequired,
         isNewPrevious: PropTypes.bool.isRequired,
         notebook: PropTypes.object.isRequired,
+        isFirstCell:PropTypes.bool,
         onAddFilteredCommand: PropTypes.func.isRequired,
         onCancelExec: PropTypes.func,
         onCheckStatus: PropTypes.func,
@@ -162,7 +163,8 @@ class NotebookCell extends React.Component {
             onOutputSelect,
             onSubmitCell,
             userSettings,
-            onEditSpreadsheet
+            onEditSpreadsheet,
+            isFirstCell
         } = this.props;
         // The main components of a notebook cell are the cell index, the cell
         // dropdown menu, the cell command text or input form and the cell
@@ -242,6 +244,7 @@ class NotebookCell extends React.Component {
                 datasets={datasets}
                 cell={cell}
                 isActiveCell={(isActiveCell) && (!notebook.readOnly)}
+                isFirstCell={isFirstCell}
                 onClick={this.handleSelectCell}
                 onDismiss={onDismissCell}
                 onSelectCell={this.handleSelectCell}

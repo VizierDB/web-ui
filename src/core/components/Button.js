@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 import FontAwesome from 'react-fontawesome';
 import 'font-awesome/css/font-awesome.css';
 import '../../css/Button.css';
+import { Divider, Icon } from 'semantic-ui-react'
 
 /**
  * Module containing a collection of different button comonents for the UI.
@@ -53,21 +54,40 @@ CloseButton.propTypes = {
 };
 
 
-export const LargeMessageButton = ({message, icon, css, onClick, title}) => (
-    <div className={css}>
+export const LargeMessageButton = ({message, icon, css, onClick, title, caption, captionIcon}) => {
+
+    let mainMessage = <div>
         <p className='lg-message'>{message}</p>
         <p className='lg-button'>
             <IconButton name={icon + ' fa-4x'} title={title} onClick={onClick}/>
         </p>
-    </div>
-);
+    </div>;
+
+    let captionMessage = caption !== null ? <div>
+        <Divider horizontal>
+            <p className='lg-button'>
+                <Icon size="big" name={captionIcon} style={{margin:0}}/>
+            </p>
+        </Divider>
+        <p className='lg-message'>{caption}</p>
+    </div> : null;
+
+    return(<div>
+            <div className={css}>
+              {mainMessage}
+            </div>
+            {captionMessage}
+    </div>)
+};
 
 LargeMessageButton.propTypes = {
     css: PropTypes.string,
     icon: PropTypes.string.isRequired,
     message: PropTypes.string.isRequired,
     onClick: PropTypes.func.isRequired,
-    title: PropTypes.string
+    title: PropTypes.string,
+    caption: PropTypes.string,
+    captionIcon: PropTypes.string
 };
 
 

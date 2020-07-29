@@ -18,7 +18,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Grid, Icon, List, Segment } from 'semantic-ui-react'
+import { Grid, Icon, List, Segment, Header } from 'semantic-ui-react'
 import '../../../../css/Commands.css'
 
 
@@ -31,7 +31,8 @@ class CommandsListing extends React.Component {
         apiEngine: PropTypes.object.isRequired,
         onDismiss: PropTypes.func.isRequired,
         onPaste: PropTypes.func,
-        onSelect: PropTypes.func.isRequired
+        onSelect: PropTypes.func.isRequired,
+        isFirstCell:PropTypes.bool
     }
     
     groupBy = (arr, property)  => {
@@ -44,7 +45,7 @@ class CommandsListing extends React.Component {
 
     	
     render() {
-        const { apiEngine, onDismiss, onPaste, onSelect } = this.props;
+        const { apiEngine, onDismiss, onPaste, onSelect, isFirstCell} = this.props;
         // Get a list of command types
         const gridColumns = [];
         // Get list of packages. The list is sorted by package name by default.
@@ -67,17 +68,22 @@ class CommandsListing extends React.Component {
 	                </List.Item>
 	            );
 	            for (let i = 0; i < commands.length; i++) {
-	                const cmd = commands[i]
-	                listItems.push(
-	                    <List.Item
-	                        key={listItems.length}
-	                        onClick={() => (onSelect(pckg.id, cmd.id))}
-	                    >
-	                        <List.Content>
-	                            <List.Header as='a'>{cmd.name}</List.Header>
-	                        </List.Content>
-	                    </List.Item>
-	                )
+	                const cmd = commands[i];
+                    let item = isFirstCell && cmd.suggest ? <List.Item key={listItems.length} onClick={() => (onSelect(pckg.id, cmd.id))}>
+                        <List.Content>
+                            <List.Header as='a' className='suggested-action' icon>
+                                <Header.Content>
+                                    <Icon name={'star'} color={'yellow'}/>
+                                    { cmd.name }
+                                </Header.Content>
+                            </List.Header>
+                        </List.Content>
+                    </List.Item> : <List.Item key={listItems.length} onClick={() => (onSelect(pckg.id, cmd.id))}>
+                        <List.Content>
+                            <List.Header as='a'>{cmd.name}</List.Header>
+                        </List.Content>
+                    </List.Item>
+                    listItems.push(item)
 	            }
 	        }
 	        gridColumns.push(

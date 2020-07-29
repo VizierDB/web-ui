@@ -76,6 +76,7 @@ class CommandDeclaration {
         this.id = obj.id;
         this.name = obj.name;
         this.description = obj.description;
+        this.suggest = obj.suggest;
         // Sort parameters by identifier to ensure that they will be rendered
         // in the correct order. Then convert the flat list of parameters
         // into a nested list based on parent-child relationships

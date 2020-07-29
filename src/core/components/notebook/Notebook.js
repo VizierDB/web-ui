@@ -87,9 +87,11 @@ class Notebook extends React.Component {
         if (notebook.cells.length === 0) {
             return (
                 <LargeMessageButton
-                    message='Your notebook is empty. Start by adding a new cell.'
+                    message='Your notebook is empty.'
                     icon='plus'
                     css='notebook-footer'
+                    caption='Start by adding a Load Dataset Cell'
+                    captionIcon='arrow up'
                     onClick={this.handleAppendCell}
                 />
             );
@@ -136,6 +138,7 @@ class Notebook extends React.Component {
                     cellNumber={moduleCount}
                     datasets={datasets}
                     isActiveCell={cell.id === activeNotebookCell}
+                    isFirstCell={notebook.cells.length===1}
                     isNewNext={isNewNext}
                     isNewPrevious={isNewPrevious}
                     notebook={notebook}
