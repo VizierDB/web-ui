@@ -32,7 +32,7 @@ import {
     CONTENT_TEXT,
     CONTENT_HIDE,
     OutputText,
-    CONTENT_TIMESTAMPS, CONTENT_MULTIPLE, CONTENT_MARKDOWN, CONTENT_HTML
+    CONTENT_TIMESTAMPS, CONTENT_MULTIPLE, CONTENT_MARKDOWN, CONTENT_HTML, StandardOutput
 } from '../../../resources/Outputs';
 import '../../../../css/App.css';
 import '../../../../css/Notebook.css';
@@ -196,7 +196,6 @@ class CellOutputArea extends React.Component {
         let outputs = {};
         let renders = {};
         const {cell, onSelectCell} = this.props;
-        outputs = {};
         if(stdout.hasOwnProperty('isMultiple') && !stdout.isMultiple()){
             switch (stdout.type) {
                 case CONTENT_TEXT: outputs['text/plain']  = stdout.lines.join("\n"); break;
@@ -353,7 +352,7 @@ class CellOutputArea extends React.Component {
                 );
             }
         }
-        const {renders} = this.getConsoleOutputs(cell.output);
+        const {renders} = this.getConsoleOutputs(output);
         let outputContent = null;
         for( let out in renders ) {
             if((resourceName===out || resourceName==='All') && !cell.isCanceled()){
@@ -377,6 +376,7 @@ class CellOutputArea extends React.Component {
                 </div>}
             </div>);
     };
+
     render() {
         const {
             cell,
