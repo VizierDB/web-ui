@@ -1,3 +1,9 @@
+.suggested-action {
+    font-weight: bold;
+    padding: 10px;
+    font-size: 1.1em;
+}
+
 div.commands-listing {
     padding-left: 10px;
 }

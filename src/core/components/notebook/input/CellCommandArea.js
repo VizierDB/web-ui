@@ -50,7 +50,8 @@ class CellCommandArea extends React.Component {
         onDismiss: PropTypes.func.isRequired,
         onSelectCell: PropTypes.func.isRequired,
         onSubmit: PropTypes.func,
-        userSettings: PropTypes.object.isRequired
+        userSettings: PropTypes.object.isRequired,
+        isFirstCell: PropTypes.bool
     }
     constructor(props) {
         super(props);
@@ -323,7 +324,8 @@ class CellCommandArea extends React.Component {
             isActiveCell,
             onClick,
             onSubmit,
-            userSettings
+            userSettings,
+            isFirstCell
         } = this.props;
         const {
             errors,
@@ -363,6 +365,7 @@ class CellCommandArea extends React.Component {
             mainContent = (
                 <CommandsListing
                     apiEngine={apiEngine}
+                    isFirstCell={isFirstCell}
                     onDismiss={this.handleDismissCommandsListing}
                     onPaste={onPaste}
                     onSelect={this.handleSelectCommand} />
