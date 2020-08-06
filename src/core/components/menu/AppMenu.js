@@ -207,11 +207,19 @@ class AppMenu extends React.Component {
                 
                 if(notebook){
                 	const modulesCount = notebook.workflow.modules.length;
-	                if (modulesCount > 0 && notebook.workflow.modules[modulesCount-1].datasets) {
-	                    menuItems.push(
+	                if (modulesCount > 0 && Object.keys(notebook.workflow.datasets).length > 0) {
+	                	const datasets = Array.from(new Map(notebook.workflow.modules.flatMap(function(module, index) {
+	                		if(module.datasets){
+	                			return module.datasets;
+	                		}
+	                		else {
+	                			return [];
+	                		}
+	                	}).map(ds => [ds.name, ds])).values());
+	                	menuItems.push(
 		                    <DatasetMenuDropdown
 		                        key='datasets'
-		                        datasets={notebook.workflow.modules[modulesCount-1].datasets}
+		                        datasets={datasets}
 		                        onSelect={onShowDataset}
 		                        resource={resource}
 		                    />
@@ -219,7 +227,7 @@ class AppMenu extends React.Component {
 		                menuItems.push(
 		                    <DatasetCaveatMenuDropdown
 		                        key='errors'
-		                        datasets={notebook.workflow.modules[modulesCount-1].datasets}
+		                        datasets={datasets}
 		                        onSelect={onShowDatasetCaveat}
 		                        resource={resource}
 		                    />

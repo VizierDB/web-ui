@@ -36,6 +36,7 @@ export class DatasetDescriptor {
      */
     fromJson(json) {
         this.id = json.id;
+        this.name = json.name
         this.columns = json.columns;
         this.rowCount = json.rowCount;
         this.links = new HATEOASReferences(json.links);
@@ -66,6 +67,7 @@ export class DatasetHandle {
      */
     fromJson(json) {
         this.id = json.id;
+        this.name = json.name;
         this.columns = json.columns;
         this.rows = json.rows;
         this.rowCount = json.rowCount;
