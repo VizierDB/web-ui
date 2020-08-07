@@ -32,7 +32,7 @@ import {
     CONTENT_TEXT,
     CONTENT_HIDE,
     OutputText,
-    CONTENT_TIMESTAMPS, CONTENT_MULTIPLE, CONTENT_MARKDOWN, CONTENT_HTML, StandardOutput
+    CONTENT_TIMESTAMPS, CONTENT_MULTIPLE, CONTENT_MARKDOWN, CONTENT_HTML
 } from '../../../resources/Outputs';
 import '../../../../css/App.css';
 import '../../../../css/Notebook.css';
