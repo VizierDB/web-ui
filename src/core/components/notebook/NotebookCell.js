@@ -227,6 +227,7 @@ class NotebookCell extends React.Component {
             outputArea = (
                 <CellOutputArea
                     cell={cell}
+                    datasets={notebook.datasets}
                     onCancelExec={onCancelExec}
                     onCheckStatus={onCheckStatus}
                     onFetchAnnotations={onFetchAnnotations}

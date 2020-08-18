@@ -67,10 +67,12 @@ class CellOutputArea extends React.Component {
      */
     static getDerivedStateFromProps(nextProps, prevState){
         const newOutput = nextProps.cell.output;
+        const datasets = nextProps.datasets;
         if(prevState.isFetching && prevState.activeTab === newOutput.type){
             if(prevState.activeTab === CONTENT_CHART ||
                 prevState.activeTab === CONTENT_DATASET){
-                if (prevState.resourceName === newOutput.dataset.name || prevState.resourceName === newOutput.name){
+                if (prevState.resourceName === newOutput.dataset.name || prevState.resourceName === newOutput.name
+                 || prevState.resourceName === datasets[newOutput.dataset.id].name){ // forward compatibility
                     return {
                         isFetching: false
                     }
