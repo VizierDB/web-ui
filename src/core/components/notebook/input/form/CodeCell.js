@@ -74,6 +74,15 @@ class CodeCell extends React.Component {
         let cursorPos = editor.getCursor();
         this.props.onCursor(cursorPos);
     }
+    
+    /**
+     * Handle keymap for codemirror to replace tab key with spaces
+     */
+    tabReplace = (cm) => {
+	    const spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+	    cm.replaceSelection(spaces);
+	  }
+    
     /**
      * Show the code editor and optionally the code snippet selector.
      */
@@ -113,7 +122,8 @@ class CodeCell extends React.Component {
                         lineNumbers: true,
                         mode: mode,
                         indentUnit: 4,
-                        readOnly: readOnly
+                        readOnly: readOnly,
+                        extraKeys: { Tab: this.tabReplace }
                     }}
                     onBeforeChange={(editor, data, value) => {
                         this.handleChange(editor, value, data);
