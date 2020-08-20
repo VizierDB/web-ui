@@ -140,6 +140,18 @@ p.cell-index.error-cell {
     color: #912d2b;
 }
 
+div.collapsed-error-cell {
+    background: #fcc;
+    width: 100%;
+    text-align: center;
+    padding: .5em;
+    margin: 0;
+}
+
+div.collapsed-error-cell i {
+    float: left;
+}
+
 /*
  * Pending state
  */
