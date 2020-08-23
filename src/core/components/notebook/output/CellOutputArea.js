@@ -69,10 +69,9 @@ class CellOutputArea extends React.Component {
         const newOutput = nextProps.cell.output;
         const datasets = nextProps.datasets;
         if(prevState.isFetching && prevState.activeTab === newOutput.type){
-            if(prevState.activeTab === CONTENT_CHART ||
-                prevState.activeTab === CONTENT_DATASET){
+            if(prevState.activeTab === CONTENT_CHART || prevState.activeTab === CONTENT_DATASET){
                 if (prevState.resourceName === newOutput.dataset.name || prevState.resourceName === newOutput.name
-                 || (prevState.activeTab === CONTENT_DATASET && prevState.resourceName === datasets[newOutput.dataset.id].name)){ // forward compatibility
+                 || (prevState.activeTab === CONTENT_DATASET && prevState.resourceName.toLowerCase() === datasets[newOutput.dataset.id].name.toLowerCase())){ // forward compatibility
                     return {
                         isFetching: false
                     }
