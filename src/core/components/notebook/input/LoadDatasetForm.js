@@ -23,6 +23,7 @@ export default function LoadDatasetForm(props) {
         "name":null,
         "file":{"fileid":null,"filename":null,"url":null},
         "loadFormat":"csv",
+        "schema":[],
         "loadInferTypes":false,
         "loadDetectHeaders":false,
         "loadDataSourceErrors":false,

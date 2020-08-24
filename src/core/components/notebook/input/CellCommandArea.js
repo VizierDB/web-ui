@@ -83,7 +83,8 @@ class CellCommandArea extends React.Component {
             hasErrors: false,
             selectedCommand: cell.commandSpec,
             showCommandsListing: (cell.commandSpec == null),
-            snippetSelectorVisible: false
+            snippetSelectorVisible: false,
+            upstreamFormValues: false
         }
     }
     /**
@@ -170,6 +171,7 @@ class CellCommandArea extends React.Component {
             modifiedEditorProps = codeEditorProps;
         }
         this.setState({
+            upstreamFormValues: true,
             formValues: modifiedValues,
             codeEditorProps: modifiedEditorProps
         });
@@ -184,7 +186,8 @@ class CellCommandArea extends React.Component {
     handleBulkFormValueChange = (values) => {
         const modifiedValues = {...values}
         this.setState({
-            formValues: modifiedValues
+            formValues: modifiedValues,
+            upstreamFormValues: true
         })
     }
     /**
@@ -205,6 +208,7 @@ class CellCommandArea extends React.Component {
         // Clean up for fresh start when cell becomes active again
         if (!cell.isNewCell()) {
             this.setState({
+                upstreamFormValues: false,
                 formValues: toFormValues(
                     cell.commandSpec.parameters,
                     datasets,
@@ -299,6 +303,7 @@ class CellCommandArea extends React.Component {
             this.setState({errors: null, hasErrors: false});
             onSubmit(cell, selectedCommand, req.data);
         }
+        this.setState({upstreamFormValues:false})
     }
     /**
      * Toggle visibility of an optional code snippet selector.
@@ -314,6 +319,21 @@ class CellCommandArea extends React.Component {
     handleF5Press = (event) => {
         event.preventDefault()
         this.handleSubmitForm()
+    }
+
+    /**
+     * To let arguments be modified by cell execution
+     */
+    static getDerivedStateFromProps(props, state){
+        const moduleArguments = (typeof props.cell.module !== "undefined") ? props.cell.module.command.arguments : null;
+        if(typeof moduleArguments !== "undefined" && moduleArguments !== null && state.upstreamFormValues === false){
+            let formattedModuleArguments = toFormValues(props.cell.commandSpec.parameters, props.datasets, moduleArguments)
+            return {
+                ...state,
+                formValues : formattedModuleArguments
+            };
+        }
+        return null;
     }
 
     render() {
@@ -409,12 +429,12 @@ class CellCommandArea extends React.Component {
                                 <MarkdownSnippets onSelect={this.handleAppendCode}/>
                             );
                     }
-                    
+
                 }
                 const { codeEditorProps } = this.state;
                 if((isActiveCell) && (paraCode.language === 'sql')) {
                 	let outputDataset = formValues['output_dataset'];
-                	additionalParams = ( 
+                	additionalParams = (
                     		<div class="ui labeled input">
 				                <div class="ui label">
 				                	Output Dataset
@@ -430,7 +450,7 @@ class CellCommandArea extends React.Component {
 				                    	this.handleFormValueChange('output_dataset', value, codeEditorProps.cursorPosition)
 				                    }}
 				                />
-				            </div> 
+				            </div>
 	                    );
                 }
                 mainContent = (
