@@ -18,6 +18,7 @@
 
 import React from 'react';
 import { PropTypes } from 'prop-types';
+import { Icon } from 'semantic-ui-react';
 import CellCommandArea from './input/CellCommandArea';
 import CellDropDownMenu from './CellDropDownMenu';
 import CellOutputArea from './output/CellOutputArea';
@@ -184,9 +185,21 @@ class NotebookCell extends React.Component {
             // know which (and how many) cells are still executing.
             const cmdSpec = cell.commandSpec;
             if ((!cell.isActive()) && (userSettings.isFiltered(cmdSpec))) {
-                if (!userSettings.hideFilteredCommands()) {
+            	let errorcss = '';
+            	let errorIcon = null;
+                if (cell.isErrorOrCanceled()) {
+                	errorcss = ' collapsed-error-cell';
+                	if (cell.isCanceled()) {
+                		errorIcon = (<Icon name='cancel' color='red' title='Canceled'/>);
+                    } else if (cell.isError()) {
+                    	errorIcon = (<Icon name='warning circle' color='red' title='Error' />);
+                    }
+                	
+                }
+            	if (!userSettings.hideFilteredCommands()) {
                     return (
-                        <div className='horizontal-divider'>
+                        <div className={'horizontal-divider' + errorcss} >
+                            { errorIcon }
                             <TextButton
                                 css='code-text'
                                 text={cmdSpec.name}
