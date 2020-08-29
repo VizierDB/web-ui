@@ -112,12 +112,14 @@ class AnnotationObject extends React.Component {
                             icon = 'warning sign';
                             title = 'Mimir';
                             color = 'yellow';
+                            anno.value = anno.message;
                         } else if (anno.key === 'user:issue') {
                             icon = 'info circle';
                             title = 'Issue';
                         } else {
                             icon = 'comment alternate outline';
                             title = 'Comment';
+                            anno.value = anno.message;
                         }
                         let cssSuffix = '';
                         if ((anno.key === 'mimir:uncertain') || (onSubmit == null)) {

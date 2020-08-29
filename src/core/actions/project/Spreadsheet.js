@@ -315,7 +315,7 @@ export const fetchAnnotations = (dataset, columnId, rowId) => (dispatch) => {
             fetchResource(
             	annoLink,
                 (json) => {
-                    const content = new AnnotationList(json['cells'])
+                    const content = new AnnotationList(json)
                     const annotation = new CellAnnotation(columnId, rowId, content);
                     return setAnnotations(annotation);
                 },

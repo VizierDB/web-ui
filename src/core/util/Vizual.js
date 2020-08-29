@@ -175,21 +175,14 @@ export const updateAnnotation = (dataset, column, new_value, row_id) => ({
 	packageId:'mimir',
 	commandId:'comment',
 	arguments: [
-		{id:'dataset',value:dataset.name},
+		{id:'dataset',value:dataset.id},
 		{id:'comments',value: [
 				[
-					{id:'expression',value:dataset.columns[column].name},
+					{id:'expression',value:dataset.columns[column].id},
 					{id:'comment',value:new_value},
 					{id:'rowid',value:row_id}
 				]
 			]
-		},
-		{id:'resultColumns',value: [
-				[
-					{id:'column',value:dataset.columns[column].name}
-				]
-			]
-		},
-		{id:'materializeInput',value:false}
+		}
 	]
 })

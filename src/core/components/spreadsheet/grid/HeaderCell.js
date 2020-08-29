@@ -23,6 +23,8 @@ import ColumnDropDown from '../menu/ColumnDropDown';
 import { MOVE } from '../../../util/App';
 import styled from 'styled-components';
 import { Loader, Label } from 'semantic-ui-react'
+import { Draggable, Droppable } from 'react-drag-and-drop'
+import { Icon } from 'semantic-ui-react';
 
 import {
     CartesianGrid,
@@ -54,7 +56,8 @@ class HeaderCell extends React.Component {
         onAction: PropTypes.func,
         onClick: PropTypes.func,
         onMove: PropTypes.func,
-        onUpdate: PropTypes.func
+        onUpdate: PropTypes.func,
+        isEditing: PropTypes.bool
     }
     /**
      * Submit changes to the cell value if a onUpdate handler is given.
@@ -90,6 +93,14 @@ class HeaderCell extends React.Component {
             }
         }
     }
+    handleMoveDropBefore = (dropData) => {
+        const { onMove } = this.props;
+        onMove(MOVE.LEFT);
+    }
+    handleMoveDropAfter = (dropData) => {
+        const { onMove } = this.props;
+        onMove(MOVE.RIGHT);
+    }
     /**
      * Render grid column cell as Html table header cell.
      */
@@ -101,7 +112,8 @@ class HeaderCell extends React.Component {
             column,
             columnIndex,
             value,
-            onAction
+            onAction,
+            isEditing
         } = this.props;
         // The value is optional (providing a value other than the column name
         // is used to override the column name while updating).
@@ -116,6 +128,9 @@ class HeaderCell extends React.Component {
         // or not.
         let cellCss = 'grid-header';
         let cellValue = null;
+        let dropTargetType = 'none';
+        let dropTargetBefore = null;
+        let dropTargetAfter = null;
         // Show optional dropdown menu if onAction handler is provided
         let dropdown = null;
         if (isActive) {
@@ -143,15 +158,45 @@ class HeaderCell extends React.Component {
             if (isUpdating) {
                 cellCss += ' updating';
             }
+            if(isEditing){
+            	dropTargetType = 'header-cell';
+            	dropTargetBefore = (
+            		<Droppable
+     		            types={[dropTargetType]}
+     		            onDrop={this.handleMoveDropBefore}>
+     		            <div className="drop-before" ><Icon
+     			            className='icon-button header-drop-target'
+     			            title='<- Move Colum Drop'
+     			            name='bullseye'
+     			        /></div>
+                     </Droppable>
+            	)
+            	dropTargetAfter = (
+            		<Droppable
+     		            types={[dropTargetType]}
+     		            onDrop={this.handleMoveDropAfter}>
+     		            <div className="drop-after" ><Icon
+     			            className='icon-button header-drop-target'
+     			            title='Move Column Drop ->'
+     			            name='bullseye'
+     			        /></div>
+                     </Droppable>
+            	)
+            }
             cellValue = (
-                <div>
-                <span className='header-value'>
-                    {columnName}
-                </span>
-                <Label size='mini'>
-                    {`(${column["type"]})`}
-                </Label>
-                <div >
+            	<div >
+            		
+            		<Draggable type="header-cell" data={columnIndex} >
+            	
+	                <span className='header-value'>
+	                    {columnName}
+	                </span>
+	                <Label size='mini'>
+	                    {`(${column["type"]})`}
+	                </Label>
+	                
+		            <div >
+                
                 {
                 // TODO: Support other type of data like text. Currently. just bar plot are generated for numerical data types.
                 /* <ColumnDistributionPlot
@@ -185,15 +230,24 @@ class HeaderCell extends React.Component {
                     :
                     <p/>
                 }
+                
+	               
                 </div>
-                </div>
+                
+                </Draggable>
+                
+	            </div>
             );
         }
         return (
+            
             <th className={cellCss} onClick={this.handleClick}>
+	            {dropTargetBefore}
+	            {dropTargetAfter}
                 {cellValue}
                 {dropdown}
             </th>
+            
         );
     }
 }
