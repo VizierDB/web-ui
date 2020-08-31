@@ -496,7 +496,7 @@ class Spreadsheet extends React.Component {
         return (
             <div className='spreadsheet-container'>
                 <h1 className='dataset-name'>
-                    {dataset.name}
+                    {notebook.datasets[dataset.id].name}
                     <span className='left-padding-lg'>
                         <Icon
                             className={annoButtonCss}
