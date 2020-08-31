@@ -333,6 +333,10 @@ class Spreadsheet extends React.Component {
         const { showNotebookCell } = this.state;
         this.setState({showNotebookCell: !showNotebookCell});
     }
+    handleFetchAnnotations = (columnId, rowId) => {
+        const { dispatch, dataset } = this.props;
+        dispatch(fetchAnnotations(dataset, columnId, rowId));
+    }
     /**
      * Render the spreadsheet as a Html table.
      */
@@ -387,6 +391,7 @@ class Spreadsheet extends React.Component {
                     onClick={this.handleSelectCell}
                     onMove={this.handleMoveHeader}
                     onUpdate={this.handleCellUpdate}
+                	isEditing={true}
                 />
             );
         }
@@ -433,6 +438,7 @@ class Spreadsheet extends React.Component {
                         onClick={this.handleSelectCell}
                         onMove={this.handleMoveCell}
                         onUpdate={this.handleCellUpdate}
+                        onFetchAnnotations={this.handleFetchAnnotations}
                     />
                 );
             }

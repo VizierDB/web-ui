@@ -88,7 +88,7 @@ class GridCell extends React.Component {
         } else if (isUpdating) {
             cellCss += ' updating';
         }
-        if ((hasAnnotations) && ((!isActive) || (onUpdate == null))) {
+        if (hasAnnotations) {
             cellCss += ' highlight';
             annoIcon = ( <Icon
 	            className='icon-button annotations-icon'
@@ -119,10 +119,11 @@ class GridCell extends React.Component {
             if (value == null) {
                 cellCss += '  is-null';
             }
-            cellValue = (<div className='cell-value'>{strValue}{annoIcon}</div>);
+            cellValue = (<div className='cell-value' onClick={this.handleClick}>{strValue}</div>);
         }
         return (
-            <td className={cellCss} onClick={this.handleClick}>
+            <td className={cellCss} >
+                {annoIcon}
                 {cellValue}
             </td>
         );

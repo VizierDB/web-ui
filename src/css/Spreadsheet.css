@@ -102,6 +102,27 @@ th.grid-header.updating {
     color: #888;
 }
 
+div.drop-before {
+	float: left;
+}
+
+div.drop-after {
+	float: right;
+}
+
+.header-drop-target {
+	opacity: 0.0 !important;
+}
+
+div.header-container {
+	display: inline-block;
+}
+
+div.header-drop {
+	width: 15px;
+	height: 3em%;
+}
+
 div.cell-value {
     height: 20px;
     overflow: hidden;
