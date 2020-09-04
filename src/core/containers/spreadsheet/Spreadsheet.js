@@ -496,7 +496,7 @@ class Spreadsheet extends React.Component {
         return (
             <div className='spreadsheet-container'>
                 <h1 className='dataset-name'>
-                    {notebook.datasets[dataset.id].name}
+                    {dataset.name}
                     <span className='left-padding-lg'>
                         <Icon
                             className={annoButtonCss}
@@ -673,9 +673,16 @@ class Spreadsheet extends React.Component {
 
 
 const mapStateToProps = state => {
+    let dataset = state.spreadsheet.dataset;
+    try{
+        // assign dataset.name the name associated with dataset.id
+        dataset.name = state.notebookPage.notebook.datasets[dataset.id].name;
+    }catch (TypeError) {
+        // to prevent spreadsheet from breaking between REQUEST_WORKFLOW AND RECEIVE_WORKFLOW when dataset is undefined
+    }
     return {
         annotations: state.spreadsheet.annotations,
-        dataset: state.spreadsheet.dataset,
+        dataset: dataset,
         isUpdating: state.spreadsheet.isUpdating,
         opError: state.spreadsheet.opError,
         project: state.projectPage.project,
