@@ -89,8 +89,12 @@ class NotebookStatusHeader extends Component {
             );
         }
 
+        const isAuth = window.env.API_ADV_AUTH;
         let url = window.location.protocol + '//' + window.location.host;
         url += notebookPageUrl(project.id, branch.id, notebook.id);
+        if( isAuth ){
+        	url =  window.location.protocol + '//' + window.location.host +'/auth/public?workflow-url=' + url
+        }
 
         return (
             <div className='notebook-header status-header'>
