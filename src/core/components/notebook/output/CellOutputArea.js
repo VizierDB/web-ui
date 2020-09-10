@@ -47,6 +47,7 @@ import { isCellOutputRequest } from '../../../actions/project/Notebook';
 class CellOutputArea extends React.Component {
     static propTypes = {
         cell: PropTypes.object.isRequired,
+        datasets: PropTypes.object.isRequired,
         onCancelExec: PropTypes.func,
         onCheckStatus: PropTypes.func,
         onFetchAnnotations: PropTypes.func.isRequired,
@@ -54,7 +55,9 @@ class CellOutputArea extends React.Component {
         onOutputSelect: PropTypes.func.isRequired,
         onSelectCell: PropTypes.func.isRequired,
         userSettings: PropTypes.object.isRequired,
-        onEditSpreadsheet: PropTypes.func.isRequired
+        onEditSpreadsheet: PropTypes.func.isRequired,
+        onRecommendAction: PropTypes.func.isRequired,
+        apiEngine: PropTypes.object.isRequired
     };
     state = {
         activeTab: null,
@@ -255,7 +258,12 @@ class CellOutputArea extends React.Component {
      * Returns a dataset view
      */
     getDatasetView = (id, dataset) => {
-        const {onSelectCell, onNavigateDataset, userSettings, onEditSpreadsheet} = this.props;
+        const {onSelectCell, datasets, onNavigateDataset, userSettings, onEditSpreadsheet, onRecommendAction, apiEngine} = this.props;
+        try {
+            dataset.name = datasets[dataset.id].name;
+        }catch (TypeError) {
+            // prevent breakage
+        }
         return (
             <div className='output-content'>
                 <DatasetView
@@ -266,6 +274,8 @@ class CellOutputArea extends React.Component {
                     userSettings={userSettings}
                     onEditSpreadsheet={onEditSpreadsheet}
                     moduleId={id}
+                    downloadLimit={apiEngine.serviceProperties.maxDownloadRowLimit}
+                    onRecommendAction={onRecommendAction}
                 />
             </div>
         )

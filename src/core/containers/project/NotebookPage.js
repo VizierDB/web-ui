@@ -386,12 +386,9 @@ class NotebookPage extends Component {
      * Switch to spreadsheet view and load the selected dataset for module.
      */
     handleEditSpreadsheet = (dataset, moduleId) => {
-        const { dispatch, history, branch } = this.props;
-        const downloadUrl = dataset.links.get(HATEOAS_DATASET_DOWNLOAD)
-        const regexp = /projects\/([a-z0-9]+)\/datasets\/([a-z0-9]+)/g;
-        const matches = Array.from(downloadUrl.matchAll(regexp));
-        const projectId = matches[0][1];
-        const datasetId = matches[0][2];
+        const { dispatch, history, branch, project } = this.props;
+        const projectId = project.id;
+        const datasetId = dataset.id;
         dispatch(showModuleSpreadsheet(dataset, 0, 25, moduleId));  
         history.push(spreadsheetPageUrl(projectId, branch.id, datasetId));
     }

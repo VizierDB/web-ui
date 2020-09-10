@@ -18,7 +18,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Dropdown } from 'semantic-ui-react'
+import {Confirm, Dropdown} from 'semantic-ui-react'
 import { HATEOAS_DATASET_DOWNLOAD } from '../../../util/HATEOAS'
 
 /**
@@ -30,8 +30,20 @@ class SpreadsheetDropDown extends React.Component {
     static propTypes = {
         dataset: PropTypes.object.isRequired,
         onEditSpreadsheet: PropTypes.func.isRequired,
-        moduleId: PropTypes.string.isRequired
+        moduleId: PropTypes.string.isRequired,
+        downloadLimit: PropTypes.number.isRequired,
+        onRecommendAction: PropTypes.func
     }
+
+    state = { open: false }
+    handleShow = () => this.setState({ open: true })
+    handleCancel = () => this.setState({ open: false })
+    onConfirm = () => {
+        const { onRecommendAction } = this.props;
+        this.setState({ open: false });
+        onRecommendAction('data','unload');
+    }
+
     /**
      * Copy dataset download URL to the clipboard.
      */
@@ -47,44 +59,62 @@ class SpreadsheetDropDown extends React.Component {
     }
     /**
      * Open a new window with the dataset URL to download the data in CSV
-     * format.
+     * format if row count less than preset value. If not, recommend the UNLOAD DATASET cell
      */
     handleDownload = () => {
-        const { dataset } = this.props
-        const downloadUrl = dataset.links.get(HATEOAS_DATASET_DOWNLOAD)
-        window.open(downloadUrl);
-    }
+        const { dataset, downloadLimit, onRecommendAction } = this.props;
+        if (dataset.rowCount <= downloadLimit){
+            const downloadUrl = dataset.links.get(HATEOAS_DATASET_DOWNLOAD)
+            window.open(downloadUrl);
+        }else {
+            // this.handleShow()
+            onRecommendAction('data','unload');
+        }
+    };
     handleEditSpreadsheet = () => {
-    	const { dataset, onEditSpreadsheet, moduleId } = this.props
-    	onEditSpreadsheet(dataset, moduleId)
+        const { dataset, onEditSpreadsheet, moduleId } = this.props
+        onEditSpreadsheet(dataset, moduleId)
     }
     render() {
-    	return (
-            <Dropdown icon='download' title='Download dataset'>
-                <Dropdown.Menu>
-                    <Dropdown.Item
-                        key={'download'}
-                        icon='download'
-                        text='Download File'
-                        title='Download dataset as CSV file'
-                        onClick={this.handleDownload}
-                    />
-                    <Dropdown.Item
-                        key={'copy-link'}
-                        icon='linkify'
-                        text='Copy URL to Clipboard'
-                        title='Copy shareable dataset URL to clipboard'
-                        onClick={this.handleCopy}
-                    />
-	                    <Dropdown.Item
-	                    key={'edit'}
-	                    icon='edit'
-	                    text='Edit as Spreadsheet'
-	                    title='Open spreadsheet view to edit the dataset'
-	                    onClick={this.handleEditSpreadsheet}
-	                />
-                </Dropdown.Menu>
-            </Dropdown>
+        const {downloadLimit} = this.props
+        const unloadDatasetModal =
+            <Confirm
+                content={'The dataset exceeds the allowed limit of ' + downloadLimit + ' rows. It is recommended to export large datasets using the Unload Cell.'}
+                open={this.state.open}
+                cancelButton={'Cancel'}
+                confirmButton={'Unload Dataset'}
+                onCancel={this.handleCancel}
+                onConfirm={this.onConfirm}
+            />
+        return (
+            <React.Fragment>
+                { unloadDatasetModal }
+                <Dropdown icon='download' title='Download dataset'>
+                    <Dropdown.Menu>
+                        <Dropdown.Item
+                            key={'download'}
+                            icon='download'
+                            text='Download File'
+                            title='Download dataset as CSV file'
+                            onClick={this.handleDownload}
+                        />
+                        <Dropdown.Item
+                            key={'copy-link'}
+                            icon='linkify'
+                            text='Copy URL to Clipboard'
+                            title='Copy shareable dataset URL to clipboard'
+                            onClick={this.handleCopy}
+                        />
+                        <Dropdown.Item
+                            key={'edit'}
+                            icon='edit'
+                            text='Edit as Spreadsheet'
+                            title='Open spreadsheet view to edit the dataset'
+                            onClick={this.handleEditSpreadsheet}
+                        />
+                    </Dropdown.Menu>
+                </Dropdown>
+            </React.Fragment>
         );
     }
 }

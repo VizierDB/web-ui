@@ -51,7 +51,7 @@ class CellCommandArea extends React.Component {
         onSelectCell: PropTypes.func.isRequired,
         onSubmit: PropTypes.func,
         userSettings: PropTypes.object.isRequired,
-        isFirstCell: PropTypes.bool
+        onResetRecommendations: PropTypes.func
     }
     constructor(props) {
         super(props);
@@ -228,11 +228,13 @@ class CellCommandArea extends React.Component {
      */
     handleDismissCommandsListing = () => {
         const { selectedCommand } = this.state;
+        const { onResetRecommendations } = this.props;
         if (selectedCommand != null) {
             this.setState({showCommandsListing: false});
         } else {
             this.handleDismiss();
         }
+        onResetRecommendations()
     }
     /**
      * Clear the list of error messages.
@@ -244,7 +246,7 @@ class CellCommandArea extends React.Component {
      * Set the command in the user settings clipboard as the selected command.
      */
     handlePasteCommand = () => {
-        const { datasets, userSettings } = this.props;
+        const { datasets, userSettings, onResetRecommendations} = this.props;
         this.setState({
             formValues: toFormValues(
                 userSettings.clipboard.commandSpec.parameters,
@@ -254,19 +256,21 @@ class CellCommandArea extends React.Component {
             selectedCommand: userSettings.clipboard.commandSpec,
             showCommandsListing: false
         });
+        onResetRecommendations()
     }
     /**
      * Update the selected command to the command that is identified by the
      * given pair of package and command identifier.
      */
     handleSelectCommand = (packageId, commandId) => {
-        const { apiEngine, datasets } = this.props;
+        const { apiEngine, datasets, onResetRecommendations} = this.props;
         const cmd = apiEngine.packages.getCommandSpec(packageId, commandId);
         this.setState({
             formValues: toFormValues(cmd.parameters, datasets),
             selectedCommand: cmd,
             showCommandsListing: false
         });
+        onResetRecommendations()
     }
     /**
      * Set the showCommandsListing to true to show a list of available commands.
@@ -345,7 +349,6 @@ class CellCommandArea extends React.Component {
             onClick,
             onSubmit,
             userSettings,
-            isFirstCell
         } = this.props;
         const {
             errors,
@@ -385,7 +388,6 @@ class CellCommandArea extends React.Component {
             mainContent = (
                 <CommandsListing
                     apiEngine={apiEngine}
-                    isFirstCell={isFirstCell}
                     onDismiss={this.handleDismissCommandsListing}
                     onPaste={onPaste}
                     onSelect={this.handleSelectCommand} />
