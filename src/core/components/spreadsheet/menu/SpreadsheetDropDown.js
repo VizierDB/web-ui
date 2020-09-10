@@ -18,7 +18,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Confirm, Dropdown} from 'semantic-ui-react'
+import { Header, Button, Popup, Grid, Dropdown, Icon, GridColumn } from 'semantic-ui-react'
 import { HATEOAS_DATASET_DOWNLOAD } from '../../../util/HATEOAS'
 
 /**
@@ -33,15 +33,6 @@ class SpreadsheetDropDown extends React.Component {
         moduleId: PropTypes.string.isRequired,
         downloadLimit: PropTypes.number.isRequired,
         onRecommendAction: PropTypes.func
-    }
-
-    state = { open: false }
-    handleShow = () => this.setState({ open: true })
-    handleCancel = () => this.setState({ open: false })
-    onConfirm = () => {
-        const { onRecommendAction } = this.props;
-        this.setState({ open: false });
-        onRecommendAction('data','unload');
     }
 
     /**
@@ -59,63 +50,69 @@ class SpreadsheetDropDown extends React.Component {
     }
     /**
      * Open a new window with the dataset URL to download the data in CSV
-     * format if row count less than preset value. If not, recommend the UNLOAD DATASET cell
+     * format if row count less than the allowed value. If not, recommend the UNLOAD DATASET cell
      */
     handleDownload = () => {
-        const { dataset, downloadLimit, onRecommendAction } = this.props;
+        const { dataset, downloadLimit } = this.props;
         if (dataset.rowCount <= downloadLimit){
             const downloadUrl = dataset.links.get(HATEOAS_DATASET_DOWNLOAD)
             window.open(downloadUrl);
-        }else {
-            // this.handleShow()
-            onRecommendAction('data','unload');
         }
     };
+    /**
+     * Handles the edit spreadsheet selection
+     */
     handleEditSpreadsheet = () => {
-        const { dataset, onEditSpreadsheet, moduleId } = this.props
+        const { dataset, onEditSpreadsheet, moduleId } = this.props;
         onEditSpreadsheet(dataset, moduleId)
     }
     render() {
-        const {downloadLimit} = this.props
-        const unloadDatasetModal =
-            <Confirm
-                content={'The dataset exceeds the allowed limit of ' + downloadLimit + ' rows. It is recommended to export large datasets using the Unload Cell.'}
-                open={this.state.open}
-                cancelButton={'Cancel'}
-                confirmButton={'Unload Dataset'}
-                onCancel={this.handleCancel}
-                onConfirm={this.onConfirm}
-            />
-        return (
-            <React.Fragment>
-                { unloadDatasetModal }
-                <Dropdown icon='download' title='Download dataset'>
-                    <Dropdown.Menu>
-                        <Dropdown.Item
-                            key={'download'}
-                            icon='download'
-                            text='Download File'
-                            title='Download dataset as CSV file'
-                            onClick={this.handleDownload}
-                        />
-                        <Dropdown.Item
-                            key={'copy-link'}
-                            icon='linkify'
-                            text='Copy URL to Clipboard'
-                            title='Copy shareable dataset URL to clipboard'
-                            onClick={this.handleCopy}
-                        />
-                        <Dropdown.Item
-                            key={'edit'}
-                            icon='edit'
-                            text='Edit as Spreadsheet'
-                            title='Open spreadsheet view to edit the dataset'
-                            onClick={this.handleEditSpreadsheet}
-                        />
-                    </Dropdown.Menu>
-                </Dropdown>
-            </React.Fragment>
-        );
+        const { dataset, downloadLimit, onRecommendAction } = this.props;
+        let downloadDropdown = <Popup trigger={<Dropdown.Item
+            key={'download'}
+            icon='download'
+            text='Download File'
+            title='Download dataset as CSV file'
+            onClick={this.handleDownload}
+        />}
+                                      on='click'
+                                      disabled = {dataset.rowCount <= downloadLimit}
+                                      hoverable
+                                      basic>
+            <Grid centered>
+                <GridColumn textAlign='center'>
+                    <Header as='h4' icon textAlign='center'>
+                        <Icon name='times circle' />
+                    </Header>
+                    <p>
+                        {'The dataset exceeds the allowed limit of ' + downloadLimit + ' rows. It is recommended to export large datasets using the Unload Cell.'}
+                    </p>
+                    <Button color='blue' content='Unload' onClick={() => onRecommendAction('data','unload')} />
+                </GridColumn>
+            </Grid>
+        </Popup>;
+
+        return <React.Fragment>
+            <Dropdown icon='download' title='Download dataset'>
+                <Dropdown.Menu>
+                    {downloadDropdown}
+                    <Dropdown.Item
+                        key={'copy-link'}
+                        icon='linkify'
+                        text='Copy URL to Clipboard'
+                        title='Copy shareable dataset URL to clipboard'
+                        onClick={this.handleCopy}
+                    />
+                    <Dropdown.Item
+                        key={'edit'}
+                        icon='edit'
+                        text='Edit as Spreadsheet'
+                        title='Open spreadsheet view to edit the dataset'
+                        onClick={this.handleEditSpreadsheet}
+                    />
+                </Dropdown.Menu>
+            </Dropdown>
+        </React.Fragment>
     }
 }
 

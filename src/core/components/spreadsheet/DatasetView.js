@@ -46,7 +46,7 @@ class DatasetView extends React.Component {
         userSettings: PropTypes.object.isRequired,
         onEditSpreadsheet: PropTypes.func.isRequired,
         downloadLimit: PropTypes.number.isRequired,
-        onRecommendAction: PropTypes.func.isRequired
+        onRecommendAction: PropTypes.func
     }
     constructor(props) {
         super(props);
