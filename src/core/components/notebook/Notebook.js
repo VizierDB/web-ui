@@ -21,7 +21,7 @@ import { PropTypes } from 'prop-types';
 import { Icon } from 'semantic-ui-react';
 import { LargeMessageButton } from '../Button'
 import NotebookCell from './NotebookCell';
-import { INSERT_AFTER } from '../../resources/Notebook'
+import {INSERT_AFTER, INSERT_BEFORE} from '../../resources/Notebook'
 
 /**
  * List of cells in a read-only notebook.
@@ -55,11 +55,55 @@ class Notebook extends React.Component {
         const { notebook, onInsertCell } = this.props;
         // If the notebook is empty both parameters are null.
         if (notebook.isEmpty()) {
-            onInsertCell();
+            this.handleRecommendAction('data','load',null);
         } else {
             onInsertCell(notebook.lastCell().module, INSERT_AFTER);
         }
     }
+    /**
+     * Allow recommendations
+     */
+    handleRecommendAction = (packageId, commandId, cell) => {
+        const { apiEngine, userSettings, onInsertCell } = this.props;
+        try{
+            let packages = apiEngine.packages.toList();
+            for (let pckg of packages){
+                if(packageId === pckg.id){
+                    let cmd = pckg.toList();
+                    for (let command of cmd){
+                        if (commandId === command.id){
+                            command.suggest = true
+                        }
+                    }
+                }
+            }
+        } catch (err){
+            // recommendation system shouldn't break the workflow
+        }
+        if (cell === null){
+            onInsertCell()
+        }else{
+            if (userSettings.showNotebookReversed()) {
+                onInsertCell(cell, INSERT_BEFORE);
+            } else {
+                onInsertCell(cell, INSERT_AFTER);
+            }
+        }
+    }
+    /**
+     * Reset all recommendations
+     */
+    handleResetRecommendations = () => {
+        const { apiEngine } = this.props;
+        let packages = apiEngine.packages.toList();
+        for (let pckg of packages){
+            let cmd = pckg.toList();
+            for (let command of cmd){
+                command.suggest = false
+            }
+        }
+    }
+
     render() {
         const {
             activeNotebookCell,
@@ -138,7 +182,6 @@ class Notebook extends React.Component {
                     cellNumber={moduleCount}
                     datasets={datasets}
                     isActiveCell={cell.id === activeNotebookCell}
-                    isFirstCell={notebook.cells.length===1}
                     isNewNext={isNewNext}
                     isNewPrevious={isNewPrevious}
                     notebook={notebook}
@@ -158,6 +201,8 @@ class Notebook extends React.Component {
                     onSubmitCell={submitHandler}
                     userSettings={userSettings}
                     onEditSpreadsheet={onEditSpreadsheet}
+                    onRecommendAction={this.handleRecommendAction}
+                    onResetRecommendations={this.handleResetRecommendations}
                 />
             );
             if (!cell.isNewCell()) {
