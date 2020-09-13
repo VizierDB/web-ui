@@ -43,7 +43,7 @@ import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
 import { branchPageUrl, isNotEmptyString, notebookPageUrl,
     NotebookResource, spreadsheetPageUrl } from '../../util/App';
 import { HATEOAS_MODULE_APPEND, HATEOAS_MODULE_INSERT,
-    HATEOAS_MODULE_REPLACE, HATEOAS_PROJECT_FILE_UPLOAD, HATEOAS_DATASET_DOWNLOAD } from '../../util/HATEOAS';
+    HATEOAS_MODULE_REPLACE, HATEOAS_PROJECT_FILE_UPLOAD } from '../../util/HATEOAS';
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
 import '../../../css/Chart.css';
