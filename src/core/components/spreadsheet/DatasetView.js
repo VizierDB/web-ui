@@ -114,7 +114,7 @@ class DatasetView extends React.Component {
                     key={column.id}
                     column={column}
                     columnIndex={cidx}
-                    summaryPlot={this.state.typeView === 2 ? true : false}
+                    summaryPlot={this.state.typeView === 2}
                 />
             );
         }

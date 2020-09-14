@@ -74,6 +74,7 @@ export class DatasetHandle {
         this.offset = json.offset;
         this.links = new HATEOASReferences(json.links);
         this.moduleId = json.moduleId;
+        this.properties = json.properties;
         return this;
     }
     hasAnnotations(columnId, rowId) {
