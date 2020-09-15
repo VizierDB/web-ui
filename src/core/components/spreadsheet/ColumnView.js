@@ -52,7 +52,7 @@ class ColumnView extends React.Component {
     render() {
         const { dataset} = this.props;
 
-        const profiledData = (dataset.properties == null || dataset.properties === {}) ? profile (dataset) : dataset.properties;
+        const profiledData = (dataset.properties == null || Object.keys(dataset.properties).length === 0) ? profile(dataset) : dataset.properties;
         const columns = dataset.columns;
         // Grid header
         let header = [<RowIndexCell key={-1} value=' ' />];
