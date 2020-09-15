@@ -36,20 +36,20 @@ class SummaryPlotHeader extends React.Component {
     }
 
     render() {
-        const { dataset} = this.props;
-        const profiledData = profile (dataset);
+        const { dataset } = this.props;
+        const profiledData = (dataset.properties == null || Object.keys(dataset.properties).length === 0) ? profile (dataset) : dataset.properties;
         const columns = dataset.columns;
         // Grid header
         let header = [<RowIndexCell key={-1} value=' ' />];
         for (let cidx = 0; cidx < columns.length; cidx++) {
             const column = columns[cidx];
-            const dataPlot_ = profiledData != null 
-                              ? profiledData.find( item => {
-                                  return item.column.id === column.id;
-                              })
-                              :
-                              [{}];
-
+            let dataPlot_ = [{}];
+            for (let property of profiledData.columns){
+                if (property.column.id === column.id){
+                    dataPlot_= property;
+                    break;
+                }
+            }
             header.push(
                 <HeaderCell
                     key={column.id}
