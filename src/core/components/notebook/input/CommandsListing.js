@@ -32,7 +32,6 @@ class CommandsListing extends React.Component {
         onDismiss: PropTypes.func.isRequired,
         onPaste: PropTypes.func,
         onSelect: PropTypes.func.isRequired,
-        isFirstCell:PropTypes.bool
     }
     
     groupBy = (arr, property)  => {
@@ -45,7 +44,7 @@ class CommandsListing extends React.Component {
 
     	
     render() {
-        const { apiEngine, onDismiss, onPaste, onSelect, isFirstCell} = this.props;
+        const { apiEngine, onDismiss, onPaste, onSelect} = this.props;
         // Get a list of command types
         const gridColumns = [];
         // Get list of packages. The list is sorted by package name by default.
@@ -69,7 +68,7 @@ class CommandsListing extends React.Component {
 	            );
 	            for (let i = 0; i < commands.length; i++) {
 	                const cmd = commands[i];
-                    let item = isFirstCell && cmd.suggest ? <List.Item key={listItems.length} onClick={() => (onSelect(pckg.id, cmd.id))}>
+                    let item = cmd.suggest ? <List.Item key={listItems.length} onClick={() => (onSelect(pckg.id, cmd.id))}>
                         <List.Content>
                             <List.Header as='a' className='suggested-action' icon>
                                 <Header.Content>

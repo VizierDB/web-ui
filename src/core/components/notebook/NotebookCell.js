@@ -55,7 +55,6 @@ class NotebookCell extends React.Component {
         isNewNext: PropTypes.bool.isRequired,
         isNewPrevious: PropTypes.bool.isRequired,
         notebook: PropTypes.object.isRequired,
-        isFirstCell:PropTypes.bool,
         onAddFilteredCommand: PropTypes.func.isRequired,
         onCancelExec: PropTypes.func,
         onCheckStatus: PropTypes.func,
@@ -71,7 +70,9 @@ class NotebookCell extends React.Component {
         onSelect: PropTypes.func.isRequired,
         onSubmitCell: PropTypes.func,
         userSettings: PropTypes.object.isRequired,
-        onEditSpreadsheet: PropTypes.func.isRequired
+        onEditSpreadsheet: PropTypes.func.isRequired,
+        onRecommendAction: PropTypes.func.isRequired,
+        onResetRecommendations: PropTypes.func.isRequired
     }
     /**
      * Add the command that is associated with this notebook cell module
@@ -147,6 +148,13 @@ class NotebookCell extends React.Component {
             onSelect(cell);
         }
     }
+    /**
+     * Handle new cell recommendations
+     */
+    handleRecommendAction = (packageId, commandId) => {
+        const { cell, onRecommendAction } = this.props;
+        onRecommendAction(packageId, commandId, cell);
+    }
     render() {
         const {
             apiEngine,
@@ -165,7 +173,7 @@ class NotebookCell extends React.Component {
             onSubmitCell,
             userSettings,
             onEditSpreadsheet,
-            isFirstCell
+            onResetRecommendations
         } = this.props;
         // The main components of a notebook cell are the cell index, the cell
         // dropdown menu, the cell command text or input form and the cell
@@ -185,18 +193,18 @@ class NotebookCell extends React.Component {
             // know which (and how many) cells are still executing.
             const cmdSpec = cell.commandSpec;
             if ((!cell.isActive()) && (userSettings.isFiltered(cmdSpec))) {
-            	let errorcss = '';
-            	let errorIcon = null;
+                let errorcss = '';
+                let errorIcon = null;
                 if (cell.isErrorOrCanceled()) {
-                	errorcss = ' collapsed-error-cell';
-                	if (cell.isCanceled()) {
-                		errorIcon = (<Icon name='cancel' color='red' title='Canceled'/>);
+                    errorcss = ' collapsed-error-cell';
+                    if (cell.isCanceled()) {
+                        errorIcon = (<Icon name='cancel' color='red' title='Canceled'/>);
                     } else if (cell.isError()) {
-                    	errorIcon = (<Icon name='warning circle' color='red' title='Error' />);
+                        errorIcon = (<Icon name='warning circle' color='red' title='Error' />);
                     }
-                	
+
                 }
-            	if (!userSettings.hideFilteredCommands()) {
+                if (!userSettings.hideFilteredCommands()) {
                     return (
                         <div className={'horizontal-divider' + errorcss} >
                             { errorIcon }
@@ -249,6 +257,8 @@ class NotebookCell extends React.Component {
                     onSelectCell={this.handleSelectCell}
                     userSettings={userSettings}
                     onEditSpreadsheet={onEditSpreadsheet}
+                    onRecommendAction={this.handleRecommendAction}
+                    apiEngine={apiEngine}
                 />
             );
         }
@@ -258,12 +268,12 @@ class NotebookCell extends React.Component {
                 datasets={datasets}
                 cell={cell}
                 isActiveCell={(isActiveCell) && (!notebook.readOnly)}
-                isFirstCell={isFirstCell}
                 onClick={this.handleSelectCell}
                 onDismiss={onDismissCell}
                 onSelectCell={this.handleSelectCell}
                 onSubmit={onSubmitCell}
                 userSettings={userSettings}
+                onResetRecommendations={onResetRecommendations}
             />
         );
         // The CSS class depends on whether the cell is active or not and
@@ -280,16 +290,16 @@ class NotebookCell extends React.Component {
         }
         return (
             <table className={css + cssState}><tbody>
-                <tr>
-                    <td className={'cell-index' + cssState} onClick={this.handleSelectCell}>
-                        <p className={'cell-index' + cssState}>[{cellIndex}]</p>
-                        { cellMenu }
-                    </td>
-                    <td className={'cell-area' + cssState}>
-                        { commandText }
-                        { outputArea }
-                    </td>
-                </tr>
+            <tr>
+                <td className={'cell-index' + cssState} onClick={this.handleSelectCell}>
+                    <p className={'cell-index' + cssState}>[{cellIndex}]</p>
+                    { cellMenu }
+                </td>
+                <td className={'cell-area' + cssState}>
+                    { commandText }
+                    { outputArea }
+                </td>
+            </tr>
             </tbody></table>
         );
     }
