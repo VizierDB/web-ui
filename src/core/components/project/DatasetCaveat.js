@@ -40,7 +40,7 @@ class DatasetCaveat extends React.Component {
         const ackedErrors = [];
         for (let i = 0; i < annotations.items.length; i++) {
             const errs = annotations.items[i];
-            if(errs.value.confirmed){
+            if(errs.confirmed){
             	ackedErrors.push(
 	        		<DatasetReason
 	            		reason={errs}
