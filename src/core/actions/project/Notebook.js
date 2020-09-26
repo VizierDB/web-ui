@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { fetchAuthed, checkResponseJsonForReAuth, requestAuth, serviceError } from '../main/Service';
+import {fetchAuthed, checkResponseJsonForReAuth, requestAuth, serviceError, getAuthed} from '../main/Service';
 import { projectActionError, projectFetchError, requestProjectAction } from './Project';
 // import { AnnotationList } from '../../resources/Annotation';
 import { DatasetHandle } from '../../resources/Dataset';
@@ -544,7 +544,7 @@ export const updateNotebookCell = (notebook, url, action, data, modifiedCellId) 
  * uploadUrl: string
  *
  */
-export const updateNotebookCellWithUpload = (notebook, modifyUrl, data, notebookModifier, modifiedCellId, uploadUrl, fileArg) => (dispatch) => {
+export const updateNotebookCellWithUpload = (notebook, modifyUrl, data, notebookModifier, modifiedCellId, uploadUrl, fileArg, onProgressUpdate) => (dispatch) => {
     const { file } = fileArg.value;
     const uploadReqData = new FormData();
     uploadReqData.append('file', file);
@@ -552,9 +552,16 @@ export const updateNotebookCellWithUpload = (notebook, modifyUrl, data, notebook
         method: 'POST',
         body: uploadReqData
     }
-    return fetchAuthed(
+    let config = {
+        onUploadProgress: function(progressEvent) {
+            onProgressUpdate && onProgressUpdate(Math.round( (progressEvent.loaded * 100) / progressEvent.total));
+        }
+    };
+    // updated methodology to use axios post instead of the native fetch() method, to enable upload progress tracking
+    return getAuthed(
             uploadUrl,
-            req
+            req,
+            config
         )(dispatch)
         // Check the response. Assume that eveything is all right if status
         // code below 400
@@ -562,7 +569,7 @@ export const updateNotebookCellWithUpload = (notebook, modifyUrl, data, notebook
             if (response.status >= 200 && response.status < 400) {
                 // SUCCESS: Fetch updated file identifier and modify the
                 // request body to update the notebook.
-                checkResponseJsonForReAuth(response).then(json => {
+                checkResponseJsonForReAuth(response, false).then(json => {
                     console.log('FILE RESPONSE');
                     console.log(json);
                     fileArg.value.fileid = json.id;
@@ -578,7 +585,7 @@ export const updateNotebookCellWithUpload = (notebook, modifyUrl, data, notebook
                 // of an error that contains an error message. For some response
                 // codes, however, this is not true (e.g. 413).
                 // TODO: Catch the cases where there is no Json response
-                checkResponseJsonForReAuth(response).then(json => dispatch(
+                checkResponseJsonForReAuth(response, false).then(json => dispatch(
                     projectActionError('Error updating workflow', json.message))
                 )
             }

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import axios from 'axios'
 /**
  * Actions for retrieving the Vizier DB Web Service Descriptor. The service
  * descriptor contains the service name, the list of available workflow
@@ -102,7 +102,44 @@ export const authHeader = (dispatch) => {
     	return null;
     }
 }
+/***
+ * use axios get and post methods to resolve promises. This fetcher gives us access to more data fetching features
+ * e.g. monitoring onUploadProgress, onDownloadProgress
+ */
+export const getAuthed = (url, fetchProps, config) => (dispatch) => {
+	if(window.env.API_BASIC_AUTH){
+		const authHead = authHeader(dispatch);
+		if(authHead){
+			let newFetchProps = fetchProps;
+			if(fetchProps && fetchProps.headers){
+				Object.assign(newFetchProps.headers, authHead);
+			}
+			else if(fetchProps){
+				newFetchProps.headers = authHead;
+			}
+			else {
+				newFetchProps = {
+					method : 'GET',
+					headers: authHead
+				};
+			}
+			config = {
+				...config,
+				headers: newFetchProps.headers
+			};
+			let propData = newFetchProps.body ? newFetchProps.body : null;
+			return newFetchProps.method ==='POST' ? axios.post(url, propData, config) : axios.get(url, config)
+		}
+		else return new Promise(function(resolve, reject){
+			reject({message:"No saved credentials.  Please enter credentials."})
+		})
+	}
+	else {
+		const promise = fetchProps.method ==='POST' ? axios.post(url, fetchProps.body, config) : axios.get(url, config)
+		return promise.then( (response) => (response))
+	}
 
+}
 /**
  * try to get the auth data saved in local storage.
  */
@@ -141,32 +178,35 @@ export const fetchAuthed = (url, fetchProps) => (dispatch) => {
  * we can generalize it more in the future.  
  *
  */
-export const checkResponseJsonForReAuth = (response) => {
-	return response.text().then(text => {
-		try {
-			const jsonObj = JSON.parse(text)
-			return Promise.resolve(jsonObj)
-		} catch(err) {
-			if(text && text.startsWith("<!DOCTYPE html>") && text.includes("SAMLRequest")){
-				const r = window.confirm("Your session has timed out.  Do you want to renew your session?");
-				if (r === true) {
-					//window.location.reload(false); 
-					//stored from serviceApi.properties.profile
-					const profile = JSON.parse(localStorage.getItem('profile'));
-					let reauthClient = "default";
-					if (profile && profile.client) {
-						reauthClient = profile.client
+export const checkResponseJsonForReAuth = (response, isReadableStream) => {
+	if(isReadableStream!=null && !isReadableStream){
+		return Promise.resolve(response.data)
+	}else{
+		return response.text().then(text => {
+			try {
+				const jsonObj = JSON.parse(text)
+				return Promise.resolve(jsonObj)
+			} catch(err) {
+				if(text && text.startsWith("<!DOCTYPE html>") && text.includes("SAMLRequest")){
+					const r = window.confirm("Your session has timed out.  Do you want to renew your session?");
+					if (r === true) {
+						//window.location.reload(false);
+						//stored from serviceApi.properties.profile
+						const profile = JSON.parse(localStorage.getItem('profile'));
+						let reauthClient = "default";
+						if (profile && profile.client) {
+							reauthClient = profile.client
+						}
+						window.open(process.env.PUBLIC_URL + "/reauth?client=" + reauthClient);
+					} else {
+						return Promise.resolve(JSON.parse("{}"))
 					}
-					window.open(process.env.PUBLIC_URL + "/reauth?client=" + reauthClient);
 				} else {
 					return Promise.resolve(JSON.parse("{}"))
 				}
-		    }
-			else {
-				return Promise.resolve(JSON.parse("{}"))
 			}
-	    }
-	});
+		});
+	}
 }
 
 /**

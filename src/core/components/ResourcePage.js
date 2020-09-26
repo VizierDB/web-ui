@@ -202,10 +202,10 @@ class ResourcePage extends Component {
             />;
         }
         // Show a modal with a loader that overlays the full screen if
-        // the page content is currently being fetched.
+        // the page content is currently being fetched: open={isActive}
         let pageContent = (
             <div>
-                <Modal dimmer={true} open={isActive}>
+                <Modal dimmer={true} open={false}>
                     <Loader size='large' active={true}>Update in progress ...</Loader>
                 </Modal>
                 { optionalError }

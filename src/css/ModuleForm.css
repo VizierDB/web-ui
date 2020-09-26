@@ -63,6 +63,11 @@ div.dropzone {
 .file-name-input {
     width: 100%;
 }
+.p-dropzone{
+    padding: 10px;
+    text-align: center;
+    padding-top: 40%;
+}
 
 p.upload-info {
     color: #1e22aa;

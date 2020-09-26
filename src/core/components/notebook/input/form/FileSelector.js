@@ -109,7 +109,7 @@ class FileSelector extends React.Component {
                     <div className='dropzone-container'>
                         <div className='dropzone'>
                             <Dropzone onDrop={this.handleFileDrop} multiple={false}>
-                                <p>Drop file here or click to select file to upload.</p>
+                                <p className='p-dropzone'>Drop file here or click to select file to upload.</p>
                             </Dropzone>
                         </div>
                     </div>

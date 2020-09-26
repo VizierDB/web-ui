@@ -393,6 +393,7 @@ class CellOutputArea extends React.Component {
             cell,
             onCancelExec,
             onCheckStatus,
+            isActive
         } = this.props;
         const { output } = cell;
         // The output content depends on the status of the cell. For running and
@@ -433,7 +434,7 @@ class CellOutputArea extends React.Component {
                     { cancelButton }
                 </div>
             );
-        } else if (cell.isPending()) {
+        } else if (cell.isPending() || isActive) {
             return (
                 <div>
                     <div className='module-timings'>
