@@ -265,7 +265,7 @@ class Spreadsheet extends React.Component {
         if (columnIndex !== -1) {
             const { dataset } = this.props;
             if (rowIndex !== -1) {
-                value = dataset.rowAtIndex(rowIndex).values[columnIndex];
+                value = dataset.rowAtIndex(Math.abs(dataset.offset-rowIndex)).values[columnIndex];
             } else {
                 value = dataset.columns[columnIndex].name;
             }
