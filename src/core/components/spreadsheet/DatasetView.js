@@ -170,7 +170,7 @@ class DatasetView extends React.Component {
             <SpreadsheetScrollbar
                 dataset={dataset}
                 onNavigate={onNavigate}
-                userSettings={userSettings}
+                cellLimit={userSettings.cellRowLimit()}
             />
         </div>
         :

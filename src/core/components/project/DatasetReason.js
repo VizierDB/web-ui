@@ -71,15 +71,15 @@ class DatasetReason extends React.Component {
      */
     render() {
     	const { reason, onRepairError } = this.props;
-        const { id, key, value } = reason;
+        const { key, family, message, confirmed } = reason;
         const { expanded } = this.state;
         const reasonElements = [];//this.buildReasonElement('reason',value);
-        reasonElements.unshift(<div className='dataset-reason-element'><td className='dataset-reason-key'><h4>id: </h4></td><td>{id}</td></div>)
+        reasonElements.unshift(<div className='dataset-reason-element'><td className='dataset-reason-key'><h4>family: </h4></td><td>{family}</td></div>)
         reasonElements.unshift(<div className='dataset-reason-element'><td className='dataset-reason-key'><h4>key: </h4></td><td>{key}</td></div>)
 
         let tableContent = null
 
-        if(expanded){
+        /*if(expanded){
         	tableContent = (<div>
         						<table>{reasonElements}</table>
         						<DatasetRepair
@@ -87,14 +87,14 @@ class DatasetReason extends React.Component {
 	        	                	onRepairError={onRepairError}
 	        	                />
         					</div> )
-        }
+        }*/
 
         let gotoErrorIcon = null
-        if(value.rowidarg !== -1 && value.args && Array.isArray(value.args) && value.args[value.rowidarg]){
+        if(key && Array.isArray(key) && key.length != 0 ){
         	gotoErrorIcon = (<Icon name='external alternate' size='small' />)
         }
         let errorIcon = (<Icon name='warning sign' size='large' color='yellow' />)
-        if(value.confirmed){
+        if(confirmed){
         	errorIcon = (<Icon name='check circle' size='large' color='green' />)
         }
 
@@ -104,7 +104,7 @@ class DatasetReason extends React.Component {
                 	<td className='dataset-reason-icon'>
                 		<div onClick={this.handleExpand}>{errorIcon}</div>
                 	</td>
-                	<td className='dataset-reason-english'><div onClick={this.handleExpand}>{value.message}</div></td>
+                	<td className='dataset-reason-english'><div onClick={this.handleExpand}>{message}</div></td>
                 	<td className='dataset-reason-goto'><div onClick={this.handleGotoError}>{gotoErrorIcon}</div></td>
                 </tr></table>
                 {tableContent}

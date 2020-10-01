@@ -68,24 +68,24 @@ class SpreadsheetScrollbar extends React.Component {
     static propTypes = {
         dataset: PropTypes.object.isRequired,
         onNavigate: PropTypes.func.isRequired,
-        userSettings: PropTypes.object.isRequired
+        cellLimit: PropTypes.number.isRequired
     }
     constructor(props) {
         super(props);
-        const { dataset, userSettings } = props;
+        const { dataset, cellLimit } = props;
         this.state = {
-            limit: userSettings.cellRowLimit(),
-            maxValue: Math.max(0, dataset.rowCount - userSettings.cellRowLimit())
+            limit: cellLimit,
+            maxValue: Math.max(0, dataset.rowCount - cellLimit)
         }
     }
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const { dataset, userSettings } = this.props;
+        const { dataset, cellLimit } = this.props;
         const { limit, maxValue } = this.state;
-        const m = Math.max(0, dataset.rowCount - userSettings.cellRowLimit());
-        if ((limit !== userSettings.cellRowLimit()) || (maxValue !== m)) {
+        const m = Math.max(0, dataset.rowCount - cellLimit);
+        if ((limit !== cellLimit || (maxValue !== m))){
             this.setState({
-                limit: userSettings.cellRowLimit(),
-                maxValue: Math.max(0, dataset.rowCount - userSettings.cellRowLimit())
+                limit: cellLimit,
+                maxValue: Math.max(0, dataset.rowCount - cellLimit)
             })
         }
     }

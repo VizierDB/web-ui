@@ -118,7 +118,7 @@ class DatasetCaveatsPage extends Component {
      */
     loadDatasetToError = (dataset) => (reason) => {
     	const { dispatch, serviceApi } = this.props;
-    	const fetch_url = serviceApi.serviceUrl + '/datasets/' + dataset.id + '?rowid='+reason.args[reason.rowidarg]
+    	const fetch_url = serviceApi.serviceUrl + '/datasets/' + dataset.id + '?rowid='+reason.key[0]
         dispatch(showSpreadsheet(dataset, fetch_url));
     }
     /**

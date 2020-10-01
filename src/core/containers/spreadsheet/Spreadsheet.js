@@ -20,7 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom'
-import { Dimmer, Icon, Loader } from 'semantic-ui-react';
+import { Dimmer, Icon, Loader, Dropdown, Menu} from 'semantic-ui-react';
 import { insertNotebookCell, updateNotebookCellWithUpload } from '../../actions/project/Notebook';
 import {
     clearAnnotations, deleteAnnotations, fetchAnnotations, showSpreadsheet,
@@ -55,7 +55,7 @@ class Spreadsheet extends React.Component {
         project: PropTypes.object.isRequired,
         serviceApi: PropTypes.object.isRequired,
         notebook: PropTypes.object.isRequired,
-        userSettings: PropTypes.object.isRequired
+        serviceProperties: PropTypes.object.isRequired
     }
     constructor(props) {
         super(props);
@@ -72,9 +72,28 @@ class Spreadsheet extends React.Component {
             updatedCellValue: null,
             updatingColumnId: -1,
             updatingRowId: -1,
-            updatingValue: null
+            updatingValue: null,
+            cellLimit:25,
+            activeDataset:null
         }
     }
+    static getDerivedStateFromProps(props, state){
+        let newState = {};
+        if (props.dataset.name !== state.activeDataset){
+            newState = {
+                cellLimit: 25,
+                activeDataset: props.dataset.name
+            }
+        }
+        if(state.cellLimit > props.dataset.rowCount){
+            newState = {
+                ...newState,
+                cellLimit: props.dataset.rowCount
+            }
+        }
+        return newState;
+    }
+
     componentWillReceiveProps(newProps) {
         // Clear the active cell if a different dataset is being shown
         let clearCell = false;
@@ -209,7 +228,7 @@ class Spreadsheet extends React.Component {
             }
         }
         // Update the active cell information
-        this.handleSelectCell(columns[colIdx].id, dataset.rowAtIndex(rowIdx).id, colIdx, rowIdx);
+        this.handleSelectCell(columns[colIdx].id, dataset.rowAtIndex(Math.abs(dataset.offset-rowIdx)).id, colIdx, rowIdx);
     }
     /**
      * Move the active header cell. Only supports moving left or right.
@@ -265,7 +284,7 @@ class Spreadsheet extends React.Component {
         if (columnIndex !== -1) {
             const { dataset } = this.props;
             if (rowIndex !== -1) {
-                value = dataset.rowAtIndex(rowIndex).values[columnIndex];
+                value = dataset.rowAtIndex(Math.abs(dataset.offset-rowIndex)).values[columnIndex];
             } else {
                 value = dataset.columns[columnIndex].name;
             }
@@ -338,6 +357,22 @@ class Spreadsheet extends React.Component {
         dispatch(fetchAnnotations(dataset, columnId, rowId));
     }
     /**
+     * handles dropdown menu requests
+     */
+    handleDisplayRows = (e, data) => {
+        const {dataset} = this.props;
+        const {cellLimit} = this.state;
+        if(data.value!==cellLimit){
+            if (data.value ==='all' && cellLimit !==dataset.rowCount){
+                this.setState({cellLimit:dataset.rowCount});
+                this.handleNavigate(dataset, 0, dataset.rowCount)
+            }else if(data.value !=='all'){
+                this.setState({cellLimit: data.value});
+                this.handleNavigate(dataset, dataset.offset, data.value);
+            }
+        }
+    };
+    /**
      * Render the spreadsheet as a Html table.
      */
     render() {
@@ -346,7 +381,7 @@ class Spreadsheet extends React.Component {
             dataset,
             isUpdating,
             notebook,
-            userSettings
+            serviceProperties
         } = this.props;
         const {
             activeColumnId,
@@ -493,6 +528,18 @@ class Spreadsheet extends React.Component {
                 </span>
             );
         }
+        let dropdownItems = [];
+        for(let v of [25, 50, 100, 150]){
+            if(v < dataset.rowCount){
+                dropdownItems.push(
+                    <Dropdown.Item text={`${v} rows`} value={v} onClick={this.handleDisplayRows}/>
+                )
+            }
+        }
+        dropdownItems.push(
+            <Dropdown.Item text={`All rows(${dataset.rowCount})`} label={dataset.rowCount>serviceProperties.maxDownloadRowLimit&&`row limit (${serviceProperties.maxDownloadRowLimit}) exceeded`}
+                           disabled={dataset.rowCount>serviceProperties.maxDownloadRowLimit} value="all" onClick={this.handleDisplayRows}/>
+        )
         return (
             <div className='spreadsheet-container'>
                 <h1 className='dataset-name'>
@@ -507,6 +554,13 @@ class Spreadsheet extends React.Component {
                         />
                     </span>
                     { notebookCellButton }
+                    <Menu compact style={{float:'right'}}>
+                        <Dropdown
+                            selection
+                            text={`Showing ${this.state.cellLimit} rows`}
+                            options={dropdownItems}
+                        />
+                    </Menu>
                 </h1>
                 <AnnotationObject
                     annotation={annotations}
@@ -525,9 +579,9 @@ class Spreadsheet extends React.Component {
 	                    </table>
 	                    </div>
 	                    <SpreadsheetScrollbar
+                            cellLimit={this.state.cellLimit}
 		                    dataset={dataset}
 		                    onNavigate={this.handleNavigate}
-	                    	userSettings={userSettings}
 		                />
 	                </div>
                 </Dimmer.Dimmable>
@@ -644,7 +698,7 @@ class Spreadsheet extends React.Component {
             }
         }
     }
-    
+
     submitUserAnnotation = (annotation, key, value) => {
         const { dispatch, dataset, notebook } = this.props;
         const { column, row } = annotation;
@@ -688,7 +742,7 @@ const mapStateToProps = state => {
         project: state.projectPage.project,
         serviceApi: state.serviceApi,
         notebook: state.notebookPage.notebook,
-        userSettings: state.app.userSettings
+        serviceProperties: state.serviceApi.properties
     }
 }
 

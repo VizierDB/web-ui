@@ -136,7 +136,7 @@ export const showDatasetCaveat = (dataset, url) => (dispatch) => {
                 return dispatch(receiveProjectResource(
                     new DatasetCaveatResource(
                         new DatasetHandle(dataset.id, dataset.name),
-                        new AnnotationList(json['annotations'])
+                        new AnnotationList(json)
                     )
                 ));
             },
