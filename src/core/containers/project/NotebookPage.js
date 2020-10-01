@@ -68,7 +68,7 @@ class NotebookPage extends Component {
         serviceApi: PropTypes.object,
         userSettings: PropTypes.object.isRequired,
         annotations: PropTypes.object
-    }
+    };
     /**
      * Fetch project information when page is loaded.
      */
@@ -297,7 +297,7 @@ class NotebookPage extends Component {
         const { branch, history, project } = this.props;
         history.push(notebookPageUrl(project.id, branch.id));
     }
-    handleSubmitCell = (cell, commandSpec, data) => {
+    handleSubmitCell = (cell, commandSpec, data, onUpdateProgress) => {
         const { dispatch, notebook, project } = this.props;
         // Create the request object containing the package and command
         // identifier together with the form data
@@ -343,7 +343,8 @@ class NotebookPage extends Component {
                     insertNotebookCell,
                     cell.id,
                     project.links.get(HATEOAS_PROJECT_FILE_UPLOAD),
-                    fileArg
+                    fileArg,
+                    onUpdateProgress
                 ));
             } else {
                 dispatch(insertNotebookCell(notebook, url, req, cell.id));
@@ -361,7 +362,8 @@ class NotebookPage extends Component {
                     replaceNotebookCell,
                     cell.id,
                     project.links.get(HATEOAS_PROJECT_FILE_UPLOAD),
-                    fileArg
+                    fileArg,
+                    onUpdateProgress
                 ));
             } else {
                 dispatch(replaceNotebookCell(notebook, url, req, cell.id));
@@ -494,6 +496,7 @@ class NotebookPage extends Component {
             	 pageContent = ( 
 	    			 <CellOutputArea
 		                cell={notebook.cells.find(ccell => ccell.id === cellOutput)}
+                        isActive={isActive}
                         datasets={notebook.datasets}
 		                onCancelExec={this.handleCancelWorkflowExec}
 		                onCheckStatus={this.handleCheckWorkflowStatus}

@@ -26,6 +26,7 @@ import { TextButton } from '../Button';
 import { INSERT_AFTER, INSERT_BEFORE } from '../../resources/Notebook';
 import '../../../css/App.css';
 import '../../../css/Notebook.css';
+import ProgressContext from  '../ProgressContext'
 
 
 /**
@@ -74,6 +75,14 @@ class NotebookCell extends React.Component {
         onRecommendAction: PropTypes.func.isRequired,
         onResetRecommendations: PropTypes.func.isRequired
     }
+    handleUpdateProgress = p => {
+        this.setState({moduleProgress: p})
+    };
+
+    state = {
+        moduleProgress: 0,
+        onUpdateProgress: this.onUpdateProgress
+    };
     /**
      * Add the command that is associated with this notebook cell module
      * to the list of hidden commands.
@@ -274,6 +283,7 @@ class NotebookCell extends React.Component {
                 onSubmit={onSubmitCell}
                 userSettings={userSettings}
                 onResetRecommendations={onResetRecommendations}
+                onUpdateProgress={this.handleUpdateProgress}
             />
         );
         // The CSS class depends on whether the cell is active or not and
@@ -289,18 +299,20 @@ class NotebookCell extends React.Component {
             cssState = ' pending-cell';
         }
         return (
-            <table className={css + cssState}><tbody>
-            <tr>
-                <td className={'cell-index' + cssState} onClick={this.handleSelectCell}>
-                    <p className={'cell-index' + cssState}>[{cellIndex}]</p>
-                    { cellMenu }
-                </td>
-                <td className={'cell-area' + cssState}>
-                    { commandText }
-                    { outputArea }
-                </td>
-            </tr>
-            </tbody></table>
+            <ProgressContext.Provider value={this.state}>
+                <table className={css + cssState}><tbody>
+                <tr>
+                    <td className={'cell-index' + cssState} onClick={this.handleSelectCell}>
+                        <p className={'cell-index' + cssState}>[{cellIndex}]</p>
+                        { cellMenu }
+                    </td>
+                    <td className={'cell-area' + cssState}>
+                        { commandText }
+                        { outputArea }
+                    </td>
+                </tr>
+                </tbody></table>
+            </ProgressContext.Provider>
         );
     }
 }

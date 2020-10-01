@@ -51,7 +51,8 @@ class CellCommandArea extends React.Component {
         onSelectCell: PropTypes.func.isRequired,
         onSubmit: PropTypes.func,
         userSettings: PropTypes.object.isRequired,
-        onResetRecommendations: PropTypes.func
+        onResetRecommendations: PropTypes.func,
+        onUpdateProgress: PropTypes.func
     }
     constructor(props) {
         super(props);
@@ -287,7 +288,7 @@ class CellCommandArea extends React.Component {
      * shown instead.
      */
     handleSubmitForm = () => {
-        const { cell, onSubmit, apiEngine } = this.props;
+        const { cell, onSubmit, apiEngine, onUpdateProgress } = this.props;
         // The onSubmit function may be none if submission is not permitted for
         // an active notebook. Show an alert for the user.
         if (onSubmit == null) {
@@ -305,7 +306,7 @@ class CellCommandArea extends React.Component {
             // Clear the error state and submit the cell, command specification
             // and form values to update the underlying workflow.
             this.setState({errors: null, hasErrors: false});
-            onSubmit(cell, selectedCommand, req.data);
+            onSubmit(cell, selectedCommand, req.data, onUpdateProgress);
         }
         this.setState({upstreamFormValues:false})
     }

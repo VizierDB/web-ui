@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "http://localhost:5000/vizier-db/api/v1/web-ui/",
   "dependencies": {
+    "axios": "^0.20.0",
     "codemirror": "^5.38.0",
     "config": "^1.28.1",
     "d3-color": "^1.0.3",

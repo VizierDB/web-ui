@@ -1,8 +1,10 @@
-import React, {useState, useEffect} from "react"
+import React, {useState, useEffect, useContext} from "react"
 import {Tab, Button, Label} from "semantic-ui-react";
 import ModuleFormControl from "./form/ModuleFormControl";
 import {DT_CODE, DT_FILE_ID} from "../../../resources/Engine";
 import PropTypes from 'prop-types';
+import ProgressContext from "../../ProgressContext";
+import Progress from "semantic-ui-react/dist/commonjs/modules/Progress";
 
 LoadDatasetForm.propTypes = {
     selectedCommand: PropTypes.object.isRequired,
@@ -90,11 +92,13 @@ export default function LoadDatasetForm(props) {
                     onChange={handleValueChange}
                 />}</Tab.Pane>}
     ];
-
-    return <Tab
+    const progress = useContext(ProgressContext);
+    return (progress.moduleProgress && 0 < progress.moduleProgress < 100 ? <Progress percent={progress.moduleProgress} autoSuccess indicating progress>
+        Uploading
+    </Progress>:<Tab
         activeIndex={activeIndexValue}
         onTabChange={(e, {activeIndex}) => setActiveIndex(activeIndex)}
-        panes={panes} />
+        panes={panes} />)
 }
 
 /**
