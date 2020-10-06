@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom'
 import { Dimmer, Icon, Loader, Dropdown, Menu} from 'semantic-ui-react';
-import { insertNotebookCell, updateNotebookCellWithUpload } from '../../actions/project/Notebook';
+import { insertNotebookCell, updateNotebookCellWithUpload, checkModuleStatus } from '../../actions/project/Notebook';
 import {
     clearAnnotations, deleteAnnotations, fetchAnnotations, showSpreadsheet,
     submitUpdate
@@ -42,6 +42,9 @@ import '../../../css/App.css';
 import '../../../css/Notebook.css';
 import '../../../css/Spreadsheet.css';
 import { HATEOAS_MODULE_APPEND } from '../../util/HATEOAS';
+import { Draggable } from 'react-drag-and-drop'
+import ColumnSelector from '../../components/notebook/input/form/ColumnSelector';
+import { ApiPolling } from '../../components/Api';
 
 /**
  * Component to display a dataset in spreadsheet format. Spreadsheets are
@@ -74,7 +77,9 @@ class Spreadsheet extends React.Component {
             updatingRowId: -1,
             updatingValue: null,
             cellLimit:25,
-            activeDataset:null
+            activeDataset:null,
+            modalResult: '',
+            notebookRunning: false
         }
     }
     static getDerivedStateFromProps(props, state){
@@ -173,7 +178,7 @@ class Spreadsheet extends React.Component {
     /**
      * Dismiss any open modals.
      */
-    dismissModal = () => (this.setState({modal: null, modalValue: null}))
+    dismissModal = () => (this.setState({modal: null, modalValue: null, modalResult:''}))
     /**
      * Keep track of the value of the active cell.
      */
@@ -317,8 +322,24 @@ class Spreadsheet extends React.Component {
         }
     }
     /**
-     * Handle a VizUAL action triggered by one of the context menues. The third
+     * Handle a VizUAL action triggered by one of the header or index cells.
      * argument (para) is optional (e.g., used to specify the sort order).
+     */
+    handleMoveAction = (cmdId, srcValue, targetValue) => {
+    	const { dataset } = this.props;
+    	if (cmdId === VIZUAL.MOVE_COLUMN) {
+            return this.submitVizualCommand(
+                moveColumn(dataset.name, srcValue, targetValue)
+            );
+        } else if (cmdId === VIZUAL.MOVE_ROW) {
+            return this.submitVizualCommand(
+                moveRow(dataset.name, srcValue, targetValue)
+            );
+        }
+    }
+   /**
+     * Handle a VizUAL action triggered by one of the context menues. The third
+     * 
      */
     handleVizualAction = (cmdId, identifier, para) => {
         const { dataset } = this.props;
@@ -381,7 +402,8 @@ class Spreadsheet extends React.Component {
             dataset,
             isUpdating,
             notebook,
-            serviceProperties
+            serviceProperties,
+            dispatch
         } = this.props;
         const {
             activeColumnId,
@@ -389,7 +411,9 @@ class Spreadsheet extends React.Component {
             showNotebookCell,
             updatingColumnId,
             updatingRowId,
-            updatingValue
+            updatingValue,
+            notebookRunning,
+            cellLimit
         } = this.state;
         const columns = dataset.columns;
         //
@@ -427,6 +451,7 @@ class Spreadsheet extends React.Component {
                     onMove={this.handleMoveHeader}
                     onUpdate={this.handleCellUpdate}
                 	isEditing={true}
+                    onMoveAction={this.handleMoveAction}
                 />
             );
         }
@@ -447,6 +472,7 @@ class Spreadsheet extends React.Component {
                     value={ridx + offset}
                     onAction={this.handleVizualAction}
                     onClick={this.clearActiveCell}
+                    onMoveAction={this.handleMoveAction}
                 />
             ];
             for (let cidx = 0; cidx < columns.length; cidx++) {
@@ -477,7 +503,13 @@ class Spreadsheet extends React.Component {
                     />
                 );
             }
-            rows.push(<tr key={row.id}>{cells}</tr>);
+            rows.push(<Draggable key={row.id} 
+                          wrapperComponent={<tr></tr>} 
+                          type="row-index-cell" 
+        			      data={row.id} 
+			              onDragStart={this.handleDragStart}  >
+				              {cells}
+				          </Draggable>);
         }
         let showAnnoHandler = null;
         if ((activeColumnId >= 0) && (activeRowId !== -1)) {
@@ -540,6 +572,28 @@ class Spreadsheet extends React.Component {
             <Dropdown.Item text={`All rows(${dataset.rowCount})`} label={dataset.rowCount>serviceProperties.maxDownloadRowLimit&&`row limit (${serviceProperties.maxDownloadRowLimit}) exceeded`}
                            disabled={dataset.rowCount>serviceProperties.maxDownloadRowLimit} value="all" onClick={this.handleDisplayRows}/>
         )
+        let apiPolling = null;
+        if(notebook.cells[notebook.cells.length - 1].isRunning()){
+        	apiPolling = <ApiPolling
+		            interval={1000}
+		            //onCancel={onCancelExec}
+		            onFetch={this.handleCheckStatus}
+		            resource={notebook.cells[notebook.cells.length - 1]}
+		            text={notebook.cells[notebook.cells.length - 1].isRunning() ? 'Running ...' : 'Pending ...'}
+		        />
+        }
+        else if(!notebook.cells[notebook.cells.length - 1].isRunning() && notebookRunning){
+        	apiPolling = <ApiPolling
+	            interval={1000}
+	            //onCancel={onCancelExec}
+	            onFetch={this.handleCheckStatus}
+	            resource={notebook.cells[notebook.cells.length - 1]}
+	            text={notebook.cells[notebook.cells.length - 1].isRunning() ? 'Running ...' : 'Pending ...'}
+	        />
+        	let newDataset = notebook.cells[notebook.cells.length - 1].module.datasets.find(ds => ds.name === dataset.name)
+        	let url = newDataset.links.getDatasetUrl(dataset.offset, cellLimit);
+            dispatch(showSpreadsheet(dataset, url));
+        }
         return (
             <div className='spreadsheet-container'>
                 <h1 className='dataset-name'>
@@ -586,9 +640,16 @@ class Spreadsheet extends React.Component {
 	                </div>
                 </Dimmer.Dimmable>
                 {this.showModal()}
+                {apiPolling}
             </div>
         );
     }
+    handleCheckStatus = () => {
+    	const { dispatch, notebook } = this.props;
+    	dispatch(checkModuleStatus(notebook, notebook.cells[notebook.cells.length - 1]));
+    	this.setState({notebookRunning: notebook.cells[notebook.cells.length - 1].isRunning()})
+    	
+    } 
     /**
      * Show the annotations modal for the current active cell.
      */
@@ -597,12 +658,20 @@ class Spreadsheet extends React.Component {
         const { activeColumnId, activeRowId } = this.state;
         dispatch(fetchAnnotations(dataset, activeColumnId, activeRowId));
     }
+    handleMoveColumnModalInputChange = (id, value) => {
+    	this.setState({modalResult: value});
+    }
+    handleMoveRowModalInputChange = (event, value) => {
+    	this.setState({modalResult: value.value});
+    }
     /**
      * Show modal if the internal state .modal value is set.
      */
     showModal = () => {
-        const { modal, modalValue } = this.state;
+        const { modal, modalValue, modalResult } = this.state;
         let content = null;
+        let inputComponent = null;
+        let value = '';
         if (modal != null) {
             let valueValidFunc = null;
             let modalTitle = null;
@@ -621,10 +690,30 @@ class Spreadsheet extends React.Component {
                         break;
                     }
                 }
+                value = modalResult;
+                inputComponent = <ColumnSelector
+	                id={dataset.id}
+	                isRequired={true}
+	                name={dataset.name}
+	                dataset={dataset}
+	                value={value}
+                    onChange={this.handleMoveColumnModalInputChange}
+	            />
                 valueValidFunc = isNonNegativeInt;
                 modalTitle = 'Move Column';
                 modalPrompt = 'Target position for column ' + column.name;
             } else if (modal === VIZUAL.MOVE_ROW) {
+            	const { dataset } = this.props;
+            	value = modalResult;
+                let options = [...Array(dataset.rowCount).keys()].map(x => { return { key: x, text: x, value: x } });
+            	inputComponent = <Dropdown
+	                value={value}
+	                selection
+	                fluid
+	                scrolling
+	                options={options}
+	                onChange={this.handleMoveRowModalInputChange}
+	            />
                 valueValidFunc = isNonNegativeInt;
                 modalTitle = 'Move Row';
                 modalPrompt = 'Target position for row ' + modalValue;
@@ -635,9 +724,10 @@ class Spreadsheet extends React.Component {
                     isValid={valueValidFunc}
                     title={modalTitle}
                     prompt={modalPrompt}
-                    value={''}
+                    value={value}
                     onCancel={this.dismissModal}
                     onSubmit={this.handleSubmitModal}
+                    inputComponent={inputComponent}
                 />
             );
         }

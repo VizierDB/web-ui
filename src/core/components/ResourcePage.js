@@ -172,7 +172,6 @@ class ResourcePage extends Component {
             branch,
             content,
             contentCss,
-            isActive,
             notebook,
             onCreateBranch,
             onDeleteBranch,
