@@ -18,7 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import DatasetRepair from './DatasetRepair';
+//import DatasetRepair from './DatasetRepair';
 import { Icon } from 'semantic-ui-react';
 import '../../../css/DatasetCaveat.css'
 
@@ -70,9 +70,9 @@ class DatasetReason extends React.Component {
      *
      */
     render() {
-    	const { reason, onRepairError } = this.props;
+    	const { reason/*, onRepairError*/ } = this.props;
         const { key, family, message, confirmed } = reason;
-        const { expanded } = this.state;
+        //const { expanded } = this.state;
         const reasonElements = [];//this.buildReasonElement('reason',value);
         reasonElements.unshift(<div className='dataset-reason-element'><td className='dataset-reason-key'><h4>family: </h4></td><td>{family}</td></div>)
         reasonElements.unshift(<div className='dataset-reason-element'><td className='dataset-reason-key'><h4>key: </h4></td><td>{key}</td></div>)
@@ -90,7 +90,7 @@ class DatasetReason extends React.Component {
         }*/
 
         let gotoErrorIcon = null
-        if(key && Array.isArray(key) && key.length != 0 ){
+        if(key && Array.isArray(key) && key.length !== 0 ){
         	gotoErrorIcon = (<Icon name='external alternate' size='small' />)
         }
         let errorIcon = (<Icon name='warning sign' size='large' color='yellow' />)

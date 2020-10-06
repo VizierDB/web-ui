@@ -20,7 +20,12 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import RowDropDown from '../menu/RowDropDown';
 import '../../../../css/Spreadsheet.css';
-
+import { Droppable } from 'react-drag-and-drop'
+import { Icon } from 'semantic-ui-react';
+import { MOVE } from '../../../util/App';
+import {
+    VIZUAL
+} from '../../../util/Vizual';
 
 /**
  * Left-hand column in the grid that contains the row index and context menu.
@@ -36,7 +41,19 @@ class RowIndexCell extends React.Component {
              PropTypes.number
          ]),
          onAction: PropTypes.func,
-         onClick: PropTypes.func
+         onClick: PropTypes.func,
+         onMoveAction: PropTypes.func
+    }
+    
+    handleMoveDropBefore = (dropData, dropTargetData) => {
+        const { onMoveAction } = this.props;
+        const dropTargetDataValue = dropTargetData.currentTarget.attributes.data.value;
+        onMoveAction(VIZUAL.MOVE_ROW,  parseInt(dropData['row-index-cell']),  parseInt(dropTargetDataValue));
+    }
+    handleMoveDropAfter = (dropData, dropTargetData) => {
+        const { onMoveAction } = this.props;
+        const dropTargetDataValue = dropTargetData.currentTarget.attributes.data.value;
+        onMoveAction(VIZUAL.MOVE_ROW,  parseInt(dropData['row-index-cell']),  parseInt(dropTargetDataValue));
     }
     /**
      * Render grod column as Html table header cell.
@@ -45,6 +62,11 @@ class RowIndexCell extends React.Component {
         const { disabled, rowIndex, rowId, value, onAction, onClick } = this.props;
         // Show a dropdown menu if onAction method is provided
         let dropdown = null;
+        let dropTargetType = 'none';
+        let dropTargetBefore = null;
+        let dropTargetAfter = null;
+        let dropData
+        
         if (onAction != null) {
             dropdown = (
                 <RowDropDown
@@ -56,10 +78,43 @@ class RowIndexCell extends React.Component {
                 />
             );
         }
+        if (rowIndex !== -1 ){
+        	dropTargetType = 'row-index-cell';
+        	dropTargetBefore = (
+        		<Droppable
+ 		            types={[dropTargetType]}
+        		    data={rowIndex}
+        		    onDrop={this.handleMoveDropBefore}>
+ 		            <div className="row-drop-before" ><Icon
+ 			            className='icon-button row-index-drop-target'
+ 			            title='<- Move Row Drop'
+ 			            name='bullseye'
+ 			        /></div>
+                 </Droppable>
+        	)
+        	dropTargetAfter = (
+        		<Droppable
+ 		            types={[dropTargetType]}
+        		    data={rowIndex}
+    		        onDrop={this.handleMoveDropAfter}>
+ 		            <div className="row-drop-after" ><Icon
+ 			            className='icon-button row-index-drop-target'
+ 			            title='Move Row Drop ->'
+ 			            name='bullseye'
+ 			        /></div>
+                 </Droppable>
+        	)
+        }
         return (
             <td className='grid-row-index' onClick={onClick}>
-                { value }
+              <div >
+                {dropTargetBefore}
+	            <div className="row-index-content" >
+		            { value }
+	            </div>
                 { dropdown }
+                {dropTargetAfter}
+              </div>
             </td>
         );
     }
