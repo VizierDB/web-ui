@@ -24,7 +24,7 @@ import { CONTENT_CHART, CONTENT_DATASET, CONTENT_ERROR } from '../resources/Outp
 
 let href = process.env.PUBLIC_URL;
 if (process.env.NODE_ENV === 'production') {
-    //href = href + '/vizier-db';
+    href = href + '/vizier-db';
 	if (href === '') {
 		href = '/'
 	}
