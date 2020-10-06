@@ -100,12 +100,12 @@ class HeaderCell extends React.Component {
     handleMoveDropBefore = (dropData, dropTargetData) => {
         const { onMoveAction } = this.props;
         const dropTargetDataValue = dropTargetData.currentTarget.attributes.data.value;
-        onMoveAction(VIZUAL.MOVE_COLUMN,  parseInt(dropData['header-cell']),  parseInt(dropTargetDataValue));
+        onMoveAction(VIZUAL.MOVE_COLUMN,  parseInt(dropData['header-cell'], 10),  parseInt(dropTargetDataValue, 10));
     }
     handleMoveDropAfter = (dropData, dropTargetData) => {
         const { onMoveAction } = this.props;
         const dropTargetDataValue = dropTargetData.currentTarget.attributes.data.value;
-        onMoveAction(VIZUAL.MOVE_COLUMN,  parseInt(dropData['header-cell']),  parseInt(dropTargetDataValue));
+        onMoveAction(VIZUAL.MOVE_COLUMN,  parseInt(dropData['header-cell'], 10),  parseInt(dropTargetDataValue, 10));
     }
     /**
      * Render grid column cell as Html table header cell.

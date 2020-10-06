@@ -48,12 +48,12 @@ class RowIndexCell extends React.Component {
     handleMoveDropBefore = (dropData, dropTargetData) => {
         const { onMoveAction } = this.props;
         const dropTargetDataValue = dropTargetData.currentTarget.attributes.data.value;
-        onMoveAction(VIZUAL.MOVE_ROW,  parseInt(dropData['row-index-cell']),  parseInt(dropTargetDataValue));
+        onMoveAction(VIZUAL.MOVE_ROW,  parseInt(dropData['row-index-cell'], 10),  parseInt(dropTargetDataValue, 10));
     }
     handleMoveDropAfter = (dropData, dropTargetData) => {
         const { onMoveAction } = this.props;
         const dropTargetDataValue = dropTargetData.currentTarget.attributes.data.value;
-        onMoveAction(VIZUAL.MOVE_ROW,  parseInt(dropData['row-index-cell']),  parseInt(dropTargetDataValue));
+        onMoveAction(VIZUAL.MOVE_ROW,  parseInt(dropData['row-index-cell'], 10),  parseInt(dropTargetDataValue, 10));
     }
     /**
      * Render grod column as Html table header cell.
@@ -65,7 +65,6 @@ class RowIndexCell extends React.Component {
         let dropTargetType = 'none';
         let dropTargetBefore = null;
         let dropTargetAfter = null;
-        let dropData
         
         if (onAction != null) {
             dropdown = (

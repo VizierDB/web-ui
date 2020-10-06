@@ -326,8 +326,7 @@ class Spreadsheet extends React.Component {
      * argument (para) is optional (e.g., used to specify the sort order).
      */
     handleMoveAction = (cmdId, srcValue, targetValue) => {
-    	const { dispatch, dataset } = this.props;
-    	const {cellLimit} = this.state;
+    	const { dataset } = this.props;
     	if (cmdId === VIZUAL.MOVE_COLUMN) {
             return this.submitVizualCommand(
                 moveColumn(dataset.name, srcValue, targetValue)
@@ -647,7 +646,6 @@ class Spreadsheet extends React.Component {
     }
     handleCheckStatus = () => {
     	const { dispatch, notebook } = this.props;
-    	const { notebookRunning } = this.state;
     	dispatch(checkModuleStatus(notebook, notebook.cells[notebook.cells.length - 1]));
     	this.setState({notebookRunning: notebook.cells[notebook.cells.length - 1].isRunning()})
     	
