@@ -18,7 +18,15 @@
 
 import { DatasetDescriptor } from './Dataset';
 import { HATEOASReferences } from '../util/HATEOAS';
-import {OutputChart, OutputHtml, OutputText, OutputMarkdown, OutputDataset, OutputMultiple} from './Outputs';
+import {
+    OutputChart,
+    OutputHtml,
+    OutputText,
+    OutputMarkdown,
+    OutputDataset,
+    OutputMultiple,
+    CONTENT_TEXT
+} from './Outputs';
 import { DatasetHandle } from './Dataset';
 import { utc2LocalTime } from '../util/Timestamp';
 
@@ -278,7 +286,7 @@ export class Notebook {
      * is received. Replaces the respective modules in notebook cells with
      * their updated counterparts. Returns a new notebook object.
      */
-    updateWorkflow(workflow, modifiedCellId) {
+    updateWorkflow(workflow, modifiedCellId, useDefaultOutputs=false) {
         // We iterate over the notebook cells and workflow modules until a
         // difference in the corresponding module ids is encoutered. At that
         // point we append the remaining workflow modules.
@@ -299,8 +307,9 @@ export class Notebook {
                 if (cell.id === module.id) {
                     // This is a cell that existed in the previous workflow. If
                     // the modified module identifier is given then we need to
-                    // set the cell output to its default value
-                    let outputResource = getModuleDefaultOutput(module);
+                    // set the cell output to its default value unless we want
+                    // to maintain the output states of the notebook cells
+                    let outputResource = outputSelector(cell, module, useDefaultOutputs)
                     modifiedCells.push(
                         new NotebookCell(
                             module.id,
@@ -420,6 +429,20 @@ class NotebookCell {
 // -----------------------------------------------------------------------------
 // Helper Methods
 // -----------------------------------------------------------------------------
+/**
+ * Selects the output between the module and cell. useDefaultOutputs =true uses module outputs.
+ * the choice between using cell and module outputs during re-rendering helps retain notebook state.
+ * the API returns an empty CONTEXT_TEXT (lines=[]) output when processing cells, hence these should
+ * be ignored and module output displayed at the end of the execution
+ */
+const outputSelector = (cell, module, useDefaultOutputs) => {
+    let outputResource = cell.output;
+    if(useDefaultOutputs || (cell.output.type===CONTENT_TEXT && (!cell.output.lines || cell.output.lines.length===0))){
+        outputResource = getModuleDefaultOutput(module);
+    }
+    return outputResource;
+}
+
 
 /**
  * Get the default output resource for a given module.

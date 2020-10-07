@@ -110,9 +110,9 @@ class NotebookCell extends React.Component {
      * Scroll to the given positions in the given dataset that is being
      * displayed in the output area of the cell.
      */
-    handleDatasetNavigate = (dataset, offset, limit) => {
+    handleDatasetNavigate = (dataset, offset, limit, profile=false) => {
         const { cell, onDatasetNavigate } = this.props;
-        onDatasetNavigate(cell.module, dataset, offset, limit);
+        onDatasetNavigate(cell.module, dataset, offset, limit, profile);
     }
     /**
      * Delete the associated cell from the notebook.

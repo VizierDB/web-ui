@@ -28,9 +28,11 @@ import ColumnView from './ColumnView';
 import '../../../css/App.css'
 import '../../../css/Notebook.css'
 import '../../../css/Spreadsheet.css'
-import { Button, Icon, Popup, Label } from 'semantic-ui-react'
-//import { each } from 'lodash';
-const SummaryPlotHeader = React.lazy(() => import('./SummaryPlotHeader')); // Lazy-loaded
+import 'toastr/build/toastr.min.css'
+
+import {Button, Icon, Popup, Label, Loader} from 'semantic-ui-react'
+import SummaryPlotHeader from "./SummaryPlotHeader";
+import toastr from 'toastr'
 
 /**
  * Display a dataset in spreadsheet format with minimal functionality for the
@@ -50,7 +52,22 @@ class DatasetView extends React.Component {
     }
     constructor(props) {
         super(props);
-        this.state = {column: -1, row: -1,  profiledData: null, typeView: 1};
+        this.state = {column: -1, row: -1,  typeView: 1};
+    }
+
+    componentDidMount() {
+        const {dataset} = this.props;
+        this.setState({
+            column: -1,
+            row:-1,
+            typeView: 1
+        })
+    }
+
+    static getDerivedStateFromProps = (props, state) => {
+        if(!props.dataset.isProfiled()){
+
+        }
     }
     /**
      * If the dataset changes we need to reset the active cell coordinates in
@@ -59,21 +76,19 @@ class DatasetView extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         // Only try to update the state if there currently are valid active
         // cell coordinates in the component state.
-        const { column, row } = this.state;
-        if ((column !== -1) && (row !== -1)) {
-            if (prevProps.dataset.id !== this.props.dataset.id) {
-                this.setState({column: -1, row: -1});
+        const { dataset } = this.props;
+        if (prevProps.dataset.id !== dataset.id) {
+            this.setState({column: -1, row: -1, typeView:1});
+        }else if (dataset.isProfiled() && !prevProps.dataset.isProfiled()){
+            toastr.options = {
+                positionClass : 'toast-top-full-width',
+                hideDuration: 300,
+                timeOut: 5000
             }
+            setTimeout(() => toastr.success(`Detailed and Column views are now available for the ${dataset.name} dataset.`), 300)
+        }else if(!dataset.isProfiled() && prevProps.dataset.isProfiled()){
+            this.setState({typeView:1})
         }
-        // TODO: Get a sample of the dataset. Currently, just the data that is showed in the table/spreadsheet
-        // is used to compute the plots.
-        // const asyncRequest = this.profile(this.props.dataset).then(
-        //     result => {
-        //       this.setState({profiledData: result});
-        //     }
-        //   ).catch(e => {
-        //     console.log('There has been a problem with your fetch operation: ' + e.message);
-        //   });
     }
     /**
      * Update the reference to the active cell in the component state.
@@ -85,9 +100,22 @@ class DatasetView extends React.Component {
      * Update the reference to the active cell in the component state.
      */
     updateTypeView = (value) => {
+        if(value!==1){
+            if(!this.props.dataset.isProfiled()){
+                this.handleRequestProfiler(true)
+            }
+        }
         this.setState({typeView: value});
+    };
+    /**
+     * request profiled properties from the server
+     */
+    handleRequestProfiler = (profile) => {
+        if(profile){
+            const {dataset, onNavigate, userSettings} = this.props;
+            onNavigate(dataset, dataset.offset, userSettings.cellRowLimit(), profile)
+        }
     }
-    
     render() {
         const { dataset, onFetchAnnotations, onNavigate, onSelectCell, userSettings, onEditSpreadsheet, moduleId, downloadLimit, onRecommendAction } = this.props;
         const activeCell = this.state;
@@ -157,12 +185,10 @@ class DatasetView extends React.Component {
                 <table className='spreadsheet'>
                 {
                     this.state.typeView === 1
-                    ?
-                    <thead>{header}</thead>
-                    :
-                    <Suspense fallback={<thead>{header}</thead>}>
+                        ?
+                        <thead>{header}</thead>
+                        :
                         <SummaryPlotHeader dataset={dataset}/>
-                    </Suspense>
                 }
                 <tbody>{rows}</tbody>
                 </table>
@@ -173,8 +199,7 @@ class DatasetView extends React.Component {
                 cellLimit={userSettings.cellRowLimit()}
             />
         </div>
-        :
-        <ColumnView dataset={dataset}/>;
+        : dataset.isProfiled() ? <ColumnView dataset={dataset}/> : <Loader active inline='centered'  content='Loading'  />
         return (
             <div>
                 { contentHeader }

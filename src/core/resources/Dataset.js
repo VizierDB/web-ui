@@ -51,7 +51,7 @@ export class DatasetDescriptor {
  * optional.
  */
 export class DatasetHandle {
-    constructor(id, name, columns, rows, rowCount, offset, links) {
+    constructor(id, name, columns, rows, rowCount, offset, links, moduleId=null, properties=null) {
         this.id = id;
         this.name = name;
         this.columns = columns;
@@ -59,6 +59,8 @@ export class DatasetHandle {
         this.rowCount = rowCount;
         this.offset = offset;
         this.links = links;
+        this.moduleId = moduleId;
+        this.properties = properties;
     }
     /**
      * Initialize the dataset handle from a Json object returned by the Web API.
@@ -115,7 +117,9 @@ export class DatasetHandle {
                 }
             }
         }
-        const {id, name, columns, rows, offset, links } = this;
-        return new DatasetHandle(id, name, columns, rows, offset, links, annotations);
+        const {id, name, columns, rows, offset, links, moduleId, properties } = this;
+        return new DatasetHandle(id, name, columns, rows, offset, links, annotations, moduleId, properties);
     }
+
+    isProfiled = () => this.properties != null && Object.keys(this.properties).length > 0 && this.properties.is_profiled != null
 }
