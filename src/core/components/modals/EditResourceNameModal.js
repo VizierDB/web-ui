@@ -18,7 +18,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types'
-import { Button, Input, Modal } from 'semantic-ui-react'
+import { Button, Modal } from 'semantic-ui-react'
+import { TextInput } from '../notebook/input/form/TextInput'
 import '../../../css/ResourceListing.css'
 
 /**
@@ -108,16 +109,18 @@ class EditResourceNameModal extends React.Component {
         if (isValid != null) {
             validName = isValid(value);
         }
-        let Tag = 'Input'
-        let inputProps = Object.assign({}, 
-        		<Input
-        	        autoFocus
-                    className="resource-name-input"
-                    value={value}
-                    onChange={this.handleChange}
-                    onKeyDown={this.handleKeyDown}
-        	    />.props);
-        if (inputComponent) {
+        let Tag = 'TextInput'
+        let inputProps = {}
+        if(!inputComponent){
+        	let ic = <TextInput
+		        value={value}
+	            onChange={this.handleChange}
+	            onKeyDown={this.handleKeyDown}
+		    />
+        	Tag = ic.type;
+            inputProps = Object.assign(inputProps, ic.props);
+        }
+        else {
             Tag = inputComponent.type;
             inputProps = Object.assign(inputProps, inputComponent.props);
             delete this.props.inputComponent;
