@@ -22,7 +22,6 @@ import RowDropDown from '../menu/RowDropDown';
 import '../../../../css/Spreadsheet.css';
 import { Droppable } from 'react-drag-and-drop'
 import { Icon } from 'semantic-ui-react';
-import { MOVE } from '../../../util/App';
 import {
     VIZUAL
 } from '../../../util/Vizual';

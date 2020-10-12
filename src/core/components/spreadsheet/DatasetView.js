@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import React, { Suspense } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import GridCell from './grid/GridCell';
 import HeaderCell from './grid/HeaderCell';
@@ -56,7 +56,6 @@ class DatasetView extends React.Component {
     }
 
     componentDidMount() {
-        const {dataset} = this.props;
         this.setState({
             column: -1,
             row:-1,
