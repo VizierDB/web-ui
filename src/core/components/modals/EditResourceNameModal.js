@@ -18,7 +18,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types'
-import { Button, Input, Modal } from 'semantic-ui-react'
+import { Button, Modal } from 'semantic-ui-react'
+import { TextInput } from '../notebook/input/form/TextInput'
 import '../../../css/ResourceListing.css'
 
 /**
@@ -33,7 +34,8 @@ class EditResourceNameModal extends React.Component {
         onCancel: PropTypes.func.isRequired,
         onSubmit: PropTypes.func.isRequired,
         title: PropTypes.string.isRequired,
-        value: PropTypes.string
+        value: PropTypes.string,
+        inputComponent: PropTypes.object
     }
     /**
      * Keep the new resource name in the local state.
@@ -78,7 +80,10 @@ class EditResourceNameModal extends React.Component {
      */
     handleSubmit = (event) => {
         const { isValid, onSubmit } = this.props;
-        const { value } = this.state
+        let { value } = this.state
+        if(!value && this.props.value){
+        	value = this.props.value
+        }
         // Return without submit if invalid value is given.
         if (isValid != null) {
             if (!isValid(value)) {
@@ -91,9 +96,12 @@ class EditResourceNameModal extends React.Component {
      * Show simple modal with input text box.
      */
     render() {
-        const { isValid, prompt, open, title } = this.props;
-        const { value } = this.state;
+        const { isValid, prompt, open, title, inputComponent } = this.props;
+        let { value } = this.state;
         let message = null;
+        if(!value && this.props.value){
+        	value = this.props.value
+        }
         if (prompt != null) {
             message = (<p>{prompt}</p>);
         }
@@ -101,19 +109,29 @@ class EditResourceNameModal extends React.Component {
         if (isValid != null) {
             validName = isValid(value);
         }
+        let Tag = 'TextInput'
+        let inputProps = {}
+        if(!inputComponent){
+        	let ic = <TextInput
+		        value={value}
+	            onChange={this.handleChange}
+	            onKeyDown={this.handleKeyDown}
+		    />
+        	Tag = ic.type;
+            inputProps = Object.assign(inputProps, ic.props);
+        }
+        else {
+            Tag = inputComponent.type;
+            inputProps = Object.assign(inputProps, inputComponent.props);
+            delete this.props.inputComponent;
+        }
         return (
             <Modal open={open} size={'small'}>
                 <Modal.Header>{title}</Modal.Header>
                 <Modal.Content>
                     <div className="resource-name">
                         {message}
-                        <Input
-                            autoFocus
-                            className="resource-name-input"
-                            value={value}
-                            onChange={this.handleChange}
-                            onKeyDown={this.handleKeyDown}
-                        />
+                        <Tag {...inputProps} />
                     </div>
                 </Modal.Content>
                 <Modal.Actions>
@@ -131,5 +149,6 @@ class EditResourceNameModal extends React.Component {
         );
     }
 }
+
 
 export default EditResourceNameModal;

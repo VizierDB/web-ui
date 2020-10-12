@@ -25,6 +25,9 @@ import styled from 'styled-components';
 import { Loader, Label } from 'semantic-ui-react'
 import { Draggable, Droppable } from 'react-drag-and-drop'
 import { Icon } from 'semantic-ui-react';
+import {
+    VIZUAL
+} from '../../../util/Vizual';
 
 import {
     CartesianGrid,
@@ -57,7 +60,8 @@ class HeaderCell extends React.Component {
         onClick: PropTypes.func,
         onMove: PropTypes.func,
         onUpdate: PropTypes.func,
-        isEditing: PropTypes.bool
+        isEditing: PropTypes.bool,
+        onMoveAction: PropTypes.func
     }
     /**
      * Submit changes to the cell value if a onUpdate handler is given.
@@ -93,13 +97,15 @@ class HeaderCell extends React.Component {
             }
         }
     }
-    handleMoveDropBefore = (dropData) => {
-        const { onMove } = this.props;
-        onMove(MOVE.LEFT);
+    handleMoveDropBefore = (dropData, dropTargetData) => {
+        const { onMoveAction } = this.props;
+        const dropTargetDataValue = dropTargetData.currentTarget.attributes.data.value;
+        onMoveAction(VIZUAL.MOVE_COLUMN,  parseInt(dropData['header-cell'], 10),  parseInt(dropTargetDataValue, 10));
     }
-    handleMoveDropAfter = (dropData) => {
-        const { onMove } = this.props;
-        onMove(MOVE.RIGHT);
+    handleMoveDropAfter = (dropData, dropTargetData) => {
+        const { onMoveAction } = this.props;
+        const dropTargetDataValue = dropTargetData.currentTarget.attributes.data.value;
+        onMoveAction(VIZUAL.MOVE_COLUMN,  parseInt(dropData['header-cell'], 10),  parseInt(dropTargetDataValue, 10));
     }
     /**
      * Render grid column cell as Html table header cell.
@@ -163,7 +169,8 @@ class HeaderCell extends React.Component {
             	dropTargetBefore = (
             		<Droppable
      		            types={[dropTargetType]}
-     		            onDrop={this.handleMoveDropBefore}>
+            		    data={columnIndex}
+        		        onDrop={this.handleMoveDropBefore}>
      		            <div className="drop-before" ><Icon
      			            className='icon-button header-drop-target'
      			            title='<- Move Colum Drop'
@@ -174,8 +181,9 @@ class HeaderCell extends React.Component {
             	dropTargetAfter = (
             		<Droppable
      		            types={[dropTargetType]}
-     		            onDrop={this.handleMoveDropAfter}>
-     		            <div className="drop-after" ><Icon
+            		    data={columnIndex}
+ 		                onDrop={this.handleMoveDropAfter}>
+            		    <div className="drop-after" ><Icon
      			            className='icon-button header-drop-target'
      			            title='Move Column Drop ->'
      			            name='bullseye'
@@ -186,9 +194,7 @@ class HeaderCell extends React.Component {
             cellValue = (
             	<div >
             		
-            		<Draggable type="header-cell" data={columnIndex} >
-            	
-	                <span className='header-value'>
+            		<span className='header-value'>
 	                    {columnName}
 	                </span>
 	                <Label size='mini'>
@@ -234,20 +240,22 @@ class HeaderCell extends React.Component {
 	               
                 </div>
                 
-                </Draggable>
                 
 	            </div>
             );
         }
         return (
-            
-            <th className={cellCss} onClick={this.handleClick}>
-	            {dropTargetBefore}
-	            {dropTargetAfter}
-                {cellValue}
-                {dropdown}
-            </th>
-            
+    		<Draggable 
+    		    type="header-cell" 
+    			data={columnIndex} 
+    		    wrapperComponent={<th></th>} 
+            	className={cellCss} 
+    		    onClick={this.handleClick}>
+		            {dropTargetBefore}
+		            {dropTargetAfter}
+	                {cellValue}
+	                {dropdown}
+            </Draggable>
         );
     }
 }

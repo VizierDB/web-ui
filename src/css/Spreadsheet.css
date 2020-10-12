@@ -45,8 +45,12 @@ table.spreadsheet {
 
 td.grid-row-index {
     background: #dedede;
-    border: 2px solid transparent;
-    padding-right: 5px;
+    /*border: 2px solid transparent; */
+    padding-top: 0px;
+    padding-bottom: 0px;
+    /* margin-top: 0px; */
+    /* margin-bottom: 0px; */
+    padding-right: 8px;
     text-align: right;
     width: 50px;
     white-space: nowrap;
@@ -110,7 +114,23 @@ div.drop-after {
 	float: right;
 }
 
+div.row-drop-before {
+	height:4px;
+}
+
+div.row-drop-after {
+	height: 4px;
+}
+
+div.row-index-content {
+	display:inline-block;
+}
+
 .header-drop-target {
+	opacity: 0.0 !important;
+}
+
+.row-index-drop-target {
 	opacity: 0.0 !important;
 }
 
