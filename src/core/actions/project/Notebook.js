@@ -269,7 +269,57 @@ const setActiveDatasetCell = (notebook, module, cell) => (dispatch) => {
     const nb = notebook.setActiveDatasetCell(module.id, cell);
     return dispatch(updateNotebook(nb));
 }
-
+/**
+ * Request properties for the specified datatset from the API and recreate the notebook.
+ * unstable because it tries to recreate the notebook from the workflow which may or may not get the properties for
+ * previously requested data cells depending on if the API updated default module outputs when that request is made.
+ */
+export const unstable_updateCellDatasetProperties = (notebook, module, dataset, offset, limit, profile) => (dispatch) => {
+    let url = dataset.links.getDatasetUrl(offset, limit, profile);
+    return fetchAuthed(url)(dispatch).then(
+        response => getJson(response, 200),
+        error => dispatch(serviceError(error.message))
+    ).then(
+        json => {
+            if (json.properties !== dataset.properties) {
+                //refetch the latest workflow since notebook might have been modified since the request to initiate profiling was sent
+                return fetchAuthed(notebook.workflow.links.get(HATEOAS_BRANCH_HEAD))(dispatch).then(
+                    response => getJson(response, 200),
+                    error => dispatch(serviceError(error.message))
+                ).then(
+                    wfJson => (dispatch(updateNotebookFromProperties(notebook, wfJson, module.id, new OutputDataset(new DatasetHandle(json.id, dataset.name, dataset.activeCell).fromJson(json))))),
+                    error => dispatch(workflowFetchError(error.message))
+                )
+            }
+        },
+        error => dispatch(setNotebookCellError(notebook, module, 'module status', error.message))
+    )
+}
+/**
+ * Request dataset properties from the API and updates the latest notebook
+ */
+export const updateCellDatasetProperties = (getLatestNotebook, module, dataset, offset, limit, profile) => (dispatch) => {
+    // Use dataset self reference to create fect URL
+    let url = dataset.links.getDatasetUrl(offset, limit, profile);
+    return dispatch(
+        fetchResource(
+            url,
+            (json) => (updateNotebook(
+                getLatestNotebook().replaceOutput(
+                    module.id,
+                    new OutputDataset(
+                        new DatasetHandle(
+                            json.id,
+                            dataset.name,
+                            dataset.activeCell
+                        ).fromJson(json)
+                    )))),
+            (message) => (
+                setNotebookCellError(getLatestNotebook(), module, 'dataset ' + dataset.name, message)
+            )
+        )
+    )
+}
 
 // -----------------------------------------------------------------------------
 // Show notebook cell output
@@ -619,6 +669,18 @@ export const updateNotebook = (notebook, json, modifiedCellId) => {
     }
     return {
         type: UPDATE_NOTEBOOK,
-        notebook
+        notebook: notebook
     }
 };
+/***
+ * Create a new notebook from the latest workflow and new dataset handle with properties
+ */
+export const updateNotebookFromProperties = (notebook, wfJson, modifiedCellId, outputDataset)=> {
+    const wf = new WorkflowHandle(notebook.workflow.engine).fromJson(wfJson);
+    return {
+        type: UPDATE_NOTEBOOK,
+        notebook: notebook
+            .updateWorkflow(wf, modifiedCellId)
+            .replaceOutput(modifiedCellId, outputDataset)
+    }
+}

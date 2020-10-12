@@ -25,7 +25,7 @@ import { createBranch, deleteBranch } from '../../actions/project/Branch';
 import { cancelWorkflowExecution, checkModuleStatus, createtNotebookCell,
     deleteNotebookCell, dismissCellChanges, fetchWorkflow,
     hideCellOutput, insertNotebookCell, replaceNotebookCell, showCellChart,
-    selectNotebookCell, showCellDataset, showCellStdout,
+    selectNotebookCell, showCellDataset, showCellStdout, updateCellDatasetProperties,
     showCellTimestamps, updateNotebookCellWithUpload, isCellOutputRequest } from '../../actions/project/Notebook';
 import { showModuleSpreadsheet, fetchAnnotations, clearAnnotations } from '../../actions/project/Spreadsheet';
 import { fetchProject, setBranch } from '../../actions/project/Project';
@@ -206,11 +206,15 @@ class NotebookPage extends Component {
     }
     /**
      * Scroll to the given positions in the given dataset that is being
-     * displayed in the output area of the cell.
+     * displayed in the output area of the cell or navigate to the profiled views
      */
-    handleDatasetNavigate = (module, dataset, offset, limit) => {
+    handleDatasetNavigate = (module, dataset, offset, limit, profile) => {
         const { dispatch, notebook } = this.props;
-        dispatch(showCellDataset(notebook, module, dataset, offset, limit));
+        if(!profile){
+            dispatch(showCellDataset(notebook, module, dataset, offset, limit));
+        }else{
+            dispatch(updateCellDatasetProperties(()=>(this.props.notebook), module, dataset, offset, limit, profile));
+        }
     }
     /**
      * Handle dismissal of all changes that were made to a notebook cell.

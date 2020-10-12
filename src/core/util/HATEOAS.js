@@ -99,9 +99,12 @@ export class HATEOASReferences {
      * Get the dataset fetch URL for a given range of rows. This method
      * it is called on the set of URL's returned for a dataset descriptor
      */
-    getDatasetUrl(offset, limit) {
+    getDatasetUrl(offset, limit, profile=false) {
         let url = this.get(HATEOAS_SELF);
         url += '?offset=' + offset + '&limit=' + limit;
+        if(profile){
+            url += '&profile=' + profile;
+        }
         return url;
     }
     /**
