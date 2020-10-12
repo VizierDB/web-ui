@@ -38,6 +38,7 @@ const DELETE_COLUMN = 'DELETE_COLUMN';
 const DELETE_DATASET = 'DELETE_DATASET';
 const DELETE_ROW = 'DELETE_ROW';
 const GET_DATASET = 'GET_DATASET';
+const GET_DATASET_FRAME = 'GET_DATASET_FRAME';
 const INSERT_COLUMN = 'INSERT_COLUMN';
 const INSERT_ROW = 'INSERT_ROW';
 const NEW_DATASET_OBJECT = 'NEW_DATASET_OBJECT';
@@ -47,6 +48,7 @@ const OUTPUT_CELL_VALUES = 'OUTPUT_CELL_VALUES';
 const OUTPUT_D3_PLOT = 'OUTPUT_D3_PLOT';
 const OUTPUT_BOKEH_PLOT = 'OUTPUT_BOKEH_PLOT';
 const OUTPUT_MAP = 'OUTPUT_MAP';
+const EXPORT_MODULE = 'EXPORT_MODULE';
 const RENAME_DATASET = 'RENAME_DATASET';
 const UPDATE_CELL_VALUE = 'UPDATE_CELL_VALUE';
 const UPDATE_ANNOTATION = 'UPDATE_ANNOTATION';
@@ -101,6 +103,9 @@ export class CodeSnippetsSelector extends React.Component {
         } else if (value === GET_DATASET) {
             lines.push('# Get object for dataset with given name.');
             lines.push('ds = vizierdb.get_dataset(\'unique-ds-name\')');
+        } else if (value === GET_DATASET_FRAME) {
+            lines.push('# Get read-only pandas dataframe object for dataset with given name.');
+            lines.push('df = vizierdb.get_dataset_frame(\'unique-ds-name\')');
         } else if (value === INSERT_COLUMN) {
             lines.push('# Create a new column with a given name. The column');
             lines.push('# position is optional.');
@@ -163,6 +168,15 @@ export class CodeSnippetsSelector extends React.Component {
             lines.push('  lon_col = \'LONGITUDE-COLUMN-NAME\',')
             lines.push('  label_col = \'LABEL-COLUMN-NAME\' # Optional')
             lines.push(')')
+        } else if (value === EXPORT_MODULE) {
+            lines.push('# Export a variable, a function or a class for use in subsequent cells')
+            lines.push('def add_numbers(number_1, number_2):')
+            lines.push('    print(\'adding \' + str(number_1) + \' + \' +str(number_2))')
+            lines.push('    return number_1 + number_2')
+            lines.push('vizierdb.export_module(')
+            lines.push('    add_numbers')
+            lines.push(')')
+            lines.push('#  Use it in a subsequent like normal: add_numbers(1,2)')
         } else if (value === RENAME_DATASET) {
             lines.push('# Rename given dataset to a new (unique) name.');
             lines.push('vizierdb.rename_dataset(\'unique-ds-name\', \'new-unique-ds-name\')');
@@ -199,6 +213,9 @@ export class CodeSnippetsSelector extends React.Component {
                                 <List.Item value={GET_DATASET} onClick={this.handleSelect}>
                                     <List.Content as='a'>Get Dataset</List.Content>
                                 </List.Item>
+                                <List.Item value={GET_DATASET_FRAME} onClick={this.handleSelect}>
+	                                <List.Content as='a'>Get Dataset Dataframe</List.Content>
+	                            </List.Item>
                                 <List.Item value={OUTPUT_COLUMN_NAMES} onClick={this.handleSelect}>
                                     <List.Content as='a'>Print Column Names</List.Content>
                                 </List.Item>
@@ -216,6 +233,9 @@ export class CodeSnippetsSelector extends React.Component {
                                 </List.Item>
                                 <List.Item value={OUTPUT_MAP} onClick={this.handleSelect}>
                                     <List.Content as='a'>Output Map</List.Content>
+                                </List.Item>
+                                <List.Item value={EXPORT_MODULE} onClick={this.handleSelect}>
+                                    <List.Content as='a'>Export Module</List.Content>
                                 </List.Item>
                             </List>
                         </Grid.Column>
