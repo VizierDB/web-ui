@@ -39,6 +39,8 @@ import '../../../../css/Notebook.css';
 import {TextButton} from "../../Button";
 import Divider from "semantic-ui-react/dist/commonjs/elements/Divider";
 import { isCellOutputRequest } from '../../../actions/project/Notebook';
+import 'toastr/build/toastr.min.css'
+import toastr from 'toastr'
 
 /**
  * Output area for notebook cells that have a workflow module associated with
@@ -167,11 +169,18 @@ class CellOutputArea extends React.Component {
         input.select();
         var result = document.execCommand('copy');
         document.body.removeChild(input);
+        toastr.options = {
+            positionClass : 'toast-top-full-width',
+            hideDuration: 300,
+            timeOut: 5000
+        }
         if(result){
     		console.log('copied embed code of output for cell ' +cell.id+' to clipboard')
+    		setTimeout(() => toastr.success(`Embed code copied!`), 300)
     	}
         else {
     	    console.log('error copying embed code of output for cell ' +cell.id+' to clipboard')
+    	    setTimeout(() => toastr.error(`Embed code copy failed!`), 300)
     	}
     };
     /**
@@ -186,11 +195,18 @@ class CellOutputArea extends React.Component {
         input.select();
         var result = document.execCommand('copy');
         document.body.removeChild(input);
+        toastr.options = {
+            positionClass : 'toast-top-full-width',
+            hideDuration: 300,
+            timeOut: 5000
+        }
         if(result){
     	    console.log('copied url of output for cell ' +cell.id+' to clipboard')
+    	    setTimeout(() => toastr.success(`Output URL copied!`), 300)
     	}
         else{
     		console.log('error copying url of output for cell ' +cell.id+' to clipboard')
+    		setTimeout(() => toastr.success(`Output URL copy failed!`), 300)
     	}
     };
     /**
