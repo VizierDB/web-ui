@@ -31,7 +31,7 @@ import '../../../css/Spreadsheet.css'
 import 'toastr/build/toastr.min.css'
 
 import {Button, Icon, Popup, Label, Loader} from 'semantic-ui-react'
-import SummaryPlotHeader from "./SummaryPlotHeader";
+import Headers from "./Headers";
 import toastr from 'toastr'
 
 /**
@@ -136,20 +136,6 @@ class DatasetView extends React.Component {
         );
 
         const columns = dataset.columns;
-        // Grid header
-        let header = [<RowIndexCell key={-1} rowIndex={-1} value={' '} />];
-        for (let cidx = 0; cidx < columns.length; cidx++) {
-            const column = columns[cidx];
-            header.push(
-                <HeaderCell
-                    key={column.id}
-                    column={column}
-                    columnIndex={cidx}
-                    summaryPlot={this.state.typeView === 2}
-                />
-            );
-        }
-        header = (<tr>{header}</tr>);
         // Grid rows
         const offset = dataset.offset;
         const rows = [];
@@ -183,11 +169,12 @@ class DatasetView extends React.Component {
             <div className='spreadsheet-table-container'>
                 <table className='spreadsheet'>
                 {
+                    // Grid header
                     this.state.typeView === 1
                         ?
-                        <thead>{header}</thead>
+                        <Headers dataset={dataset} isLoadingPlot={false} />
                         :
-                        <SummaryPlotHeader dataset={dataset}/>
+                        <Headers dataset={dataset} isLoadingPlot={true} />
                 }
                 <tbody>{rows}</tbody>
                 </table>
