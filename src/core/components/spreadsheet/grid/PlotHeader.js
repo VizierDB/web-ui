@@ -27,13 +27,12 @@ import VegaLiteBasedPlot from './VegaLiteBasedPlot';
  */
 class PlotHeader extends React.Component {
     render() {
-        const { column, columnIndex, profiledData, isLoadingPlot } = this.props;
+        const { column, profiledData, isLoadingPlot } = this.props;
         const profilerType = profiledData.is_profiled[0];
         if (profilerType === 'mimir'){
             return (
                 <D3BasedPlot
                     column={column}
-                    columnIndex={columnIndex}
                     profiledData={profiledData}
                     isLoadingPlot={isLoadingPlot}
                 />
@@ -41,10 +40,8 @@ class PlotHeader extends React.Component {
         }
         if (profilerType === 'datamart_profiler') {
             return (
-                // <div/>
                 <VegaLiteBasedPlot
                     column={column}
-                    columnIndex={columnIndex}
                     profiledData={profiledData}
                     isLoadingPlot={isLoadingPlot}
                 />

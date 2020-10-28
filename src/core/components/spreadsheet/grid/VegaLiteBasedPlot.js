@@ -48,7 +48,6 @@ function getEncoding(typePlot) {
           bin: { binned: true },
           field: 'bin_start',
           type: 'quantitative',
-          axis: null,
         },
         x2: {
           field: 'bin_end',
@@ -67,7 +66,6 @@ function getEncoding(typePlot) {
           field: 'date_start',
           type: 'temporal',
           utc: true,
-          axis: null,
         },
         x2: {
           field: 'date_end',
@@ -84,7 +82,6 @@ function getEncoding(typePlot) {
           title: null,
           field: 'bin',
           type: 'ordinal',
-          axis: null,
           sort: { order: 'descending', field: 'count' },
         },
         tooltip: { field: 'bin', type: 'ordinal' },
@@ -101,7 +98,6 @@ function getEncoding(typePlot) {
           field: 'count',
           type: 'quantitative',
           sort: { order: 'descending', field: 'count' },
-          axis: null,
         },
         tooltip: [
           { field: 'bin', type: 'ordinal' },
@@ -119,6 +115,16 @@ function getSpecification(typePlot) {
         width: '120',
         height: '120',
         data: { name: 'values' },
+        config: {
+            background: null,
+            axis: {
+                domainColor: 'darkslategray'
+              },
+            axisX: {
+                labels: false,
+                ticks: false
+              }
+          },
         description: 'A simple bar chart with embedded data.',
         encoding: getEncoding(typePlot),
         mark: 'bar',
@@ -127,60 +133,41 @@ function getSpecification(typePlot) {
 }
 
 class VegaLiteBasedPlot extends React.Component {
-    static propTypes = {
-        dataset: PropTypes.object.isRequired,
-    }
 
     render() {
         const { column, profiledData, isLoadingPlot } = this.props;
         // Grid header
         let dataPlot = undefined; // [{}];
+        let isTherePlotData = false;
         for (let property of profiledData.columns){
             if (property.name === column.name){
                 dataPlot= property.plot;
+                isTherePlotData = true;
                 break;
             }
         }
-        const spec = {
-            width: 400,
-            height: 200,
-            mark: 'bar',
-            encoding: {
-              x: { field: 'a', type: 'ordinal' },
-              y: { field: 'b', type: 'quantitative' },
-            },
-            data: { name: 'table' }, // note: vega-lite data attribute is a plain object instead of an array
-          }
+        const message = <p className="small text-muted"
+            style={{textAlign:"center", verticalAlign: "middle", display: "table-cell"}}>
+                Nothing to show.
+            </p>;
 
-          const barData = {
-            table: [
-              { a: 'A', b: 28 },
-              { a: 'B', b: 55 },
-              { a: 'C', b: 43 },
-              { a: 'D', b: 91 },
-              { a: 'E', b: 81 },
-              { a: 'F', b: 53 },
-              { a: 'G', b: 19 },
-              { a: 'H', b: 87 },
-              { a: 'I', b: 52 },
-            ],
-          }
         return (
             <div>
             {
                 dataPlot
                 ?
-                <VegaLite spec={spec} data={barData} />
-                // <VegaLite
-                //     spec={getSpecification(dataPlot.type)}
-                //     data={{ values: dataPlot.data }}
-                // />
+                <VegaLite
+                    spec={getSpecification(dataPlot.type)}
+                    data={{ values: dataPlot.data }}
+                />
                 :
-                isLoadingPlot
+                isLoadingPlot && !isTherePlotData
                 ?
                 <Loader active inline='centered'  content='Loading'  />
                 :
-                <p/>
+                <div style={{width:100, height:145, display: "table"}} >
+                {message}
+                </div>
             }
             </div>
         );

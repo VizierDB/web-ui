@@ -42,9 +42,6 @@ const Centered = styled.div`
  */
 
 class D3BasedPlot extends React.Component {
-    static propTypes = {
-        dataset: PropTypes.object.isRequired,
-    }
 
     render() {
         const { column, profiledData, isLoadingPlot } = this.props;

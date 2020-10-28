@@ -192,7 +192,6 @@ class HeaderCell extends React.Component {
                         this.props.dataset && this.props.dataset.isProfiled() &&
                         <PlotHeader
                             column={column}
-                            columnIndex={columnIndex}
                             profiledData={this.props.profiledData}
                             isLoadingPlot={this.props.isLoadingPlot}
                         />

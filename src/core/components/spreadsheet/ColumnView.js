@@ -23,20 +23,7 @@ import '../../../css/App.css'
 import '../../../css/Notebook.css'
 import '../../../css/Spreadsheet.css'
 import { Table} from 'react-bootstrap';
-
-import {
-    CartesianGrid,
-    Tooltip,
-    XAxis,
-    YAxis,
-    BarChart,
-    Bar,
-    Legend,
-} from 'recharts';
-import styled from 'styled-components';
-const Centered = styled.div`
-text-align: center;
-`;
+import PlotHeader from './grid/PlotHeader';
 
 /**
  * Display a dataset in spreadsheet format with minimal functionality for the
@@ -51,13 +38,19 @@ export default function ColumnView(props){
     const { dataset } = props;
     const profiledData = dataset.properties;
     const columns = dataset.columns;
+    const profilerType = profiledData.is_profiled[0];
     // Grid header
     let header = [<RowIndexCell key={-1} value=' ' />];
     for (let cidx = 0; cidx < columns.length; cidx++) {
         const column = columns[cidx];
         let dataPlot_ = [{}];
+
         for (let property of profiledData.columns){
-            if (property.column.id === column.id){
+            if (profilerType === 'mimir' && property.column.id === column.id){
+                dataPlot_= property;
+                break;
+            }
+            if (profilerType === 'datamart_profiler' && property.name === column.name){
                 dataPlot_= property;
                 break;
             }
@@ -78,20 +71,14 @@ export default function ColumnView(props){
                 </td>
                 <td key={column.name} style={{width: '30%'}}>
                     <div className="card mb-4" style={{overflow: 'auto'}}>
-                        <Centered>
-                            <BarChart
-                                width={250}
-                                height={180}
-                                data={dataPlot_.values}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" />
-                                <YAxis />
-                                <Tooltip />
-                                <Legend />
-                                <Bar dataKey="count" fill="steelblue" />
-                            </BarChart>
-                        </Centered>
+                    {
+                        dataset && dataset.isProfiled() &&
+                        <PlotHeader
+                            column={column}
+                            profiledData={profiledData}
+                            isLoadingPlot={true}
+                        />
+                    }
                     </div>
                 </td>
                 <td key={'rows_' + column.name} style={{width: '35%'}}>
@@ -101,8 +88,10 @@ export default function ColumnView(props){
                             <div className="row">
                                 <ul style={{ listStyle: 'none', columnCount: 2, columnGap: 10 }}>
                                     {dataPlot_.distinctValueCount != null  && <li>Unique Values</li>}
+                                    {dataPlot_.num_distinct_values != null  && <li>Unique Values</li>}
                                     {dataPlot_.count != null  && <li>Total Values</li>}
                                     {dataPlot_.distinctValueCount != null  && (<li>{dataPlot_.distinctValueCount}</li>)}
+                                    {dataPlot_.num_distinct_values != null  && (<li>{dataPlot_.num_distinct_values}</li>)}
                                     {dataPlot_.count != null  && (<li>{dataPlot_.count}</li>)}
                                 </ul>
                             </div>
@@ -116,6 +105,7 @@ export default function ColumnView(props){
                                         {dataPlot_.stdDev != null  && <li>Std Deviation</li>}
                                         {dataPlot_.sum != null  && <li>Sum</li>}
                                         {dataPlot_.distinctValueCount != null  && <li>Unique Values</li>}
+                                        {dataPlot_.num_distinct_values != null  && <li>Unique Values</li>}
                                         {dataPlot_.count != null  && <li>Total Values</li>}
                                         {dataPlot_.max != null  && (<li>{dataPlot_.max}</li>)}
                                         {dataPlot_.min != null  && (<li>{dataPlot_.min}</li>)}
@@ -123,6 +113,7 @@ export default function ColumnView(props){
                                         {dataPlot_.stdDev != null  && (<li>{dataPlot_.stdDev.toFixed(2)}</li>)}
                                         {dataPlot_.sum != null  && (<li>{dataPlot_.sum.toFixed(2)}</li>)}
                                         {dataPlot_.distinctValueCount != null  && (<li>{dataPlot_.distinctValueCount}</li>)}
+                                        {dataPlot_.num_distinct_values != null  && (<li>{dataPlot_.num_distinct_values}</li>)}
                                         {dataPlot_.count != null  && (<li>{dataPlot_.count}</li>)}
                                     </ul>
                                 </div>
