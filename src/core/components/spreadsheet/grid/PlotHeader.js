@@ -21,7 +21,7 @@ import '../../../../css/App.css'
 import '../../../../css/Notebook.css'
 import '../../../../css/Spreadsheet.css'
 import D3BasedPlot from './D3BasedPlot';
-
+import VegaLiteBasedPlot from './VegaLiteBasedPlot';
 /**
  * The plot header is generated based on the type of profiler.
  */
@@ -41,14 +41,13 @@ class PlotHeader extends React.Component {
         }
         if (profilerType === 'datamart_profiler') {
             return (
-                <div/>
-                // <VegaBasedPlot
-                //     key={key}
-                //     column={column}
-                //     columnIndex={columnIndex}
-                //     profiledData={profiledData}
-                //     isLoadingPlot={isLoadingPlot}
-                // />
+                // <div/>
+                <VegaLiteBasedPlot
+                    column={column}
+                    columnIndex={columnIndex}
+                    profiledData={profiledData}
+                    isLoadingPlot={isLoadingPlot}
+                />
             );
         }
     }

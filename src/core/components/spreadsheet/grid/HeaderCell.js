@@ -180,28 +180,24 @@ class HeaderCell extends React.Component {
             }
             cellValue = (
             	<div >
-            		
             		<span className='header-value'>
 	                    {columnName}
 	                </span>
 	                <Label size='mini'>
 	                    {`(${column["type"]})`}
 	                </Label>
-	                
 		            <div >
-                {
-                this.props.isLoadingPlot &&
-                this.props.dataset && this.props.dataset.isProfiled() &&
-                <PlotHeader
-                    column={column}
-                    columnIndex={columnIndex}
-                    profiledData={this.props.profiledData}
-                    isLoadingPlot={this.props.isLoadingPlot}
-                />
-                }
-                </div>
-                
-                
+                    {
+                        this.props.isLoadingPlot &&
+                        this.props.dataset && this.props.dataset.isProfiled() &&
+                        <PlotHeader
+                            column={column}
+                            columnIndex={columnIndex}
+                            profiledData={this.props.profiledData}
+                            isLoadingPlot={this.props.isLoadingPlot}
+                        />
+                    }
+                    </div>
 	            </div>
             );
         }

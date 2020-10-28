@@ -37,6 +37,10 @@ const Centered = styled.div`
   text-align: center;
 `;
 
+/**
+ *Plots are created using Recharts which is a redefined chart library built with React and D3.
+ */
+
 class D3BasedPlot extends React.Component {
     static propTypes = {
         dataset: PropTypes.object.isRequired,

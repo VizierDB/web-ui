@@ -19,7 +19,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import GridCell from './grid/GridCell';
-import HeaderCell from './grid/HeaderCell';
 import RowIndexCell from './grid/RowIndexCell';
 import SpreadsheetDropDown from './menu/SpreadsheetDropDown';
 import SpreadsheetScrollbar from './SpreadsheetScrollbar';
