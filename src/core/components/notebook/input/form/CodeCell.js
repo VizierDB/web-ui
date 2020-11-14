@@ -27,7 +27,6 @@ import 'codemirror/mode/r/r';
 import '../../../../../css/App.css';
 import '../../../../../css/ModuleForm.css';
 import '../../../../../css/CodeHighlight.css';
-import ReactMarkdown from 'react-markdown'
 import Highlight from 'react-highlight'
 
 class CodeCell extends React.Component {
@@ -95,7 +94,6 @@ class CodeCell extends React.Component {
          } = this.props;
          let div = document.getElementById("empxCalc");
          div.style.height = '1em';
-         const targetHeight = event.target.offsetHeight;
          const lineHeightInPx = div.offsetHeight * 1.4285;//because lineheight is 1.4285em
          const chWidthInPx = div.offsetHeight / 1.6585;//because font size is 1em
          const transCY = event.nativeEvent.layerY;
