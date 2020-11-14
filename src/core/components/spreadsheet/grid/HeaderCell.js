@@ -61,7 +61,8 @@ class HeaderCell extends React.Component {
         onMove: PropTypes.func,
         onUpdate: PropTypes.func,
         isEditing: PropTypes.bool,
-        onMoveAction: PropTypes.func
+        onMoveAction: PropTypes.func,
+        isSpreadsheet: PropTypes.bool
     }
     /**
      * Submit changes to the cell value if a onUpdate handler is given.
@@ -119,7 +120,8 @@ class HeaderCell extends React.Component {
             columnIndex,
             value,
             onAction,
-            isEditing
+            isEditing,
+            isSpreadsheet
         } = this.props;
         // The value is optional (providing a value other than the column name
         // is used to override the column name while updating).
@@ -164,7 +166,7 @@ class HeaderCell extends React.Component {
             if (isUpdating) {
                 cellCss += ' updating';
             }
-            if(isEditing){
+            if((isEditing) && (isSpreadsheet)){
             	dropTargetType = 'header-cell';
             	dropTargetBefore = (
             		<Droppable

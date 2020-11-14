@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 import { HotKeys } from 'react-hotkeys';
 import { Button, Form } from 'semantic-ui-react';
 import CommandsListing from './CommandsListing';
+import ContentSpinner from '../../ContentSpinner';
 import CodeCell from './form/CodeCell'
 import TextControl from './form/TextControl';
 import { ErrorListMessage } from '../../Message';
@@ -85,7 +86,8 @@ class CellCommandArea extends React.Component {
             selectedCommand: cell.commandSpec,
             showCommandsListing: (cell.commandSpec == null),
             snippetSelectorVisible: false,
-            upstreamFormValues: false
+            upstreamFormValues: false,
+            submitted: false
         }
     }
     /**
@@ -305,7 +307,7 @@ class CellCommandArea extends React.Component {
         } else {
             // Clear the error state and submit the cell, command specification
             // and form values to update the underlying workflow.
-            this.setState({errors: null, hasErrors: false});
+            this.setState({errors: null, hasErrors: false, submitted:true});
             onSubmit(cell, selectedCommand, req.data, onUpdateProgress);
         }
         this.setState({upstreamFormValues:false})
@@ -357,7 +359,8 @@ class CellCommandArea extends React.Component {
             hasErrors,
             selectedCommand,
             showCommandsListing,
-            snippetSelectorVisible
+            snippetSelectorVisible,
+            submitted
         } = this.state;
         // Show an list of error messages if the form did not validate
         let errorMessage = null;
@@ -404,107 +407,127 @@ class CellCommandArea extends React.Component {
                 paraCode = cell.commandSpec.codeParameter;
             }
             if (paraCode != null) {
-                // Show (optional) code snippet selector for different code cell
-                // types. The snippet selector is only visible if this is the
-                // active cell and the show snippet flag is true.
-                let codeSnippetPanel = null;
-                if ((isActiveCell) && (snippetSelectorVisible)) {
-                    if (paraCode.language === 'python') {
-                        codeSnippetPanel = (
-                            <PythonSnippets onSelect={this.handleAppendCode}/>
-                        );
-                    } else if (paraCode.language === 'scala') {
-                        codeSnippetPanel = (
-                            <ScalaSnippets onSelect={this.handleAppendCode}/>
-                        );
-                    } else if (paraCode.language === 'r') {
-                    	codeSnippetPanel = (
-                            <RSnippets onSelect={this.handleAppendCode}/>
-                        );
-                    } else if (paraCode.language === 'sql') {
-                        // let outputDataset = formValues['output_dataset'];
-                    	codeSnippetPanel = (
-                                <SQLSnippets datasets={datasets} onSelect={this.handleAppendCode}/>
-                            );
-                    }
-                    else if (paraCode.language === 'markdown') {
-                        codeSnippetPanel = (
-                                <MarkdownSnippets onSelect={this.handleAppendCode}/>
-                            );
-                    }
-
+            	if (submitted) {
+                    // cell has been submitted but not put/post not done yet
+                    mainContent = (
+                        <div className={'module-form'}>
+                           <ContentSpinner text="Submitting Cell" size='small' />
+                        </div>
+                    );
                 }
-                const { codeEditorProps } = this.state;
-                if((isActiveCell) && (paraCode.language === 'sql')) {
-                	let outputDataset = formValues['output_dataset'];
-                	additionalParams = (
-                    		<div class="ui labeled input">
-				                <div class="ui label">
-				                	Output Dataset
-				                </div>
-			                    <TextControl
-				                    key={paraCode.id}
-				                    id={paraCode.id}
-				                    name={'Output Dataset'}
-				                    placeholder={'Output Dataset (optional)'}
-				                    isRequired={false}
-				                    value={outputDataset}
-				                    onChange={(dstext, value) => {
-				                    	this.handleFormValueChange('output_dataset', value, codeEditorProps.cursorPosition)
-				                    }}
-				                />
-				            </div>
-	                    );
+            	else{
+	            	// Show (optional) code snippet selector for different code cell
+	                // types. The snippet selector is only visible if this is the
+	                // active cell and the show snippet flag is true.
+	                let codeSnippetPanel = null;
+	                if ((isActiveCell) && (snippetSelectorVisible)) {
+	                    if (paraCode.language === 'python') {
+	                        codeSnippetPanel = (
+	                            <PythonSnippets onSelect={this.handleAppendCode}/>
+	                        );
+	                    } else if (paraCode.language === 'scala') {
+	                        codeSnippetPanel = (
+	                            <ScalaSnippets onSelect={this.handleAppendCode}/>
+	                        );
+	                    } else if (paraCode.language === 'r') {
+	                    	codeSnippetPanel = (
+	                            <RSnippets onSelect={this.handleAppendCode}/>
+	                        );
+	                    } else if (paraCode.language === 'sql') {
+	                        // let outputDataset = formValues['output_dataset'];
+	                    	codeSnippetPanel = (
+	                                <SQLSnippets datasets={datasets} onSelect={this.handleAppendCode}/>
+	                            );
+	                    }
+	                    else if (paraCode.language === 'markdown') {
+	                        codeSnippetPanel = (
+	                                <MarkdownSnippets onSelect={this.handleAppendCode}/>
+	                            );
+	                    }
+	
+	                }
+	                const { codeEditorProps } = this.state;
+	                if((isActiveCell) && (paraCode.language === 'sql')) {
+	                	let outputDataset = formValues['output_dataset'];
+	                	additionalParams = (
+	                    		<div class="ui labeled input">
+					                <div class="ui label">
+					                	Output Dataset
+					                </div>
+				                    <TextControl
+					                    key={paraCode.id}
+					                    id={paraCode.id}
+					                    name={'Output Dataset'}
+					                    placeholder={'Output Dataset (optional)'}
+					                    isRequired={false}
+					                    value={outputDataset}
+					                    onChange={(dstext, value) => {
+					                    	this.handleFormValueChange('output_dataset', value, codeEditorProps.cursorPosition)
+					                    }}
+					                />
+					            </div>
+		                    );
+	                }
+	                mainContent = (
+	                    <div>
+	                        <Form>
+	                            <CodeCell
+	                                cursorPosition={codeEditorProps.cursorPosition}
+	                                editing={false}
+	                                id={paraCode.id}
+	                                isActiveCell={isActiveCell}
+	                                key={paraCode.id}
+	                                language={paraCode.language}
+	                                onChange={this.handleFormValueChange}
+	                                onCursor={this.handleCursorChange}
+	                                onFocus={this.handleActivateCell}
+	                                readOnly={onSubmit == null}
+	                                value={formValues[paraCode.id]}
+	                            />
+	                        </Form>
+	                    { additionalParams }
+	                    { codeSnippetPanel }
+	                    </div>
+	                );
+	                // The snippet toggle button text depends on whether the snippet
+	                // selector is vizible or not
+	                const buttonTitle = (snippetSelectorVisible) ? 'Hide' : 'Show';
+	                codeSnippetButton = (
+	                    <Button
+	                        content={ buttonTitle + '  Code Examples' }
+	                        icon='info'
+	                        labelPosition='left'
+	                        primary
+	                        onClick={this.handleToggleSnippetSelector}
+	                    />
+	                );
                 }
-                mainContent = (
-                    <div>
-                        <Form>
-                            <CodeCell
-                                cursorPosition={codeEditorProps.cursorPosition}
-                                editing={false}
-                                id={paraCode.id}
-                                isActiveCell={isActiveCell}
-                                key={paraCode.id}
-                                language={paraCode.language}
-                                onChange={this.handleFormValueChange}
-                                onCursor={this.handleCursorChange}
-                                onFocus={this.handleActivateCell}
-                                readOnly={onSubmit == null}
-                                value={formValues[paraCode.id]}
-                            />
-                        </Form>
-                    { additionalParams }
-                    { codeSnippetPanel }
-                    </div>
-                );
-                // The snippet toggle button text depends on whether the snippet
-                // selector is vizible or not
-                const buttonTitle = (snippetSelectorVisible) ? 'Hide' : 'Show';
-                codeSnippetButton = (
-                    <Button
-                        content={ buttonTitle + '  Code Examples' }
-                        icon='info'
-                        labelPosition='left'
-                        primary
-                        onClick={this.handleToggleSnippetSelector}
-                    />
-                );
             } else if (isActiveCell) {
-                const errorCss = (hasErrors) ? ' error' : '';
-                mainContent = (
-                    <div className={'module-form' + errorCss}>
-                        <p className={'module-form-header' + errorCss}>
-                            {selectedCommand.name}
-                        </p>
-                        <ModuleInputForm
-                            datasets={datasets}
-                            onChange={this.handleFormValueChange}
-                            selectedCommand={selectedCommand}
-                            serviceProperties={apiEngine.serviceProperties}
-                            values={formValues}
-                        />
-                    </div>
-                );
+            	const errorCss = (hasErrors) ? ' error' : '';
+                if (submitted) {
+                    // cell has been submitted but not put/post not done yet
+                    mainContent = (
+                        <div className={'module-form' + errorCss}>
+                           <ContentSpinner text="Submitting Cell" size='small' />
+                        </div>
+                    );
+                }
+            	else{
+	            	mainContent = (
+	                    <div className={'module-form' + errorCss}>
+	                        <p className={'module-form-header' + errorCss}>
+	                            {selectedCommand.name}
+	                        </p>
+	                        <ModuleInputForm
+	                            datasets={datasets}
+	                            onChange={this.handleFormValueChange}
+	                            selectedCommand={selectedCommand}
+	                            serviceProperties={apiEngine.serviceProperties}
+	                            values={formValues}
+	                        />
+	                    </div>
+	                );
+            	}
             } else if ((cell.isNewCell())  && (selectedCommand != null)) {
                 mainContent = (
                     <pre className='cell-cmd-text' onClick={onClick}>
@@ -520,7 +543,7 @@ class CellCommandArea extends React.Component {
                         {cell.module.text}
                     </pre>
                 );
-            }
+            } 
         }
         // Wrap main content in hotkey handler if submission of the form is
         // allowed
@@ -544,7 +567,7 @@ class CellCommandArea extends React.Component {
         }
         // Add a list of action buttons if the cell is the active cell.
         let buttons = null;
-        if ((isActiveCell) && (!showCommandsListing)) {
+        if ((isActiveCell) && (!showCommandsListing) && (!submitted)) {
             buttons = (
                 <div className='module-form-buttons'>
                     { codeSnippetButton }

@@ -425,6 +425,7 @@ class Spreadsheet extends React.Component {
                 rowIndex={-1}
                 value={' '}
                 onClick={this.clearActiveCell}
+                isSpreadsheet={true}
             />
         ];
         for (let cidx = 0; cidx < columns.length; cidx++) {
@@ -452,6 +453,7 @@ class Spreadsheet extends React.Component {
                     onUpdate={this.handleCellUpdate}
                 	isEditing={true}
                     onMoveAction={this.handleMoveAction}
+                    isSpreadsheet={true}
                 />
             );
         }

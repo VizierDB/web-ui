@@ -75,7 +75,8 @@ class NotebookPage extends Component {
     constructor(props) {
         super(props);
         // Set the branch modal state
-        this.state = {modalOpen: false, modalTitle: 'New branch', moduleId: null};
+        const copySupport = document.queryCommandSupported('copy');
+        this.state = {modalOpen: false, modalTitle: 'New branch', moduleId: null, copySupport:copySupport};
         // Fetch any resources that are currently null or out of sync with the
         // browser URL. It is assumed that the branch is set if the project is
         // set (i.e., either both are null or neither of them).
@@ -434,7 +435,7 @@ class NotebookPage extends Component {
             // There is nothing else to show yet.
             content = <ContentSpinner text='Loading Notebook ...' />;
         } else if (notebook != null) {
-            const { modalOpen, modalTitle } = this.state;
+            const { modalOpen, modalTitle, copySupport } = this.state;
             // List of notebook cells
             let notebookCells =  (
                 <Notebook
@@ -522,6 +523,7 @@ class NotebookPage extends Component {
 	                        onShowHistory={this.handleShowBranch}
 	                        onSwitchBranch={this.handleSwitchBranch}
 	                        project={project}
+	                        copySupport={copySupport}
 	                    />
 	                    { notebookCells }
 	                    { notebookFooter }

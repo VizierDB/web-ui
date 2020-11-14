@@ -41,6 +41,7 @@ import Divider from "semantic-ui-react/dist/commonjs/elements/Divider";
 import { isCellOutputRequest } from '../../../actions/project/Notebook';
 import 'toastr/build/toastr.min.css'
 import toastr from 'toastr'
+import gfm from 'remark-gfm'
 
 /**
  * Output area for notebook cells that have a workflow module associated with
@@ -247,7 +248,8 @@ class CellOutputArea extends React.Component {
                 renders[out] = (
                     <div className='output-content'>
                         <ReactMarkdown
-                            source={outputs[out]}/>
+                            plugins={[gfm]} 
+    	                    source={outputs[out]}/>
                     </div>
                 );
             } else if (out === "text/plain"){

@@ -41,7 +41,8 @@ class RowIndexCell extends React.Component {
          ]),
          onAction: PropTypes.func,
          onClick: PropTypes.func,
-         onMoveAction: PropTypes.func
+         onMoveAction: PropTypes.func,
+         isSpreadsheet: PropTypes.bool
     }
     
     handleMoveDropBefore = (dropData, dropTargetData) => {
@@ -58,7 +59,7 @@ class RowIndexCell extends React.Component {
      * Render grod column as Html table header cell.
      */
     render() {
-        const { disabled, rowIndex, rowId, value, onAction, onClick } = this.props;
+        const { disabled, rowIndex, rowId, value, onAction, onClick, isSpreadsheet } = this.props;
         // Show a dropdown menu if onAction method is provided
         let dropdown = null;
         let dropTargetType = 'none';
@@ -76,7 +77,7 @@ class RowIndexCell extends React.Component {
                 />
             );
         }
-        if (rowIndex !== -1 ){
+        if ((rowIndex !== -1) && (isSpreadsheet)){
         	dropTargetType = 'row-index-cell';
         	dropTargetBefore = (
         		<Droppable

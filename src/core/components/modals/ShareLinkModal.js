@@ -29,7 +29,8 @@ class ShareLinkModal extends React.Component {
     static propTypes = {
         onClose: PropTypes.func.isRequired,
         open: PropTypes.bool.isRequired,
-        url: PropTypes.string.isRequired
+        url: PropTypes.string.isRequired,
+        copySupport: PropTypes.bool.isRequired
     }
 
     state = {
@@ -49,7 +50,7 @@ class ShareLinkModal extends React.Component {
      * column the cell module.
      */
     render() {
-        const { onClose, open, url } = this.props;
+        const { onClose, open, url, copySupport } = this.props;
         return (
             <Modal open={open} dimmer={'inverted'} size={'small'}>
                 <Modal.Header>Share Link</Modal.Header>
@@ -59,7 +60,7 @@ class ShareLinkModal extends React.Component {
                             Copy link below to share this notebook version
                         </p>
                         { // ensure copying to clipboard is supported by the browser else just display the link
-                            document.queryCommandSupported('copy') ?
+                        	copySupport ?
                             <Input
                                 fluid
                                 readOnly
