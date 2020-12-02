@@ -343,4 +343,13 @@ div.cell-output-links {
 	width: 100%;
 }
 
+.empxCalc {
+	height:0;
+	width:0;
+	outline:none;
+	border:none;
+	padding:none;
+	margin:none;
+	box-sizing:content-box;
+}
  

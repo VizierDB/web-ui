@@ -36,6 +36,7 @@ class NotebookStatusHeader extends Component {
         onShowHistory: PropTypes.func.isRequired,
         onSwitchBranch: PropTypes.func.isRequired,
         project: PropTypes.object.isRequired,
+        copySupport: PropTypes.bool.isRequired 
     }
     constructor(props) {
         super(props);
@@ -55,7 +56,8 @@ class NotebookStatusHeader extends Component {
             notebook,
             onShowHistory,
             onSwitchBranch,
-            project
+            project,
+            copySupport
         } = this.props;
         const { showModal } = this.state;
         let extraContent = null;
@@ -115,6 +117,7 @@ class NotebookStatusHeader extends Component {
                     url={url}
                     onClose={this.closeModal}
                     open={showModal}
+                    copySupport={copySupport}
                 />
             </div>
         );

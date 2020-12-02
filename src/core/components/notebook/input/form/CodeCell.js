@@ -26,7 +26,8 @@ import 'codemirror/mode/sql/sql';
 import 'codemirror/mode/r/r';
 import '../../../../../css/App.css';
 import '../../../../../css/ModuleForm.css';
-
+import '../../../../../css/CodeHighlight.css';
+import Highlight from 'react-highlight'
 
 class CodeCell extends React.Component {
     static propTypes = {
@@ -84,6 +85,27 @@ class CodeCell extends React.Component {
 	  }
     
     /**
+     * Handle click for inactive cell to map click to cursor position in codemirror
+     */
+    onClickInactiveCodeCell = (event) => {
+    	 const {
+             onFocus,
+             onCursor
+         } = this.props;
+         let div = document.getElementById("empxCalc");
+         div.style.height = '1em';
+         const lineHeightInPx = div.offsetHeight * 1.4285;//because lineheight is 1.4285em
+         const chWidthInPx = div.offsetHeight / 1.6585;//because font size is 1em
+         const transCY = event.nativeEvent.layerY;
+         const transCX = event.nativeEvent.layerX;
+         const lineNo = (transCY/lineHeightInPx)
+         const lineSkew = lineNo * 0.03448; 
+         let cursorPos = { line:Math.round(lineNo+lineSkew) , ch:Math.round(transCX/chWidthInPx)-1, sticky:"before", xRel: 0};
+         onFocus();
+         onCursor(cursorPos);
+	  }
+    
+    /**
      * Show the code editor and optionally the code snippet selector.
      */
     render() {
@@ -112,30 +134,46 @@ class CodeCell extends React.Component {
             mode = 'markdown';
         }
         let codeEditor = null;
-        if(!(language === 'markdown' && !isActiveCell)){
+        if(isActiveCell){
         	codeEditor = <div className='editor-container'>
-                <CodeMirror
-                    value={value}
-                    cursor={cursorPosition}
-                    options={{
-                        autofocus: isActiveCell,
-                        lineNumbers: true,
-                        mode: mode,
-                        indentUnit: 4,
-                        readOnly: readOnly,
-                        extraKeys: { Tab: this.tabReplace }
-                    }}
-                    onBeforeChange={(editor, data, value) => {
-                        this.handleChange(editor, value, data);
-                    }}
-                	onCursor={(editor, data) => {
-                		this.handleCursorActivity(editor, data)
-                	}}
-                    onFocus={onFocus}
-                />
-            </div>
+	        	<CodeMirror
+		            value={value}
+		            cursor={cursorPosition}
+		            options={{
+		                autofocus: isActiveCell,
+		                lineNumbers: true,
+		                mode: mode,
+		                indentUnit: 4,
+		                readOnly: ((!isActiveCell) || readOnly) ,
+		                dragDrop: false,
+		                extraKeys: { Tab: this.tabReplace }
+		            }}
+		            onBeforeChange={(editor, data, value) => {
+		                this.handleChange(editor, value, data);
+		            }}
+		        	onCursor={(editor, data) => {
+		        		this.handleCursorActivity(editor, data)
+		        	}}
+		            onFocus={onFocus}
+		        />
+	         </div>
         }
-        return (codeEditor);
+        else {
+        	if(!(language === 'markdown')){
+	            codeEditor = 
+        	    <div 
+        	      className='editor-container'
+        	      onClick={this.onClickInactiveCodeCell} >
+	        		<Highlight className={ language }>
+	        		  { value }
+	        		</Highlight>
+	            </div>
+            }
+        }
+        return (<div>
+        		  <div id="empxCalc" className="empxCalc"></div>
+        		  { codeEditor }
+        		</div>);
     }
 }
 
