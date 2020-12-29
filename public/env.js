@@ -17,5 +17,6 @@ window.env = {
   APP_TITLE: 'Development Server',
   ANALYTICS_URL: '',
   ANALYTICS_SITE_ID: '12a12e629ffb388167c2c3e560bbc8e1',
-  API_ADV_AUTH: true
+  API_ADV_AUTH: true,
+  PUBLIC_URL: '/'
 };

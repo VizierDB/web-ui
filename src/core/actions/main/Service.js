@@ -184,6 +184,7 @@ export const checkResponseJsonForReAuth = (response, isReadableStream) => {
 	}else{
 		return response.text().then(text => {
 			try {
+        console.log("REAUTH: " + text)
 				const jsonObj = JSON.parse(text)
 				return Promise.resolve(jsonObj)
 			} catch(err) {

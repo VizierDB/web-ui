@@ -78,7 +78,7 @@ export const WarningMessage = ({title, message, onDismiss}) => (
         icon='warning circle'
         header={title}
         onDismiss={onDismiss}
-        content={message.charAt(0).toUpperCase() + message.slice(1)}
+        content={(message != null) ? ( message.charAt(0).toUpperCase() + message.slice(1) ) : "Unknown Error"}
     />
 );
 
@@ -92,6 +92,6 @@ export const NotFoundMessage = ({message}) => (
         icon='frown'
         header='Ooops ... 404'
         size='massive'
-        content={message.charAt(0).toUpperCase() + message.slice(1)}
+        content={(message != null) ? ( message.charAt(0).toUpperCase() + message.slice(1) ) : "Unknown Error" }
     />
 );
