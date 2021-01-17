@@ -483,6 +483,7 @@ class CellCommandArea extends React.Component {
 	                                onFocus={this.handleActivateCell}
 	                                readOnly={onSubmit == null}
 	                                value={formValues[paraCode.id]}
+	                                locked={cell.module.locked}
 	                            />
 	                        </Form>
 	                    { additionalParams }
