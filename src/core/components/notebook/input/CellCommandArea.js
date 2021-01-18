@@ -447,6 +447,7 @@ class CellCommandArea extends React.Component {
 	
 	                }
 	                const { codeEditorProps } = this.state;
+	                const lockedCell = cell && cell.module ? cell.module.locked : false;
 	                if((isActiveCell) && (paraCode.language === 'sql')) {
 	                	let outputDataset = formValues['output_dataset'];
 	                	additionalParams = (
@@ -483,7 +484,7 @@ class CellCommandArea extends React.Component {
 	                                onFocus={this.handleActivateCell}
 	                                readOnly={onSubmit == null}
 	                                value={formValues[paraCode.id]}
-	                                locked={cell.module.locked}
+	                                locked={lockedCell}
 	                            />
 	                        </Form>
 	                    { additionalParams }
