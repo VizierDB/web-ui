@@ -93,6 +93,7 @@ export class WorkflowHandle {
         // a list of notebook cells when needed.
         this.modules = json.modules;
         this.links = new HATEOASReferences(json.links);
+        this.tableOfContents = json.tableOfContents
         return this;
     }
     /**

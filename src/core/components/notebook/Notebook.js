@@ -21,6 +21,7 @@ import { PropTypes } from 'prop-types';
 import { Icon } from 'semantic-ui-react';
 import { LargeMessageButton } from '../Button'
 import NotebookCell from './NotebookCell';
+import TableOfContents from './TableOfContents';
 import {INSERT_AFTER, INSERT_BEFORE} from '../../resources/Notebook'
 
 /**
@@ -211,6 +212,15 @@ class Notebook extends React.Component {
             }
             isNewPrevious = cell.isNewCell();
         }
+
+        let tableOfContents = null;
+        if("tableOfContents" in notebook.workflow) {
+            tableOfContents = (
+                <TableOfContents
+                    contents={notebook.workflow.tableOfContents} />
+            );
+        }
+
         // Show a message button to append a new cell (only if the last cell
         // is not already a new cell and the workflow is not in error state
         // or read only).
@@ -240,6 +250,7 @@ class Notebook extends React.Component {
             notebookCells.reverse();
             content = (
                 <div>
+                    { tableOfContents }
                     { appendCellButton }
                     { notebookCells }
                 </div>
@@ -247,6 +258,7 @@ class Notebook extends React.Component {
         } else {
             content = (
                 <div>
+                    { tableOfContents }
                     { notebookCells }
                     { appendCellButton }
                 </div>

@@ -303,6 +303,7 @@ class NotebookCell extends React.Component {
                 <table className={css + cssState}><tbody>
                 <tr>
                     <td className={'cell-index' + cssState} onClick={this.handleSelectCell}>
+                        <a id={"cell-"+cellIndex} />
                         <p className={'cell-index' + cssState}>[{cellIndex}]</p>
                         { cellMenu }
                     </td>
