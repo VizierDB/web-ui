@@ -529,6 +529,14 @@ export const replaceNotebookCell = (notebook, url, data, modifiedCellId) => (dis
 
 
 /**
+ * Freeze a specified cell in the notebook an d its successors.
+ */
+export const freezeOrThawNotebookCell = (notebook, url, modifiedCellId) => (dispatch) => {
+    dispatch(updateNotebookCell(notebook, url, 'POST', {}, modifiedCellId));
+}
+
+
+/**
  * Update a cell in a notebook. This could either insert a new notebook cell or
  * replace an existing cell. The data object contains the module specification
  * and user provided input parameters.

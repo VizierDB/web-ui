@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import { Dropdown, Icon } from 'semantic-ui-react';
 import { INSERT_AFTER, INSERT_BEFORE } from '../../resources/Notebook';
 import '../../../css/Notebook.css'
-
+import { HATEOAS_MODULE_FREEZE, HATEOAS_MODULE_THAW } from '../../util/HATEOAS'
 
 /**
  * Dropdown menu for a notebook cell. Displays two icons with dropdown menus.
@@ -42,7 +42,9 @@ class CellDropDownMenu extends React.Component {
         onCreateBranch: PropTypes.func.isRequired,
         onDeleteCell: PropTypes.func.isRequired,
         onInsertCell: PropTypes.func.isRequired,
-        onSelectCell: PropTypes.func.isRequired
+        onSelectCell: PropTypes.func.isRequired,
+        onFreezeCell: PropTypes.func.isRequired,
+        onThawCell: PropTypes.func.isRequired,
     }
     /**
      * Insert new cell before the notebook cell that is associated with the
@@ -69,7 +71,9 @@ class CellDropDownMenu extends React.Component {
             onCopyCell,
             onCreateBranch,
             onDeleteCell,
-            onSelectCell
+            onSelectCell,
+            onFreezeCell,
+            onThawCell
         } = this.props;
         // If the cell is in pending or running state no menu is displayed. We
         // only show an icon that depicts the cell status.
@@ -147,6 +151,30 @@ class CellDropDownMenu extends React.Component {
                     onClick={this.handleInsertAfter}
                 />
             );
+            if(cell.module.links.has(HATEOAS_MODULE_FREEZE)){
+                dropdownItems.push(
+                    <Dropdown.Item
+                        key='freeze-below'
+                        disabled={false}
+                        icon='snowflake'
+                        text='Freeze cells from here'
+                        title={'Freeze cell #' + cellNumber + ' and subsequent cells and keep them from executing'}
+                        onClick={onFreezeCell}
+                    />
+                );
+            };
+            if(cell.module.links.has(HATEOAS_MODULE_THAW)){
+                dropdownItems.push(
+                    <Dropdown.Item
+                        key='thaw-above'
+                        disabled={false}
+                        icon='sun'
+                        text='Thaw cells up to here'
+                        title={'Thaw cell #' + cellNumber + ' and preceding cells and update their outputs'}
+                        onClick={onThawCell}
+                    />
+                );
+            };
             dropdownItems.push(<Dropdown.Divider key='div-branch'/>);
         }
         // Have a descriptive title that shows the user which cells will be

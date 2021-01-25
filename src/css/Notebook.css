@@ -126,6 +126,26 @@ div.cell-status-icon {
 
 
 /*
+ * Frozen state
+ */
+table.cell.frozen-cell {
+    /*border-left: solid 3px #d32f2f;*/
+}
+
+td.cell-index.frozen-cell {
+    background: #c9dbdb;
+    border-radius: 5px;
+}
+
+p.cell-index.frozen-cell {
+    color: #428480;
+}
+
+table.cell.frozen-cell div.output-area div.ui.segment {
+    background: #ebf5f5;
+}
+
+/*
  * Error state
  */
 table.cell.inactive-cell.error-cell {

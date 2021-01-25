@@ -36,6 +36,7 @@ const STATE_RUNNING = 1
 const STATE_CANCELED = 2
 const STATE_ERROR = 3
 const STATE_SUCCESS = 4
+const STATE_FROZEN = 5
 
 // Relative positions when inserting a new cell
 export const INSERT_AFTER = 'INSERT_AFTER';
@@ -421,6 +422,16 @@ class NotebookCell {
             return this.module.state === STATE_SUCCESS
         } else {
             return false;
+        }
+    }
+    /**
+     * Test if this cell is in the frozen state.
+     */
+    isFrozen() {
+        if (this.module != null) {
+            return this.module.state === STATE_FROZEN
+        } else {
+            return false
         }
     }
 }

@@ -73,7 +73,9 @@ class NotebookCell extends React.Component {
         userSettings: PropTypes.object.isRequired,
         onEditSpreadsheet: PropTypes.func.isRequired,
         onRecommendAction: PropTypes.func.isRequired,
-        onResetRecommendations: PropTypes.func.isRequired
+        onResetRecommendations: PropTypes.func.isRequired,
+        onFreezeCell: PropTypes.func.isRequired,
+        onThawCell: PropTypes.func.isRequired,
     }
     handleUpdateProgress = p => {
         this.setState({moduleProgress: p})
@@ -157,6 +159,22 @@ class NotebookCell extends React.Component {
             onSelect(cell);
         }
     }
+    /**
+     * Freeze this and all subsequent cells
+     */
+    handleFreezeCell = () => {
+        const { cell, onFreezeCell } = this.props;
+        onFreezeCell(cell)
+    }
+    /**
+     * Thaw this and all prior cells
+     */
+    handleThawCell = () => {
+        const { cell, onThawCell } = this.props;
+        onThawCell(cell)
+    }
+
+
     /**
      * Handle new cell recommendations
      */
@@ -252,6 +270,8 @@ class NotebookCell extends React.Component {
                     onDeleteCell={this.handleDeleteCell}
                     onInsertCell={this.handleInsertCell}
                     onSelectCell={this.handleSelectCell}
+                    onFreezeCell={this.handleFreezeCell}
+                    onThawCell={this.handleThawCell}
                 />
             );
             outputArea = (
@@ -297,14 +317,17 @@ class NotebookCell extends React.Component {
             cssState = ' running-cell';
         } else if (cell.isPending()) {
             cssState = ' pending-cell';
+        } else if (cell.isFrozen()) {
+            cssState = ' frozen-cell';
         }
         return (
             <ProgressContext.Provider value={this.state}>
                 <table className={css + cssState}><tbody>
                 <tr>
                     <td className={'cell-index' + cssState} onClick={this.handleSelectCell}>
-                        <a id={"cell-"+cellIndex} />
-                        <p className={'cell-index' + cssState}>[{cellIndex}]</p>
+                        <a id={"cell-"+cellIndex} >
+                            <p className={'cell-index' + cssState}>[{cellIndex}]</p>
+                        </a>
                         { cellMenu }
                     </td>
                     <td className={'cell-area' + cssState}>

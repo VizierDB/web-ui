@@ -26,7 +26,8 @@ import { cancelWorkflowExecution, checkModuleStatus, createtNotebookCell,
     deleteNotebookCell, dismissCellChanges, fetchWorkflow,
     hideCellOutput, insertNotebookCell, replaceNotebookCell, showCellChart,
     selectNotebookCell, showCellDataset, showCellStdout, updateCellDatasetProperties,
-    showCellTimestamps, updateNotebookCellWithUpload, isCellOutputRequest } from '../../actions/project/Notebook';
+    showCellTimestamps, updateNotebookCellWithUpload, isCellOutputRequest,
+    freezeOrThawNotebookCell } from '../../actions/project/Notebook';
 import { showModuleSpreadsheet, fetchAnnotations, clearAnnotations } from '../../actions/project/Spreadsheet';
 import { fetchProject, setBranch } from '../../actions/project/Project';
 import { fetchProjects } from '../../actions/project/ProjectListing';
@@ -43,7 +44,8 @@ import { CONTENT_CHART, CONTENT_DATASET, CONTENT_HIDE, CONTENT_TEXT,
 import { branchPageUrl, isNotEmptyString, notebookPageUrl,
     NotebookResource, spreadsheetPageUrl } from '../../util/App';
 import { HATEOAS_MODULE_APPEND, HATEOAS_MODULE_INSERT,
-    HATEOAS_MODULE_REPLACE, HATEOAS_PROJECT_FILE_UPLOAD } from '../../util/HATEOAS';
+    HATEOAS_MODULE_REPLACE, HATEOAS_PROJECT_FILE_UPLOAD,
+    HATEOAS_MODULE_FREEZE, HATEOAS_MODULE_THAW } from '../../util/HATEOAS';
 import '../../../css/App.css';
 import '../../../css/ProjectPage.css';
 import '../../../css/Chart.css';
@@ -246,6 +248,26 @@ class NotebookPage extends Component {
         // ensured by the child component (not validated here).
         const { dispatch, notebook } = this.props;
         dispatch(createtNotebookCell(notebook, cell, position));
+    }
+    /**
+     * Event handler when the user wants to freeze a cell and its successors.
+     */
+    handleFreezeCell = (cell) => {
+        // Cell has to be an existing workflow module cell. This should be
+        // ensured by the child component (not validated here).
+        const { dispatch, notebook } = this.props;
+        const url = cell.module.links.get(HATEOAS_MODULE_FREEZE)
+        dispatch(freezeOrThawNotebookCell(notebook, url, cell.id))
+    }
+    /**
+     * Event handler when the user wants to freeze a cell and its successors.
+     */
+    handleThawCell = (cell) => {
+        // Cell has to be an existing workflow module cell. This should be
+        // ensured by the child component (not validated here).
+        const { dispatch, notebook } = this.props;
+        const url = cell.module.links.get(HATEOAS_MODULE_THAW)
+        dispatch(freezeOrThawNotebookCell(notebook, url, cell.id))
     }
     /**
      * Dispatch a command specification object for a command that the user
@@ -461,6 +483,8 @@ class NotebookPage extends Component {
                     onSubmitCell={this.handleSubmitCell}
                     userSettings={userSettings}
                 	onEditSpreadsheet={this.handleEditSpreadsheet}
+                    onFreezeCell={this.handleFreezeCell}
+                    onThawCell={this.handleThawCell}
                 />
             );
             // Add modal form for user to enter branch name when creating a new

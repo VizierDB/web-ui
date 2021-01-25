@@ -19,8 +19,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import '../../../css/TableOfContents.css';
-import TableOfContentsToggle from './TableOfContentsToggle.js';
-
 
 /**
  * Dropdown menu for a notebook cell. Displays two icons with dropdown menus.
@@ -30,10 +28,10 @@ import TableOfContentsToggle from './TableOfContentsToggle.js';
  */
 class TableOfContents extends React.Component {
   static propTypes = {
-    contents: PropTypes.object.isRequired,
+    contents: PropTypes.array.isRequired,
   }
   state = {
-    active: true
+    active: false
   }
 
   toggleState = () => { 
@@ -59,9 +57,9 @@ class TableOfContents extends React.Component {
     if(active){ activityClass = "active"; };
 
     return (
-      <div class={ "toc " + activityClass }>
-        <a class="toctoggle" href="#" onClick={this.toggleState}>≡</a>
-        <div class="tocbody">
+      <div className={ "toc " + activityClass }>
+        <a className="toctoggle" onClick={this.toggleState}>≡</a>
+        <div className="tocbody">
           {tocElements}
         </div>
       </div>

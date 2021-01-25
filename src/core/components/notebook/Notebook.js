@@ -46,6 +46,8 @@ class Notebook extends React.Component {
         onRemoveFilteredCommand: PropTypes.func.isRequired,
         onSubmitCell: PropTypes.func.isRequired,
         onSelectNotebookCell: PropTypes.func.isRequired,
+        onFreezeCell: PropTypes.func.isRequired,
+        onThawCell: PropTypes.func.isRequired,
         userSettings: PropTypes.object.isRequired,
         onEditSpreadsheet: PropTypes.func.isRequired
     }
@@ -91,6 +93,7 @@ class Notebook extends React.Component {
             }
         }
     }
+
     /**
      * Reset all recommendations
      */
@@ -125,7 +128,9 @@ class Notebook extends React.Component {
             onSelectNotebookCell,
             onSubmitCell,
             userSettings,
-            onEditSpreadsheet
+            onEditSpreadsheet,
+            onFreezeCell,
+            onThawCell,
         } = this.props;
         // For empty notebooks a message is shown that contains a button to
         // add the first notebook cell.
@@ -204,6 +209,8 @@ class Notebook extends React.Component {
                     onEditSpreadsheet={onEditSpreadsheet}
                     onRecommendAction={this.handleRecommendAction}
                     onResetRecommendations={this.handleResetRecommendations}
+                    onFreezeCell={onFreezeCell}
+                    onThawCell={onThawCell}
                 />
             );
             if (!cell.isNewCell()) {
