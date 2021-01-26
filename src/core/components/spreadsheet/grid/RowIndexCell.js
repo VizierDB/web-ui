@@ -33,8 +33,7 @@ class RowIndexCell extends React.Component {
     static propTypes = {
         disabled: PropTypes.bool.isRequired,
         rowIndex: PropTypes.number.isRequired,
-        rowId: PropTypes.number.isRequired,
-        key: PropTypes.number.isRequired,
+        rowId: PropTypes.string.isRequired,
         value: PropTypes.oneOfType([
              PropTypes.string,
              PropTypes.number

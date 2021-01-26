@@ -28,7 +28,7 @@ class GridCell extends React.Component {
         hasAnnotations: PropTypes.bool.isRequired,
         isActive: PropTypes.bool.isRequired,
         isUpdating: PropTypes.bool.isRequired,
-        rowId: PropTypes.number.isRequired,
+        rowId: PropTypes.string.isRequired,
         rowIndex: PropTypes.number,
         value: PropTypes.oneOfType([
              PropTypes.string,

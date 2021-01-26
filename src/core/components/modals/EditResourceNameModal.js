@@ -113,6 +113,7 @@ class EditResourceNameModal extends React.Component {
         let inputProps = {}
         if(!inputComponent){
         	let ic = <TextInput
+                id="EditResourceNameModal"
 		        value={value}
 	            onChange={this.handleChange}
 	            onKeyDown={this.handleKeyDown}

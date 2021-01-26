@@ -28,7 +28,7 @@ import '../../../../../css/ResourceListing.css';
 export class TextInput extends React.Component {
     static propTypes = {
         id: PropTypes.string.isRequired,
-        value: PropTypes.bool.isRequired,
+        value: PropTypes.string.isRequired,
         onChange: PropTypes.func.isRequired,
         onKeyDown: PropTypes.func.isRequired,
     }

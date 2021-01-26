@@ -65,7 +65,9 @@ class DatasetView extends React.Component {
 
     static getDerivedStateFromProps = (props, state) => {
         if(!props.dataset.isProfiled()){
-
+            return null;
+        } else {
+            return null;
         }
     }
     /**
@@ -137,7 +139,7 @@ class DatasetView extends React.Component {
 
         const columns = dataset.columns;
         // Grid header
-        let header = [<RowIndexCell key={-1} rowIndex={-1} value={' '} />];
+        let header = [<RowIndexCell key={-1} rowId={"-1"} rowIndex={-1} value={' '} />];
         for (let cidx = 0; cidx < columns.length; cidx++) {
             const column = columns[cidx];
             header.push(

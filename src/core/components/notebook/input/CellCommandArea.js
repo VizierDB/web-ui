@@ -450,8 +450,8 @@ class CellCommandArea extends React.Component {
 	                if((isActiveCell) && (paraCode.language === 'sql')) {
 	                	let outputDataset = formValues['output_dataset'];
 	                	additionalParams = (
-	                    		<div class="ui labeled input">
-					                <div class="ui label">
+	                    		<div className="ui labeled input">
+					                <div className="ui label">
 					                	Output Dataset
 					                </div>
 				                    <TextControl
