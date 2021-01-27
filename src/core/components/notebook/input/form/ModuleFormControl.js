@@ -159,7 +159,7 @@ class ModuleFormControl extends React.Component {
                     name={controlSpec.id}
                     selectedDataset={selectedDataset}
                     serviceProperties={serviceProperties}
-                    value={value}
+                    value={value === undefined ? [] : value}
                     onChange={onChange}
                 />
             )
@@ -173,7 +173,7 @@ class ModuleFormControl extends React.Component {
                     name={controlSpec.id}
                     selectedDataset={selectedDataset}
                     serviceProperties={serviceProperties}
-                    value={value}
+                    value={value === undefined ? {} : value}
                     onChange={onChange}
                 />
             )

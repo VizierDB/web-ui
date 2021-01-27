@@ -33,7 +33,7 @@ import { isNotEmptyString } from '../../util/App';
 import '../../../css/ResourceListing.css';
 import '../../../css/ProjectPage.css';
 
-import logo from '../../../img/logo_small_tiny.png';
+import logo from '../../../img/vizier_tiny.svg';
 
 /**
  * Component that allows to select the current branch. In addition to switching
@@ -142,7 +142,7 @@ class AppMenu extends React.Component {
         if (!resource.isMainPage()) {
             menuItems.push(
                 <Menu.Item key='logo' header onClick={onGoHome}>
-                    <Image src={logo} />
+                    <Image src={logo} size="tiny"/>
                 </Menu.Item>
             );
         } else {

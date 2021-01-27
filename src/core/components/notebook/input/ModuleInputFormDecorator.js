@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import LoadDatasetForm from "./LoadDatasetForm";
 
 ModuleInputFormDecorator.propTypes = {
-    components:PropTypes.object.isRequired,
+    components:PropTypes.array.isRequired,
     selectedCommand: PropTypes.object.isRequired,
     cssTable:PropTypes.string,
     datasets: PropTypes.array.isRequired,

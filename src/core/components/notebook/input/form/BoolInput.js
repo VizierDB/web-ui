@@ -28,7 +28,7 @@ import '../../../../../css/ModuleForm.css';
 class BoolInput extends React.Component {
     static propTypes = {
         id: PropTypes.string.isRequired,
-        value: PropTypes.bool.isRequired,
+        value: PropTypes.bool,
         onChange: PropTypes.func.isRequired
     }
     handleChange = (e, { checked }) => {
@@ -39,7 +39,7 @@ class BoolInput extends React.Component {
         const { value } = this.props
         return (
             <span className='boolctrl'>
-                <Checkbox checked={value} onChange={this.handleChange}/>
+                <Checkbox checked={value === undefined ? false : value} onChange={this.handleChange}/>
             </span>
         );
     }

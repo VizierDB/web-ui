@@ -59,8 +59,12 @@ class ControlRow extends React.Component {
         } = this.props;
         const formLabels = []
         const formControls = []
+        console.log("ROW")
+        console.log(value)
         for (let i = 0; i < controlSpec.parameters.length; i++) {
             const child = controlSpec.parameters[i]
+            console.log("CHILD")
+            console.log(child)
             formLabels.push(
                 <td key={formLabels.length} className='inner-form-header'>
                     {child.name}
