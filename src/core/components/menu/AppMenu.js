@@ -142,7 +142,7 @@ class AppMenu extends React.Component {
         if (!resource.isMainPage()) {
             menuItems.push(
                 <Menu.Item key='logo' header onClick={onGoHome}>
-                    <Image src={logo} size="tiny"/>
+                    <Image src={logo}/>
                 </Menu.Item>
             );
         } else {
