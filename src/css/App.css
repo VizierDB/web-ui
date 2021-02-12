@@ -148,9 +148,9 @@ a.external-link:hover {
 h1.home-headline {
     color: #3b4151;
     margin-bottom: 10px;
-    font-size: 3em;
     font-weight: bold;
     font-family: Titillium Web,sans-serif;
+    float: left;
 }
 
 span.headline-small {

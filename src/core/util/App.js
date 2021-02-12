@@ -30,7 +30,6 @@ if (href === '') {
     href = '/'
 }
 
-
 export const baseHref = href;
 export const projectHref = baseHref + 'projects/:project_id';
 export const branchHref = projectHref + '/branches/:branch_id';

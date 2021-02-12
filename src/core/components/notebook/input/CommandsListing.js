@@ -48,10 +48,16 @@ class CommandsListing extends React.Component {
         // Get a list of command types
         const gridColumns = [];
         // Get list of packages. The list is sorted by package name by default.
-        const knownCategories = ['data_m','code','data_v','vizualization','default']
+        const knownCategories = ['data_m','code','data_v','vizualization','default'];
+        const columnOrg = {'MIMIR':0,'DATA':1,'R':2,'SAMPLING':1,'SCALA':2,'SQL':2,'MARKDOWN':2,'PLOT':2,'PYTHON':2,'VIZUAL':3};
         const packages = apiEngine.packages.toList();//.sort((c1, c2) => (knownCategories.indexOf(c1.category)-knownCategories.indexOf(c2.category)));
-        const groupedPackages = this.groupBy(packages, 'category');
-        const sortedKeys = Object.keys(groupedPackages).sort((c1, c2) => (knownCategories.indexOf(c1)-knownCategories.indexOf(c2)))
+        //const groupedPackages = this.groupBy(packages, 'category');
+        const groupedPackages = [[],[],[],[]];
+        for (let pckg of packages) {
+        	let colIdx = (pckg.name.toUpperCase() in columnOrg) ? columnOrg[pckg.name.toUpperCase()] : 1;
+        	groupedPackages[colIdx].push(pckg);
+        }
+        const sortedKeys = [0,1,2,3]//Object.keys(groupedPackages).sort((c1, c2) => (knownCategories.indexOf(c1)-knownCategories.indexOf(c2)))
         //groupedPackages[knownCategories[i]]
         let listItems = [];
         for (const packageCategory of sortedKeys) {
@@ -79,14 +85,14 @@ class CommandsListing extends React.Component {
                         </List.Content>
                     </List.Item> : <List.Item key={listItems.length} onClick={() => (onSelect(pckg.id, cmd.id))}>
                         <List.Content>
-                            <List.Header as='a'>{cmd.name}</List.Header>
+                            <List.Header as='a'>{'  ' + cmd.name}</List.Header>
                         </List.Content>
                     </List.Item>
                     listItems.push(item)
 	            }
 	        }
 	        gridColumns.push(
-                    <Grid.Column width={4} key={gridColumns.length}>
+                    <Grid.Column className={packageCategory} width={4} key={gridColumns.length}>
                         <List link>
                             { listItems }
                         </List>

@@ -21,26 +21,13 @@ import PropTypes from 'prop-types'
 import GridInput from './GridInput';
 import ColumnDropDown from '../menu/ColumnDropDown';
 import { MOVE } from '../../../util/App';
-import styled from 'styled-components';
-import { Loader, Label } from 'semantic-ui-react'
+import { Label } from 'semantic-ui-react'
 import { Draggable, Droppable } from 'react-drag-and-drop'
 import { Icon } from 'semantic-ui-react';
 import {
     VIZUAL
 } from '../../../util/Vizual';
-
-import {
-    CartesianGrid,
-    Tooltip,
-    XAxis,
-    YAxis,
-    BarChart,
-    Bar,
-    Legend,
-  } from 'recharts';
-const Centered = styled.div`
-  text-align: center;
-`;
+import PlotHeader from './PlotHeader';
 
 /**
  * Column header in a spreadsheet grid.
@@ -195,54 +182,23 @@ class HeaderCell extends React.Component {
             }
             cellValue = (
             	<div >
-            		
             		<span className='header-value'>
 	                    {columnName}
 	                </span>
 	                <Label size='mini'>
 	                    {`(${column["type"]})`}
 	                </Label>
-	                
 		            <div >
-                
-                {
-                // TODO: Support other type of data like text. Currently. just bar plot are generated for numerical data types.
-                /* <ColumnDistributionPlot
-                    data={columnDataInfo}
-                    showXLabel={false}
-                    showYLabel={false}
-                    showInfo={false}
-                /> */
-                }
-                {
-                    this.props.dataPlot
-                    ?
-                    <Centered>
-                        <BarChart
-                            width={250}
-                            height={180}
-                            data={this.props.dataPlot.values}
-                        >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="count" fill="steelblue" />
-                        </BarChart>
-                    </Centered>
-                    :
-                    this.props.summaryPlot
-                    ?
-                    <Loader active inline='centered'  content='Loading'  />
-                    :
-                    <p/>
-                }
-                
-	               
-                </div>
-                
-                
+                    {
+                        this.props.isLoadingPlot &&
+                        this.props.dataset && this.props.dataset.isProfiled() &&
+                        <PlotHeader
+                            column={column}
+                            profiledData={this.props.profiledData}
+                            isLoadingPlot={this.props.isLoadingPlot}
+                        />
+                    }
+                    </div>
 	            </div>
             );
         }

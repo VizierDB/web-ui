@@ -40,6 +40,7 @@ class CodeCell extends React.Component {
         onFocus: PropTypes.func.isRequired,
         readOnly: PropTypes.bool.isRequired,
         value: PropTypes.string,
+        locked: PropTypes.bool
     }
     /**
      * Handle changes in the code mirror editor. Keep track of the editor value
@@ -115,7 +116,8 @@ class CodeCell extends React.Component {
             language,
             onFocus,
             readOnly,
-            value
+            value,
+            locked
         } = this.props;
         // The editor mode and the shown code snippet selector depends on the
         // value of the language property. By now we support the following
@@ -135,40 +137,50 @@ class CodeCell extends React.Component {
         }
         let codeEditor = null;
         if(isActiveCell){
-        	codeEditor = <div className='editor-container'>
-	        	<CodeMirror
-		            value={value}
-		            cursor={cursorPosition}
-		            options={{
-		                autofocus: isActiveCell,
-		                lineNumbers: true,
-		                mode: mode,
-		                indentUnit: 4,
-		                readOnly: ((!isActiveCell) || readOnly) ,
-		                dragDrop: false,
-		                extraKeys: { Tab: this.tabReplace }
-		            }}
-		            onBeforeChange={(editor, data, value) => {
-		                this.handleChange(editor, value, data);
-		            }}
-		        	onCursor={(editor, data) => {
-		        		this.handleCursorActivity(editor, data)
-		        	}}
-		            onFocus={onFocus}
-		        />
-	         </div>
+        	if(locked){
+        		codeEditor = <div className='editor-container'>{'Code Cell'}</div>
+        	}
+        	else{
+	        	codeEditor = <div className='editor-container'>
+		        	<CodeMirror
+			            value={value}
+			            cursor={cursorPosition}
+			            options={{
+			                autofocus: isActiveCell,
+			                lineNumbers: true,
+			                mode: mode,
+			                indentUnit: 4,
+			                readOnly: ((!isActiveCell) || readOnly) ,
+			                dragDrop: false,
+			                extraKeys: { Tab: this.tabReplace }
+			            }}
+			            onBeforeChange={(editor, data, value) => {
+			                this.handleChange(editor, value, data);
+			            }}
+			        	onCursor={(editor, data) => {
+			        		this.handleCursorActivity(editor, data)
+			        	}}
+			            onFocus={onFocus}
+			        />
+		         </div>
+        	}
         }
         else {
-        	if(!(language === 'markdown')){
-	            codeEditor = 
-        	    <div 
-        	      className='editor-container'
-        	      onClick={this.onClickInactiveCodeCell} >
-	        		<Highlight className={ language }>
-	        		  { value }
-	        		</Highlight>
-	            </div>
-            }
+        	if(locked){
+        		codeEditor = <div className='editor-container'>{'Code Cell'}</div>
+        	}
+        	else{
+        		if(!(language === 'markdown')){
+        	      codeEditor = 
+	        	    <div 
+	        	      className='editor-container'
+	        	      onClick={this.onClickInactiveCodeCell} >
+		        		<Highlight className={ language }>
+		        		  { value }
+		        		</Highlight>
+		            </div>
+	            }
+        	}
         }
         return (<div>
         		  <div id="empxCalc" className="empxCalc"></div>
