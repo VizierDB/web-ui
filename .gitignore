@@ -22,3 +22,5 @@
 npm-debug.log*
 npm-debug.log*
 npm-error.log*
+
+.eslintcache
