@@ -23,6 +23,7 @@ import RowIndexCell from './grid/RowIndexCell';
 import SpreadsheetDropDown from './menu/SpreadsheetDropDown';
 import SpreadsheetScrollbar from './SpreadsheetScrollbar';
 import ColumnView from './ColumnView';
+import HeaderCell from './grid/HeaderCell'; 
 
 import '../../../css/App.css'
 import '../../../css/Notebook.css'
