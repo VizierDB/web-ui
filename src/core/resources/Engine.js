@@ -147,7 +147,10 @@ export class PackageRegistry {
      * Get the specification for a given command.
      */
     getCommandSpec(packageId, commandId) {
-        return this.packages[packageId].commands[commandId];
+    	if(packageId && commandId){
+            return this.packages[packageId].commands[commandId];
+    	}
+    	else return {name:'Create'}
     }
     /**
      * Get a listing of package declarations in the registry.

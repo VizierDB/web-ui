@@ -221,7 +221,7 @@ class Notebook extends React.Component {
         }
 
         let tableOfContents = null;
-        if("tableOfContents" in notebook.workflow) {
+        if("tableOfContents" in notebook.workflow && Array.isArray(notebook.workflow['tableOfContents']) && (notebook.workflow['tableOfContents'].length > 0)) {
             tableOfContents = (
                 <TableOfContents
                     contents={notebook.workflow.tableOfContents} />
