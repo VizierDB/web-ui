@@ -44,8 +44,8 @@ export const VIZUAL_OP = 'vizual';
 
 // Sort orders
 export const SORT = {
-    ASC: 'A-Z',
-    DESC: 'Z-A'
+    ASC: 'asc',
+    DESC: 'desc'
 }
 
 
@@ -152,8 +152,12 @@ export const sortDataset = (dataset, column, sortOrder) => ({
 	commandId: VIZUAL.SORT,
     arguments: [
     	{id:'dataset',value:dataset},
-        {id:'column',value:column},
-        {id:'columns_order',value:sortOrder}
+        {id:'columns',value:[
+            [
+                {id:'columns_column',value:column},
+                {id:'columns_order',value:sortOrder}
+            ]
+        ]}
     ]
 })
 
