@@ -29,7 +29,7 @@ import '../../../css/Spreadsheet.css'
  * user to interact with the data. This is a static view on a historic
  * dataset that was generated as output of a workflow module.
  */
-class SummaryPlotHeader extends React.Component {
+class Headers extends React.Component {
     static propTypes = {
         dataset: PropTypes.object.isRequired,
     }
@@ -39,26 +39,17 @@ class SummaryPlotHeader extends React.Component {
         const profiledData =  dataset.properties;
         const columns = dataset.columns;
         // Grid header
-        let header = [<RowIndexCell key={-1} value=' ' />];
+        let header = [<RowIndexCell key={-1} rowIndex={-1} value={' '} />];
         for (let cidx = 0; cidx < columns.length; cidx++) {
             const column = columns[cidx];
-            let dataPlot_ = false;
-            if(dataset.isProfiled()){
-                dataPlot_ = [{}];
-                for (let property of profiledData.columns){
-                    if (property.column.id === column.id){
-                        dataPlot_= property;
-                        break;
-                    }
-                }
-            }
             header.push(
                 <HeaderCell
+                    dataset={dataset}
                     key={column.id}
                     column={column}
                     columnIndex={cidx}
-                    dataPlot={dataPlot_}
-                    summaryPlot={true}
+                    profiledData={profiledData}
+                    isLoadingPlot={this.props.isLoadingPlot}
                 />
             );
         }
@@ -69,4 +60,4 @@ class SummaryPlotHeader extends React.Component {
     }
 }
 
-export default SummaryPlotHeader;
+export default Headers;

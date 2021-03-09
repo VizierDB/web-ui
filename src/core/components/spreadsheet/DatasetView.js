@@ -19,11 +19,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import GridCell from './grid/GridCell';
-import HeaderCell from './grid/HeaderCell';
 import RowIndexCell from './grid/RowIndexCell';
 import SpreadsheetDropDown from './menu/SpreadsheetDropDown';
 import SpreadsheetScrollbar from './SpreadsheetScrollbar';
 import ColumnView from './ColumnView';
+import HeaderCell from './grid/HeaderCell'; 
 
 import '../../../css/App.css'
 import '../../../css/Notebook.css'
@@ -31,7 +31,7 @@ import '../../../css/Spreadsheet.css'
 import 'toastr/build/toastr.min.css'
 
 import {Button, Icon, Popup, Label, Loader} from 'semantic-ui-react'
-import SummaryPlotHeader from "./SummaryPlotHeader";
+import Headers from "./Headers";
 import toastr from 'toastr'
 
 /**
@@ -185,11 +185,12 @@ class DatasetView extends React.Component {
             <div className='spreadsheet-table-container'>
                 <table className='spreadsheet'>
                 {
+                    // Grid header
                     this.state.typeView === 1
                         ?
-                        <thead>{header}</thead>
+                        <Headers dataset={dataset} isLoadingPlot={false} />
                         :
-                        <SummaryPlotHeader dataset={dataset}/>
+                        <Headers dataset={dataset} isLoadingPlot={true} />
                 }
                 <tbody>{rows}</tbody>
                 </table>

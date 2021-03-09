@@ -102,28 +102,28 @@ Inside the app directory, you can run several commands:
 
 **Install build dependencies**
 
->>> yarn install
+>>> npm install
 
 
 **Start the development server**
 
->>> yarn start
+>>> npm start
 
 **Bundles the app into static files for production**
 
->>> yarn build
+>>> npm build
 
 **Additional Commands**
 
 Starts the test runner.
 
->>> yarn test
+>>> npm test
 
 Remove this tool and copies build dependencies, configuration files and scripts into the app directory. If you do this, you can’t go back!
 
->>> yarn eject
+>>> npm eject
 
 Configuration
 ~~~~~~~~~~~~~
 
-The UI app connects to the Web API server. The Url for the server is currently hard-coded in the file ``public/env.js``. Before running ``yarn start`` adjust the Url to point to a running Web API server. By default a local server running on port 5000 is used.
+The UI app connects to the Web API server. The Url for the server is currently hard-coded in the file ``public/env.js``. Before running ``npm start`` adjust the Url to point to a running Web API server. By default a local server running on port 5000 is used.

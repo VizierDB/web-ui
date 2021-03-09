@@ -77,6 +77,7 @@ class ModuleHandle {
         for (var ts in json.timestamps) {
             this.timestamps[ts] = utc2LocalTime(json.timestamps[ts]);
         }
+        this.locked = json.locked;
         return this;
     }
 }
