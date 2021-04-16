@@ -570,7 +570,7 @@ class NotebookPage extends Component {
                     onSwitchBranch={this.handleSwitchBranch}
                     project={project}
                     projectList={projectList}
-                    resource={new NotebookResource()}
+                    resource={NotebookResource()}
                     serviceApi={serviceApi}
                     userSettings={userSettings}
                 />

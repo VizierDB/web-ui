@@ -52,6 +52,7 @@ class NotebookCell extends React.Component {
         cell: PropTypes.object.isRequired,
         cellNumber: PropTypes.number.isRequired,
         datasets: PropTypes.array.isRequired,
+        artifacts: PropTypes.array.isRequired,
         isActiveCell: PropTypes.bool.isRequired,
         isNewNext: PropTypes.bool.isRequired,
         isNewPrevious: PropTypes.bool.isRequired,
@@ -188,6 +189,7 @@ class NotebookCell extends React.Component {
             cell,
             cellNumber,
             datasets,
+            artifacts,
             isActiveCell,
             isNewNext,
             isNewPrevious,
@@ -295,6 +297,7 @@ class NotebookCell extends React.Component {
             <CellCommandArea
                 apiEngine={apiEngine}
                 datasets={datasets}
+                artifacts={artifacts}
                 cell={cell}
                 isActiveCell={(isActiveCell) && (!notebook.readOnly)}
                 onClick={this.handleSelectCell}

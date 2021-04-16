@@ -7,6 +7,7 @@ ModuleInputFormDecorator.propTypes = {
     selectedCommand: PropTypes.object.isRequired,
     cssTable:PropTypes.string,
     datasets: PropTypes.array.isRequired,
+    artifacts: PropTypes.array.isRequired,
     selectedDataset:PropTypes.object,
     serviceProperties: PropTypes.object.isRequired,
     values: PropTypes.object.isRequired,
@@ -18,6 +19,7 @@ export default function ModuleInputFormDecorator(props) {
         selectedCommand,
         cssTable,
         datasets,
+        artifacts,
         selectedDataset,
         serviceProperties,
         values,
@@ -34,6 +36,7 @@ export default function ModuleInputFormDecorator(props) {
         case "load": return <LoadDatasetForm
             selectedCommand={selectedCommand}
             datasets={datasets}
+            artifacts={artifacts}
             selectedDataset={selectedDataset}
             serviceProperties={serviceProperties}
             values = {values}

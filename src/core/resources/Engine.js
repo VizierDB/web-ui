@@ -48,6 +48,7 @@ export const DT_BOOL = 'bool';
 export const DT_CODE = 'code';
 export const DT_COLUMN_ID = 'colid';
 export const DT_DATASET_ID = 'dataset';
+export const DT_ARTIFACT_ID = 'artifact';
 export const DT_DECIMAL = 'decimal';
 export const DT_FILE_ID = 'fileid';
 export const DT_INT = 'int';

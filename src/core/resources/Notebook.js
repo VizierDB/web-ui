@@ -17,6 +17,7 @@
  */
 
 import { DatasetDescriptor } from './Dataset';
+import { ArtifactDescriptor } from './Artifact';
 import { HATEOASReferences } from '../util/HATEOAS';
 import {
     OutputChart,
@@ -67,6 +68,13 @@ class ModuleHandle {
             const ds = datasets[id];
             this.datasets.push(
                 new DatasetDescriptor(id, name, ds.columns, ds.links)
+            );
+        }
+        this.artifacts = [];
+        for (let i = 0; i < json.artifacts.length; i++) {
+            const { id, name, objType, category } = json.artifacts[i];
+            this.artifacts.push(
+                new ArtifactDescriptor(id, name, objType, category, json.links)
             );
         }
         this.charts = json.charts;

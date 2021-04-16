@@ -153,6 +153,7 @@ class Notebook extends React.Component {
         let isNewPrevious = false;
         let hasActiveCell = false;
         let datasets = [];
+        let artifacts = [];
         for (let i = 0; i < notebook.cells.length; i++) {
             const cell = notebook.cells[i];
             let isNewNext = false;
@@ -187,6 +188,7 @@ class Notebook extends React.Component {
                     cell={cell}
                     cellNumber={moduleCount}
                     datasets={datasets}
+                    artifacts={artifacts}
                     isActiveCell={cell.id === activeNotebookCell}
                     isNewNext={isNewNext}
                     isNewPrevious={isNewPrevious}
@@ -216,6 +218,7 @@ class Notebook extends React.Component {
             if (!cell.isNewCell()) {
                 moduleCount++;
                 datasets = cell.module.datasets;
+                artifacts = cell.module.artifacts;
             }
             isNewPrevious = cell.isNewCell();
         }

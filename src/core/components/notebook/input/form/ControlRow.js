@@ -34,6 +34,7 @@ class ControlRow extends React.Component {
     static propTypes = {
         controlSpec: PropTypes.object.isRequired,
         datasets: PropTypes.array.isRequired,
+        artifacts: PropTypes.array.isRequired,
         id: PropTypes.string.isRequired,
         onChange: PropTypes.func.isRequired,
         selectedDataset: PropTypes.object,
@@ -53,6 +54,7 @@ class ControlRow extends React.Component {
         const {
             controlSpec,
             datasets,
+            artifacts,
             selectedDataset,
             serviceProperties,
             value
@@ -76,6 +78,7 @@ class ControlRow extends React.Component {
                         key={child.id}
                         controlSpec={child}
                         datasets={datasets}
+                        artifacts={artifacts}
                         onChange={this.handleChange}
                         selectedDataset={selectedDataset}
                         serviceProperties={serviceProperties}

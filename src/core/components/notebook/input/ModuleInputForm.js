@@ -27,6 +27,7 @@ import ModuleInputFormDecorator from "./ModuleInputFormDecorator";
 class ModuleInputForm extends React.Component {
     static propTypes = {
         datasets: PropTypes.array.isRequired,
+        artifacts: PropTypes.array.isRequired,
         selectedCommand: PropTypes.object.isRequired,
         serviceProperties: PropTypes.object.isRequired,
         values: PropTypes.object.isRequired,
@@ -35,6 +36,7 @@ class ModuleInputForm extends React.Component {
     render() {
         const {
             datasets,
+            artifacts,
             selectedCommand,
             serviceProperties,
             onChange,
@@ -65,6 +67,7 @@ class ModuleInputForm extends React.Component {
                                 key={para.id}
                                 controlSpec={para}
                                 datasets={datasets}
+                                artifacts={artifacts}
                                 selectedDataset={selectedDataset}
                                 serviceProperties={serviceProperties}
                                 value={values[para.id]}
@@ -84,6 +87,7 @@ class ModuleInputForm extends React.Component {
                 selectedCommand={ selectedCommand }
                 cssTable = {cssTable}
                 datasets = { datasets }
+                artifacts = { artifacts }
                 selectedDataset = { selectedDataset }
                 serviceProperties = { serviceProperties }
                 values = { values }

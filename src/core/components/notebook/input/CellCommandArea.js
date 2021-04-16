@@ -45,6 +45,7 @@ class CellCommandArea extends React.Component {
     static propTypes = {
         apiEngine: PropTypes.object.isRequired,
         datasets: PropTypes.array.isRequired,
+        artifacts: PropTypes.array.isRequired,
         cell: PropTypes.object.isRequired,
         isActiveCell: PropTypes.bool.isRequired,
         onClick: PropTypes.func.isRequired,
@@ -348,6 +349,7 @@ class CellCommandArea extends React.Component {
             apiEngine,
             cell,
             datasets,
+            artifacts,
             isActiveCell,
             onClick,
             onSubmit,
@@ -521,7 +523,8 @@ class CellCommandArea extends React.Component {
 	                            {selectedCommand.name}
 	                        </p>
 	                        <ModuleInputForm
-	                            datasets={datasets}
+                                datasets={datasets}
+                                artifacts={artifacts}
 	                            onChange={this.handleFormValueChange}
 	                            selectedCommand={selectedCommand}
 	                            serviceProperties={apiEngine.serviceProperties}

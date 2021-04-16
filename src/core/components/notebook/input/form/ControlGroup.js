@@ -42,6 +42,7 @@ class ControlGroup extends React.Component {
     static propTypes = {
         controlSpec: PropTypes.object.isRequired,
         datasets: PropTypes.array.isRequired,
+        artifacts: PropTypes.array.isRequired,
         id: PropTypes.string.isRequired,
         onChange: PropTypes.func.isRequired,
         selectedDataset: PropTypes.object,
@@ -161,6 +162,7 @@ class ControlGroup extends React.Component {
         const {
             controlSpec,
             datasets,
+            artifacts,
             id,
             selectedDataset,
             serviceProperties,
@@ -194,8 +196,9 @@ class ControlGroup extends React.Component {
                         <ModuleFormControl
                             key={child.id}
                             controlSpec={child}
-                            datasets={datasets}
-                            onChange={(name, value) => (this.handleChange(t, name, value))}
+                            datasets={datasets} 
+                            artifacts={artifacts}
+                           onChange={(name, value) => (this.handleChange(t, name, value))}
                             selectedDataset={selectedDataset}
                             serviceProperties={serviceProperties}
                             value={tuple[child.id]}
@@ -249,6 +252,7 @@ class ControlGroup extends React.Component {
                         key={child.id}
                         controlSpec={child}
                         datasets={datasets}
+                        artifacts={artifacts}
                         onChange={(name, value) => (this.handleAdd(child.id, value))}
                         selectedDataset={selectedDataset}
                         serviceProperties={serviceProperties}

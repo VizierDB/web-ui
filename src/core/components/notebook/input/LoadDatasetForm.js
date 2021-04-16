@@ -9,6 +9,7 @@ import Progress from "semantic-ui-react/dist/commonjs/modules/Progress";
 LoadDatasetForm.propTypes = {
     selectedCommand: PropTypes.object.isRequired,
     datasets: PropTypes.array.isRequired,
+    artifacts: PropTypes.array.isRequired,
     selectedDataset:PropTypes.object,
     serviceProperties: PropTypes.object.isRequired,
     values: PropTypes.object.isRequired,
@@ -74,6 +75,7 @@ export default function LoadDatasetForm(props) {
         { menuItem:<Label size="large" content="From Local Machine" icon='computer' />, render: ()=> <Tab.Pane>{
                 <LoadFormPane
                     datasets = {datasets}
+                    artifacts = {artifacts}
                     selectedDataset={selectedDataset}
                     serviceProperties={serviceProperties}
                     selectedCommand={selectedCommand}
@@ -84,6 +86,7 @@ export default function LoadDatasetForm(props) {
         { menuItem: <Label size="large" content='From the Internet' icon='world' />, render: ()=> <Tab.Pane>{
                 <LoadFormPane
                     datasets = {datasets}
+                    artifacts = {artifacts}
                     selectedDataset={selectedDataset}
                     serviceProperties={serviceProperties}
                     selectedCommand={selectedCommand}
@@ -106,6 +109,7 @@ export default function LoadDatasetForm(props) {
  */
 const LoadFormPane = (props) => {
     const {datasets,
+        artifacts,
         selectedDataset,
         serviceProperties,
         selectedCommand,
@@ -148,6 +152,7 @@ const LoadFormPane = (props) => {
                             key={para.id}
                             controlSpec={para}
                             datasets={datasets}
+                            artifacts={artifacts}
                             selectedDataset={selectedDataset}
                             serviceProperties={serviceProperties}
                             value={tabState[para.id]}

@@ -23,12 +23,14 @@ import ColumnSelector from './ColumnSelector';
 import ControlGroup from './ControlGroup';
 import ControlRow from './ControlRow';
 import DatasetSelector from './DatasetSelector';
+import ArtifactSelector from './ArtifactSelector';
 import FileSelector from './FileSelector';
 import TextControl from './TextControl';
 import TextSelector from './TextSelector';
 import {
     DT_BOOL, DT_COLUMN_ID, DT_DATASET_ID, DT_DECIMAL, DT_FILE_ID, DT_INT,
-    DT_LIST, DT_RECORD, DT_ROW_ID, DT_ROW_INDEX, DT_SCALAR, DT_STRING, DT_URL
+    DT_LIST, DT_RECORD, DT_ROW_ID, DT_ROW_INDEX, DT_SCALAR, DT_STRING, DT_URL,
+    DT_ARTIFACT_ID
 } from '../../../../resources/Engine';
 import URLSelector from "./URLSelector";
 
@@ -41,6 +43,7 @@ class ModuleFormControl extends React.Component {
     static propTypes = {
         controlSpec: PropTypes.object.isRequired,
         datasets: PropTypes.array.isRequired,
+        artifacts: PropTypes.array.isRequired,
         selectedDataset: PropTypes.object,
         serviceProperties: PropTypes.object.isRequired,
         value: PropTypes.oneOfType([
@@ -56,6 +59,7 @@ class ModuleFormControl extends React.Component {
         const {
             controlSpec,
             datasets,
+            artifacts,
             selectedDataset,
             serviceProperties,
             value,
@@ -73,6 +77,20 @@ class ModuleFormControl extends React.Component {
                     onChange={onChange}
                 />
             )
+        } else if (controlSpec.datatype === DT_ARTIFACT_ID) {
+            return (
+                <ArtifactSelector
+                    key={controlSpec.id}
+                    id={controlSpec.id}
+                    isRequired={controlSpec.required ? true : false}
+                    name={controlSpec.id}
+                    artifactType={controlSpec.artifactType}
+                    artifacts={artifacts}
+                    datasets={datasets}
+                    value={value}
+                    onChange={onChange}
+                />
+            )
         } else if (controlSpec.datatype === DT_DATASET_ID) {
             return (
                 <DatasetSelector
@@ -80,7 +98,6 @@ class ModuleFormControl extends React.Component {
                     id={controlSpec.id}
                     isRequired={controlSpec.required ? true : false}
                     name={controlSpec.id}
-                    datasets={datasets}
                     value={value}
                     onChange={onChange}
                 />
@@ -155,6 +172,7 @@ class ModuleFormControl extends React.Component {
                     key={controlSpec.id}
                     controlSpec={controlSpec}
                     datasets={datasets}
+                    artifacts={artifacts}
                     id={controlSpec.id}
                     name={controlSpec.id}
                     selectedDataset={selectedDataset}
@@ -169,6 +187,7 @@ class ModuleFormControl extends React.Component {
                     key={controlSpec.id}
                     controlSpec={controlSpec}
                     datasets={datasets}
+                    artifacts={artifacts}
                     id={controlSpec.id}
                     name={controlSpec.id}
                     selectedDataset={selectedDataset}

@@ -145,7 +145,7 @@ class MainPage extends Component {
                 dispatch={dispatch}
                 isActive={false}
                 projectList={projects}
-                resource={new MainPageResource()}
+                resource={MainPageResource()}
                 serviceApi={serviceApi}
                 userSettings={userSettings}
             />
