@@ -20,7 +20,7 @@ LoadDatasetForm.propTypes = {
  * Creates a Load Dataset Form with internal state management per tab/source type
  */
 export default function LoadDatasetForm(props) {
-    const {selectedCommand, datasets, selectedDataset, serviceProperties, values, onChange} = props;
+    const {selectedCommand, datasets, artifacts, selectedDataset, serviceProperties, values, onChange} = props;
 
     const initialState = {
         "name":null,
