@@ -100,6 +100,8 @@ class ModuleFormControl extends React.Component {
                     name={controlSpec.id}
                     value={value}
                     onChange={onChange}
+                    artifacts={artifacts}
+                    datasets={datasets}
                 />
             )
         } else if ((controlSpec.datatype === DT_STRING) && (controlSpec.values)) {

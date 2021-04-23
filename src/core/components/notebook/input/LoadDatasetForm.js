@@ -75,7 +75,7 @@ export default function LoadDatasetForm(props) {
         { menuItem:<Label size="large" content="From Local Machine" icon='computer' />, render: ()=> <Tab.Pane>{
                 <LoadFormPane
                     datasets = {datasets}
-                    artifacts = {artifacts}
+                    artifacts = {[]}
                     selectedDataset={selectedDataset}
                     serviceProperties={serviceProperties}
                     selectedCommand={selectedCommand}
@@ -86,7 +86,7 @@ export default function LoadDatasetForm(props) {
         { menuItem: <Label size="large" content='From the Internet' icon='world' />, render: ()=> <Tab.Pane>{
                 <LoadFormPane
                     datasets = {datasets}
-                    artifacts = {artifacts}
+                    artifacts = {[]}
                     selectedDataset={selectedDataset}
                     serviceProperties={serviceProperties}
                     selectedCommand={selectedCommand}
