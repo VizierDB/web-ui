@@ -31,6 +31,7 @@ import {
     CONTENT_DATASET,
     CONTENT_TEXT,
     CONTENT_HIDE,
+    CONTENT_JAVASCRIPT,
     OutputText,
     CONTENT_TIMESTAMPS, CONTENT_MULTIPLE, CONTENT_MARKDOWN, CONTENT_HTML
 } from '../../../resources/Outputs';
@@ -42,6 +43,8 @@ import { isCellOutputRequest } from '../../../actions/project/Notebook';
 import 'toastr/build/toastr.min.css'
 import toastr from 'toastr'
 import gfm from 'remark-gfm'
+import JavascriptCellOutput from "./JavascriptCellOutput"
+
 
 /**
  * Output area for notebook cells that have a workflow module associated with
@@ -222,6 +225,8 @@ class CellOutputArea extends React.Component {
                 case CONTENT_TEXT: outputs['text/plain']  = stdout.lines.join("\n"); break;
                 case CONTENT_HTML: outputs['text/html']  = stdout.lines.join("\n"); break;
                 case CONTENT_MARKDOWN: outputs['text/markdown']  = stdout.lines.join("\n"); break;
+                case CONTENT_MARKDOWN: outputs['text/markdown']  = stdout.lines.join("\n"); break;
+                case CONTENT_JAVASCRIPT: outputs['text/javascript'] = stdout.lines[0]; break;
                 default: outputs['text/plain']  = stdout.lines.join("\n"); break;
             }
         }else{
@@ -262,7 +267,13 @@ class CellOutputArea extends React.Component {
                 renders[out] = this.getDatasetView(cell.id, outputs[out])
             } else if (out === "chart/view"){
                 renders[out] = this.getChartView(outputs[out].data.name, outputs[out].result)
-            } else {
+            } else if (out === "text/javascript"){
+                renders[out] = 
+                    <JavascriptCellOutput html={outputs[out].value.html}
+                                          code={outputs[out].value.code}
+                                          deps={outputs[out].value.js_deps}/>
+                
+            }  else {
                 renders[out] = (
                     <pre className='plain-text' onClick={onSelectCell}>
                             {JSON.stringify(outputs[out],null,2)}

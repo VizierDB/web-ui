@@ -26,6 +26,7 @@ import {
     OutputMarkdown,
     OutputDataset,
     OutputMultiple,
+    OutputJavascript,
     CONTENT_TEXT
 } from './Outputs';
 import { DatasetHandle } from './Dataset';
@@ -483,6 +484,8 @@ const getModuleDefaultOutput = (module) => {
             outputResource = new OutputHtml(stdout);
         } else if (out.type === 'text/markdown') {
             outputResource = new OutputMarkdown(stdout);
+        } else if (out.type === 'text/javascript') {
+            outputResource = new OutputJavascript(stdout);
         } else  {
             outputResource = new OutputText(stdout);
         }

@@ -32,6 +32,7 @@ export const CONTENT_HTML = 'CONTENT_HTML';
 export const CONTENT_MARKDOWN = 'CONTENT_MARKDOWN';
 export const CONTENT_HIDE = 'CONTENT_HIDE';
 export const CONTENT_TEXT = 'CONTENT_TEXT';
+export const CONTENT_JAVASCRIPT = 'CONTENT_JAVASCRIPT';
 export const CONTENT_TIMESTAMPS = 'CONTENT_TIMESTAMPS';
 export const CONTENT_MULTIPLE = 'CONTENT_MULTIPLE';
 
@@ -52,6 +53,7 @@ class OutputResource {
     isMarkdown = () => (this.type === CONTENT_MARKDOWN);
     isText = () => (this.type === CONTENT_TEXT);
     isTimestamps = () => (this.type === CONTENT_TIMESTAMPS);
+    isJavascript = () => (this.type === CONTENT_JAVASCRIPT);
     isMultiple = () => (this.type === CONTENT_MULTIPLE);
 }
 
@@ -141,6 +143,32 @@ export class OutputHtml extends OutputResource {
             if (out.type != null) {
                 if (out.type === 'text/html') {
                     this.lines.push(out.value);
+                }
+            } else {
+                this.lines.push(out);
+            }
+        }
+    }
+    /**
+     * Return a copy of the resource where the isFetching flag is true.
+     */
+    setFetching() {
+        return new OutputHtml(this.lines, true);
+    }
+}
+/**
+ * Output resource for showing content of the module standard output as HTML
+ * in the output area of a notebook cell, enhanced with Javascript
+ */
+export class OutputJavascript extends OutputResource {
+    constructor(outputObjects, isFetching) {
+        super(CONTENT_JAVASCRIPT, isFetching);
+        this.lines  = [];
+        for (let j = 0; j < outputObjects.length; j++) {
+            const out = outputObjects[j];
+            if (out.type != null) {
+                if (out.type === 'text/javascript') {
+                    this.lines.push(out);
                 }
             } else {
                 this.lines.push(out);
@@ -275,6 +303,8 @@ export const StandardOutput = (module) => {
             outputResource = new OutputHtml(stdout);
         } else if (out.type === 'text/markdown') {
             outputResource = new OutputMarkdown(stdout);
+        } else if (out.type === 'text/javascript') {
+            outputResource = new OutputJavascript(stdout);
         } else if (out.type === 'chart/view') {
             outputResource = new OutputChart(out.value.data.name, out.value.result);
         } else if (out.type === 'dataset/view') {
