@@ -44,7 +44,8 @@ export default function LoadDatasetForm(props) {
      * Load cell state values into the form when rendering an existing cell
      */
     useEffect(()=> {
-        if(values["file"]["url"]===null){
+        console.log(values["file"])
+        if(values["file"]["url"] == null){
             setState[0](values);
             setActiveIndex(0);
         }else{
