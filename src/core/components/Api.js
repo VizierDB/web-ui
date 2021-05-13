@@ -47,7 +47,8 @@ export class ApiPolling extends React.Component {
      */
     componentDidMount() {
         const { interval, onFetch, resource } = this.props;
-        this.timer = setInterval(() => (onFetch(resource)), interval);
+        window.pollingTimer = setInterval(() => (onFetch(resource)), interval);
+        this.timer = window.pollingTimer
     }
     /**
      * Cancel the fetch timer.

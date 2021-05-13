@@ -62,7 +62,7 @@ class DatasetSelector extends React.Component {
                 value: ''
             })
         }
-        for (let i = 0; i < datasets.length; i++) {
+        for (let i = 0; datasets && i < datasets.length; i++) {
             const dataset = datasets[i];
             options.push({
                 key: dataset.name,

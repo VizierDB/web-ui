@@ -130,7 +130,10 @@ export const checkModuleStatus = (notebook, cell) => (dispatch) => (
     ).then(
         json => {
             if (json.state !== cell.module.state) {
-                return fetchAuthed(notebook.workflow.links.get(HATEOAS_BRANCH_HEAD))(dispatch).then(
+            	//TODO: hurry up and tell the interval to die in your render loop, react.  
+            	//  Nevermind; hacking for now.  FIXIT: soon
+            	clearInterval(window.pollingTimer);
+            	return fetchAuthed(notebook.workflow.links.get(HATEOAS_BRANCH_HEAD))(dispatch).then(
                     response => getJson(response, 200),
                     error => dispatch(serviceError(error.message))
                 ).then(
