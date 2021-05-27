@@ -90,9 +90,11 @@ export default function ColumnView(props){
                                     {dataPlot_.distinctValueCount != null  && <li>Unique Values</li>}
                                     {dataPlot_.num_distinct_values != null  && <li>Unique Values</li>}
                                     {dataPlot_.count != null  && <li>Total Values</li>}
+                                    {dataPlot_.nullCount != null  && <li>Null Values</li>}
                                     {dataPlot_.distinctValueCount != null  && (<li>{dataPlot_.distinctValueCount}</li>)}
                                     {dataPlot_.num_distinct_values != null  && (<li>{dataPlot_.num_distinct_values}</li>)}
                                     {dataPlot_.count != null  && (<li>{dataPlot_.count}</li>)}
+                                    {dataPlot_.nullCount != null  && (<li>{dataPlot_.nullCount}</li>)}
                                 </ul>
                             </div>
                             :
@@ -107,6 +109,7 @@ export default function ColumnView(props){
                                         {dataPlot_.distinctValueCount != null  && <li>Unique Values</li>}
                                         {dataPlot_.num_distinct_values != null  && <li>Unique Values</li>}
                                         {dataPlot_.count != null  && <li>Total Values</li>}
+                                        {dataPlot_.nullCount != null  && <li>Null Values</li>}
                                         {dataPlot_.max != null  && (<li>{dataPlot_.max}</li>)}
                                         {dataPlot_.min != null  && (<li>{dataPlot_.min}</li>)}
                                         {dataPlot_.mean != null  && (<li>{dataPlot_.mean.toFixed(2)}</li>)}
@@ -115,6 +118,7 @@ export default function ColumnView(props){
                                         {dataPlot_.distinctValueCount != null  && (<li>{dataPlot_.distinctValueCount}</li>)}
                                         {dataPlot_.num_distinct_values != null  && (<li>{dataPlot_.num_distinct_values}</li>)}
                                         {dataPlot_.count != null  && (<li>{dataPlot_.count}</li>)}
+                                        {dataPlot_.nullCount != null  && (<li>{dataPlot_.nullCount}</li>)}
                                     </ul>
                                 </div>
                                 :

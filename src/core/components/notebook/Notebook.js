@@ -47,7 +47,9 @@ class Notebook extends React.Component {
         onSubmitCell: PropTypes.func.isRequired,
         onSelectNotebookCell: PropTypes.func.isRequired,
         onFreezeCell: PropTypes.func.isRequired,
+        onFreezeOneCell: PropTypes.func.isRequired,
         onThawCell: PropTypes.func.isRequired,
+        onThawOneCell: PropTypes.func.isRequired,
         userSettings: PropTypes.object.isRequired,
         onEditSpreadsheet: PropTypes.func.isRequired
     }
@@ -130,7 +132,9 @@ class Notebook extends React.Component {
             userSettings,
             onEditSpreadsheet,
             onFreezeCell,
+            onFreezeOneCell,
             onThawCell,
+            onThawOneCell,
         } = this.props;
         // For empty notebooks a message is shown that contains a button to
         // add the first notebook cell.
@@ -212,7 +216,9 @@ class Notebook extends React.Component {
                     onRecommendAction={this.handleRecommendAction}
                     onResetRecommendations={this.handleResetRecommendations}
                     onFreezeCell={onFreezeCell}
+                    onFreezeOneCell={onFreezeCell}
                     onThawCell={onThawCell}
+                    onThawOneCell={onThawCell}
                 />
             );
             if (!cell.isNewCell()) {

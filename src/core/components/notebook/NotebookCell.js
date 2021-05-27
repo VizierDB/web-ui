@@ -76,7 +76,9 @@ class NotebookCell extends React.Component {
         onRecommendAction: PropTypes.func.isRequired,
         onResetRecommendations: PropTypes.func.isRequired,
         onFreezeCell: PropTypes.func.isRequired,
+        onFreezeOneCell: PropTypes.func.isRequired,
         onThawCell: PropTypes.func.isRequired,
+        onThawOneCell: PropTypes.func.isRequired,
     }
     handleUpdateProgress = p => {
         this.setState({moduleProgress: p})
@@ -168,11 +170,25 @@ class NotebookCell extends React.Component {
         onFreezeCell(cell)
     }
     /**
+     * Freeze only this cell
+     */
+    handleFreezeOneCell = () => {
+        const { cell, onFreezeOneCell } = this.props;
+        onFreezeOneCell(cell)
+    }
+    /**
      * Thaw this and all prior cells
      */
     handleThawCell = () => {
         const { cell, onThawCell } = this.props;
         onThawCell(cell)
+    }
+    /**
+     * Thaw only this cell
+     */
+    handleThawOneCell = () => {
+        const { cell, onThawOneCell } = this.props;
+        onThawOneCell(cell)
     }
 
 
@@ -273,7 +289,9 @@ class NotebookCell extends React.Component {
                     onInsertCell={this.handleInsertCell}
                     onSelectCell={this.handleSelectCell}
                     onFreezeCell={this.handleFreezeCell}
+                    onFreezeOneCell={this.handleFreezeOneCell}
                     onThawCell={this.handleThawCell}
+                    onThawOneCell={this.handleThawOneCell}
                 />
             );
             outputArea = (

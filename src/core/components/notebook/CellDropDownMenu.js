@@ -44,7 +44,9 @@ class CellDropDownMenu extends React.Component {
         onInsertCell: PropTypes.func.isRequired,
         onSelectCell: PropTypes.func.isRequired,
         onFreezeCell: PropTypes.func.isRequired,
+        onFreezeOneCell: PropTypes.func.isRequired,
         onThawCell: PropTypes.func.isRequired,
+        onThawOneCell: PropTypes.func.isRequired,
     }
     /**
      * Insert new cell before the notebook cell that is associated with the
@@ -73,7 +75,9 @@ class CellDropDownMenu extends React.Component {
             onDeleteCell,
             onSelectCell,
             onFreezeCell,
-            onThawCell
+            onFreezeOneCell,
+            onThawCell,
+            onThawOneCell
         } = this.props;
         // If the cell is in pending or running state no menu is displayed. We
         // only show an icon that depicts the cell status.
@@ -154,11 +158,21 @@ class CellDropDownMenu extends React.Component {
             if(cell.module.links.has(HATEOAS_MODULE_FREEZE)){
                 dropdownItems.push(
                     <Dropdown.Item
+                        key='freeze-this'
+                        disabled={false}
+                        icon='snowflake'
+                        text='Freeze this cell'
+                        title={'Freeze cell #' + cellNumber + ', temporarily removing it from the notebook'}
+                        onClick={onFreezeOneCell}
+                    />
+                );
+                dropdownItems.push(
+                    <Dropdown.Item
                         key='freeze-below'
                         disabled={false}
                         icon='snowflake'
                         text='Freeze cells from here'
-                        title={'Freeze cell #' + cellNumber + ' and subsequent cells and keep them from executing'}
+                        title={'Freeze cell #' + cellNumber + ' and subsequent cells, temporarily removing it from the notebook'}
                         onClick={onFreezeCell}
                     />
                 );
@@ -166,11 +180,21 @@ class CellDropDownMenu extends React.Component {
             if(cell.module.links.has(HATEOAS_MODULE_THAW)){
                 dropdownItems.push(
                     <Dropdown.Item
+                        key='thaw-this'
+                        disabled={false}
+                        icon='sun'
+                        text='Thaw cells up to here'
+                        title={'Thaw cell #' + cellNumber + ', returning it to the notebook and rerunning it'}
+                        onClick={onThawOneCell}
+                    />
+                );
+                dropdownItems.push(
+                    <Dropdown.Item
                         key='thaw-above'
                         disabled={false}
                         icon='sun'
                         text='Thaw cells up to here'
-                        title={'Thaw cell #' + cellNumber + ' and preceding cells and update their outputs'}
+                        title={'Thaw cell #' + cellNumber + ' and preceding cells, returning them to the notebook and rerunning it'}
                         onClick={onThawCell}
                     />
                 );
