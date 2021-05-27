@@ -434,7 +434,7 @@ class CellOutputArea extends React.Component {
             if (!output.isError()) {
                 cancelButton = (
                     <ApiPolling
-                        interval={1000}
+                        interval={2000}
                         onCancel={onCancelExec}
                         onFetch={onCheckStatus}
                         resource={cell}
