@@ -55,7 +55,9 @@ export const HATEOAS_MODULE_DELETE = 'module.delete';
 export const HATEOAS_MODULE_INSERT = 'module.insert';
 export const HATEOAS_MODULE_REPLACE = 'module.replace';
 export const HATEOAS_MODULE_FREEZE = 'module.freeze';
+export const HATEOAS_MODULE_FREEZE_ONE = 'module.freeze_one';
 export const HATEOAS_MODULE_THAW = 'module.thaw';
+export const HATEOAS_MODULE_THAW_ONE = 'module.thaw_one';
 
 
 /**

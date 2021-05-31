@@ -216,9 +216,9 @@ class Notebook extends React.Component {
                     onRecommendAction={this.handleRecommendAction}
                     onResetRecommendations={this.handleResetRecommendations}
                     onFreezeCell={onFreezeCell}
-                    onFreezeOneCell={onFreezeCell}
+                    onFreezeOneCell={onFreezeOneCell}
                     onThawCell={onThawCell}
-                    onThawOneCell={onThawCell}
+                    onThawOneCell={onThawOneCell}
                 />
             );
             if (!cell.isNewCell()) {

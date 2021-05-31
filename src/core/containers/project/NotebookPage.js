@@ -506,7 +506,9 @@ class NotebookPage extends Component {
                     userSettings={userSettings}
                 	onEditSpreadsheet={this.handleEditSpreadsheet}
                     onFreezeCell={this.handleFreezeCell}
+                    onFreezeOneCell={this.handleFreezeOneCell}
                     onThawCell={this.handleThawCell}
+                    onThawOneCell={this.handleThawOneCell}
                 />
             );
             // Add modal form for user to enter branch name when creating a new

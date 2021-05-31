@@ -183,7 +183,7 @@ class CellDropDownMenu extends React.Component {
                         key='thaw-this'
                         disabled={false}
                         icon='sun'
-                        text='Thaw cells up to here'
+                        text='Thaw this cell'
                         title={'Thaw cell #' + cellNumber + ', returning it to the notebook and rerunning it'}
                         onClick={onThawOneCell}
                     />
