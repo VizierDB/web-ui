@@ -191,12 +191,14 @@ class Plots extends React.Component {
         }
     }
     
-    caveatDot = (props) => {
+    caveatDotTemplate = (props, normalPoint) => {
     	  const {
     		    cx, cy, payload, dataKey
     		  } = props;
 
-    		  if (payload[dataKey + "_caveat"] === false) {
+          console.log(props)
+          console.log("Caveat? " + payload[dataKey + "_caveat"] + " -> @ " + cx + ", " + cy)
+    		  if (payload[dataKey + "_caveat"] !== false) {
     		    return (
     		      /*<svg x={cx - 2} y={cy - 2} width={4} height={4} fill="red" viewBox="0 0 4 4">
     		        <path d="M 2 2 m -2 0 a 2 2 0 1 0 4 0 a 2 2 0 1 0 -4 0"/> 
@@ -205,17 +207,21 @@ class Plots extends React.Component {
 		            <text x={0} y={0} dy={18} fontSize={16} >{"*"}</text>
 		          </svg>
     		    );
-    		  }
-
-    		  return (
-    		    <svg x={cx} y={cy} width={0} height={0} fill="green" viewBox="0 0 0 0">
-    		    </svg>
-    		  );
+    		  } else { 
+            return normalPoint(props, cx, cy)
+          }
     		};
+
+    caveatDot = (props) => { return this.caveatDotTemplate(props, (props, cx, cy) => {
+      return (
+        <svg x={cx} y={cy} width={0} height={0} fill="green" viewBox="0 0 0 0">
+        </svg>
+      );
+    })}
 
     		
     caveatLabels = (labels, idx) => { 
-    	return (d) => d[labels[idx] + '_caveat']
+    	return (d) => !d[labels[idx] + '_caveat']
     }
     /**
      * Return a function that takes a list of data series and width as parameter
@@ -257,14 +263,29 @@ class Plots extends React.Component {
               {
                 grouped ?
                 list
-                : <Bar id='id_' dataKey={yAxisName} fill={this.listColors[0]} label={<CaveatLabel caveats={data.map(d => d[yAxisName + '_caveat'])} />} />
+                : <Bar id='id_' dataKey={yAxisName} fill={this.listColors[0]} label={<CaveatLabel caveats={data.map(d => !d[yAxisName + '_caveat'])} />} />
               }
               <Brush />
             </BarChart>
           );
-        } else if (nameChart==='Line Chart') { // line chart
+        } else if (nameChart==='Line Chart with Points' || nameChart === 'Line Chart' || nameChart==='Line Chart without Points') { // line chart
+          var dot = (nameChart === 'Line Chart without Points') ?
+                      this.caveatDot :
+                      (props) => { return this.caveatDotTemplate(props, (props, cx, cy) => {
+                        // console.log(props)
+                        return (
+                          <svg x={cx-9} y={cy-9} width={18} height={18} viewBox="0 0 18 18">
+                            <circle cx={9} cy={9} r={props.r} fill={props.fill} stroke-width={props.strokeWidth} stroke={props.stroke} />
+                          </svg>
+                        );
+                      })}
+                      // (props) => { return this.caveatDotTemplate(props, (props, cx, cy) => {
+                      //   console.log("Point: ["+cx+", "+cy+"]");
+                      //   return (
+                      //   );
+                      // }) }
           for (i=1; i<labels.length; i++) {
-            list.push(<Line key={'id_'+i} type="monotone" name={labels[i]} dataKey={labels[i]} stroke={this.listColors[i-1]} dot={this.caveatDot} />);
+            list.push(<Line key={'id_'+i} type="monotone" name={labels[i]} dataKey={labels[i]} stroke={this.listColors[i-1]} dot={dot} />);
           }
           return (data, width, grouped, yAxisName) => (
             <LineChart width={width} height={400} data={data} margin={{top: 10, bottom: 50, left: 50, right: 10}}>
@@ -276,7 +297,7 @@ class Plots extends React.Component {
               {
                 grouped ?
                 list
-                : <Line type="monotone" name={yAxisName} dataKey={yAxisName} stroke={this.listColors[0]} dot={this.caveatDot} />
+                : <Line type="monotone" name={yAxisName} dataKey={yAxisName} stroke={this.listColors[0]} dot={dot} />
               }
               <Brush />
             </LineChart>
@@ -507,7 +528,8 @@ Plots.defaultProps = {
     charts : [
         "Area Chart",
         "Bar Chart",
-        "Line Chart",
+        "Line Chart with Points",
+        "Line Chart without Points",
         "Scatter Plot",
         "Pie Chart",
         "Donut Chart",

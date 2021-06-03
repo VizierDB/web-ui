@@ -203,7 +203,7 @@ class SpreadsheetPage extends Component {
                     notebook={notebook}
                     project={project}
                     projectList={projectList}
-                    resource={new SpreadsheetResource(dataset)}
+                    resource={SpreadsheetResource(dataset)}
                     serviceApi={serviceApi}
                     userSettings={userSettings}
                     onShowNotebook={this.handleShowBranchHead}

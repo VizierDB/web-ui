@@ -68,7 +68,7 @@ export const showSpreadsheet = (dataset, url) => (dispatch) => {
             fetchUrl,
             (json) => (dispatch) => {
                 return dispatch(receiveProjectResource(
-                    new SpreadsheetResource(
+                    SpreadsheetResource(
                         new DatasetHandle(id, name)
                             .fromJson(json)
                     )
@@ -96,7 +96,7 @@ export const showModuleSpreadsheet = (dataset, offset, limit, moduleId) => (disp
             (json) => (dispatch) => {
             	json.moduleId = moduleId;
                 return dispatch(receiveProjectResource(
-                    new SpreadsheetResource(
+                    SpreadsheetResource(
                         new DatasetHandle(
                             json.id,
                             dataset.name
@@ -240,7 +240,7 @@ export const submitUpdate = (notebook, dataset, cmd, moduleIndex) => (dispatch) 
                 	//const wf = new WorkflowHandle(notebook.workflow.engine).fromJson(json);
                 	dispatch(updateNotebook(notebook, json, moduleId));
                 	dispatch(receiveProjectResource(
-                            new SpreadsheetResource(upds)));
+                            SpreadsheetResource(upds)));
                 	
                 });
             } else if(response.status === 401) {
