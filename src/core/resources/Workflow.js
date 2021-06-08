@@ -17,7 +17,7 @@
  */
 
 import { DatasetDescriptor } from './Dataset';
-import { HATEOASReferences } from '../util/HATEOAS';
+import { HATEOASReferences, HATEOAS_WORKFLOW_CANCEL } from '../util/HATEOAS';
 import { utc2LocalTime } from '../util/Timestamp';
 
 
@@ -96,6 +96,11 @@ export class WorkflowHandle {
         this.tableOfContents = json.tableOfContents
         return this;
     }
+
+    isRunning() {
+        return this.links.has(HATEOAS_WORKFLOW_CANCEL)
+    }
+
     /**
      * Get the specification for a given module command.
      */

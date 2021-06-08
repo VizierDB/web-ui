@@ -62,6 +62,7 @@ class AppMenu extends React.Component {
         onDeleteProject: PropTypes.func.isRequired,
         onEditBranch: PropTypes.func.isRequired,
         onEditProject: PropTypes.func.isRequired,
+        onCancelExec: PropTypes.func.isRequired,
         onGoHome: PropTypes.func.isRequired,
         onHideCells: PropTypes.func.isRequired,
         onReverse: PropTypes.func.isRequired,
@@ -115,6 +116,7 @@ class AppMenu extends React.Component {
             branch,
             notebook,
             onCreateBranch,
+            onCancelExec,
             onCreateProject,
             onImportProject,
             onGoHome,
@@ -184,8 +186,10 @@ class AppMenu extends React.Component {
                         onGetMostRecent={this.switchToBranchHead}
                         onSelect={onSwitchBranch}
                         onShowHistory={onShowHistory}
+                        onCancelExec={onCancelExec}
                         resource={resource}
                         selectedBranch={branch}
+                        isRunning={notebook.workflow.isRunning()}
                     />
                 );
             }

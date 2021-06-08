@@ -29,7 +29,7 @@ export const ErrorMessage = ({title, message, onDismiss}) => (
         icon='warning sign'
         header={title}
         onDismiss={onDismiss}
-        content={message.charAt(0).toUpperCase() + message.slice(1)}
+        content={message != null ? message.charAt(0).toUpperCase() + message.slice(1) : "No Message"}
     />
 );
 

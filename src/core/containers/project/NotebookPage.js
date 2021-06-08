@@ -579,6 +579,7 @@ class NotebookPage extends Component {
 	                </div>
 	            );
             }
+            console.log("CancelExec at NotebookPage: " + this.handleCancelWorkflowExec)
             content = (
                 <ResourcePage
                     actionError={actionError}
@@ -592,6 +593,7 @@ class NotebookPage extends Component {
                     onDeleteBranch={this.handleDeleteBranch}
                     onShowNotebook={this.handleShowBranchHead}
                     onSwitchBranch={this.handleSwitchBranch}
+                    onCancelExec={this.handleCancelWorkflowExec}
                     project={project}
                     projectList={projectList}
                     resource={NotebookResource()}

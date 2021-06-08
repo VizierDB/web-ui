@@ -85,8 +85,8 @@ export class HATEOASReferences {
         if (ref != null) {
             return ref.href;
         } else {
-            console.log('NOT FOUND IN')
-            console.log(this.links);
+            console.log(null())
+            console.log('HATEOAS action '+key+' NOT FOUND IN: '+this.links)
             return null;
         }
     }

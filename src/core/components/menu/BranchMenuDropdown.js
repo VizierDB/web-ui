@@ -35,8 +35,10 @@ class BranchMenuDropdown extends React.Component {
         onGetMostRecent: PropTypes.func.isRequired,
         onSelect: PropTypes.func,
         onShowHistory: PropTypes.func.isRequired,
+        onCancelExec: PropTypes.func,
         resource: PropTypes.object.isRequired,
-        selectedBranch: PropTypes.object.isRequired
+        selectedBranch: PropTypes.object.isRequired,
+        isRunning: PropTypes.bool
     }
     /**
      * Call the create branch callback without an argument to create a new
@@ -55,8 +57,10 @@ class BranchMenuDropdown extends React.Component {
             onGetMostRecent,
             onSelect,
             onShowHistory,
+            onCancelExec,
             resource,
-            selectedBranch
+            selectedBranch,
+            isRunning
         } = this.props;
         // List of items in the dropdown menu
         let branchItems = [];
@@ -108,6 +112,16 @@ class BranchMenuDropdown extends React.Component {
                 text='Latest Version'
                 onClick={onGetMostRecent}
             />);
+        if(onCancelExec != null) {
+            branchItems.push(<Dropdown.Header content='Execution' key='header-tm' />);
+            branchItems.push(<Dropdown.Item
+                    key='cancelExecution'
+                    icon='fa-times-circle'
+                    disabled={!isRunning}
+                    text='Cancel Workflow'
+                    onClick={onCancelExec}
+                />);
+        }
         // Add option to create a new branch from the end of the current
         // notebook (if the onCreateBranch callback is given).
         return (

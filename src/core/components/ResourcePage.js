@@ -46,6 +46,7 @@ class ResourcePage extends Component {
         onDeleteBranch: PropTypes.func,
         onShowNotebook: PropTypes.func,
         onSwitchBranch: PropTypes.func,
+        onCancelExec: PropTypes.func,
         project: PropTypes.object,
         projectList: PropTypes.array,
         resource: PropTypes.object.isRequired,
@@ -177,6 +178,7 @@ class ResourcePage extends Component {
             onDeleteBranch,
             onShowNotebook,
             onSwitchBranch,
+            onCancelExec,
             project,
             projectList,
             resource,
@@ -244,6 +246,7 @@ class ResourcePage extends Component {
 		                onShowNotebook={onShowNotebook}
 		                onShowProject={this.handleShowProject}
 		                onSwitchBranch={onSwitchBranch}
+                        onCancelExec={onCancelExec}
 		                project={project}
 		                projectList={projectList}
 		                resource={resource}
