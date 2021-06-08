@@ -23,7 +23,7 @@ import { withRouter } from 'react-router-dom'
 import { Dimmer, Icon, Loader, Dropdown, Menu} from 'semantic-ui-react';
 import { insertNotebookCell, updateNotebookCellWithUpload, checkModuleStatus } from '../../actions/project/Notebook';
 import {
-    clearAnnotations, deleteAnnotations, fetchAnnotations, showSpreadsheet,
+    clearAnnotations, deleteAnnotations, fetchAnnotations, showModuleSpreadsheet,
     submitUpdate
 } from '../../actions/project/Spreadsheet';
 import { CloseButton } from '../../components/Button'
@@ -270,8 +270,8 @@ class Spreadsheet extends React.Component {
     	this.clearActiveCell();
         // Dispatch navitation request
         const { dispatch, dataset } = this.props;
-        let url = dataset.links.getDatasetUrl(offset, limit);
-        dispatch(showSpreadsheet(dataset, url));
+        dispatch(showModuleSpreadsheet(dataset, offset, limit, dataset.moduleId));  
+        // dispatch(showSpreadsheet(dataset, url));
     }
     /**
      * Set the coordinates of the selected cell.
@@ -593,8 +593,9 @@ class Spreadsheet extends React.Component {
 	            text={notebook.cells[notebook.cells.length - 1].isRunning() ? 'Running ...' : 'Pending ...'}
 	        />
         	let newDataset = notebook.cells[notebook.cells.length - 1].module.datasets.find(ds => ds.name === dataset.name)
-        	let url = newDataset.links.getDatasetUrl(dataset.offset, cellLimit);
-            dispatch(showSpreadsheet(dataset, url));
+        	// let url = newDataset.links.getDatasetUrl(dataset.offset, cellLimit);
+            // dispatch(showSpreadsheet(dataset, url));
+            dispatch(showModuleSpreadsheet(dataset, dataset.offset, cellLimit, dataset.moduleId));
         }
         return (
             <div className='spreadsheet-container'>
