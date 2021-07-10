@@ -134,7 +134,7 @@ export const showDatasetCaveat = (dataset, url) => (dispatch) => {
             fetchUrl,
             (json) => (dispatch) => {
                 return dispatch(receiveProjectResource(
-                    new DatasetCaveatResource(
+                    DatasetCaveatResource(
                         new DatasetHandle(dataset.id, dataset.name),
                         new AnnotationList(json)
                     )
@@ -162,7 +162,7 @@ export const repairDatasetCaveat = (dataset, url, reason, repair, acknowledge) =
             data,
             (json) => (dispatch) => {
                 return dispatch(receiveProjectResource(
-                    new DatasetCaveatResource(
+                    DatasetCaveatResource(
                         new DatasetHandle(dataset.id, dataset.name),
                         new AnnotationList(json['annotations'])
                     )

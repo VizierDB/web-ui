@@ -189,7 +189,7 @@ class AppMenu extends React.Component {
                         onCancelExec={onCancelExec}
                         resource={resource}
                         selectedBranch={branch}
-                        isRunning={notebook.workflow.isRunning()}
+                        isRunning={notebook ? notebook.workflow.isRunning() : false} 
                     />
                 );
             }

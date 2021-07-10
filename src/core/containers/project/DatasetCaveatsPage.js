@@ -194,7 +194,7 @@ class DatasetCaveatsPage extends Component {
                     isActive={isActive}
                     project={project}
                     projectList={projectList}
-                    resource={new DatasetCaveatResource()}
+                    resource={DatasetCaveatResource()}
                     serviceApi={serviceApi}
                     userSettings={userSettings}
                     onShowNotebook={this.handleShowBranchHead}
