@@ -116,6 +116,7 @@ const ARGUMENT_VALUE_2_REQUEST_DATA = (argument, command, value) => {
  * string: ''
  */
 const DEFAULT_VALUE = (argument, command, datasets, argValue) => {
+    if(argument.default){ return argument.default }
     const dt = argument.datatype;
     // Test for a structured argument data type first.
     if (dt === DT_AS_ROW) {
