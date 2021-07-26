@@ -26,24 +26,45 @@ class JavascriptCellOutput extends React.Component {
     static propTypes = {
       html: PropTypes.string.isRequired,
       code: PropTypes.string.isRequired,
-      deps: PropTypes.array.isRequired
+      deps: PropTypes.array.isRequired,
+      css: PropTypes.array,
     }
 
     componentDidMount() {
-      const { code, deps } = this.props
+      const { code, deps, css } = this.props
 
       // Compute which dependencies we nee dto load
       var neededDeps = []
       for(var i in deps){
         if(!document.getElementById("import-"+deps[i])){
-          console.log("Need to download: "+deps[i])
+          console.log("Need to download javascript: "+deps[i])
           neededDeps.push(deps[i])
         }
       }
-      neededDeps = neededDeps.reverse()
-      var trigger = () => {
-        eval(code)
+      if(css){
+        for(var i in css){
+          if(!document.getElementById("import-"+css[i])){
+            console.log("Need to download css: "+css[i])
+            if(!document.getElementById("import-"+css[i])){
+              const stylesheet = document.createElement('link')
+              stylesheet.rel = "stylesheet"
+              stylesheet.href = css[i]
+              stylesheet.id = "import-"+css[i]
+              document.body.appendChild(stylesheet)
+            }
+          }
+        }
       }
+      var trigger = () => {
+        try {
+          eval(code)
+        } catch(error) {
+          console.log("Error running javascript: "+error)
+          console.log("---- code ----")
+          console.log(code)
+        }
+      }
+      neededDeps = neededDeps.reverse()
       for(var i in neededDeps){
         const dep = neededDeps[i]
         const lastTrigger = trigger

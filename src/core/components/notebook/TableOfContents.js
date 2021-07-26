@@ -49,7 +49,7 @@ class TableOfContents extends React.Component {
     const tocElements = []
     for(let element of contents){
       tocElements.push(
-        <a class="element" href={"#cell-"+(element.linkToIdx+1)}>{ element.title }</a>
+        <a className="element" href={"#cell-"+(element.linkToIdx+1)}>{ element.title }</a>
       )
     }
 

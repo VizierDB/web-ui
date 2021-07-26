@@ -271,7 +271,8 @@ class CellOutputArea extends React.Component {
                 renders[out] = 
                     <JavascriptCellOutput html={outputs[out].value.html}
                                           code={outputs[out].value.code}
-                                          deps={outputs[out].value.js_deps}/>
+                                          deps={outputs[out].value.js_deps}
+                                          css={outputs[out].value.css_deps}/>
                 
             }  else {
                 renders[out] = (
