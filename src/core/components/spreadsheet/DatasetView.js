@@ -19,6 +19,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import GridCell from './grid/GridCell';
+import ImageCell from './grid/ImageCell';
 import RowIndexCell from './grid/RowIndexCell';
 import SpreadsheetDropDown from './menu/SpreadsheetDropDown';
 import SpreadsheetScrollbar from './SpreadsheetScrollbar';
@@ -161,20 +162,28 @@ class DatasetView extends React.Component {
             for (let cidx = 0; cidx < columns.length; cidx++) {
                 const column = columns[cidx];
                 const isActive = (activeCell.column === column.id) && (activeCell.row === row.id);
-                cells.push(
-                    <GridCell
-                        key={'C' + column.id + 'R' + row.id}
-                        column={column}
-                        columnIndex={cidx}
-                        hasAnnotations={dataset.hasAnnotations(column.id, row.id)}
-                        isActive={isActive}
-                        rowId={row.id}
-                        rowIndex={ridx}
-                        value={row.values[cidx]}
-                        onClick={() => (this.handleSelectCell(column.id, row.id))}
-                        onFetchAnnotations={onFetchAnnotations}
-                    />
-                );
+                if (column.type != "image/png") {
+                    cells.push(
+                        <GridCell
+                            key={'C' + column.id + 'R' + row.id}
+                            column={column}
+                            columnIndex={cidx}
+                            hasAnnotations={dataset.hasAnnotations(column.id, row.id)}
+                            isActive={isActive}
+                            rowId={row.id}
+                            rowIndex={ridx}
+                            value={row.values[cidx]}
+                            onClick={() => (this.handleSelectCell(column.id, row.id))}
+                            onFetchAnnotations={onFetchAnnotations}
+                        />
+                    );
+                } else {
+                    cells.push(
+                        <ImageCell
+                            value={row.values[cidx]}
+                        />
+                    )
+                }
             }
             rows.push(<tr key={row.id}>{cells}</tr>);
         }
