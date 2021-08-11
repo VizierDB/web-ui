@@ -20,7 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'semantic-ui-react';
 import ModuleFormControl from './ModuleFormControl';
-import { toFormValues } from '../../../../resources/Engine';
+import { toFormValues, getSelectedDataset } from '../../../../resources/Engine';
 import '../../../../../css/Notebook.css';
 import '../../../../../css/ModuleForm.css';
 
@@ -187,6 +187,8 @@ class ControlGroup extends React.Component {
         // Add a row of controls for each row in the form
         for (let t = 0; t < value.length; t++) {
             let tuple = value[t];
+            let rowSelectedDataset = getSelectedDataset(controlSpec, tuple, datasets)
+
             const key = 'r_' + t + '_' + id;
             const rowControls = [];
             for (let c = 0; c < controlSpec.parameters.length; c++) {
@@ -199,7 +201,7 @@ class ControlGroup extends React.Component {
                             datasets={datasets} 
                             artifacts={artifacts}
                            onChange={(name, value) => (this.handleChange(t, name, value))}
-                            selectedDataset={selectedDataset}
+                            selectedDataset={rowSelectedDataset ? rowSelectedDataset : selectedDataset}
                             serviceProperties={serviceProperties}
                             value={tuple[child.id]}
                         />

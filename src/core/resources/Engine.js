@@ -247,6 +247,7 @@ export const getSelectedDataset = (commandSpec, values, datasets) => {
             }
         }
     }
+    return null;
 }
 
 
