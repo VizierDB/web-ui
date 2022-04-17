@@ -19,7 +19,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Icon, Grid, List } from 'semantic-ui-react';
-import {Controlled as CodeMirror} from 'react-codemirror2'
+import {Controlled as CodeMirror} from 'react-codemirror2';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/python/python';
 import '../../../../../css/App.css';
@@ -42,6 +42,7 @@ const GET_DATASET_FRAME = 'GET_DATASET_FRAME';
 const INSERT_COLUMN = 'INSERT_COLUMN';
 const INSERT_ROW = 'INSERT_ROW';
 const NEW_DATASET_OBJECT = 'NEW_DATASET_OBJECT';
+const SAVE_DATASET_FRAME = 'SAVE_DATASET_FRAME';
 const OUTPUT_ANNOTATIONS = 'OUTPUT_ANNOTATIONS';
 const OUTPUT_COLUMN_NAMES = 'OUTPUT_COLUMN_NAMES';
 const OUTPUT_CELL_VALUES = 'OUTPUT_CELL_VALUES';
@@ -49,6 +50,8 @@ const OUTPUT_D3_PLOT = 'OUTPUT_D3_PLOT';
 const OUTPUT_BOKEH_PLOT = 'OUTPUT_BOKEH_PLOT';
 const OUTPUT_MAP = 'OUTPUT_MAP';
 const EXPORT_MODULE = 'EXPORT_MODULE';
+const EXPORT_PICKLE = 'EXPORT_PICKLE';
+const GET_PICKLE = 'GET_PICKLE';
 const RENAME_DATASET = 'RENAME_DATASET';
 const UPDATE_CELL_VALUE = 'UPDATE_CELL_VALUE';
 const UPDATE_ANNOTATION = 'UPDATE_ANNOTATION';
@@ -69,7 +72,7 @@ export class CodeSnippetsSelector extends React.Component {
         let lines = [];
         if (value === ADD_ANNOTATION) {
             lines.push('# Add new annotation for dataset cells. Note that rows');
-            lines.push('# and columns are referenced by their unique identifiers.')
+            lines.push('# and columns are referenced by their unique identifiers.');
             lines.push('col = ds.columns[ds.column_index(\'name-label-or-index\')]');
             lines.push('for row in ds.rows:');
             lines.push('    annos = ds.annotations.for_cell(col.identifier, row.identifier)');
@@ -78,11 +81,11 @@ export class CodeSnippetsSelector extends React.Component {
         } else if (value === CREATE_DATASET) {
             lines.push('# Create a new dataset in the data store. Expects a');
             lines.push('# dataset object and a unique dataset name.');
-            lines.push('vizierdb.create_dataset(\'unique-ds-name\', ds)')
+            lines.push('vizierdb.create_dataset(\'unique-ds-name\', ds)');
         } else if (value === DELETE_ANNOTATION) {
             lines.push('# Delete annotations for dataset cell. Delete is similar to');
             lines.push('# update. Delete an annotation by setting its value to None.');
-            lines.push('# Rows and columns are referenced by their unique identifiers.')
+            lines.push('# Rows and columns are referenced by their unique identifiers.');
             lines.push('col = ds.columns[ds.column_index(\'name-label-or-index\')]');
             lines.push('for row in ds.rows:');
             lines.push('    annos = ds.annotations.for_cell(col.identifier, row.identifier)');
@@ -94,7 +97,7 @@ export class CodeSnippetsSelector extends React.Component {
             lines.push('# column index (0, 1, ...).');
             lines.push('ds.delete_column(\'name-label-or-index\')');
         } else if (value === DELETE_DATASET) {
-            lines.push('# Delete dataset with the given name from data store.')
+            lines.push('# Delete dataset with the given name from data store.');
             lines.push('vizierdb.drop_dataset(\'unique-ds-name\')');
         } else if (value === DELETE_ROW) {
             lines.push('# Delete dataset rows by removing them from the list of');
@@ -105,7 +108,12 @@ export class CodeSnippetsSelector extends React.Component {
             lines.push('ds = vizierdb.get_dataset(\'unique-ds-name\')');
         } else if (value === GET_DATASET_FRAME) {
             lines.push('# Get read-only pandas dataframe object for dataset with given name.');
-            lines.push('df = vizierdb.get_dataset_frame(\'unique-ds-name\')');
+            lines.push('df = vizierdb.get_data_frame(\'unique-ds-name\')');
+        } else if (value == SAVE_DATASET_FRAME) {
+            lines.push('# Save pandas dataframe as Vizier dataset with given name.');
+            lines.push('import pandas as pd');
+            lines.push('df = pd.DataFrame([[0, 1], [1, 2], [-1, -1], [2, 0]],  columns=[\'A\', \'B\'])');
+            lines.push('vizierdb.save_data_frame(\'unique-ds-name\', df)');
         } else if (value === INSERT_COLUMN) {
             lines.push('# Create a new column with a given name. The column');
             lines.push('# position is optional.');
@@ -119,7 +127,7 @@ export class CodeSnippetsSelector extends React.Component {
             lines.push('ds = vizierdb.new_dataset()');
         } else if (value === OUTPUT_ANNOTATIONS) {
             lines.push('# Print all annotations for dataset column. Note that');
-            lines.push('# rows and columns are referenced by their unique identifiers.')
+            lines.push('# rows and columns are referenced by their unique identifiers.');
             lines.push('col = ds.columns[ds.column_index(\'name-label-or-index\')]');
             lines.push('for row in ds.rows:');
             lines.push('    annos = ds.annotations.for_cell(col.identifier, row.identifier)');
@@ -131,64 +139,72 @@ export class CodeSnippetsSelector extends React.Component {
             lines.push('for col in ds.columns:');
             lines.push('    print(col.name)');
         } else if (value === OUTPUT_CELL_VALUES) {
-            lines.push('# Iterate over list of dataset rows and print cell value.')
+            lines.push('# Iterate over list of dataset rows and print cell value.');
             lines.push('# Reference column by name, label (\'A\', \'B\', ...), or');
             lines.push('# column index (0, 1, ...).');
             lines.push('for row in ds.rows:');
             lines.push('    print(row.get_value(\'name-label-or-index\'))');
         } else if (value === OUTPUT_D3_PLOT) {
-            lines.push('# Generate a plot using Vizier\'s internal D3-based engine.')
-            lines.push('# (Expects a dataset named `ds`)')
-            lines.push('ds.show_d3_plot(\'bar_cluster\', ')
-            lines.push('  labels_inner= [ \'LINE 1\',  \'LINE 2\',  \'LINE 3\'],')
-            lines.push('  keys        = [ \'VALUE-1\', \'VALUE-2\', \'VALUE-3\'],')
-            lines.push('  key_col     = \'KEY-COLUMN-NAME\',')
-            lines.push('  value_cols  = [ \'VALUE-COL-1\', \'VALUE-COL-2\', \'VALUE-COL-3\'],')
-            lines.push('  title       = \'My Plot\',')
-            lines.push('  legend_title=\'Legend\'')
-            lines.push(')')
+            lines.push('# Generate a plot using Vizier\'s internal D3-based engine.');
+            lines.push('# (Expects a dataset named `ds`)');
+            lines.push('ds.show_d3_plot(\'bar_cluster\', ');
+            lines.push('  labels_inner= [ \'LINE 1\',  \'LINE 2\',  \'LINE 3\'],');
+            lines.push('  keys        = [ \'VALUE-1\', \'VALUE-2\', \'VALUE-3\'],');
+            lines.push('  key_col     = \'KEY-COLUMN-NAME\',');
+            lines.push('  value_cols  = [ \'VALUE-COL-1\', \'VALUE-COL-2\', \'VALUE-COL-3\'],');
+            lines.push('  title       = \'My Plot\',');
+            lines.push('  legend_title=\'Legend\'');
+            lines.push(')');
         } else if (value === OUTPUT_BOKEH_PLOT) {
-            lines.push('# Generate a plot using Bokeh')
-            lines.push('# (Expects a dataset named `ds`)')
-            lines.push('# See https://bokeh.pydata.org/en/latest/docs/reference.html')
-            lines.push('from bokeh.io import show')
-            lines.push('from bokeh.plotting import figure')
-            lines.push('plot = figure(title = \'MyFigure\')')
-            lines.push('plot.line(')
-            lines.push('  x = \'X-COLUMN-NAME\', ')
-            lines.push('  y = \'Y-COLUMN-NAME\', ')
-            lines.push('  source = ds.to_bokeh()')
-            lines.push(')')
-            lines.push('show(plot)')
+            lines.push('# Generate a plot using Bokeh');
+            lines.push('# (Expects a dataset named `ds`)');
+            lines.push('# See https://bokeh.pydata.org/en/latest/docs/reference.html');
+            lines.push('from bokeh.io import show');
+            lines.push('from bokeh.plotting import figure');
+            lines.push('plot = figure(title = \'MyFigure\')');
+            lines.push('plot.line(');
+            lines.push('  x = \'X-COLUMN-NAME\', ');
+            lines.push('  y = \'Y-COLUMN-NAME\', ');
+            lines.push('  source = ds.to_bokeh()');
+            lines.push(')');
+            lines.push('show(plot)');
         } else if (value === OUTPUT_MAP) {
-            lines.push('# Render an interactive OpenStreetMap with points marked')
-            lines.push('# (Expects a dataset named `ds`)')
-            lines.push('ds.show_map(')
-            lines.push('  lat_col = \'LATITUDE-COLUMN-NAME\',')
-            lines.push('  lon_col = \'LONGITUDE-COLUMN-NAME\',')
-            lines.push('  label_col = \'LABEL-COLUMN-NAME\' # Optional')
-            lines.push(')')
+            lines.push('# Render an interactive OpenStreetMap with points marked');
+            lines.push('# (Expects a dataset named `ds`)');
+            lines.push('ds.show_map(');
+            lines.push('  lat_col = \'LATITUDE-COLUMN-NAME\',');
+            lines.push('  lon_col = \'LONGITUDE-COLUMN-NAME\',');
+            lines.push('  label_col = \'LABEL-COLUMN-NAME\' # Optional');
+            lines.push(')');
         } else if (value === EXPORT_MODULE) {
-            lines.push('# Export a variable, a function or a class for use in subsequent cells')
-            lines.push('def add_numbers(number_1, number_2):')
-            lines.push('    print(\'adding \' + str(number_1) + \' + \' +str(number_2))')
-            lines.push('    return number_1 + number_2')
-            lines.push('vizierdb.export_module(')
-            lines.push('    add_numbers')
-            lines.push(')')
-            lines.push('#  Use it in a subsequent like normal: add_numbers(1,2)')
+            lines.push('# Export a variable, a function or a class for use in subsequent cells');
+            lines.push('def add_numbers(number_1, number_2):');
+            lines.push('    print(\'adding \' + str(number_1) + \' + \' +str(number_2))');
+            lines.push('    return number_1 + number_2');
+            lines.push('vizierdb.export_module(');
+            lines.push('    add_numbers');
+            lines.push(')');
+            lines.push('#  Use it in a subsequent like normal: add_numbers(1,2)');
+        } else if (value == EXPORT_PICKLE) {
+            lines.push('# Export any python object that is supported by python\'s pickle library');
+            lines.push('vizierdb.export_pickle(\'a\', [1,2,3]) # store [1,2,3] as a');
+            lines.push('# Access \'a\' in another cell');
+            lines.push('vizierdb.get_pickle(\'a\')');
+        } else if (value == GET_PICKLE) {
+            lines.push('# Access a previously exported python object \'a\'');
+            lines.push('vizierdb.get_pickle(\'a\')');
         } else if (value === RENAME_DATASET) {
             lines.push('# Rename given dataset to a new (unique) name.');
             lines.push('vizierdb.rename_dataset(\'unique-ds-name\', \'new-unique-ds-name\')');
         } else if (value === UPDATE_CELL_VALUE) {
-            lines.push('# Iterate over list of dataset rows and update cell value.')
+            lines.push('# Iterate over list of dataset rows and update cell value.');
             lines.push('# Reference column by name, label (\'A\', \'B\', ...), or');
             lines.push('# column index (0, 1, ...).');
             lines.push('for row in ds.rows:');
             lines.push('    row.set_value(\'name-label-or-index\', value)');
         } else if (value === UPDATE_ANNOTATION) {
             lines.push('# Update all annotations for dataset cell. Note that');
-            lines.push('# rows and columns are referenced by their unique identifiers.')
+            lines.push('# rows and columns are referenced by their unique identifiers.');
             lines.push('col = ds.columns[ds.column_index(\'name-label-or-index\')]');
             lines.push('for row in ds.rows:');
             lines.push('    annos = ds.annotations.for_cell(col.identifier, row.identifier)');
@@ -208,7 +224,7 @@ export class CodeSnippetsSelector extends React.Component {
                         <Grid.Column width={4} key='output'>
                             <List link>
                                 <List.Item>
-                                    <List.Header><Icon name='desktop' /> Access & Output</List.Header>
+                                    <List.Header><Icon name='table' /> Access & Output Datasets</List.Header>
                                 </List.Item>
                                 <List.Item value={GET_DATASET} onClick={this.handleSelect}>
                                     <List.Content as='a'>Get Dataset</List.Content>
@@ -225,6 +241,25 @@ export class CodeSnippetsSelector extends React.Component {
                                 <List.Item value={OUTPUT_ANNOTATIONS} onClick={this.handleSelect}>
                                     <List.Content as='a'>Print Cell Annotations</List.Content>
                                 </List.Item>
+                            </List>
+                            <List link>
+                                <List.Item>
+                                    <List.Header><Icon name='python' /> Python Objects & Functions</List.Header>
+                                </List.Item>
+                                <List.Item value={EXPORT_MODULE} onClick={this.handleSelect}>
+                                    <List.Content as='a'>Export Python Function</List.Content>
+                                </List.Item>
+                                <List.Item value={EXPORT_PICKLE} onClick={this.handleSelect}>
+                                    <List.Content as='a'>Export Python Object</List.Content>
+                                </List.Item>
+                                <List.Item value={GET_PICKLE} onClick={this.handleSelect}>
+                                    <List.Content as='a'>Access Python Object</List.Content>
+                                </List.Item>
+                            </List>
+                            <List link>
+                                <List.Item>
+                                    <List.Header><Icon name='map' /> Plots & Maps</List.Header>
+                                </List.Item>
                                 <List.Item value={OUTPUT_D3_PLOT} onClick={this.handleSelect}>
 	                                <List.Content as='a'>Output Plot (D3)</List.Content>
 	                            </List.Item>
@@ -233,9 +268,6 @@ export class CodeSnippetsSelector extends React.Component {
                                 </List.Item>
                                 <List.Item value={OUTPUT_MAP} onClick={this.handleSelect}>
                                     <List.Content as='a'>Output Map</List.Content>
-                                </List.Item>
-                                <List.Item value={EXPORT_MODULE} onClick={this.handleSelect}>
-                                    <List.Content as='a'>Export Module</List.Content>
                                 </List.Item>
                             </List>
                         </Grid.Column>
@@ -261,7 +293,7 @@ export class CodeSnippetsSelector extends React.Component {
                         <Grid.Column width={4} key='update'>
                             <List link>
                                 <List.Item>
-                                    <List.Header><Icon name='edit' /> Update</List.Header>
+                                    <List.Header><Icon name='edit' /> Update Dataset Content</List.Header>
                                 </List.Item>
                                 <List.Item value={UPDATE_CELL_VALUE} onClick={this.handleSelect}>
                                     <List.Content as='a'>Edit Cell Values</List.Content>
@@ -269,12 +301,20 @@ export class CodeSnippetsSelector extends React.Component {
                                 <List.Item value={UPDATE_ANNOTATION} onClick={this.handleSelect}>
                                     <List.Content as='a'>Update Cell Annotations</List.Content>
                                 </List.Item>
+                            </List>
+                            <List link>
+                                <List.Item>
+                                    <List.Header><Icon name='edit' /> Save & Rename Datasets</List.Header>
+                                </List.Item>
                                 <List.Item value={UPDATE_DATASET} onClick={this.handleSelect}>
                                     <List.Content as='a'>Save Dataset</List.Content>
                                 </List.Item>
                                 <List.Item value={CREATE_DATASET} onClick={this.handleSelect}>
                                     <List.Content as='a'>Save Dataset As ...</List.Content>
                                 </List.Item>
+                                <List.Item value={SAVE_DATASET_FRAME} onClick={this.handleSelect}>
+	                                <List.Content as='a'>Save Dataframe as Dataset</List.Content>
+	                            </List.Item>
                                 <List.Item value={RENAME_DATASET} onClick={this.handleSelect}>
                                     <List.Content as='a'>Rename Dataset</List.Content>
                                 </List.Item>
@@ -302,7 +342,7 @@ export class CodeSnippetsSelector extends React.Component {
                     </Grid.Row>
                 </Grid>
             </div>
-        )
+        );
     }
 }
 
@@ -444,7 +484,7 @@ class PythonCell extends React.Component {
         let headerCss = '';
         let selectorPanel = null;
         let examplePanel = null;
-        let editorContainerCss = active ? '' : ' collapsed'
+        let editorContainerCss = active ? '' : ' collapsed';
         if (snippetSelectorVisible) {
             headerCss = ' expanded';
             selectorPanel = <CodeSnippetsSelector onSelect={this.appendCode}/>
@@ -477,10 +517,10 @@ class PythonCell extends React.Component {
                             this.handleChange(editor, value, data);
                         }}
                         editorDidMount={(editor) => {
-	                    	this.handleEditorDidMount(editor)
+	                    	this.handleEditorDidMount(editor);
 	                    }}
                     	onCursor={(editor, data) => {
-                    		this.handleCursorActivity(editor, data)
+                    		this.handleCursorActivity(editor, data);
                     	}}
                     />
                 </div>
