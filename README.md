@@ -1,3 +1,10 @@
+# Vizier 1.0 is no longer being maintained!!!
+
+[Vizier 2.0](https://github.com/VizierDB/vizier-scala) is the current active version
+
+-------------
+
+
 [![Documentation Status](https://media.readthedocs.org/static/projects/badges/passing-flat.svg)](https://test-vizier-db.readthedocs.io/en/latest/)
 
 # Vizier DB - Web User Interface
